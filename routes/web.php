@@ -244,6 +244,7 @@ Route::middleware(['auth'])->group(function () {
      * Routenya mechanical inspection
      */
     Route::resource('mechanicalinspection', MechanicalInspectionController::class)
+        ->parameters(['mechanicalinspection' => 'mechanical_inspection'])
         ->middleware('role:superadmin')
         ->names('mechanicalinspection');
 

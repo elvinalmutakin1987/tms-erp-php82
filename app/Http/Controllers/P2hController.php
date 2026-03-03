@@ -132,10 +132,13 @@ class P2hController extends Controller
             $p2h = P2h::create($data);
             foreach ($request->inspection_item as $i => $item) {
                 $p2h->p2h_detail()->updateOrCreate(
-                    ['inspection_item' => $item],
+                    [
+                        'inspection_item' => $item,
+                        'inspection_group' => $request->inspection_group[$i]
+                    ],
                     [
                         'inspection_group' => $request->inspection_group[$i],
-                        'check' => (int) ($request->check[$item] ?? 0),
+                        'check' => (int) ($request->check[$item][$request->inspection_group[$i]] ?? 0),
                         'defect_listed' => $request->defect_listed[$i],
                         'action_taken' => $request->action_taken[$i]
                     ]
@@ -201,17 +204,20 @@ class P2hController extends Controller
                     'inspection_item',
                     'check',
                     'defect_listed',
-                    'action_taken'
+                    'action_taken',
                 ),
                 ['input_method' => 'Web']
             );
             $p2h->update($data);
             foreach ($request->inspection_item as $key => $item) {
                 $p2h->p2h_detail()->updateOrCreate(
-                    ['inspection_item' => $item],
+                    [
+                        'inspection_item' => $item,
+                        'inspection_group' => $request->inspection_group[$key]
+                    ],
                     [
                         'inspection_group' => $request->inspection_group[$key],
-                        'check' => (int) ($request->check[$item] ?? 0),
+                        'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
                         'defect_listed' => $request->defect_listed[$key],
                         'action_taken' => $request->action_taken[$key]
                     ]
@@ -322,25 +328,6 @@ class P2hController extends Controller
             ], 400);
         }
     }
-
-    /**
-     * Ngambil detail p2h yang udah kesimpen
-     */
-    public function get_p2h_detail(Request $request, P2h $p2h)
-    {
-        try {
-            $approval_flow = Approval_flow::find($request->approval_flow_id);
-            $approval_step = Approval_step::where('approval_flow_id', $request->approval_flow_id)->orderBy('order')->get();
-            $view = 'approvalflow.step-list';
-            return response()->view($view, compact('approval_flow', 'approval_step'), 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
-    }
-
 
     /**
      * ngambil detail p2h

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Yajra\DataTables\Html\Editor\Fields\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Mechanical_inspection extends Model
 {
@@ -16,7 +16,7 @@ class Mechanical_inspection extends Model
     protected static function booted()
     {
         static::creating(function ($mechanical_inspection) {
-            $mechanical_inspection->inpection_no = running_number()
+            $mechanical_inspection->inspection_no = running_number()
                 ->type('inspection')
                 ->generate();
         });

@@ -11,7 +11,6 @@
                         <label for="client_vendor_id" class="form-label">Client</label>
                         <select class="form-select select-select" id="client_vendor_id" name="client_vendor_id">
                         </select>
-                        <input type="hidden" class="form-control" id="id" name="id">
                     </div>
                     <div class="col-md-12 mb-2">
                         <label for="contract_id" class="form-label">Contract</label>

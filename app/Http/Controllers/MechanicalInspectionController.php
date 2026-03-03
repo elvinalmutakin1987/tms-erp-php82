@@ -10,6 +10,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class MechanicalInspectionController extends Controller
 {
@@ -40,11 +41,10 @@ class MechanicalInspectionController extends Controller
                                 aria-expanded="false">Action</button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('') . '">Export to PDF</a>
+                                    <a class="dropdown-item exportPdfButton" href="' . route('mechanicalinspection.export_pdf', $item->id) . '">Export PDF</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item printButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Print</a>
+                                    <a class="dropdown-item printButton" href="' . route('mechanicalinspection.print', $item->id) . '" target="_blank">Print</a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
@@ -69,18 +69,18 @@ class MechanicalInspectionController extends Controller
                 })
                 ->addColumn('result', function ($item) {
                     $total_item = $item->mechanical_inspection_detail()->count();
-                    $total_broken = $item->mechanical_inspection_detail()->where('condition', "Not OK")->count();
-                    $total_good = $item->mechanical_inspection_detail()->where('condition', "OK")->count();
+                    $total_broken = $item->mechanical_inspection_detail()->where('check', 1)->count();
+                    $total_good = $item->mechanical_inspection_detail()->where('check', 0)->count();
                     $percent = $total_good / $total_item * 100;
                     return $percent;
                 })
                 ->addColumn('broken', function ($item) {
-                    $total_broken = $item->mechanical_inspection_detail()->where('condition', "Not OK")->count();
+                    $total_broken = $item->mechanical_inspection_detail()->where('check', 1)->count();
                     return $total_broken;
                 })
                 ->addColumn('condition', function ($item) {
                     $total_item = $item->mechanical_inspection_detail()->count();
-                    $total_broken = $item->mechanical_inspection_detail()->where('condition', "Not OK")->count();
+                    $total_good = $item->mechanical_inspection_detail()->where('check', 0)->count();
                     $condition = $total_good / $total_item * 100;
                     return Number::format($condition, precision: 0);
                 })
@@ -122,21 +122,24 @@ class MechanicalInspectionController extends Controller
                     '_method',
                     'inspection_group',
                     'inspection_item',
-                    'condition',
+                    'check',
                     'remarks',
                     'inspected_by',
                 ),
                 ['input_method' => 'Web']
             );
             $mechanical_inspection = Mechanical_inspection::create($data);
-            foreach ($request->inspection_item as $i => $item) {
-                $p2h->p2h_detail()->updateOrCreate(
-                    ['inspection_item' => $item],
+            foreach ($request->inspection_item as $key => $item) {
+                $mechanical_inspection->mechanical_inspection_detail()->updateOrCreate(
                     [
-                        'inspection_group' => $request->inspection_group[$i],
-                        'condition' => (int) ($request->condition[$item] ?? 0),
-                        'remarks' => $request->remarks[$i],
-                        'inspected_by' => $request->inspected_by[$i]
+                        'inspection_item' => $item,
+                        'inspection_group' => $request->inspection_group[$key],
+                    ],
+                    [
+                        'inspection_group' => $request->inspection_group[$key],
+                        'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
+                        'remarks' => $request->remarks[$key],
+                        'inspected_by' => $request->inspected_by[$key]
                     ]
                 );
             }
@@ -161,12 +164,12 @@ class MechanicalInspectionController extends Controller
      */
     public function show(Mechanical_inspection $mechanical_inspection)
     {
-        $mechanical_inspection = $mechanical_inspection->mechanical_inspection_detail;
+        $mechanical_inspection_detail = $mechanical_inspection->mechanical_inspection_detail;
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $mechanical_inspection,
-            'mechanical_inspection' => $mechanical_inspection
+            'mechanical_inspection_detail' => $mechanical_inspection_detail
         ], 200);
     }
 
@@ -196,21 +199,24 @@ class MechanicalInspectionController extends Controller
                     '_method',
                     'inspection_group',
                     'inspection_item',
-                    'condition',
+                    'check',
                     'remarks',
-                    'inspected_by',
+                    'inspected_by'
                 ),
                 ['input_method' => 'Web']
             );
-            $p2h = P2h::update($data);
-            foreach ($request->inspection_item as $i => $item) {
-                $p2h->p2h_detail()->updateOrCreate(
-                    ['inspection_item' => $item],
+            $mechanical_inspection->update($data);
+            foreach ($request->inspection_item as $key => $item) {
+                $mechanical_inspection->mechanical_inspection_detail()->updateOrCreate(
                     [
-                        'inspection_group' => $request->inspection_group[$i],
-                        'condition' => (int) ($request->condition[$item] ?? 0),
-                        'remarks' => $request->remarks[$i],
-                        'inspected_by' => $request->inspected_by[$i]
+                        'inspection_item' => $item,
+                        'inspection_group' => $request->inspection_group[$key],
+                    ],
+                    [
+                        'inspection_group' => $request->inspection_group[$key],
+                        'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
+                        'remarks' => $request->remarks[$key],
+                        'inspected_by' => $request->inspected_by[$key]
                     ]
                 );
             }
@@ -306,7 +312,7 @@ class MechanicalInspectionController extends Controller
         try {
             $view = 'mechanical_inspection.table-edit';
             $inspection_item = config('mechanical-inspection');
-            $html = view($view, compact('inspection_item', 'p2h'))->render();
+            $html = view($view, compact('inspection_item', 'mechanical_inspection'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -318,5 +324,92 @@ class MechanicalInspectionController extends Controller
                 'message' => $th->getMessage()
             ], 400);
         }
+    }
+
+
+    /**
+     * ngambil detail mechanical inspection
+     */
+    public function get_detail(Request $request, Mechanical_inspection $mechanical_inspection)
+    {
+        try {
+            $inspection_item = config('mechanical-inspection');
+            $inspection_detail = $mechanical_inspection->mechanical_inspection_detail;
+            $view = 'mechanical_inspection.detail';
+            return response()->view($view, compact('mechanical_inspection', 'inspection', 'inspection_item'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Mechanical_inspection $mechanical_inspection)
+    {
+        $inspection_item = config('mechanical-inspection');
+
+        $pdf = Pdf::loadView('mechanical_inspection.print', [
+            'mechanical_inspection' => $mechanical_inspection,
+            'inspection_item' => $inspection_item
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        return $pdf->stream("report-{$mechanical_inspection->inspection_no}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Mechanical_inspection $mechanical_inspection)
+    {
+        $inspection_item = config('mechanical-inspection');
+
+        $pdf = Pdf::loadView('mechanical_inspection.print', [
+            'mechanical_inspection' => $mechanical_inspection,
+            'inspection_item' => $inspection_item
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+
+        return $pdf->download("report-{$mechanical_inspection->inspection_no}.pdf");
     }
 }

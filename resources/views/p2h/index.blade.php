@@ -52,7 +52,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>No.</th>
+                                        <th>P2H Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
                                         <th>Driver</th>

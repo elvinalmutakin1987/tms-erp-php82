@@ -17,7 +17,6 @@
                                             <option value="{{ $value }}">{{ $value }}</option>
                                         @endforeach
                                     </select>
-                                    <input type="hidden" class="form-control" id="id" name="id">
                                 </div>
                             </div>
                             <div class="row">

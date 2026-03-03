@@ -52,7 +52,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>No.</th>
+                                        <th>Inspection Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
                                         <th>Inspector</th>
@@ -122,8 +122,8 @@
                         targets: '_all'
                     },
                     {
-                        data: 'p2h_no',
-                        name: 'p2h_no',
+                        data: 'inspection_no',
+                        name: 'inspection_no',
                         orderable: true,
                         searchable: true,
                     },
@@ -140,14 +140,8 @@
                         searchable: true,
                     },
                     {
-                        data: 'driver',
-                        name: 'driver',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'shift',
-                        name: 'shift',
+                        data: 'inspector',
+                        name: 'inspector',
                         orderable: true,
                         searchable: true,
                     },
@@ -204,7 +198,7 @@
             $(document).on('click', '.editButton', function() {
                 inspectionId = $(this).data('id');
                 $('#modal-header').text('Edit Inspection');
-                $('#id').val(p2hId);
+                $('#id').val(inspectionId);
                 let url = '{{ route('mechanicalinspection.show', ':_id') }}';
                 url = url.replace(':_id', inspectionId);
                 $.ajax({
@@ -216,6 +210,7 @@
                         $("#inspector").val(response.data.inspector);
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
+                        $("#unit_id").val(response.data.unit_id).trigger('change');
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -346,9 +341,9 @@
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('mechanicalinspection.store') }}';
             var type = 'POST';
-            if (p2hId != '') {
+            if (inspectionId != '') {
                 url = '{{ route('mechanicalinspection.update', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+                url = url.replace(':_id', inspectionId);
                 formData.append('_method', 'PUT');
             }
             $.ajax({
@@ -367,7 +362,7 @@
                         willClose: () => {
                             $('#table-data').DataTable().ajax.reload(null, false);
                             $('#formModal form')[0].reset();
-                            p2hId = '';
+                            inspectionId = '';
                             $('#formModal').modal('hide');
                         }
                     });

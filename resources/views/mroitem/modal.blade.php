@@ -10,7 +10,6 @@
                      <div class="col-md-12 mb-2">
                          <label for="part_number" class="form-label">Part Number</label>
                          <input type="text" class="form-control" id="part_number" name="part_number">
-                         <input type="hidden" class="form-control" id="id" name="id">
                      </div>
                      <div class="col-md-12 mb-2">
                          <label for="name" class="form-label">Name</label>

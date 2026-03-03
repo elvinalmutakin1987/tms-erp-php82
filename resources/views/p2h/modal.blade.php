@@ -12,7 +12,6 @@
                             <label for="unit_id" class="form-label">Unit</label>
                             <select class="form-select select-select" id="unit_id" name="unit_id">
                             </select>
-                            <input type="hidden" class="form-control" id="id" name="id">
                         </div>
                         <div class="col">
                             <label for="driver" class="form-label">Driver</label>

@@ -15,7 +15,6 @@
                      <div class="col-md-12">
                          <label for="desc" class="form-label">Description</label>
                          <input type="text" class="form-control" id="desc" name="desc">
-                         <input type="hidden" class="form-control" id="id" name="id">
                      </div>
                  </form>
              </div>

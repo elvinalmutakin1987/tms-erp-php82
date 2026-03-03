@@ -14,6 +14,6 @@ class Mechanical_inspection_detail extends Model
 
     public function mechanical_inspection(): BelongsTo
     {
-        return $this->belongsTo(Mechanical_inspection::class)->withDefault(['inspection_no' => null]);
+        return $this->belongsTo(Mechanical_inspection::class)->withDefault(['inspector' => null]);
     }
 }

@@ -13,7 +13,6 @@
                              <option value="Unit Location">Unit Location</option>
                              <option value="Project Location">Project Location</option>
                          </select>
-                         <input type="hidden" class="form-control" id="id" name="id">
                      </div>
                      <div class="col-md-12 mb-2">
                          <label for="name" class="form-label">Name</label>

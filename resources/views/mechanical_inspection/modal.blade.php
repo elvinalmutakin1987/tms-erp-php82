@@ -12,7 +12,6 @@
                             <label for="unit_id" class="form-label">Unit</label>
                             <select class="form-select select-select" id="unit_id" name="unit_id">
                             </select>
-                            <input type="hidden" class="form-control" id="id" name="id">
                         </div>
                         <div class="col">
                             <label for="date" class="form-label">Date</label>
@@ -45,8 +44,8 @@
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <label for="inspector" class="form-label">Notes</label>
-                            <input type="text" class="form-control" id="inspector" name="inspector">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
                         </div>
                     </div>
                 </form>
