@@ -47,4 +47,9 @@ class Unit extends Model
     {
         return $this->hasMany(P2h::class);
     }
+
+    public function maintenance(): HasMany
+    {
+        return $this->hasMany(Maintenance::class);
+    }
 }

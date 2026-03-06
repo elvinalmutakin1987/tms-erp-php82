@@ -50,9 +50,10 @@
                  <li> <a href="{{ route('mechanicalinspection.index') }}"><i class='bx bx-radio-circle'></i>Mechanical
                          Inspection</a>
                  </li>
-                 <li> <a href="app-file-manager.html"><i class='bx bx-radio-circle'></i>Daily Report</a>
+                 <li> <a href="{{ route('maintenance.index') }}"><i class='bx bx-radio-circle'></i>Repair &
+                         Maintenance</a>
                  </li>
-                 <li> <a href="app-contact-list.html"><i class='bx bx-radio-circle'></i>Repair & Maintenance</a>
+                 <li> <a href="app-file-manager.html"><i class='bx bx-radio-circle'></i>Daily Report</a>
                  </li>
                  <li> <a href="app-to-do.html"><i class='bx bx-radio-circle'></i>Purchase Requisition</a>
                  </li>
@@ -137,6 +138,9 @@
                  <li> <a href="{{ route('unitrate.index') }}"><i class='bx bx-radio-circle'></i>Unit Rate</a>
                  </li>
                  <li> <a href="{{ route('location.index') }}"><i class='bx bx-radio-circle'></i>Location</a>
+                 </li>
+                 <li> <a href="{{ route('maintenanceitem.index') }}"><i class='bx bx-radio-circle'></i>Maintenance
+                         Item</a>
                  </li>
                  <li> <a href="{{ route('mroitem.index') }}"><i class='bx bx-radio-circle'></i>MRO Item</a>
                  </li>

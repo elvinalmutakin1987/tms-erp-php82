@@ -22,7 +22,7 @@
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Item"><i
-                                            class='bx bxs-plus-square'></i>New Item</a>
+                                            class='bx bxs-plus-square'></i>New</a>
                                 </div>
                             </div>
                         </div>
@@ -136,7 +136,7 @@
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit Location');
+                        $('#modal-header').text('Edit Item');
                         $('#part_number').val(response.data.part_number);
                         $('#name').val(response.data.name);
                         mro_unit = response.mro_unit;

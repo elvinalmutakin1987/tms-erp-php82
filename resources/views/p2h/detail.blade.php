@@ -130,7 +130,11 @@
                                 <input type="hidden" name="inspection_item[]" value="{{ $item }}">
                             </td>
 
-                            @php $check @endphp
+                            @php
+                                $check = 0;
+                                $defect_listed = '';
+                                $action_taken = '';
+                            @endphp ?>
                             @if ($p2h_detail)
                                 @php
                                     $check = $p2h_detail->check;

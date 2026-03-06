@@ -22,4 +22,9 @@ class Client_vendor extends Model
     {
         return $this->hasMany(Contract::class);
     }
+
+    public function maintenance(): HasMany
+    {
+        return $this->hasMany(Maintenance::class);
+    }
 }

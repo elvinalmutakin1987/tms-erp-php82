@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\DB;
 use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
 use Barryvdh\DomPDF\Facade\Pdf;
+use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use Illuminate\Support\Str;
 
 class MechanicalInspectionController extends Controller
 {
@@ -46,7 +48,7 @@ class MechanicalInspectionController extends Controller
                                 <li>
                                     <a class="dropdown-item printButton" href="' . route('mechanicalinspection.print', $item->id) . '" target="_blank">Print</a>
                                 </li>
-                                <li>
+                               <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
                                 </li>
@@ -280,15 +282,17 @@ class MechanicalInspectionController extends Controller
     }
 
     /**
-     * Ngambil tabel list p2h nya
+     * Ngambil tabel list mechanical inspection nya
      */
     public function get_table_add(Request $request, Mechanical_inspection $mechanical_inspection)
     {
         try {
+            $presenter = new DatePrefixPresenter('Y/m', '/');
             $view = 'mechanical_inspection.table-add';
             $inspection_item = config('mechanical-inspection');
             $inspection_prev_no = Generator::make()
-                ->type('inspection')
+                ->type('insp')
+                ->formatter($presenter)
                 ->preview();
             $html = view($view, compact('inspection_item'))->render();
             return response()->json([
@@ -336,7 +340,7 @@ class MechanicalInspectionController extends Controller
             $inspection_item = config('mechanical-inspection');
             $inspection_detail = $mechanical_inspection->mechanical_inspection_detail;
             $view = 'mechanical_inspection.detail';
-            return response()->view($view, compact('mechanical_inspection', 'inspection', 'inspection_item'), 200);
+            return response()->view($view, compact('mechanical_inspection', 'inspection_detail', 'inspection_item'), 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
@@ -375,7 +379,10 @@ class MechanicalInspectionController extends Controller
             10,
             [0, 0, 0]
         );
-        return $pdf->stream("report-{$mechanical_inspection->inspection_no}.pdf");
+        $safeFilename = Str::of($mechanical_inspection->inspection_no)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->stream("report-{$safeFilename}.pdf");
     }
 
     /**
@@ -409,7 +416,9 @@ class MechanicalInspectionController extends Controller
             10,
             [0, 0, 0]
         );
-
-        return $pdf->download("report-{$mechanical_inspection->inspection_no}.pdf");
+        $safeFilename = Str::of($mechanical_inspection->inspection_no)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->download("report-{$safeFilename}.pdf");
     }
 }

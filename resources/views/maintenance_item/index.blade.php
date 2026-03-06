@@ -21,8 +21,21 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Approval Flow"><i
+                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Item"><i
                                             class='bx bxs-plus-square'></i>New</a>
+                                </div>
+                                <div class="col-2">
+                                    <select class="form-select" id="act" name="act">
+                                        <option value="All">All Unit</option>
+                                        <option value="Repair">Repair</option>
+                                        <option value="Replace">Replace</option>
+                                        <option value="Washing">Washing</option>
+                                        <option value="Add">Add</option>
+                                        <option value="Flushing">Flushing</option>
+                                        <option value="Commisioning">Commisioning</option>
+                                        <option value="Welding">Welding</option>
+                                        <option value="Adjust">Adjust</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -38,9 +51,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
+                                        <th>Action</th>
                                         <th>Name</th>
-                                        <th>Model</th>
-                                        <th>Step Total</th>
                                         <th width="20">Action</th>
                                     </tr>
                                 </thead>
@@ -57,7 +69,7 @@
     </div>
     <!--end page wrapper -->
 
-    @include('approvalflow.modal')
+    @include('maintenance_item.modal')
 @endsection
 
 @section('js')
@@ -65,9 +77,8 @@
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
-
     <script>
-        var approvalFlowId = '';
+        var maintenanceItemId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -85,7 +96,12 @@
                 "autoWidth": false,
                 "processing": true,
                 "serverSide": true,
-                "ajax": ajax,
+                "ajax": {
+                    url: ajax,
+                    data: function(d) {
+                        d.action = $('#act').val();
+                    }
+                },
                 "columns": [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
@@ -96,20 +112,14 @@
                         targets: '_all'
                     },
                     {
+                        data: 'act',
+                        name: 'act',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
                         data: 'name',
                         name: 'name',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'approvable_model',
-                        name: 'approvable_model',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'step_total',
-                        name: 'step_total',
                         orderable: true,
                         searchable: true,
                     },
@@ -126,26 +136,32 @@
             });
 
             $(document).on('click', '.editButton', function() {
-                approvalFlowId = $(this).data('id');
-                $('#modal-header').text('Edit Approval Flow');
-                $('#id').val(approvalFlowId);
-                let url = '{{ route('approval_flow.show', ':_id') }}';
-                url = url.replace(':_id', approvalFlowId);
-
+                maintenanceItemId = $(this).data('id');
+                $('#modal-header').text('Edit Item');
+                $('#id').val(maintenanceItemId);
+                let url = '{{ route('maintenanceitem.show', ':_id') }}';
+                url = url.replace(':_id', maintenanceItemId);
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(response) {
-                        $('#username').prop('readonly', true);
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit User');
+                        $('#modal-header').text('Edit Item');
                         $('#name').val(response.data.name);
-                        $('#approvable_model').val(response.data.approvable_model);
+                        $('#action').val(response.data.action).trigger('change');
                     },
                     error: function() {
                         alert('Error fetching data');
                     }
                 });
+            });
+
+            $("#act").select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                    'w-100') ? '100%' : 'style',
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
             });
 
             gen_select2();
@@ -162,7 +178,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('approval_flow.destroy', ':_id') }}';
+                    let url = '{{ route('maintenanceitem.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -198,11 +214,11 @@
 
         $('#saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('approval_flow.store') }}';
+            var url = '{{ route('maintenanceitem.store') }}';
             var type = 'POST';
-            if (approvalFlowId != '') {
-                url = '{{ route('approval_flow.update', ':_id') }}';
-                url = url.replace(':_id', approvalFlowId);
+            if (maintenanceItemId != '') {
+                url = '{{ route('maintenanceitem.update', ':_id') }}';
+                url = url.replace(':_id', maintenanceItemId);
                 formData.append('_method', 'PUT');
             }
             $.ajax({
@@ -221,7 +237,7 @@
                         willClose: () => {
                             $('#table-data').DataTable().ajax.reload(null, false);
                             $('#formModal form')[0].reset();
-                            userId = '';
+                            maintenanceItemId = '';
                             $('#formModal').modal('hide');
                         }
                     });
@@ -242,71 +258,10 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-            var tbody = $("#tableStep > tbody");
-            tbody.append(`
-                    <tr>
-                        <td colspan="5">
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually">Loading...</span>
-                        </td>
-                    </tr>
-                    `);
-            $.ajax({
-                url: '{{ route('approval_flow.get_user_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#approver_id').empty();
-                    $.each(response.data, function(index, role) {
-                        $('#approver_id').append('<option value="' + role.id +
-                            '">' +
-                            role.name +
-                            '</option>');
-                    });
-                    if (approvalFlowId != '') {
-                        $("#approver_id").val(approvalFlowId).trigger('change');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
-
-            setTimeout(function() {
-                var data = {
-                    'form': 'create'
-                };
-                if (approvalFlowId != '') {
-                    data = {
-                        'form': 'edit',
-                        'approval_flow_id': approvalFlowId
-                    };
-                    $.ajax({
-                        url: '{{ route('approval_flow.get_step_list') }}',
-                        data: data,
-                        type: 'GET',
-                        success: function(response) {
-                            setTimeout(function() {
-                                $('#tableStep tbody tr').not(':first').remove();
-                                tbody.append(response);
-                            }, 500);
-                        },
-                        error: function(xhr, status, error) {
-                            console.log(error)
-                        }
-                    });
-                } else {
-                    $('#tableStep tbody tr').not(':first').remove();
-                }
-            }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            approvalFlowId = '';
-            $('#tableStep tbody tr').not(':first').remove();
+            maintenanceItemId = '';
         });
 
         $('#cancelButton').on('click', function() {
@@ -334,47 +289,6 @@
                     });
             });
         }
-
-        $('#addStepButton').on('click', function() {
-            var tbody = $("#tableStep > tbody");
-            var user_id = $("#approver_id").val();
-            var user_name = $("#approver_id option:selected").text();
-            var order = $("#txt_order").val();
-            var action = $("#slc_action option:selected").text();
-
-            var newRow = `
-                <tr>
-                    <td>
-                        #
-                    </td>
-                    <td>
-                       <input type="text" class="form-control" id="username" name="username" readonly value="${user_name}">
-                       <input type="hidden" class="form-control" id="user_id" name="user_id[]" value="${user_id}">
-                    </td>
-                    <td>
-                       <input type="text" class="form-control" id="action" name="action[]" readonly value="${action}">
-                    </td>
-                    <td>
-                        <input type="number" class="form-control" id="order" name="order[]" value="${order}">
-                    </td>
-                    <td class="text-center">
-                        <div class="row row-cols-auto g-3">
-                            <div class="col">
-                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-                                                        id="removeStepButton"></button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            $("#txt_order").val('');
-            tbody.append(newRow);
-            gen_select2();
-        });
-
-        $("#tableStep").on("click", ".delete-row", function() {
-            $(this).closest("tr").remove();
-        });
     </script>
     <!--app JS-->
 @endsection

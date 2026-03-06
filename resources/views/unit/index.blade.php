@@ -23,7 +23,7 @@
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Unit"><i
-                                            class='bx bxs-plus-square'></i>New Unit</a>
+                                            class='bx bxs-plus-square'></i>New</a>
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select" id="typeUnit" name="typeUnit">

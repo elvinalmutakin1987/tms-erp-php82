@@ -9,7 +9,9 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use CleaniqueCoders\RunningNumber\Generator;
 use Barryvdh\DomPDF\Facade\Pdf;
+use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Number;
+use Illuminate\Support\Str;
 
 class P2hController extends Controller
 {
@@ -288,10 +290,12 @@ class P2hController extends Controller
     public function get_table_add(Request $request, P2h $p2h)
     {
         try {
+            $presenter = new DatePrefixPresenter('Y/m', '/');
             $view = 'p2h.table-add';
             $p2hitem = config('p2hitem');
             $p2h_prev_no = Generator::make()
                 ->type('p2h')
+                ->formatter($presenter)
                 ->preview();
             $html = view($view, compact('p2hitem'))->render();
             return response()->json([
@@ -377,7 +381,10 @@ class P2hController extends Controller
             10,
             [0, 0, 0]
         );
-        return $pdf->stream("report-{$p2h->p2h_no}.pdf");
+        $safeFilename = Str::of($p2h->p2h_no)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->stream("report-{$safeFilename}.pdf");
     }
 
     /**
@@ -411,7 +418,9 @@ class P2hController extends Controller
             10,
             [0, 0, 0]
         );
-
-        return $pdf->download("report-{$p2h->p2h_no}.pdf");
+        $safeFilename = Str::of($p2h->p2h_no)
+            ->replace(['/', '\\'], '-')   // ganti slash
+            ->toString();
+        return $pdf->download("report-{$safeFilename}.pdf");
     }
 }

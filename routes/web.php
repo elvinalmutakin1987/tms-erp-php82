@@ -15,6 +15,8 @@ use App\Http\Controllers\UnitBrandController;
 use App\Http\Controllers\UnitModelController;
 use App\Http\Controllers\ClientVendorController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\MaintenanceController;
+use App\Http\Controllers\MaintenanceItemController;
 use App\Http\Controllers\MechanicalInspectionController;
 use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
@@ -279,4 +281,68 @@ Route::middleware(['auth'])->group(function () {
     Route::get('mechanicalinspection-export-pdf/{mechanical_inspection}', [MechanicalInspectionController::class, 'export_pdf'])
         ->middleware('role:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.export_pdf');
+
+
+    /**
+     * Routenya Item2 untuk maintenance nya. Biar bisa dibuat laporan
+     */
+    Route::resource('maintenanceitem', MaintenanceItemController::class)
+        ->parameters(['maintenanceitem' => 'maintenance_item'])
+        ->middleware('role_or_permission:superadmin')
+        ->names('maintenanceitem');
+
+    /**
+     * Routenya mechanical 
+     */
+    Route::resource('maintenance', MaintenanceController::class)
+        ->middleware('role:superadmin')
+        ->names('maintenance');
+
+    Route::get('maintenance-get-unit-all', [MaintenanceController::class, 'get_unit_all'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.get_unit_all');
+
+    Route::get('maintenance-get-vendor-all', [MaintenanceController::class, 'get_vendor_all'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.get_vendor_all');
+
+    Route::get('maintenance-get-maintenance-item', [MaintenanceController::class, 'get_maintenance_item'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.get_maintenance_item');
+
+    Route::get('maintenance-print/{maintenance}', [MaintenanceController::class, 'print'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.print');
+
+    Route::get('maintenance-export-pdf/{maintenance}', [MaintenanceController::class, 'export_pdf'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.export_pdf');
+
+    Route::get('maintenance-load-table-add', [MaintenanceController::class, 'get_table_add'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.get_table_add');
+
+    Route::get('maintenance-load-table-edit/{maintenance}', [MaintenanceController::class, 'get_table_edit'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.get_table_edit');
+
+    Route::get('maintenance-get-detail/{maintenance}', [MaintenanceController::class, 'get_detail'])
+        ->middleware('role:superadmin|v')
+        ->name('maintenance.get_detail');
+
+    Route::get('maintenance-print/{maintenance}', [MaintenanceController::class, 'print'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.print');
+
+    Route::get('maintenance-export-pdf/{maintenance}', [MaintenanceController::class, 'export_pdf'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.export_pdf');
+
+    Route::get('maintenance-get-maintenance-item-by-action', [MaintenanceController::class, 'get_maintenance_item_by_action'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.get_maintenance_item_by_action');
+
+    Route::get('maintenance-get-maintenance-item-list', [MaintenanceController::class, 'get_maintenance_item_list'])
+        ->middleware('role_or_permission:superadmin|maintenance')
+        ->name('maintenance.get_maintenance_item_list');
 });

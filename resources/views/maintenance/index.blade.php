@@ -22,19 +22,31 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add P2H"><i
+                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Maintenance"><i
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
                                     <select class="form-select" id="unit" name="unit">
                                         <option value="All">All Unit</option>
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
+                                    <select class="form-select" id="vendor" name="vendor">
+                                        <option value="All">All Vendor</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select class="form-select" id="_status" name="_status">
+                                        <option value="All">All Status</option>
+                                        <option value="Open">Open</option>
+                                        <option value="Done">Done</option>
+                                    </select>
+                                </div>
+                                <div class="col">
                                     <input type="text" class="form-control datepicker" id="date_start" name="date_start"
                                         placeholder="Start Date">
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
                                     <input type="text" class="form-control datepicker" id="date_end" name="date_end"
                                         placeholder="End Date">
                                 </div>
@@ -52,14 +64,14 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>P2H Number</th>
+                                        <th>Maintenance Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
-                                        <th>Driver</th>
-                                        <th>Shift</th>
-                                        <th>Result</th>
-                                        <th>Condition</th>
-                                        <th width="20">Action</th>
+                                        <th>Start</th>
+                                        <th>Finish</th>
+                                        <th>Duration</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -75,9 +87,9 @@
     </div>
     <!--end page wrapper -->
 
-    @include('p2h.modal')
+    @include('maintenance.modal')
 
-    @include('p2h.modal-detail')
+    @include('maintenance.modal-detail')
 @endsection
 
 @section('js')
@@ -88,8 +100,10 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        var p2hId = '';
+        var maintenanceId = '';
         var unitId = '';
+        var vendorId = '';
+        var status = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -111,6 +125,8 @@
                     url: ajax,
                     data: function(d) {
                         d.unit_id = $('#unit').val();
+                        d.client_vendor_id = $('#vendor').val();
+                        d.status = $('#_status').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
                     }
@@ -125,8 +141,8 @@
                         targets: '_all'
                     },
                     {
-                        data: 'p2h_no',
-                        name: 'p2h_no',
+                        data: 'maintenance_no',
+                        name: 'maintenance_no',
                         orderable: true,
                         searchable: true,
                     },
@@ -143,52 +159,35 @@
                         searchable: true,
                     },
                     {
-                        data: 'driver',
-                        name: 'driver',
+                        data: 'start',
+                        name: 'start',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'shift',
-                        name: 'shift',
+                        data: 'finish',
+                        name: 'finish',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'result',
-                        name: 'result',
+                        data: 'work_duration',
+                        name: 'work_duration',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (data == 100) {
-                                return '<span class="badge bg-success" style="font-size: 13px">Fit</span>';
-                            } else {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    row.broken + ' broken</span>';
-                            }
-                        }
-                    },
-                    {
-                        data: 'condition',
-                        name: 'condition',
-                        orderable: true,
-                        searchable: true,
-                        render: function(data, type, row) {
-                            if (data >= 80) {
+                            if (data == "Done") {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else if (data >= 60) {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else if (data >= 40) {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else if (data >= 20) {
-                                return '<span class="badge bg-warning" style="font-size: 13px">' +
-                                    data + '%</span>';
+                                    data + '</span>';
                             } else {
                                 return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '%</span>';
+                                    data + '</span>';
                             }
                         }
                     },
@@ -205,29 +204,20 @@
             });
 
             $(document).on('click', '.editButton', function() {
-                p2hId = $(this).data('id');
-                $('#modal-header').text('Edit P2H');
-                $('#id').val(p2hId);
-                let url = '{{ route('p2h.show', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+                maintenanceId = $(this).data('id');
+                $('#modal-header').text('Edit Maintenance');
+                $('#id').val(maintenanceId);
+                let url = '{{ route('maintenance.show', ':_id') }}';
+                url = url.replace(':_id', maintenanceId);
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit P2H');
-                        $("#driver").val(response.data.driver);
+                        $('#modal-header').text('Edit Inspection');
                         $("#date").val(response.data.date);
+                        $("#notes").val(response.data.notes);
                         $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#shift").val(response.data.shift).trigger('change');
-                        $('#km_start').val(response.data.km_start);
-                        $('#_km_start').val(numbro(response.data.km_start).format({
-                            thousandSeparated: true
-                        }));
-                        $('#km_finish').val(response.data.km_finish);
-                        $('#_km_finish').val(numbro(response.data.km_finish).format({
-                            thousandSeparated: true
-                        }));
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -236,8 +226,8 @@
             });
 
             $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail P2H');
-                let url = '{{ route('p2h.get_detail', ':_id') }}';
+                $('#modal-detail-header').text('Detail Inspection');
+                let url = '{{ route('mechanicalinspection.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -252,8 +242,30 @@
             });
 
             $(".datepicker").flatpickr();
+            $(".timepicker").flatpickr({
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: "H:i",
+            });
 
             $("#unit").select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                    'w-100') ? '100%' : 'style',
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            $("#vendor").select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                    'w-100') ? '100%' : 'style',
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+
+            $("#_status").select2({
                 theme: "bootstrap-5",
                 width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
                     'w-100') ? '100%' : 'style',
@@ -270,7 +282,7 @@
             });
 
             $.ajax({
-                url: '{{ route('p2h.get_unit_all') }}',
+                url: '{{ route('maintenance.get_unit_all') }}',
                 type: 'GET',
                 success: function(response) {
                     $('#unit').empty();
@@ -306,6 +318,43 @@
                 }
             });
 
+            $.ajax({
+                url: '{{ route('maintenance.get_vendor_all') }}',
+                type: 'GET',
+                success: function(response) {
+                    $('#vendor').empty();
+                    $('#vendor').append('<option value="All">All Vendor</option>');
+                    $.each(response.data, function(index, vendor) {
+                        $('#vendor').append('<option value="' + vendor.id +
+                            '">' +
+                            vendor.name +
+                            '</option>');
+                    });
+                    if (vendorId != '') {
+                        $("#vendor").val(vendorId).trigger('change');
+                    }
+
+                    $('#client_vendor_id').empty();
+                    $('#client_vendor_id').append('<option value="All">All Vendor</option>');
+                    $.each(response.data, function(index, vendor) {
+                        $('#client_vendor_id').append('<option value="' + vendor.id +
+                            '">' +
+                            vendor.name +
+                            '</option>');
+                    });
+                    if (vendorId != '') {
+                        $("#client_vendor_id").val(vendorId).trigger('change');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: error,
+                    });
+                }
+            });
+
             gen_select2();
         });
 
@@ -320,7 +369,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('p2h.destroy', ':_id') }}';
+                    let url = '{{ route('maintenance.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -356,11 +405,11 @@
 
         $('#saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('p2h.store') }}';
+            var url = '{{ route('maintenance.store') }}';
             var type = 'POST';
-            if (p2hId != '') {
-                url = '{{ route('p2h.update', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+            if (maintenaceId != '') {
+                url = '{{ route('maintenance.update', ':_id') }}';
+                url = url.replace(':_id', maintenaceId);
                 formData.append('_method', 'PUT');
             }
             $.ajax({
@@ -379,7 +428,7 @@
                         willClose: () => {
                             $('#table-data').DataTable().ajax.reload(null, false);
                             $('#formModal form')[0].reset();
-                            p2hId = '';
+                            maintenanceId = '';
                             $('#formModal').modal('hide');
                         }
                     });
@@ -400,7 +449,6 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-
             var tbody = $("#tableItem > tbody");
             tbody.append(`
                     <tr>
@@ -411,35 +459,39 @@
                     </tr>
                     `);
             setTimeout(function() {
-                const isEdit = p2hId != '';
-                const url = isEdit ?
-                    '{{ route('p2h.get_table_edit', ':_id') }}'.replace(':_id', p2hId) :
-                    '{{ route('p2h.get_table_add') }}';
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $("#tableItem > tbody").html(response.html);
-
-                        const titleText = isEdit ? 'Edit P2H' : 'Add P2H';
-                        const number = isEdit ? response.p2h_no : response.p2h_prev_no;
-
-                        $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
+                var data = {
+                    'form': 'create'
+                };
+                if (maintenanceId != '') {
+                    data = {
+                        'form': 'edit',
+                        'maintenance_id': maintenanceId
+                    };
+                    $.ajax({
+                        url: '{{ route('maintenance.get_table_edit') }}',
+                        data: data,
+                        type: 'GET',
+                        success: function(response) {
+                            setTimeout(function() {
+                                $('#tableStep tbody tr').not(':first').remove();
+                                tbody.append(response);
+                            }, 500);
+                        },
+                        error: function(xhr, status, error) {
+                            console.log(error)
+                        }
+                    });
+                } else {
+                    $('#tableStep tbody tr').not(':first').remove();
+                }
             }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            p2hId = '';
+            maintenanceId = '';
             unitId = '';
             $('#tableItem tbody').empty();
             $("#unit_id").val('All').trigger('change');
-            $("#shift").val('Day').trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -472,8 +524,7 @@
             });
         }
 
-        const $km_start = $('#_km_start');
-        const $km_finish = $('#_km_finish');
+        const $km_hm = $('#_km_hm');
 
         let isFmt = false;
         let userDecSep = null;
@@ -574,20 +625,12 @@
             $("#" + key).val(numbro.unformat(el.value));
         }
 
-        $km_start.on('keydown', function(e) {
+        $km_hm.on('keydown', function(e) {
             textKeyDown(e);
         });
 
-        $km_start.on('input', function(e) {
-            textInput("km_start", e);
-        });
-
-        $km_finish.on('keydown', function(e) {
-            textKeyDown(e);
-        });
-
-        $km_finish.on('input', function(e) {
-            textInput("km_finish", e);
+        $km_hm.on('input', function(e) {
+            textInput("km_hm", e);
         });
     </script>
     <!--app JS-->

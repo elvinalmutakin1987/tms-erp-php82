@@ -14,21 +14,30 @@ return new class extends Migration
         Schema::create('maintenances', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('unit_id')->nullable();
-            $table->unsignedBigInteger('p2h_id')->nullable();
             $table->unsignedBigInteger('mechanical_inspection_id')->nullable();
+            $table->unsignedBigInteger('p2h_id')->nullable();
+            $table->unsignedBigInteger('client_vendor_id')->nullable();
             $table->date('date')->nullable();
             $table->string('number', 30)->nullable();
+            $table->text('description')->nullable();
             $table->string('maintenance_no', 30)->nullable();
             $table->string('mechanic', 30)->nullable();
+            $table->decimal('cost_total', 16, 2)->nullable();
+            $table->decimal('hour_meter', 16, 2)->nullable();
+            $table->decimal('km_hm', 16, 2)->nullable();
+            $table->time('start')->nullable();
+            $table->time('finish')->nullable();
+            $table->time('work_duration')->nullable();
             $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->text('remarks')->nullable();
             $table->string('input_method', 20)->nullable();
-            $table->text('status', 30)->nullable(); //Status nya > Open, Close
+            $table->text('status')->nullable(); //Status nya > Open, Close
             $table->timestamps();
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
             $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('p2h_id')->references('id')->on('p2hs')->onDelete('cascade');
             $table->foreign('mechanical_inspection_id')->references('id')->on('mechanical_inspections')->onDelete('cascade');

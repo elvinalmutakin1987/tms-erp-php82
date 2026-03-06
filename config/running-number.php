@@ -29,15 +29,15 @@ return [
         // Organization::unit()->value,
         // Organization::profile()->value,
         'p2h', //Untuk P2H
-        'invoice', //Untuk invoice  
-        'purchase_order', //Untuk purchase order
-        'daily_report', //Untuk daily report
-        'po_payment', //Untuk pembayaran po
-        'invoice_payment', //Untuk pembayaran invocie
-        'commissioning', //Buat penomoran commisioning
-        'service', //Untuk nomor service
-        'maintenance', //Untuk penomoran maintenance
-        'inspection', //Untuk penomoran maintenance
+        'inv', //Untuk invoice  
+        'po', //Untuk purchase order
+        'rep', //Untuk daily report
+        'pop', //Untuk pembayaran po
+        'invp', //Untuk pembayaran invocie
+        'comm', //Buat penomoran commisioning
+        'serv', //Untuk nomor service
+        'main', //Untuk penomoran maintenance
+        'insp', //Untuk penomoran maintenance
     ],
 
     'model' => RunningNumber::class,
@@ -75,7 +75,7 @@ return [
     |
     */
 
-    'padding' => 3,
+    'padding' => 4,
 
     /*
     |--------------------------------------------------------------------------

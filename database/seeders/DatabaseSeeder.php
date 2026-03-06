@@ -26,7 +26,8 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             UnitbrandSeeder::class,
             LocationSeeder::class,
-            UnitmodelSeeder::class
+            UnitmodelSeeder::class,
+            UnitSeeder::class
         ]);
     }
 }

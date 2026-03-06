@@ -22,7 +22,7 @@
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Service"><i
-                                            class='bx bxs-plus-square'></i>New Service</a>
+                                            class='bx bxs-plus-square'></i>New</a>
                                 </div>
                                 <div class="col-3">
                                     <select class="form-select" id="typeSevice" name="typeSevice">
