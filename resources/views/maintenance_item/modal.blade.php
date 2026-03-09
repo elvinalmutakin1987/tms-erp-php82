@@ -7,7 +7,7 @@
              <div class="modal-body">
                  <form enctype="multipart/form-data">
                      @csrf
-                     <div class="col-md-12 mb-2">
+                     {{-- <div class="col-md-12 mb-2">
                          <label for="action" class="form-label">Action</label>
                          <select class="form-select select-select" id="action" name="action"
                              data-placeholder="Choose unit">
@@ -20,7 +20,7 @@
                              <option value="Welding">Welding</option>
                              <option value="Adjust">Adjust</option>
                          </select>
-                     </div>
+                     </div> --}}
                      <div class="col-md-12 mb-2">
                          <label for="name" class="form-label">Name</label>
                          <input type="text" class="form-control" id="name" name="name">

@@ -22,17 +22,25 @@
                             <select class="form-select select-select" id="client_vendor_id" name="client_vendor_id">
                             </select>
                         </div>
+                    </div>
+                    <div class="row mb-2">
                         <div class="col">
                             <label for="mechanic" class="form-label">Mechanic</label>
                             <input type="text" class="form-control" id="mechanic" name="mechanic">
                         </div>
-                    </div>
-                    <div class="row mb-2">
+                        <div class="col">
+                            <label for="km_hm" class="form-label">Hour Meter</label>
+                            <input type="hidden" class="form-control" id="hour_meter" name="hour_meter">
+                            <input type="text" class="form-control" id="_hour_meter" name="_hour_meter">
+                        </div>
                         <div class="col">
                             <label for="km_hm" class="form-label">KM/HM</label>
                             <input type="hidden" class="form-control" id="km_hm" name="km_hm">
                             <input type="text" class="form-control" id="_km_hm" name="_km_hm">
                         </div>
+                    </div>
+                    <div class="row mb-2">
+
                         <div class="col">
                             <label for="start" class="form-label">Start</label>
                             <input type="text" class="form-control timepicker" id="start" name="start">
@@ -51,18 +59,17 @@
                             <table class="table mb-0" id="tableItem">
                                 <thead class="table-dark">
                                     <tr>
-                                        <th scope="col" style="width:3%">#</th>
-                                        <th scope="col" style="width: 15%">Action</th>
+                                        <th scope="col" style="width: 2%">#</th>
+                                        <th scope="col" style="width: 20%">Action</th>
                                         <th scope="col">Item</th>
-                                        <th scope="col" style="width:20%">Cost</th>
-                                        <th scope="col" style="width:7%">Action</th>
+                                        <th scope="col" style="width:2%">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tbody">
-                                    <tr>
-                                        <td class="p-1 align-middle" style="width: 3%">
+                                    <tr class="fixed-row">
+                                        <td class="p-1 align-middle" style="width: 2%">
                                         </td>
-                                        <td class="p-1 align-middle" style="width: 15%">
+                                        <td class="p-1 align-middle" style="width: 20%">
                                             <select class="form-select select-select" id="act" name="act">
                                                 <option value="Repair" selected>Repair</option>
                                                 <option value="Replace">Replace</option>
@@ -82,13 +89,7 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td class="p-1 align-middle" style="width:20%">
-                                            <input type="hidden" class="form-control timepicker" id="cost_i"
-                                                name="cost_i">
-                                            <input type="text" class="form-control timepicker" id="_cost_i"
-                                                name="_cost_i">
-                                        </td>
-                                        <td class="p-1 align-middle" style="width:7%">
+                                        <td class="p-1 align-middle" style="width:2%">
                                             <div class="row row-cols-auto g-3">
                                                 <div class="col">
                                                     <button type="button"
@@ -100,19 +101,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-
-                        </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col">
-                        </div>
-                        <div class="col">
-                        </div>
-                        <div class="col">
-                        </div>
-                        <div class="col">
-                            <label for="cost_total" class="form-label">Total Cost</label>
-                            <input type="text" class="form-control" id="cost_total" name="cost_total" readonly>
                         </div>
                     </div>
                 </form>

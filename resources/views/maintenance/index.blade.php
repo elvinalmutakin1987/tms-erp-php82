@@ -246,6 +246,8 @@
                 enableTime: true,
                 noCalendar: true,
                 dateFormat: "H:i",
+                time_24hr: true,
+                minuteIncrement: 1
             });
 
             $("#unit").select2({
@@ -355,6 +357,33 @@
                 }
             });
 
+            $("#act").select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                    'w-100') ? '100%' : 'style',
+            }).on('change', function() {
+                $('#main_item_id').val('').trigger('change');
+                let action = $("#act").val();
+                $('#main_item_id').select2({
+                    theme: "bootstrap-5",
+                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                        'w-100') ? '100%' : 'style',
+                    allowClear: true,
+                    ajax: {
+                        url: '{{ route('maintenance.get_maintenance_item_by_action') }}',
+                        dataType: 'json',
+                        data: function(params) {
+                            return {
+                                term: params.term || '',
+                                page: params.page || 1,
+                                action: action
+                            };
+                        },
+                        cache: true,
+                    }
+                });
+            });
+
             gen_select2();
         });
 
@@ -407,9 +436,9 @@
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('maintenance.store') }}';
             var type = 'POST';
-            if (maintenaceId != '') {
+            if (maintenanceId != '') {
                 url = '{{ route('maintenance.update', ':_id') }}';
-                url = url.replace(':_id', maintenaceId);
+                url = url.replace(':_id', maintenanceId);
                 formData.append('_method', 'PUT');
             }
             $.ajax({
@@ -468,12 +497,12 @@
                         'maintenance_id': maintenanceId
                     };
                     $.ajax({
-                        url: '{{ route('maintenance.get_table_edit') }}',
+                        url: '{{ route('maintenance.get_maintenance_item_list') }}',
                         data: data,
                         type: 'GET',
                         success: function(response) {
                             setTimeout(function() {
-                                $('#tableStep tbody tr').not(':first').remove();
+                                $('#tableItem tbody tr').not(':first').remove();
                                 tbody.append(response);
                             }, 500);
                         },
@@ -482,7 +511,7 @@
                         }
                     });
                 } else {
-                    $('#tableStep tbody tr').not(':first').remove();
+                    $('#tableItem tbody tr').not(':first').remove();
                 }
             }, 500);
         });
@@ -490,7 +519,7 @@
         $('#formModal').on('hidden.bs.modal', function() {
             maintenanceId = '';
             unitId = '';
-            $('#tableItem tbody').empty();
+            $('#tableItem tbody tr').not(':first').remove();
             $("#unit_id").val('All').trigger('change');
         });
 
@@ -501,6 +530,66 @@
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
         });
+
+        $('#addItemButton').on('click', function() {
+            var tbody = $("#tableItem > tbody");
+            var action = $("#act").val();
+            var main_item_id = $("#main_item_id").val();
+            var main_item = $("#main_item_id option:selected").text();
+            var newRow = `
+                <tr>
+                    <td class="p-1 align-middle row-number">
+                        #
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="text" class="form-control" id="action" name="action[]" readonly value="${action}">
+                       
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]" readonly value="${main_item_id}">
+                       <input type="text" class="form-control" id="main_item" name="main_item[]" readonly value="${main_item}">
+                    </td>
+                    <td class="text-center p-1 align-middle">
+                        <div class="row row-cols-auto g-3">
+                            <div class="col">
+                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+                                id="removeItemButton"></button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            $('#act').val("Repair").trigger('change');
+            tbody.append(newRow);
+
+            renumberRows();
+        });
+
+        $("#tableItem").on("click", ".delete-row", function() {
+            $(this).closest("tr").remove();
+
+            if ($(this).hasClass('fixed-row')) {
+                return;
+            }
+
+            $(this).remove();
+            renumberRows();
+        });
+
+        function renumberRows() {
+            let no = 1;
+
+            $('#tableItem > tbody > tr').each(function() {
+                // row khusus tidak ikut nomor
+                if ($(this).hasClass('fixed-row')) {
+                    $(this).find('.row-number').text('');
+                    return;
+                }
+
+                $(this).find('.row-number').text(no);
+                no++;
+            });
+        }
 
         function gen_select2() {
             $('.select-select').each(function() {
@@ -525,6 +614,7 @@
         }
 
         const $km_hm = $('#_km_hm');
+        const $hour_meter = $('#_hour_meter');
 
         let isFmt = false;
         let userDecSep = null;
@@ -632,6 +722,58 @@
         $km_hm.on('input', function(e) {
             textInput("km_hm", e);
         });
+
+        $hour_meter.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $hour_meter.on('input', function(e) {
+            textInput("hour_meter", e);
+        });
+
+        function hitungSelisihWaktu() {
+            const start = document.getElementById('start').value.trim();
+            const finish = document.getElementById('finish').value.trim();
+            const durationField = document.getElementById('work_duration');
+
+            if (start === '' || finish === '') {
+                durationField.value = '';
+                return;
+            }
+
+            const startClean = start.replace('.', ':');
+            const finishClean = finish.replace('.', ':');
+
+            const startParts = startClean.split(':').map(Number);
+            const finishParts = finishClean.split(':').map(Number);
+
+            if (
+                startParts.length !== 2 || finishParts.length !== 2 ||
+                isNaN(startParts[0]) || isNaN(startParts[1]) ||
+                isNaN(finishParts[0]) || isNaN(finishParts[1])
+            ) {
+                durationField.value = '';
+                return;
+            }
+
+            let startMinutes = startParts[0] * 60 + startParts[1];
+            let finishMinutes = finishParts[0] * 60 + finishParts[1];
+
+            if (finishMinutes < startMinutes) {
+                finishMinutes += 24 * 60;
+            }
+
+            const diff = finishMinutes - startMinutes;
+            const jam = String(Math.floor(diff / 60)).padStart(2, '0');
+            const menit = String(diff % 60).padStart(2, '0');
+
+            durationField.value = `${jam}:${menit}`;
+        }
+
+        document.getElementById('start').addEventListener('input', hitungSelisihWaktu);
+        document.getElementById('finish').addEventListener('input', hitungSelisihWaktu);
+        document.getElementById('start').addEventListener('change', hitungSelisihWaktu);
+        document.getElementById('finish').addEventListener('change', hitungSelisihWaktu);
     </script>
     <!--app JS-->
 @endsection

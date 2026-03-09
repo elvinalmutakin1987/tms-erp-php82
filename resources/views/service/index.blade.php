@@ -307,16 +307,16 @@
             var item_des = $("#txt_item_des").val();
             var newRow = `
                 <tr>
-                    <td>
+                    <td class="p-1 align-middle row-number">
                         #
                     </td>
-                    <td>
+                    <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="${item_no}">
                     </td>
-                    <td>
+                    <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="item_des" name="item_des[]" readonly value="${item_des}">
                     </td>
-                    <td class="text-center">
+                    <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
                             <div class="col">
                                 <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
@@ -329,10 +329,34 @@
             $("#txt_item_no").val('');
             $("#txt_item_des").val('');
             tbody.append(newRow);
+
+            renumberRows();
         });
+
+        function renumberRows() {
+            let no = 1;
+
+            $('#tableStep > tbody > tr').each(function() {
+                // row khusus tidak ikut nomor
+                if ($(this).hasClass('fixed-row')) {
+                    $(this).find('.row-number').text('');
+                    return;
+                }
+
+                $(this).find('.row-number').text(no);
+                no++;
+            });
+        }
 
         $("#tableStep").on("click", ".delete-row", function() {
             $(this).closest("tr").remove();
+
+            if ($(this).hasClass('fixed-row')) {
+                return;
+            }
+
+            $(this).remove();
+            renumberRows();
         });
 
         function gen_select2() {

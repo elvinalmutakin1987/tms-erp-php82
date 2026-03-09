@@ -72,7 +72,7 @@ class MaintenanceItemController extends Controller
         try {
             $request->validate([
                 'name' => 'required',
-                'action' => 'required',
+                // 'action' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
             Maintenance_item::create($data);
@@ -121,7 +121,7 @@ class MaintenanceItemController extends Controller
         try {
             $request->validate([
                 'name' => 'required',
-                'action' => 'required',
+                // 'action' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
             $maintenance_item->update($data);

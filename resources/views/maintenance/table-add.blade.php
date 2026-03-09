@@ -35,40 +35,4 @@
 
 <script>
     gen_select2();
-
-    $("#act").select2({
-        theme: "bootstrap-5",
-        width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-            'w-100') ? '100%' : 'style',
-    }).on('change', function() {
-        $('#main_item_id').val('').trigger('change');
-        let action = $("#act").val();
-        $('#main_item_id').select2({
-            theme: "bootstrap-5",
-            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                'w-100') ? '100%' : 'style',
-            allowClear: true,
-            ajax: {
-                url: '{{ route('maintenance.get_maintenance_item_by_action') }}',
-                dataType: 'json',
-                data: function(params) {
-                    return {
-                        term: params.term || '',
-                        page: params.page || 1,
-                        action: action
-                    };
-                },
-                cache: true,
-            }
-        });
-    });
-
-    const $cost_i = $('#_cost_i');
-    $cost_i.on('keydown', function(e) {
-        textKeyDown(e);
-    });
-
-    $cost_i.on('input', function(e) {
-        textInput("cost_i", e);
-    });
 </script>

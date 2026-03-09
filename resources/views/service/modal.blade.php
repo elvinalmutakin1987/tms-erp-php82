@@ -30,16 +30,16 @@
                                  </tr>
                              </thead>
                              <tbody id='bodyTableStep'>
-                                 <tr>
-                                     <td></td>
-                                     <td>
+                                 <tr class="fixed-row">
+                                     <td class="p-1 align-middle"></td>
+                                     <td class="p-1 align-middle">
                                          <input type="text" class="form-control" id="txt_item_no" name="txt_item_no">
                                      </td>
-                                     <td>
+                                     <td class="p-1 align-middle">
                                          <input type="text" class="form-control" id="txt_item_des"
                                              name="txt_item_des">
                                      </td>
-                                     <td class="text-center">
+                                     <td class="text-center p-1 align-middle">
                                          <div class="row row-cols-auto g-3">
                                              <div class="col">
                                                  <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"

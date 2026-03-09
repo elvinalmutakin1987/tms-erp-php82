@@ -24,7 +24,7 @@
                                         data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Item"><i
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
-                                <div class="col-2">
+                                {{-- <div class="col-2">
                                     <select class="form-select" id="act" name="act">
                                         <option value="All">All Unit</option>
                                         <option value="Repair">Repair</option>
@@ -36,7 +36,7 @@
                                         <option value="Welding">Welding</option>
                                         <option value="Adjust">Adjust</option>
                                     </select>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
@@ -51,7 +51,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Action</th>
+                                        {{-- <th>Action</th> --}}
                                         <th>Name</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -111,12 +111,12 @@
                         className: 'dt-center',
                         targets: '_all'
                     },
-                    {
-                        data: 'act',
-                        name: 'act',
-                        orderable: true,
-                        searchable: true,
-                    },
+                    // {
+                    //     data: 'act',
+                    //     name: 'act',
+                    //     orderable: true,
+                    //     searchable: true,
+                    // },
                     {
                         data: 'name',
                         name: 'name',

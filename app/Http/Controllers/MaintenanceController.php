@@ -31,8 +31,8 @@ class MaintenanceController extends Controller
             if (request()->status != 'All') {
                 $maintenance = $maintenance->where('status', request()->status);
             }
-            if (request()->vendor != 'All') {
-                $maintenance = $maintenance->where('client_vendor_id', request()->status);
+            if (request()->client_vendor_id != 'All') {
+                $maintenance = $maintenance->where('client_vendor_id', request()->client_vendor_id);
             }
             if (request()->date_start != '') {
                 $maintenance = $maintenance->where('date', '>=', request()->date_start);
@@ -79,13 +79,14 @@ class MaintenanceController extends Controller
                 })
                 ->make();
         }
+        $maintenance_item = Maintenance_item::where('action', 'Repair')->get();
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
             'sub-module' => 'Maintenance',
             'route-sub-module' => 'maintenance.index',
         ];
-        return view('maintenance.index', compact('breadcrum'));
+        return view('maintenance.index', compact('breadcrum', 'maintenance_item'));
     }
 
     /**
@@ -107,7 +108,6 @@ class MaintenanceController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
                 'client_vendor_id' => ['required', 'not_in:All'],
-                'cost_total' => 'required',
                 'hour_meter' => 'required',
                 'km_hm' => 'required',
                 'start' => 'required',
@@ -122,9 +122,14 @@ class MaintenanceController extends Controller
                     'mro_item_id',
                     'notes',
                     'action',
-                    'cost',
+                    'act',
+                    'main_item',
+                    'main_item_id'
                 ),
-                ['input_method' => 'Web']
+                [
+                    'input_method' => 'Web',
+                    'status' => 'Open'
+                ]
             );
             $maintenance = Maintenance::create($data);
             foreach ($request->maintenance_item_id as $key => $item) {
@@ -135,9 +140,6 @@ class MaintenanceController extends Controller
                     [
                         'maintenance_item_id' => $request->maintenance_item_id[$key],
                         'action' => $request->action[$key],
-                        'mro_item_id' => $request->mro_item_id[$key],
-                        'notes' => $request->notes[$key],
-                        'cost' => $request->cost[$key],
                     ]
                 );
             }
@@ -190,7 +192,6 @@ class MaintenanceController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
                 'client_vendor_id' => ['required', 'not_in:All'],
-                'cost_total' => 'required',
                 'hour_meter' => 'required',
                 'km_hm' => 'required',
                 'start' => 'required',
@@ -205,7 +206,9 @@ class MaintenanceController extends Controller
                     'mro_item_id',
                     'notes',
                     'action',
-                    'cost',
+                    'act',
+                    'main_item',
+                    'main_item_id'
                 ),
                 ['input_method' => 'Web']
             );
@@ -217,10 +220,7 @@ class MaintenanceController extends Controller
                     ],
                     [
                         'maintenance_item_id' => $request->maintenance_item_id[$key],
-                        'action' => $request->action[$key],
-                        'mro_item_id' => $request->mro_item_id[$key],
-                        'notes' => $request->notes[$key],
-                        'cost' => $request->cost[$key],
+                        'action' => $request->action[$key]
                     ]
                 );
             }
