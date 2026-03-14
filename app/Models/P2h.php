@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class P2h extends Model
+class P2h extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
     protected $guarded = [];

@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Maintenance extends Model
+class Maintenance extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
     protected $guarded = [];
@@ -30,7 +32,7 @@ class Maintenance extends Model
         return $this->hasMany(Maintenance_detail::class);
     }
 
-    public function vendor(): BelongsTo
+    public function client_vendor(): BelongsTo
     {
         return $this->belongsTo(Client_vendor::class)->withDefault(['name' => null]);
     }

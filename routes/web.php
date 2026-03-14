@@ -345,4 +345,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('maintenance-get-maintenance-item-list', [MaintenanceController::class, 'get_maintenance_item_list'])
         ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_maintenance_item_list');
+
+    Route::get('maintenance/cost/{maintenance}', [MaintenanceController::class, 'cost'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.cost');
 });

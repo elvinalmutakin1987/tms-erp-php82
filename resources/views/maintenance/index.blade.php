@@ -30,16 +30,25 @@
                                         <option value="All">All Unit</option>
                                     </select>
                                 </div>
-                                <div class="col">
+                                {{-- <div class="col">
                                     <select class="form-select" id="vendor" name="vendor">
                                         <option value="All">All Vendor</option>
                                     </select>
-                                </div>
+                                </div> --}}
                                 <div class="col">
                                     <select class="form-select" id="_status" name="_status">
                                         <option value="All">All Status</option>
+                                        <option value="Draft">Draft</option>
                                         <option value="Open">Open</option>
                                         <option value="Done">Done</option>
+                                    </select>
+                                </div>
+                                <div class="col">
+                                    <select class="form-select" id="main_type" name="main_type">
+                                        <option value="All">All Type</option>
+                                        @foreach ($maintenance_type as $d)
+                                            <option value="{{ $d['name'] }}">{{ $d['abbreviation'] }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col">
@@ -65,8 +74,8 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Maintenance Number</th>
-                                        <th>Date</th>
                                         <th>Unit</th>
+                                        <th>Date</th>
                                         <th>Start</th>
                                         <th>Finish</th>
                                         <th>Duration</th>
@@ -87,9 +96,11 @@
     </div>
     <!--end page wrapper -->
 
-    @include('maintenance.modal')
+    @include('maintenance.modal', ['maintenance_type' => $maintenance_type])
 
-    @include('maintenance.modal-detail')
+    @include('maintenance.modal-detail', ['maintenance_type' => $maintenance_type])
+
+    @include('maintenance.modal-cost', ['maintenance_type' => $maintenance_type])
 @endsection
 
 @section('js')
@@ -102,8 +113,9 @@
     <script>
         var maintenanceId = '';
         var unitId = '';
-        var vendorId = '';
+        var clientVendorId = '';
         var status = '';
+        var type = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -125,7 +137,7 @@
                     url: ajax,
                     data: function(d) {
                         d.unit_id = $('#unit').val();
-                        d.client_vendor_id = $('#vendor').val();
+                        d.type = $('#main_type').val();
                         d.status = $('#_status').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
@@ -147,14 +159,14 @@
                         searchable: true,
                     },
                     {
-                        data: 'date',
-                        name: 'date',
+                        data: 'unit',
+                        name: 'unit',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'unit',
-                        name: 'unit',
+                        data: 'date',
+                        name: 'date',
                         orderable: true,
                         searchable: true,
                     },
@@ -185,8 +197,11 @@
                             if (data == "Done") {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
                                     data + '</span>';
+                            } else if (data == 'Open') {
+                                return '<span class="badge bg-primary" style="font-size: 13px">' +
+                                    data + '</span>';
                             } else {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
+                                return '<span class="badge bg-secondary" style="font-size: 13px">' +
                                     data + '</span>';
                             }
                         }
@@ -214,10 +229,26 @@
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit Inspection');
+                        $('#modal-header').text('Edit Maintenance');
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
                         $("#unit_id").val(response.data.unit_id).trigger('change');
+                        $("#type").val(response.data.type).trigger('change');
+                        $("#client_vendor_id").val(response.data.client_vendor_id).trigger(
+                            'change');
+                        $("#date").val(response.data.date);
+                        $("#mechanic").val(response.data.mechanic);
+                        $("#hour_meter").val(response.data.hour_meter);
+                        $('#_hour_meter').val(numbro(response.data.hour_meter).format({
+                            thousandSeparated: true
+                        }));
+                        $("#km_hm").val(response.data.km_hm);
+                        $('#_km_hm').val(numbro(response.data.km_hm).format({
+                            thousandSeparated: true
+                        }));
+                        $("#start").val(response.data.start);
+                        $("#finish").val(response.data.finish);
+                        $("#work_duration").val(response.data.work_duration);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -234,6 +265,22 @@
                     type: 'GET',
                     success: function(response) {
                         $('#modal-detail-body').html(response);
+                    },
+                    error: function() {
+                        alert('Error fetching data');
+                    }
+                });
+            });
+
+            $(document).on('click', '.costButton', function() {
+                $('#modal-cost-header').text('Cost Setting');
+                let url = '{{ route('maintenance.cost', ':_id') }}';
+                url = url.replace(':_id', $(this).data('id'));
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-cost-body').html(response);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -258,7 +305,16 @@
                 $('#table-data').DataTable().draw();
             });
 
-            $("#vendor").select2({
+            // $("#vendor").select2({
+            //     theme: "bootstrap-5",
+            //     width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+            //         'w-100') ? '100%' : 'style',
+            // }).on('change', function() {
+            //     $('#table-data').DataTable().draw();
+            // });
+
+
+            $("#_status").select2({
                 theme: "bootstrap-5",
                 width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
                     'w-100') ? '100%' : 'style',
@@ -266,8 +322,7 @@
                 $('#table-data').DataTable().draw();
             });
 
-
-            $("#_status").select2({
+            $("#main_type").select2({
                 theme: "bootstrap-5",
                 width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
                     'w-100') ? '100%' : 'style',
@@ -332,8 +387,8 @@
                             vendor.name +
                             '</option>');
                     });
-                    if (vendorId != '') {
-                        $("#vendor").val(vendorId).trigger('change');
+                    if (clientVendorId != '') {
+                        $("#vendor").val(clientVendorId).trigger('change');
                     }
 
                     $('#client_vendor_id').empty();
@@ -344,8 +399,8 @@
                             vendor.name +
                             '</option>');
                     });
-                    if (vendorId != '') {
-                        $("#client_vendor_id").val(vendorId).trigger('change');
+                    if (clientVendorId != '') {
+                        $("#client_vendor_id").val(clientVendorId).trigger('change');
                     }
                 },
                 error: function(xhr, status, error) {
@@ -355,33 +410,6 @@
                         text: error,
                     });
                 }
-            });
-
-            $("#act").select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                    'w-100') ? '100%' : 'style',
-            }).on('change', function() {
-                $('#main_item_id').val('').trigger('change');
-                let action = $("#act").val();
-                $('#main_item_id').select2({
-                    theme: "bootstrap-5",
-                    width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                        'w-100') ? '100%' : 'style',
-                    allowClear: true,
-                    ajax: {
-                        url: '{{ route('maintenance.get_maintenance_item_by_action') }}',
-                        dataType: 'json',
-                        data: function(params) {
-                            return {
-                                term: params.term || '',
-                                page: params.page || 1,
-                                action: action
-                            };
-                        },
-                        cache: true,
-                    }
-                });
             });
 
             gen_select2();
@@ -432,10 +460,12 @@
             });
         }
 
-        $('#saveButton').on('click', function() {
+        $('.saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('maintenance.store') }}';
             var type = 'POST';
+            formData.append('type', $("#type").val());
+            formData.append('status', $(this).val());
             if (maintenanceId != '') {
                 url = '{{ route('maintenance.update', ':_id') }}';
                 url = url.replace(':_id', maintenanceId);
@@ -481,19 +511,71 @@
             var tbody = $("#tableItem > tbody");
             tbody.append(`
                     <tr>
-                        <td colspan="5">
+                        <td colspan="4">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="visually">Loading...</span>
                         </td>
                     </tr>
                     `);
             setTimeout(function() {
+                const isEdit = maintenanceId != '';
+                const url = isEdit ?
+                    '{{ route('maintenance.get_table_edit', ':_id') }}'.replace(':_id', maintenanceId) :
+                    '{{ route('maintenance.get_table_add') }}';
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+
+                        const titleText = isEdit ? 'Edit Maintenance' : 'Add Maintenance';
+                        const number = isEdit ? response.maintenance_no : response
+                            .maintenance_prev_no;
+
+                        $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
+
+                        if (!isEdit) {
+                            $('#tableItem tbody tr').not(':first').remove();
+                            return;
+                        }
+
+                        // $("#tableItem > tbody").html(response.html);
+                        const $tbody = $("#tableItem > tbody");
+                        const $newRows = $('<tbody>').html(response.html).find('tr');
+
+                        $tbody.find('tr:not(:first)').remove();
+                        $tbody.append($newRows);
+
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            }, 500);
+        });
+
+        $('#formModal').on('hidden.bs.modal', function() {
+            maintenanceId = '';
+            unitId = '';
+            clientVendorId = '';
+            typeId = '';
+            $('#tableItem tbody tr').not(':first').remove();
+            $("#unit_id").val('All').trigger('change');
+            $("#client_vendor_id").val('All').trigger('change');
+            $("#type").val(null).trigger('change');
+        });
+
+        $('#formCost').on('show.bs.modal', function() {
+            var button = $('#costButton');
+            var title = button.data('title');
+            $('#modal-cost-header').text(title);
+            setTimeout(function() {
                 var data = {
                     'form': 'create'
                 };
                 if (maintenanceId != '') {
                     data = {
-                        'form': 'edit',
+                        'form': 'cost',
                         'maintenance_id': maintenanceId
                     };
                     $.ajax({
@@ -516,11 +598,8 @@
             }, 500);
         });
 
-        $('#formModal').on('hidden.bs.modal', function() {
+        $('#formCost').on('hidden.bs.modal', function() {
             maintenanceId = '';
-            unitId = '';
-            $('#tableItem tbody tr').not(':first').remove();
-            $("#unit_id").val('All').trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -529,6 +608,11 @@
 
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
+        });
+
+        $('#cancelCostButton').on('click', function() {
+            $('#formCost').modal('hide');
+            maintenanceId = '';
         });
 
         $('#addItemButton').on('click', function() {
@@ -543,7 +627,6 @@
                     </td>
                     <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="action" name="action[]" readonly value="${action}">
-                       
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]" readonly value="${main_item_id}">
@@ -601,6 +684,27 @@
                         width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                             'style'),
                         selectOnClose: false,
+                        minimumResultsForSearch: 0,
+                    })
+                    .on('select2:open', function() {
+                        setTimeout(function() {
+                            const $search = $('.select2-container--open .select2-search__field');
+                            $search.trigger('focus');
+                            $('.select2-container--open').css('z-index', 1056);
+                        }, 0);
+                    });
+            });
+
+            $('.select-type').each(function() {
+                const $el = $(this);
+                $el.select2({
+                        theme: "bootstrap-5",
+                        dropdownParent: $(
+                            '#formModal'),
+                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                            'style'),
+                        selectOnClose: false,
+                        placeholder: 'Maintenance Type',
                         minimumResultsForSearch: 0,
                     })
                     .on('select2:open', function() {

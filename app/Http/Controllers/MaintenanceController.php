@@ -14,6 +14,7 @@ use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
 use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class MaintenanceController extends Controller
@@ -31,8 +32,11 @@ class MaintenanceController extends Controller
             if (request()->status != 'All') {
                 $maintenance = $maintenance->where('status', request()->status);
             }
-            if (request()->client_vendor_id != 'All') {
-                $maintenance = $maintenance->where('client_vendor_id', request()->client_vendor_id);
+            // if (request()->client_vendor_id != 'All') {
+            //     $maintenance = $maintenance->where('client_vendor_id', request()->client_vendor_id);
+            // }
+            if (request()->type != 'All') {
+                $maintenance = $maintenance->where('type', request()->type);
             }
             if (request()->date_start != '') {
                 $maintenance = $maintenance->where('date', '>=', request()->date_start);
@@ -40,7 +44,7 @@ class MaintenanceController extends Controller
             if (request()->date_end != '') {
                 $maintenance = $maintenance->where('date', '<=', request()->date_end);
             }
-            $maintenance = $maintenance->orderBy('date', 'desc')->get();
+            $maintenance = $maintenance->orderBy('maintenance_no', 'desc')->get();
             return DataTables::of($maintenance)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -59,12 +63,22 @@ class MaintenanceController extends Controller
                                <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
-                                </li>
-                                <li>
+                                </li>';
+                    if ($item->status == 'Open'):
+                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.cost')):
+                            $button .= '<li>
+                                    <a class="dropdown-item costButton" href="#" data-bs-toggle="modal" data-bs-target="#formCost"
+                                    data-id="' . $item->id . '">Cost Setting</a>
+                                </li>';
+                        endif;
+                    endif;
+                    if ($item->status == 'Draft'):
+                        $button .= '<li>
+                        <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                        data-id="' . $item->id . '">Edit</a>
+                    </li>';
+                    endif;
+                    $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>
                             </ul>
@@ -77,16 +91,46 @@ class MaintenanceController extends Controller
                     $unit = Unit::find($item->unit_id);
                     return $unit->vehicle_no;
                 })
+                ->addColumn('main_type', function ($item) {
+                    $type = "";
+                    if ($item->type == "BO") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "B1") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "B2") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "B3") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "B4") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "M") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "N") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "A") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "OP") {
+                        $type = "Breakdown under repair";
+                    } elseif ($item->type == "STD") {
+                        $type = "Stand By";
+                    } elseif ($item->type == "B0") {
+                        $type = "Breakdown";
+                    } elseif ($item->type == "A/OP") {
+                        $type = "Abnormal Operation";
+                    }
+                    return $type;
+                })
                 ->make();
         }
-        $maintenance_item = Maintenance_item::where('action', 'Repair')->get();
+        $maintenance_item = Maintenance_item::all();
+        $maintenance_type = config('maintenance-type');
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
             'sub-module' => 'Maintenance',
             'route-sub-module' => 'maintenance.index',
         ];
-        return view('maintenance.index', compact('breadcrum', 'maintenance_item'));
+        return view('maintenance.index', compact('breadcrum', 'maintenance_item', 'maintenance_type'));
     }
 
     /**
@@ -127,8 +171,7 @@ class MaintenanceController extends Controller
                     'main_item_id'
                 ),
                 [
-                    'input_method' => 'Web',
-                    'status' => 'Open'
+                    'input_method' => 'Web'
                 ]
             );
             $maintenance = Maintenance::create($data);
@@ -371,7 +414,8 @@ class MaintenanceController extends Controller
         try {
             $view = 'maintenance.table-edit';
             $maintenance_detail = $maintenance->maintenance_detail;
-            $html = view($view, compact('maintenance_detail'))->render();
+            $maintenance_item = Maintenance_item::where('action', 'Repair')->get();
+            $html = view($view, compact('maintenance', 'maintenance_detail', 'maintenance_item'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -435,5 +479,48 @@ class MaintenanceController extends Controller
                 'message' => $th->getMessage()
             ], 400);
         }
+    }
+
+    /**
+     * Nampilin form cost setting
+     */
+    public function cost(Request $request, Maintenance $maintenance)
+    {
+        try {
+            $maintenance_detail = $maintenance->maintenance_detail;
+            $view = 'maintenance.cost';
+            return response()->view($view, compact('maintenance', 'maintenance_detail'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Nyimpen data cost nya
+     */
+    public function cost_store(Request $request, Maintenance $maintenance)
+    {
+        try {
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Check unit sedang maintenance atau tidak
+     */
+    public function check_maintenance_unit(String $unit_id)
+    {
+        $check = Maintenance::where('unit_id', $unit_id)->where('status', 'Open')->first()->count();
+        if ($check == 1) {
+            return true;
+        }
+        return false;
     }
 }

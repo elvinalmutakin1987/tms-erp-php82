@@ -33,6 +33,7 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->text('remarks')->nullable();
+            $table->text('type')->nullable();
             $table->string('input_method', 20)->nullable();
             $table->text('status')->nullable(); //Status nya > Open, Close
             $table->timestamps();

@@ -106,8 +106,17 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <div class="d-md-flex d-grid align-items-center gap-3">
-                    <button type="button" class="btn btn-success" id="saveButton">Save</button>
+                <div class="d-md-flex d-grid align-items-center gap-1">
+                    <select class="form-select select-type" id="type" name="type" style="width: 350px"
+                        placeholder="Maintenance Type">
+                        @foreach ($maintenance_type as $d)
+                            <option value="{{ $d['name'] }}">{{ $d['abbreviation'] }} - {{ $d['name'] }}</option>
+                        @endforeach
+                    </select>
+                    <button type="button" class="btn btn-secondary saveButton" id="saveButton1" name="status"
+                        value="Draft">Draft</button>
+                    <button type="button" class="btn btn-success saveButton" id="saveButton2" name="status"
+                        value="Open">Save</button>
                     <button type="button" class="btn btn-light" id="cancelButton">Cancel</button>
                 </div>
             </div>

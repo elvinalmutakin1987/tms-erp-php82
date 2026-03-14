@@ -1,7 +1,7 @@
-<tr>
-    <td class="p-1 align-middle" style="width: 3%">
+<tr class="fixed-row">
+    <td class="p-1 align-middle" style="width: 2%">
     </td>
-    <td class="p-1 align-middle" style="width: 15%">
+    <td class="p-1 align-middle" style="width: 20%">
         <select class="form-select select-select" id="act" name="act">
             <option value="Repair" selected>Repair</option>
             <option value="Replace">Replace</option>
@@ -20,11 +20,7 @@
             @endforeach
         </select>
     </td>
-    <td class="p-1 align-middle" style="width:20%">
-        <input type="hidden" class="form-control timepicker" id="cost_i" name="cost_i">
-        <input type="text" class="form-control timepicker" id="_cost_i" name="_cost_i">
-    </td>
-    <td class="p-1 align-middle" style="width:7%">
+    <td class="p-1 align-middle" style="width:2%">
         <div class="row row-cols-auto g-3">
             <div class="col">
                 <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1" id="addItemButton"></button>
@@ -32,7 +28,3 @@
         </div>
     </td>
 </tr>
-
-<script>
-    gen_select2();
-</script>

@@ -51,12 +51,15 @@ class MechanicalInspectionController extends Controller
                                <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
-                                </li>
-                                <li>
+                                </li>';
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('inspection.delete')):
+                        $button .= '<li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
-                                </li>
-                                <li>
+                                </li>';
+                    endif;
+
+                    $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>
                             </ul>

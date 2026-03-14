@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use CleaniqueCoders\RunningNumber\Generator;
 use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
 
@@ -54,11 +55,13 @@ class P2hController extends Controller
                                 <li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
-                                </li>
-                                <li>
+                                </li>';
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h.delete')):
+                        $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>
-                            </ul>
+                                </li>';
+                    endif;
+                    $button .= '</ul>
                         </div>
                     </div>
                     ';

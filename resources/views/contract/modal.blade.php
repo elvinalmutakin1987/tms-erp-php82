@@ -41,7 +41,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <div class="d-md-flex d-grid align-items-center gap-3">
+                <div class="d-md-flex d-grid align-items-center gap-1">
                     <button type="button" class="btn btn-success" id="saveButton">Save</button>
                     <button type="button" class="btn btn-light" id="cancelButton">Cancel</button>
                 </div>
