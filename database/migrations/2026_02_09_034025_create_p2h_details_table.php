@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('p2h_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('p2h_id')->nullable();
-            $table->string('inspection_group', 50)->nullable();
-            $table->string('inspection_item')->nullable();
+            $table->text('inspection_group')->nullable();
+            $table->text('inspection_item')->nullable();
             $table->string('check', 20)->nullable();
             $table->text('defect_listed')->nullable();
             $table->text('action_taken')->nullable();

@@ -7,7 +7,7 @@
 @endphp
 <div class="row mb-2">
     <div class="col">
-        <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;"">
+        <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
                 <td width="30%">Number <br>
                     <b>{{ $p2h->p2h_no }}</b>
@@ -134,7 +134,7 @@
                                 $check = 0;
                                 $defect_listed = '';
                                 $action_taken = '';
-                            @endphp ?>
+                            @endphp
                             @if ($p2h_detail)
                                 @php
                                     $check = $p2h_detail->check;

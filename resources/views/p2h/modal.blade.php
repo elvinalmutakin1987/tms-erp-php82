@@ -1,6 +1,14 @@
+<style>
+    #formModal .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(100vh - 160px);
+        scroll-behavior: auto;
+    }
+</style>
+
 <!-- search modal -->
 <div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-md-down">
         <div class="modal-content">
             <div class="modal-header" id="modal-header">
             </div>

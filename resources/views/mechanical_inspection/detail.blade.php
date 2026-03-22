@@ -7,7 +7,7 @@
 @endphp
 <div class="row mb-2">
     <div class="col">
-        <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;"">
+        <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
                 <td width="30%">Number <br>
                     <b>{{ $mechanical_inspection->inspection_no }}</b>

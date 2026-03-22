@@ -55,10 +55,10 @@ class MaintenanceController extends Controller
                                 aria-expanded="false">Action</button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('mechanicalinspection.export_pdf', $item->id) . '">Export PDF</a>
+                                    <a class="dropdown-item exportPdfButton" href="' . route('maintenance.export_pdf', $item->id) . '">Export PDF</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item printButton" href="' . route('mechanicalinspection.print', $item->id) . '" target="_blank">Print</a>
+                                    <a class="dropdown-item printButton" href="' . route('maintenance.print', $item->id) . '" target="_blank">Print</a>
                                 </li>
                                <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
@@ -501,12 +501,57 @@ class MaintenanceController extends Controller
     /**
      * Nyimpen data cost nya
      */
-    public function cost_store(Request $request, Maintenance $maintenance)
+    public function cost_store(Request $request)
     {
         try {
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Nyimpen data cost nya
+     */
+    public function cost_update(Request $request, Maintenance $maintenance)
+    {
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'cost_total' => 'required'
+            ]);
+            $data = array_merge(
+                $request->except(
+                    '_token',
+                    '_method',
+                    'maintenance_item_id',
+                    'cost'
+                )
+            );
+            $maintenance->update($data);
+            foreach ($request->maintenance_item_id as $key => $item) {
+                $maintenance->maintenance_detail()->updateOrCreate(
+                    [
+                        'maintenance_item_id' => $item,
+                    ],
+                    [
+                        'cost' => $request->cost[$key]
+                    ]
+                );
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
                 'message' => $th->getMessage()
             ], 400);
         }
@@ -522,5 +567,98 @@ class MaintenanceController extends Controller
             return true;
         }
         return false;
+    }
+
+    /**
+     * ngambil detail maintenance
+     */
+    public function get_detail(Request $request, Maintenance $maintenance)
+    {
+        try {
+            $maintenance_item = Maintenance_item::all();
+            $maintenance_detail = $maintenance->maintenance_detail;
+            $view = 'maintenance.detail';
+            return response()->view($view, compact('maintenance', 'maintenance_detail', 'maintenance_item'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Maintenance $maintenance)
+    {
+        $maintenance_item = Maintenance_item::all();
+
+        $pdf = Pdf::loadView('maintenance.print', [
+            'maintenance' => $maintenance,
+            'maintenance_item' => $maintenance_item,
+            'maintenance_detail' => $maintenance->maintenance_detail
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        $safeFilename = Str::of($maintenance->maintenance_item)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->stream("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Maintenance $maintenance)
+    {
+        $maintenance_item = Maintenance_item::all();
+
+        $pdf = Pdf::loadView('maintenance.print', [
+            'maintenance' => $maintenance,
+            'maintenance_item' => $maintenance_item,
+            'maintenance_detail' => $maintenance->maintenance_detail
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        $safeFilename = Str::of($maintenance->maintenance_no)
+            ->replace(['/', '\\'], '-')   // ganti slash
+            ->toString();
+        return $pdf->download("report-{$safeFilename}.pdf");
     }
 }

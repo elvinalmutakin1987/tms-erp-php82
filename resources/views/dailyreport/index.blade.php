@@ -22,7 +22,7 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add P2H"><i
+                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Report"><i
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
                                 <div class="col-2">
@@ -52,13 +52,10 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>P2H Number</th>
+                                        <th>Report Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
-                                        <th>Driver</th>
-                                        <th>Shift</th>
-                                        <th>Result</th>
-                                        <th>Condition</th>
+                                        <th>Total KM/Duration</th>
                                         <th width="20">Action</th>
                                     </tr>
                                 </thead>
@@ -75,9 +72,7 @@
     </div>
     <!--end page wrapper -->
 
-    @include('p2h.modal')
-
-    @include('p2h.modal-detail')
+    @include('dailyreport.modal')
 @endsection
 
 @section('js')
@@ -88,7 +83,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        var p2hId = '';
+        var reportId = '';
         var unitId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -125,8 +120,8 @@
                         targets: '_all'
                     },
                     {
-                        data: 'p2h_no',
-                        name: 'p2h_no',
+                        data: 'report_no',
+                        name: 'report_no',
                         orderable: true,
                         searchable: true,
                     },
@@ -143,54 +138,10 @@
                         searchable: true,
                     },
                     {
-                        data: 'driver',
-                        name: 'driver',
+                        data: 'total_km_duration',
+                        name: 'total_km_duration',
                         orderable: true,
                         searchable: true,
-                    },
-                    {
-                        data: 'shift',
-                        name: 'shift',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'result',
-                        name: 'result',
-                        orderable: true,
-                        searchable: true,
-                        render: function(data, type, row) {
-                            if (data == 100) {
-                                return '<span class="badge bg-success" style="font-size: 13px">Fit</span>';
-                            } else {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    row.broken + ' broken</span>';
-                            }
-                        }
-                    },
-                    {
-                        data: 'condition',
-                        name: 'condition',
-                        orderable: true,
-                        searchable: true,
-                        render: function(data, type, row) {
-                            if (data >= 80) {
-                                return '<span class="badge bg-success" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else if (data >= 60) {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else if (data >= 40) {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else if (data >= 20) {
-                                return '<span class="badge bg-warning" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            } else {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '%</span>';
-                            }
-                        }
                     },
                     {
                         data: 'action',
@@ -205,29 +156,20 @@
             });
 
             $(document).on('click', '.editButton', function() {
-                p2hId = $(this).data('id');
-                $('#modal-header').text('Edit P2H');
-                $('#id').val(p2hId);
-                let url = '{{ route('p2h.show', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+                reportId = $(this).data('id');
+                $('#modal-header').text('Edit Report');
+                $('#id').val(reportId);
+                let url = '{{ route('dailyreport.show', ':_id') }}';
+                url = url.replace(':_id', reportId);
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit P2H');
-                        $("#driver").val(response.data.driver);
+                        $('#modal-header').text('Edit Report');
                         $("#date").val(response.data.date);
+                        $("#remarks").val(response.data.remarks);
                         $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#shift").val(response.data.shift).trigger('change');
-                        $('#km_start').val(response.data.km_start);
-                        $('#_km_start').val(numbro(response.data.km_start).format({
-                            thousandSeparated: true
-                        }));
-                        $('#km_finish').val(response.data.km_finish);
-                        $('#_km_finish').val(numbro(response.data.km_finish).format({
-                            thousandSeparated: true
-                        }));
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -236,8 +178,8 @@
             });
 
             $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail P2H');
-                let url = '{{ route('p2h.get_detail', ':_id') }}';
+                $('#modal-detail-header').text('Detail Report');
+                let url = '{{ route('dailyreport.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -270,7 +212,7 @@
             });
 
             $.ajax({
-                url: '{{ route('p2h.get_unit_all') }}',
+                url: '{{ route('dailyreport.get_unit_all') }}',
                 type: 'GET',
                 success: function(response) {
                     $('#unit').empty();
@@ -320,7 +262,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('p2h.destroy', ':_id') }}';
+                    let url = '{{ route('dailyreport.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -356,11 +298,11 @@
 
         $('#saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('p2h.store') }}';
+            var url = '{{ route('dailyreport.store') }}';
             var type = 'POST';
-            if (p2hId != '') {
-                url = '{{ route('p2h.update', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+            if (reportId != '') {
+                url = '{{ route('dailyreport.update', ':_id') }}';
+                url = url.replace(':_id', reportId);
                 formData.append('_method', 'PUT');
             }
             $.ajax({
@@ -379,7 +321,7 @@
                         willClose: () => {
                             $('#table-data').DataTable().ajax.reload(null, false);
                             $('#formModal form')[0].reset();
-                            p2hId = '';
+                            reportId = '';
                             $('#formModal').modal('hide');
                         }
                     });
@@ -411,19 +353,21 @@
                     </tr>
                     `);
             setTimeout(function() {
-                const isEdit = p2hId != '';
+                const isEdit = reportId != '';
                 const url = isEdit ?
-                    '{{ route('p2h.get_table_edit', ':_id') }}'.replace(':_id', p2hId) :
-                    '{{ route('p2h.get_table_add') }}';
+                    '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
+                        inspectionId) :
+                    '{{ route('dailyreport.get_form_add') }}';
 
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(response) {
-                        $("#tableItem > tbody").html(response.html);
+                        $("#div-form").html(response.html);
 
-                        const titleText = isEdit ? 'Edit P2H' : 'Add P2H';
-                        const number = isEdit ? response.p2h_no : response.p2h_prev_no;
+                        const titleText = isEdit ? 'Edit Report' : 'Add Report';
+                        const number = isEdit ? response.report_no : response
+                            .report_prev_no;
 
                         $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
                     },
@@ -435,11 +379,10 @@
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            p2hId = '';
+            reprotId = '';
             unitId = '';
-            $('#tableItem tbody').empty();
+            $('#div-form').empty();
             $("#unit_id").val('All').trigger('change');
-            $("#shift").val('Day').trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -454,188 +397,23 @@
             $('.select-select').each(function() {
                 const $el = $(this);
                 $el.select2({
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0,
-                }).on('select2:close', function() {
-                    $(this).blur();
-                    if (document.activeElement) {
-                        document.activeElement.blur();
-                    }
-                });
-            });
-        }
-
-        const $km_start = $('#_km_start');
-        const $km_finish = $('#_km_finish');
-
-        let isFmt = false;
-        let userDecSep = null;
-
-        function sanitize(s) {
-            return (s ?? '').toString().replace(/[^0-9.,]/g, '');
-        }
-
-        function groupThousands(digits, sep) {
-            digits = digits.replace(/^0+(?=\d)/, '');
-            if (digits === '') digits = '0';
-            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-        }
-
-        function countDigitsLeft(str, pos) {
-            return (str.slice(0, pos).match(/\d/g) || []).length;
-        }
-
-        function caretByDigits(str, digitCount) {
-            let c = 0;
-            for (let i = 0; i < str.length; i++) {
-                if (/\d/.test(str[i])) c++;
-                if (c >= digitCount) return i + 1;
-            }
-            return str.length;
-        }
-
-        function textKeyDown(e) {
-            if (e.ctrlKey || e.metaKey || e.altKey) return;
-
-            const okNav = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter'];
-            if (okNav.includes(e.key)) return;
-
-            if (/^[0-9.,]$/.test(e.key)) return;
-
-            e.preventDefault();
-        }
-
-        function textInput(key, e) {
-            if (isFmt) return;
-            isFmt = true;
-
-            const el = e.target;
-            const raw = el.value || '';
-            const caretRaw = (typeof el.selectionStart === 'number') ? el.selectionStart : raw.length;
-
-            const oe = e.originalEvent || e;
-            const inserted = (oe && typeof oe.data === 'string') ? oe.data : '';
-
-            const prevDecSep = userDecSep;
-            const justTypedSep = (inserted === '.' || inserted === ',');
-
-            const san = sanitize(raw);
-            const leftSan = sanitize(raw.slice(0, caretRaw));
-            const caretSan = leftSan.length;
-
-            if (userDecSep && !san.includes(userDecSep)) userDecSep = null;
-
-            const justSetDecSep = (!prevDecSep && justTypedSep);
-            if (justSetDecSep) userDecSep = inserted;
-
-            const digitsLeft = countDigitsLeft(san, caretSan);
-
-            let intDigits = '';
-            let fracDigits = '';
-            let keepDec = false;
-
-            if (userDecSep && san.includes(userDecSep)) {
-                const pos = san.indexOf(userDecSep);
-                keepDec = true;
-                intDigits = san.slice(0, pos).replace(/[.,]/g, '');
-                fracDigits = san.slice(pos + 1).replace(/[.,]/g, '');
-                if (intDigits === '') intDigits = '0';
-            } else {
-                intDigits = san.replace(/[.,]/g, '');
-            }
-
-            const thousandsSep = userDecSep ? (userDecSep === ',' ? '.' : ',') : ',';
-
-            const formattedInt = groupThousands(intDigits, thousandsSep);
-            const formatted = keepDec ? (formattedInt + userDecSep + fracDigits) : formattedInt;
-
-            el.value = formatted;
-
-            if (typeof el.setSelectionRange === 'function') {
-                if (justSetDecSep && keepDec) {
-                    const decPosNew = formatted.indexOf(userDecSep);
-                    const newCaret = decPosNew + 1;
-                    el.setSelectionRange(newCaret, newCaret);
-                } else {
-                    const newCaret = caretByDigits(formatted, digitsLeft);
-                    el.setSelectionRange(newCaret, newCaret);
-                }
-            }
-
-            isFmt = false;
-
-            $("#" + key).val(numbro.unformat(el.value));
-        }
-
-        $km_start.on('keydown', function(e) {
-            textKeyDown(e);
-        });
-
-        $km_start.on('input', function(e) {
-            textInput("km_start", e);
-        });
-
-        $km_finish.on('keydown', function(e) {
-            textKeyDown(e);
-        });
-
-        $km_finish.on('input', function(e) {
-            textInput("km_finish", e);
-        });
-
-        $("#unit_id").on('change', function() {
-            const modalEl = document.getElementById('formModal');
-            const modalBody = modalEl.querySelector('.modal-body');
-            const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
-
-            $(this).select2('close');
-            $(this).blur();
-
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
-
-            const $tbody = $("#tableItem > tbody");
-            $tbody.html(`
-                <tr>
-                    <td colspan="5" class="text-center">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span class="visually-hidden">Loading...</span>
-                    </td>
-                </tr>
-            `);
-            let url = '{{ route('p2h.get_p2h_item') }}';
-            if ($(this).val() == 'All') {
-                url = '{{ route('p2h.get_table_add') }}';
-            }
-            $.ajax({
-                url: url,
-                type: 'GET',
-                data: {
-                    unit_id: $(this).val()
-                },
-                success: function(response) {
-                    $tbody.html(response.html);
-
-                    requestAnimationFrame(function() {
-                        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modalInstance.handleUpdate();
-
-                        if (modalBody) {
-                            modalBody.scrollTop = lastScrollTop;
-                        }
+                        theme: "bootstrap-5",
+                        dropdownParent: $(
+                            '#formModal'),
+                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                            'style'),
+                        selectOnClose: false,
+                        minimumResultsForSearch: 0,
+                    })
+                    .on('select2:open', function() {
+                        setTimeout(function() {
+                            const $search = $('.select2-container--open .select2-search__field');
+                            $search.trigger('focus');
+                            $('.select2-container--open').css('z-index', 1056);
+                        }, 0);
                     });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    $tbody.empty();
-                }
             });
-        });
+        }
     </script>
     <!--app JS-->
 @endsection

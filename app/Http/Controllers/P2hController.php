@@ -321,7 +321,15 @@ class P2hController extends Controller
     {
         try {
             $view = 'p2h.table-edit';
+            $unit = Unit::find($p2h->unit_id);
             $p2hitem = config('p2hitem');
+            if ($unit->type == 'Light') {
+                $p2hitem = config('p2hitem');
+            } elseif ($unit->type == 'Fuel Truck') {
+                $p2hitem = config('p2hitem-fuel');
+            } else {
+                $p2hitem = config('p2hitem-light');
+            }
             $html = view($view, compact('p2hitem', 'p2h'))->render();
             return response()->json([
                 'success' => true,
@@ -359,7 +367,15 @@ class P2hController extends Controller
      */
     public function print(Request $request, P2h $p2h)
     {
+        $unit = Unit::find($p2h->unit_id);
         $p2hitem = config('p2hitem');
+        if ($unit->type == 'Light') {
+            $p2hitem = config('p2hitem');
+        } elseif ($unit->type == 'Fuel Truck') {
+            $p2hitem = config('p2hitem-fuel');
+        } else {
+            $p2hitem = config('p2hitem-light');
+        }
 
         $pdf = Pdf::loadView('p2h.print', [
             'p2h' => $p2h,
@@ -396,7 +412,15 @@ class P2hController extends Controller
 
     public function export_pdf(Request $request, P2h $p2h)
     {
+        $unit = Unit::find($p2h->unit_id);
         $p2hitem = config('p2hitem');
+        if ($unit->type == 'Light') {
+            $p2hitem = config('p2hitem');
+        } elseif ($unit->type == 'Fuel Truck') {
+            $p2hitem = config('p2hitem-fuel');
+        } else {
+            $p2hitem = config('p2hitem-light');
+        }
 
         $pdf = Pdf::loadView('p2h.print', [
             'p2h' => $p2h,
@@ -425,5 +449,33 @@ class P2hController extends Controller
             ->replace(['/', '\\'], '-')   // ganti slash
             ->toString();
         return $pdf->download("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * Ngambil item p2h nya berdasarkan tipe unit
+     */
+    public function get_p2h_item(Request $request)
+    {
+        try {
+            $unit = Unit::find($request->unit_id);
+            if ($unit->type == 'Light') {
+                $item = config('p2hitem');
+            } elseif ($unit->type == 'Fuel Truck') {
+                $item = config('p2hitem-fuel');
+            } else {
+                $item = config('p2hitem-light');
+            }
+            $view = 'p2h.table-item';
+            $html = view($view, compact('item'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

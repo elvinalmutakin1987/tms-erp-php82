@@ -365,6 +365,11 @@
                                                 <td class="val">{{ $p2h->unit->vehicle_no ?? '-' }}</td>
                                             </tr>
                                             <tr>
+                                                <td class="label">Type</td>
+                                                <td class="sep">:</td>
+                                                <td class="val">{{ $p2h->unit->type ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
                                                 <td class="label">Driver</td>
                                                 <td class="sep">:</td>
                                                 <td class="val">{{ $p2h->driver ?? '-' }}</td>

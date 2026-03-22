@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('mechanical_inspection_details', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('mechanical_inspection_id')->nullable();
-            $table->string('inspection_group')->nullable();
-            $table->string('inspection_item')->nullable();
+            $table->text('inspection_group')->nullable();
+            $table->text('inspection_item')->nullable();
             $table->string('check', 20)->nullable();
             $table->text('remarks')->nullable();
             $table->string('inspected_by', 20)->nullable();

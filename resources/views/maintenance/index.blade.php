@@ -175,18 +175,27 @@
                         name: 'start',
                         orderable: true,
                         searchable: true,
+                        render: function(data, type, row) {
+                            return time_format(data);
+                        }
                     },
                     {
                         data: 'finish',
                         name: 'finish',
                         orderable: true,
                         searchable: true,
+                        render: function(data, type, row) {
+                            return time_format(data);
+                        }
                     },
                     {
                         data: 'work_duration',
                         name: 'work_duration',
                         orderable: true,
                         searchable: true,
+                        render: function(data, type, row) {
+                            return time_format(data);
+                        }
                     },
                     {
                         data: 'status',
@@ -246,9 +255,9 @@
                         $('#_km_hm').val(numbro(response.data.km_hm).format({
                             thousandSeparated: true
                         }));
-                        $("#start").val(response.data.start);
-                        $("#finish").val(response.data.finish);
-                        $("#work_duration").val(response.data.work_duration);
+                        $("#start").val(time_format(response.data.start));
+                        $("#finish").val(time_format(response.data.finish));
+                        $("#work_duration").val(time_format(response.data.work_duration));
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -257,8 +266,8 @@
             });
 
             $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail Inspection');
-                let url = '{{ route('mechanicalinspection.get_detail', ':_id') }}';
+                $('#modal-detail-header').text('Detail Maintenance');
+                let url = '{{ route('maintenance.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -273,6 +282,7 @@
             });
 
             $(document).on('click', '.costButton', function() {
+                maintenanceId = $(this).data('id');
                 $('#modal-cost-header').text('Cost Setting');
                 let url = '{{ route('maintenance.cost', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
@@ -415,6 +425,16 @@
             gen_select2();
         });
 
+        function time_format(data) {
+            if (!data) return '';
+
+            const parts = data.split(':');
+            if (parts.length < 2) return '';
+
+            const [hours, minutes] = parts;
+            return `${hours}:${minutes}`;
+        }
+
         function delete_(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -502,6 +522,169 @@
                 }
             });
         });
+
+        // $('.saveCostButton').on('click', function() {
+        //     if ($(this).val() == 'Done') {
+        //         Swal.fire({
+        //             title: 'Are you sure?',
+        //             icon: 'warning',
+        //             showCancelButton: true,
+        //             confirmButtonColor: '#5156be',
+        //             cancelButtonColor: '#fd625e',
+        //             confirmButtonText: 'Yes, Delete it!',
+        //             cancelButtonText: 'Cancel'
+        //         }).then((result) => {
+        //             if (result.isConfirmed) {
+        //                 var formData = new FormData($('#formCost').find('form')[0]);
+        //                 var url = '{{ route('maintenance.cost.store') }}';
+        //                 var type = 'POST';
+        //                 formData.append('status', $(this).val());
+        //                 if (maintenanceId != '') {
+        //                     url = '{{ route('maintenance.cost.update', ':_id') }}';
+        //                     url = url.replace(':_id', maintenanceId);
+        //                     formData.append('_method', 'PUT');
+        //                 }
+        //                 $.ajax({
+        //                     url: url,
+        //                     type: type,
+        //                     data: formData,
+        //                     contentType: false,
+        //                     processData: false,
+        //                     success: function(response) {
+        //                         Swal.fire({
+        //                             title: response.title,
+        //                             text: response.message,
+        //                             icon: "success",
+        //                             timer: 5000,
+        //                             didOpen: () => {},
+        //                             willClose: () => {
+        //                                 $('#table-data').DataTable().ajax.reload(
+        //                                     null, false);
+        //                                 $('#formCost form')[0].reset();
+        //                                 maintenanceId = '';
+        //                                 $('#formCost').modal('hide');
+        //                             }
+        //                         });
+        //                     },
+        //                     error: function(xhr, status, error) {
+        //                         var errorMessage = xhr.responseJSON ? xhr.responseJSON.message :
+        //                             error;
+        //                         Swal.fire({
+        //                             icon: "error",
+        //                             title: "Oops...",
+        //                             text: errorMessage,
+        //                         });
+        //                     }
+        //                 });
+        //             }
+        //         });
+        //     } else {
+        //         var formData = new FormData($('#formCost').find('form')[0]);
+        //         var url = '{{ route('maintenance.cost.store') }}';
+        //         var type = 'POST';
+        //         formData.append('status', $(this).val());
+        //         if (maintenanceId != '') {
+        //             url = '{{ route('maintenance.cost.update', ':_id') }}';
+        //             url = url.replace(':_id', maintenanceId);
+        //             formData.append('_method', 'PUT');
+        //         }
+        //         $.ajax({
+        //             url: url,
+        //             type: type,
+        //             data: formData,
+        //             contentType: false,
+        //             processData: false,
+        //             success: function(response) {
+        //                 Swal.fire({
+        //                     title: response.title,
+        //                     text: response.message,
+        //                     icon: "success",
+        //                     timer: 5000,
+        //                     didOpen: () => {},
+        //                     willClose: () => {
+        //                         $('#table-data').DataTable().ajax.reload(null, false);
+        //                         $('#formCost form')[0].reset();
+        //                         maintenanceId = '';
+        //                         $('#formCost').modal('hide');
+        //                     }
+        //                 });
+        //             },
+        //             error: function(xhr, status, error) {
+        //                 var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+        //                 Swal.fire({
+        //                     icon: "error",
+        //                     title: "Oops...",
+        //                     text: errorMessage,
+        //                 });
+        //             }
+        //         });
+        //     }
+        // });
+
+        $(document).on('click', '.saveCostButton', function() {
+            const status = $(this).val();
+
+            if (status === 'Done') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, Done it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitCost(status);
+                    }
+                });
+            } else {
+                submitCost(status);
+            }
+        });
+
+        function submitCost(status) {
+            const formData = new FormData($('#formCost').find('form')[0]);
+            let url = '{{ route('maintenance.cost.store') }}';
+
+            formData.append('status', status);
+
+            if (maintenanceId !== '') {
+                url = '{{ route('maintenance.cost.update', ':_id') }}'.replace(':_id', maintenanceId);
+                formData.append('_method', 'PUT');
+            }
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: response.title,
+                        text: response.message,
+                        icon: 'success',
+                        timer: 5000,
+                        willClose: () => {
+                            $('#table-data').DataTable().ajax.reload(null, false);
+                            $('#formCost form')[0].reset();
+                            maintenanceId = '';
+                            $('#formCost').modal('hide');
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errorMessage,
+                    });
+                }
+            });
+        }
 
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
@@ -719,7 +902,6 @@
 
         const $km_hm = $('#_km_hm');
         const $hour_meter = $('#_hour_meter');
-
         let isFmt = false;
         let userDecSep = null;
 

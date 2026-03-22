@@ -45,19 +45,33 @@
                  <div class="menu-title">Equipment</div>
              </a>
              <ul>
-                 <li> <a href="{{ route('p2h.index') }}"><i class='bx bx-radio-circle'></i>P2H</a>
+                 <li>
+                     <a href="{{ route('dailyreport.index') }}"><i class='bx bx-radio-circle'></i>Daily Report</a>
                  </li>
-                 <li> <a href="{{ route('mechanicalinspection.index') }}"><i class='bx bx-radio-circle'></i>Mechanical
-                         Inspection</a>
+                 @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h'))
+                     <li>
+                         <a href="{{ route('p2h.index') }}"><i class='bx bx-radio-circle'></i>P2H</a>
+                     </li>
+                 @endif
+                 @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('mechanical_inspection'))
+                     <li>
+                         <a href="{{ route('mechanicalinspection.index') }}"><i
+                                 class='bx bx-radio-circle'></i>Mechanical
+                             Inspection</a>
+                     </li>
+                 @endif
+                 @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance'))
+                     <li>
+                         <a href="{{ route('maintenance.index') }}"><i class='bx bx-radio-circle'></i>Repair &
+                             Maintenance</a>
+                     </li>
+                 @endif
+
+                 <li>
+                     <a href="app-to-do.html"><i class='bx bx-radio-circle'></i>Purchase Requisition</a>
                  </li>
-                 <li> <a href="{{ route('maintenance.index') }}"><i class='bx bx-radio-circle'></i>Repair &
-                         Maintenance</a>
-                 </li>
-                 <li> <a href="app-file-manager.html"><i class='bx bx-radio-circle'></i>Daily Report</a>
-                 </li>
-                 <li> <a href="app-to-do.html"><i class='bx bx-radio-circle'></i>Purchase Requisition</a>
-                 </li>
-                 <li> <a href="app-invoice.html"><i class='bx bx-radio-circle'></i>Proforma Invoice</a>
+                 <li>
+                     <a href="app-invoice.html"><i class='bx bx-radio-circle'></i>Proforma Invoice</a>
                  </li>
              </ul>
          </li>

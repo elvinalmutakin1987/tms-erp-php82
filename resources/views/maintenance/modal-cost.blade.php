@@ -9,9 +9,9 @@
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-1">
-                    <button type="button" class="btn btn-secondary" id="saveButton1" name="status"
+                    <button type="button" class="btn btn-secondary saveCostButton" id="saveCostButton1" name="status"
                         value="Open">Draft</button>
-                    <button type="button" class="btn btn-success" id="saveButton2" name="status"
+                    <button type="button" class="btn btn-success saveCostButton" id="saveCostButton2" name="status"
                         value="Done">Save</button>
                     <button type="button" class="btn btn-light" id="cancelCostButton">Cancel</button>
                 </div>

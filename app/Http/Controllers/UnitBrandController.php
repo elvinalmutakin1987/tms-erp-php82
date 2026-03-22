@@ -67,7 +67,7 @@ class UnitBrandController extends Controller
                 'name' => 'required|unique:unit_brands,name',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Unit_brand::update($data);
+            Unit_brand::create($data);
             DB::commit();
             return response()->json([
                 'success' => true,

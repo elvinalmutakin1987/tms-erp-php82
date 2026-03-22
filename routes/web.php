@@ -15,6 +15,7 @@ use App\Http\Controllers\UnitBrandController;
 use App\Http\Controllers\UnitModelController;
 use App\Http\Controllers\ClientVendorController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MaintenanceItemController;
 use App\Http\Controllers\MechanicalInspectionController;
@@ -213,6 +214,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|p2h')
         ->name('p2h.get_unit_all');
 
+    Route::get('p2h-get-p2h-item', [P2hController::class, 'get_p2h_item'])
+        ->middleware('role:superadmin|p2h')
+        ->name('p2h.get_p2h_item');
+
     /**
      * buat load table inputan p2h waktu mau tambah data
      */
@@ -247,7 +252,7 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('mechanicalinspection', MechanicalInspectionController::class)
         ->parameters(['mechanicalinspection' => 'mechanical_inspection'])
-        ->middleware('role:superadmin')
+        ->middleware('role:superadmin|mechanical_inspection')
         ->names('mechanicalinspection');
 
     Route::get('mechanicalinspection-get-unit-all', [MechanicalInspectionController::class, 'get_unit_all'])
@@ -295,7 +300,7 @@ Route::middleware(['auth'])->group(function () {
      * Routenya mechanical 
      */
     Route::resource('maintenance', MaintenanceController::class)
-        ->middleware('role:superadmin')
+        ->middleware('role:superadmin|maintenance')
         ->names('maintenance');
 
     Route::get('maintenance-get-unit-all', [MaintenanceController::class, 'get_unit_all'])
@@ -349,4 +354,43 @@ Route::middleware(['auth'])->group(function () {
     Route::get('maintenance/cost/{maintenance}', [MaintenanceController::class, 'cost'])
         ->middleware('role:superadmin|maintenance')
         ->name('maintenance.cost');
+
+    Route::post('maintenance/cost', [MaintenanceController::class, 'cost_store'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.cost.store');
+
+    Route::put('maintenance/cost/{maintenance}', [MaintenanceController::class, 'cost_update'])
+        ->middleware('role:superadmin|maintenance')
+        ->name('maintenance.cost.update');
+
+    /**
+     * Routenya daily report 
+     */
+    Route::resource('dailyreport', DailyReportController::class)
+        ->middleware('role:superadmin|daily_report')
+        ->names('dailyreport');
+
+    Route::get('dailyreport-get-unit-all', [DailyReportController::class, 'get_unit_all'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.get_unit_all');
+
+    Route::get('dailyreport-print/{daily_report}', [DailyReportController::class, 'print'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.print');
+
+    Route::get('dailyreport-export-pdf/{daily_report}', [DailyReportController::class, 'export_pdf'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.export_pdf');
+
+    Route::get('dailyreport-load-form-add', [DailyReportController::class, 'get_form_add'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.get_form_add');
+
+    Route::get('dailyreport-load-form-edit/{daily_report}', [DailyReportController::class, 'get_form_edit'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.get_form_edit');
+
+    Route::get('dailyreport-get-detail/{daily_report}', [DailyReportController::class, 'get_detail'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.get_detail');
 });
