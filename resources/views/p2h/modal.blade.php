@@ -22,8 +22,8 @@
                             </select>
                         </div>
                         <div class="col">
-                            <label for="driver" class="form-label">Driver</label>
-                            <input type="text" class="form-control" id="driver" name="driver">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="text" class="form-control datepicker" id="date" name="date">
                         </div>
                         <div class="col">
                             <label for="shift" class="form-label">Shift</label>
@@ -35,8 +35,8 @@
                     </div>
                     <div class="row mb-4">
                         <div class="col">
-                            <label for="date" class="form-label">Date</label>
-                            <input type="text" class="form-control datepicker" id="date" name="date">
+                            <label for="driver" class="form-label">Driver</label>
+                            <input type="text" class="form-control" id="driver" name="driver">
                         </div>
                         <div class="col">
                             <label for="km_start" class="form-label">KM Start</label>

@@ -72,7 +72,7 @@
     </div>
     <!--end page wrapper -->
 
-    @include('dailyreport.modal')
+    @include('daily_report.modal')
 @endsection
 
 @section('js')
@@ -343,14 +343,9 @@
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
 
-            var tbody = $("#tableItem > tbody");
-            tbody.append(`
-                    <tr>
-                        <td colspan="5">
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually">Loading...</span>
-                        </td>
-                    </tr>
+            $("#div-form").html(`
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually">Loading...</span>
                     `);
             setTimeout(function() {
                 const isEdit = reportId != '';
@@ -414,6 +409,48 @@
                     });
             });
         }
+
+        $("#unit_id").on('change', function() {
+            const modalEl = document.getElementById('formModal');
+            const modalBody = modalEl.querySelector('.modal-body');
+            const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+
+            $(this).select2('close');
+            $(this).blur();
+
+            if (document.activeElement) {
+                document.activeElement.blur();
+            }
+
+            $("#div-form").html(`
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually">Loading...</span>
+                    `);
+            let url = '{{ route('dailyreport.get_form_add') }}';
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: {
+                    unit_id: $(this).val()
+                },
+                success: function(response) {
+                    $("#div-form").html(response.html);
+
+                    requestAnimationFrame(function() {
+                        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modalInstance.handleUpdate();
+
+                        if (modalBody) {
+                            modalBody.scrollTop = lastScrollTop;
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error:', error);
+                    $tbody.empty();
+                }
+            });
+        });
     </script>
     <!--app JS-->
 @endsection

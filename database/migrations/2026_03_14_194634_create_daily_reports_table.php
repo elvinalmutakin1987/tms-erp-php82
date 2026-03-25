@@ -29,6 +29,7 @@ return new class extends Migration
             $table->timestamp('down_time')->nullable();
             $table->timestamp('ready_for_use')->nullable();
             $table->decimal('refule_hm', 16, 2)->nullable();
+            $table->decimal('refule_km', 16, 2)->nullable();
             $table->decimal('refule_liter', 16, 2)->nullable();
             $table->string('refule_type', 20)->nullable();
             $table->decimal('supply_fuel', 16, 2)->nullable();

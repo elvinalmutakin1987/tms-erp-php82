@@ -85,7 +85,7 @@ class DailyReportController extends Controller
             'sub-module' => 'Daily Report',
             'route-sub-module' => 'dailyreport.index',
         ];
-        return view('dailyreport.index', compact('breadcrum'));
+        return view('daily_report.index', compact('breadcrum'));
     }
 
     /**
@@ -115,7 +115,7 @@ class DailyReportController extends Controller
                     'date' => 'required',
                     'km_start' => 'required',
                     'km_finish' => 'required',
-                    'km_total' => 'required'
+                    'km_total' => 'required',
                 ]);
             }
 
@@ -216,18 +216,18 @@ class DailyReportController extends Controller
             $presenter = new DatePrefixPresenter('Y/m', '/');
             $unit = Unit::find($request->unit_id);
             $view = 'daily_report.form';
-            if ($unit->type == 'LCT') {
+            if ($unit && $unit->type == 'LCT') {
                 $view = 'daily_report.form-lct';
             }
             $report_prev_no = Generator::make()
-                ->type('report')
+                ->type('rep')
                 ->formatter($presenter)
                 ->preview();
-            $html = view($view, compact('p2hitem'))->render();
+            $html = view($view)->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
-                'p2h_prev_no' => $p2h_prev_no
+                'report_prev_no' => $report_prev_no
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -243,7 +243,7 @@ class DailyReportController extends Controller
     public function get_form_edit(Request $request, Daily_report $daily_report)
     {
         try {
-            $view = 'p2h.table-edit';
+            $view = 'daily_report.table-edit';
             $unit = Unit::find($p2h->unit_id);
             $p2hitem = config('p2hitem');
             if ($unit->type == 'Light') {
