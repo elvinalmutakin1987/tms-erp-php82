@@ -94,7 +94,7 @@ return [
     */
 
     'reset_period' => [
-        'default' => ResetPeriod::NEVER->value,
+        // 'default' => ResetPeriod::NEVER->value,
 
         // Per-type reset periods (optional)
         // Uncomment and configure specific types as needed
@@ -103,6 +103,18 @@ return [
         //     'receipt' => ResetPeriod::MONTHLY->value,
         //     'ticket' => ResetPeriod::DAILY->value,
         // ],
+        'types' => [
+            'p2h' => ResetPeriod::YEARLY->value,
+            'inv' => ResetPeriod::YEARLY->value,
+            'po' => ResetPeriod::YEARLY->value,
+            'rep' => ResetPeriod::YEARLY->value,
+            'pop' => ResetPeriod::YEARLY->value,
+            'invp' => ResetPeriod::YEARLY->value,
+            'comm' => ResetPeriod::YEARLY->value,
+            'serv' => ResetPeriod::YEARLY->value,
+            'main' => ResetPeriod::YEARLY->value,
+            'insp' => ResetPeriod::YEARLY->value,
+        ],
     ],
 
     /*

@@ -61,6 +61,16 @@
                 <input type="text" class="form-control" id="helper" name="helper">
             </td>
         </tr>
+        <tr>
+            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">
+                Load
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="load" name="load">
+                <input type="text" class="form-control" id="_load" name="_load">
+            </td>
+        </tr>
         <tr class="table-secondary">
             <th colspan="3" class="align-middle">Refule</th>
         </tr>
@@ -82,7 +92,8 @@
                 Liter
             </td>
             <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="refule_liter" name="refule_liter">
+                <input type="hidden" class="form-control" id="refule_liter" name="refule_liter">
+                <input type="text" class="form-control" id="_refule_liter" name="_refule_liter">
             </td>
         </tr>
         <tr>
@@ -91,7 +102,8 @@
                 KM
             </td>
             <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="refule_km" name="refule_km">
+                <input type="hidden" class="form-control" id="refule_km" name="refule_km">
+                <input type="text" class="form-control" id="_refule_km" name="_refule_km">
             </td>
         </tr>
     </tbody>
@@ -119,7 +131,7 @@
     });
 
     (() => {
-        $('#refule_type').each(function() {
+        $('.select-select').each(function() {
             const $el = $(this);
             $el.select2({
                     theme: "bootstrap-5",
@@ -142,6 +154,9 @@
         const $km_start = $('#_km_start');
         const $km_finish = $('#_km_finish');
         const $km_total = $('#km_total');
+        const $refule_liter = $('#_refule_liter');
+        const $refule_km = $('#_refule_km');
+        const $load = $('#_load');
 
         let isFmt = false;
         let userDecSep = null;
@@ -283,6 +298,30 @@
 
         $km_finish.off('input').on('input', function(e) {
             textInput("km_finish", e);
+        });
+
+        $refule_liter.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $refule_liter.off('input').on('input', function(e) {
+            textInput("refule_liter", e);
+        });
+
+        $refule_km.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $refule_km.off('input').on('input', function(e) {
+            textInput("refule_km", e);
+        });
+
+        $load.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $load.off('input').on('input', function(e) {
+            textInput("load", e);
         });
     })();
 </script>

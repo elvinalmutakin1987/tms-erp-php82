@@ -28,6 +28,8 @@ return new class extends Migration
             $table->decimal('load', 16, 2)->nullable();
             $table->timestamp('down_time')->nullable();
             $table->timestamp('ready_for_use')->nullable();
+            $table->string('item', 30)->nullable();
+            $table->string('uom', 30)->nullable();
             $table->decimal('refule_hm', 16, 2)->nullable();
             $table->decimal('refule_km', 16, 2)->nullable();
             $table->decimal('refule_liter', 16, 2)->nullable();

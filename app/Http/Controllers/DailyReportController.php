@@ -11,6 +11,7 @@ use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
 use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class DailyReportController extends Controller
@@ -118,7 +119,11 @@ class DailyReportController extends Controller
                     'km_total' => 'required',
                 ]);
             }
-
+            $unit = Unit::find($request->unit_id);
+            $type = 'Vehicle';
+            if ($unit->type == 'LCT') {
+                $type = 'LCT';
+            }
             $data = array_merge(
                 $request->except(
                     '_token',
@@ -129,17 +134,17 @@ class DailyReportController extends Controller
                     'complete_loading_at',
                     'depart_at',
                     'duration_trip',
-                    'daily_report_detail_id',
-                    'unit_id',
+                    'lct_unit_id',
                     'item',
                     'uom',
                     'value',
                 ),
-                ['input_method' => 'Web']
+                [
+                    'input_method' => 'Web',
+                    'type' => $type
+                ]
             );
             $daily_report = Daily_report::create($data);
-
-
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -161,7 +166,13 @@ class DailyReportController extends Controller
      */
     public function show(Daily_report $daily_report)
     {
-        //
+        $daily_report_detail = $daily_report->daily_report_detail;
+        return response()->json([
+            'success' => true,
+            'message' => 'Data showed',
+            'data' => $daily_report,
+            'daily_report_detail' => $daily_report_detail
+        ], 200);
     }
 
     /**
@@ -243,21 +254,17 @@ class DailyReportController extends Controller
     public function get_form_edit(Request $request, Daily_report $daily_report)
     {
         try {
-            $view = 'daily_report.table-edit';
-            $unit = Unit::find($p2h->unit_id);
-            $p2hitem = config('p2hitem');
-            if ($unit->type == 'Light') {
-                $p2hitem = config('p2hitem');
-            } elseif ($unit->type == 'Fuel Truck') {
-                $p2hitem = config('p2hitem-fuel');
-            } else {
-                $p2hitem = config('p2hitem-light');
+            $daily_report_detail = $daily_report->daily_report_detail;
+            $view = 'daily_report.form-edit';
+            $unit = Unit::find($daily_report->unit_id);
+            if ($unit && $unit->type == 'LCT') {
+                $view = 'daily_report.form-edit-lct';
             }
-            $html = view($view, compact('p2hitem', 'p2h'))->render();
+            $html = view($view, compact('daily_report', 'daily_report_detail'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
-                'p2h_no' => $p2h->p2h_no
+                'report_no' => $daily_report->report_no
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([

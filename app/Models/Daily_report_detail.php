@@ -18,6 +18,11 @@ class Daily_report_detail extends Model
         return $this->belongsTo(Location::class)->withDefault(['name' => null]);
     }
 
+    public function depart_location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class)->withDefault(['name' => null]);
+    }
+
     public function daily_report(): BelongsTo
     {
         return $this->belongsTo(Daily_report::class)->withDefault(['report_no' => null]);

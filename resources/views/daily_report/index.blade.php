@@ -168,8 +168,8 @@
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Report');
                         $("#date").val(response.data.date);
-                        $("#remarks").val(response.data.remarks);
                         $("#unit_id").val(response.data.unit_id).trigger('change');
+                        $("#shift").val(response.data.shift).trigger('change');
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -351,9 +351,8 @@
                 const isEdit = reportId != '';
                 const url = isEdit ?
                     '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
-                        inspectionId) :
+                        reportId) :
                     '{{ route('dailyreport.get_form_add') }}';
-
                 $.ajax({
                     url: url,
                     type: 'GET',
@@ -374,9 +373,9 @@
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            reprotId = '';
+            reportId = '';
             unitId = '';
-            $('#div-form').empty();
+            $('#div-form').html('');
             $("#unit_id").val('All').trigger('change');
         });
 

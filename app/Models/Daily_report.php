@@ -18,10 +18,10 @@ class Daily_report extends Model implements Auditable
 
     protected static function booted()
     {
-        static::creating(function ($maintenance) {
+        static::creating(function ($daily_report) {
             $presenter = new DatePrefixPresenter('Y/m', '/');
             $daily_report->report_no = running_number()
-                ->type('main')
+                ->type('rep')
                 ->formatter($presenter)
                 ->generate();
         });

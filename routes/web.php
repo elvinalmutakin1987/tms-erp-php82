@@ -367,6 +367,7 @@ Route::middleware(['auth'])->group(function () {
      * Routenya daily report 
      */
     Route::resource('dailyreport', DailyReportController::class)
+        ->parameters(['dailyreport' => 'daily_report'])
         ->middleware('role:superadmin|daily_report')
         ->names('dailyreport');
 

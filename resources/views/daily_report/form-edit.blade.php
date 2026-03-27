@@ -1,7 +1,6 @@
 @php
     use Illuminate\Support\Number;
 @endphp
-
 <table class="table mb-0" id="tableItem">
     <thead class="table-dark">
         <tr>
@@ -21,9 +20,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="km_start" name="km_start"
-                    value="{{ $daily_report->km_start ?? 0 }}">
+                    value="{{ $daily_report->km_start }}">
                 <input type="text" class="form-control" id="_km_start" name="_km_start"
-                    value="{{ $daily_report->km_start ? Number::format($daily_report->km_start) : '' }}">
+                    value="{{ $daily_report->km_start ? Number::format($daily_report->km_start, precision: 0) : '' }}">
             </td>
         </tr>
         <tr>
@@ -32,8 +31,10 @@
                 Finish
             </td>
             <td class="p-1 align-middle">
-                <input type="hidden" class="form-control" id="km_finish" name="km_finish">
-                <input type="text" class="form-control" id="_km_finish" name="_km_finish">
+                <input type="hidden" class="form-control" id="km_finish" name="km_finish"
+                    value="{{ $daily_report->km_finish }}">
+                <input type="text" class="form-control" id="_km_finish" name="_km_finish"
+                    value="{{ $daily_report->km_finish ? Number::format($daily_report->km_finish, precision: 0) : '' }}">
             </td>
         </tr>
         <tr>
@@ -42,8 +43,11 @@
                 Total
             </td>
             <td class="p-1 align-middle">
-                <input type="hidden" class="form-control" id="km_total" name="km_total">
-                <input type="text" class="form-control" id="_km_total" name="_km_total" readonly>
+                <input type="hidden" class="form-control" id="km_total" name="km_total"
+                    value="{{ $daily_report->km_total }}">
+                <input type="text" class="form-control" id="_km_total" name="_km_total"
+                    value="{{ $daily_report->km_total ? Number::format($daily_report->km_total, precision: 0) : '' }}"
+                    readonly>
             </td>
         </tr>
         <tr class="table-secondary">
@@ -55,7 +59,8 @@
                 Operator
             </td>
             <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="operator" name="operator">
+                <input type="text" class="form-control" id="operator" name="operator"
+                    value="{{ $daily_report->operator }}">
             </td>
         </tr>
         <tr>
@@ -64,40 +69,61 @@
                 Helper
             </td>
             <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="helper" name="helper">
+                <input type="text" class="form-control" id="helper" name="helper"
+                    value="{{ $daily_report->helper }}">
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">
+                Load
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="load" name="load"
+                    value="{{ $daily_report->load }}">
+                <input type="text" class="form-control" id="_load" name="_load"
+                    value="{{ $daily_report->load ? Number::format($daily_report->load, precision: 0) : '' }}">
             </td>
         </tr>
         <tr class="table-secondary">
             <th colspan="3" class="align-middle">Refule</th>
         </tr>
         <tr>
-            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">7</td>
             <td class="p-1 align-middle">
                 From
             </td>
             <td class="p-1 align-middle">
                 <select class="form-select select-select" id="refule_type" name="refule_type">
-                    <option value="KPC">KPC</option>
-                    <option value="POM Bensin">POM Bensin</option>
+                    <option value="KPC" {{ $daily_report->refule_type == 'KPC' ? 'selected' : '' }}>KPC</option>
+                    <option value="POM Bensin" {{ $daily_report->refule_type == 'POM Bensin' ? 'selected' : '' }}>POM
+                        Bensin
+                    </option>
                 </select>
-            </td>
-        </tr>
-        <tr>
-            <td class="p-1 align-middle">7</td>
-            <td class="p-1 align-middle">
-                Liter
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="refule_liter" name="refule_liter">
             </td>
         </tr>
         <tr>
             <td class="p-1 align-middle">8</td>
             <td class="p-1 align-middle">
+                Liter
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_liter" name="refule_liter"
+                    value="{{ $daily_report->refule_liter }}">
+                <input type="text" class="form-control" id="_refule_liter" name="_refule_liter"
+                    value="{{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}">
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">9</td>
+            <td class="p-1 align-middle">
                 KM
             </td>
             <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="refule_km" name="refule_km">
+                <input type="hidden" class="form-control" id="refule_km" name="refule_km"
+                    value="{{ $daily_report->refule_km }}">
+                <input type="text" class="form-control" id="_refule_km" name="_refule_km"
+                    value="{{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}">
             </td>
         </tr>
     </tbody>
@@ -148,6 +174,9 @@
         const $km_start = $('#_km_start');
         const $km_finish = $('#_km_finish');
         const $km_total = $('#km_total');
+        const $refule_liter = $('#_refule_liter');
+        const $refule_km = $('#_refule_km');
+        const $load = $('#_load');
 
         let isFmt = false;
         let userDecSep = null;
@@ -289,6 +318,30 @@
 
         $km_finish.off('input').on('input', function(e) {
             textInput("km_finish", e);
+        });
+
+        $refule_liter.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $refule_liter.off('input').on('input', function(e) {
+            textInput("refule_liter", e);
+        });
+
+        $refule_km.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $refule_km.off('input').on('input', function(e) {
+            textInput("refule_km", e);
+        });
+
+        $load.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $load.off('input').on('input', function(e) {
+            textInput("load", e);
         });
     })();
 </script>
