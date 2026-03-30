@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Daily_report;
+use App\Models\Location;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -265,6 +266,25 @@ class DailyReportController extends Controller
                 'success' => true,
                 'html' => $html,
                 'report_no' => $daily_report->report_no
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil data project
+     */
+    public function get_project_location(Request $request)
+    {
+        try {
+            $location = Location::where('loc_type', 'Project Location')->get();
+            return response()->json([
+                'success' => true,
+                'data' => $location
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([

@@ -46,7 +46,7 @@ return new class extends Migration
             //Shipping Information
             //-----------------------------------------------------------
             $table->unsignedBigInteger('location_id')->nullable();
-            $table->unsignedBigInteger('depart_location_id')->nullable();
+            $table->unsignedBigInteger('arrival_location_id')->nullable();
             $table->time('loading_at')->nullable();
             $table->time('complete_loading_at')->nullable();
             $table->time('depart_at')->nullable();
@@ -62,7 +62,7 @@ return new class extends Migration
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
             $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('depart_location_id')->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('arrival_location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }
 

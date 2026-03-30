@@ -1,76 +1,142 @@
-{{-- <table class="table mb-0" id="tableItem">
-    <thead class="table-dark">
-        <tr>
-            <th scope="col" colspan="2">Shipping Information</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr class="table-secondary">
-            <th class="align-middle" colspan="2">Trip</th>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <table class="mb-0" width="100%">
-                    <tr>
-                        <td class="p-1 align-middle w-25">From</td>
-                        <td class="p-1 align-middle w-25">
-                            <select class="form-select select-select" id="_location_id" name="_location_id">
-                            </select>
-                        </td>
-                        <td class="p-1 align-middle w-25">To</td>
-                        <td class="p-1 align-middle w-25">
-                            <select class="form-select select-select" id="_depart_location_id"
-                                name="_depart_location_id">
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="p-1 align-middle">Loading At</td>
-                        <td class="p-1 align-middle">
-                            <input type="text" class="form-control timepicker" id="_loading_at" name="_loading_at">
-                        </td>
-                        <td class="p-1 align-middle">Arrived At</td>
-                        <td class="p-1 align-middle">
-                            <input type="text" class="form-control timepicker" id="_complete_loading_at"
-                                name="_complete_loading_at">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="p-1 align-middle">Complete Loading At</td>
-                        <td class="p-1 align-middle">
-                            <input type="text" class="form-control timepicker" id="_complete_loading_at"
-                                name="_complete_loading_at">
-                        </td>
-                        <td class="p-1 align-middle">Berthing At</td>
-                        <td class="p-1 align-middle">
-                            <input type="text" class="form-control timepicker" id="_complete_loading_at"
-                                name="_complete_loading_at">
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="p-1 align-middle">Depart At</td>
-                        <td class="p-1 align-middle">
-                            <input type="text" class="form-control timepicker" id="_depart_at" name="_depart_at">
-                        </td>
-                        <td class="p-1 align-middle"></td>
-                        <td class="p-1 align-middle">
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-        <tr class="table-secondary">
-            <th class="align-middle" colspan="2">Unit</th>
-        </tr>
-    </tbody>
+<table class="table mb-0" id="tableItem">
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
+            <th scope="col">Item</th>
+            <th scope="col" class="text-center">Value</th>
         </tr>
     </thead>
     <tbody id="tbody">
+        <tr class="table-secondary">
+            <th colspan="3" class="align-middle">Departure</th>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">1</td>
+            <td class="p-1 align-middle">
+                Location
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="location_id" name="location_id">
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">2</td>
+            <td class="p-1 align-middle">
+                Loading At
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control timepicker" id="loading_at" name="loading_at">
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">3</td>
+            <td class="p-1 align-middle">
+                Complete Loading At
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control timepicker" id="complete_loading_at"
+                    name="complete_loading_at">
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">4</td>
+            <td class="p-1 align-middle">
+                Depart At
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control timepicker" id="depart_at" name="depart_at">
+            </td>
+        </tr>
+        <tr class="table-secondary">
+            <th colspan="3" class="align-middle">Arrival</th>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">5</td>
+            <td class="p-1 align-middle">
+                Location
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="arrival_location_id" name="arrival_location_id">
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">
+                Arrived At
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control timepicker" id="arrived_at" name="arrived_at">
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">7</td>
+            <td class="p-1 align-middle">
+                Berthing At
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control timepicker" id="berthing_at" name="berthing_at">
+            </td>
+        </tr>
     </tbody>
-</table> --}}
+</table>
+<table class="table mb-0" id="tableUnit">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col" style="width: 2%">#</th>
+            <th scope="col" style="width: 20%">Unit</th>
+            <th scope="col" style="width: 25%">Item</th>
+            <th scope="col" style="width: 11%">Uom 1</th>
+            <th scope="col" style="width: 11%">Value 1</th>
+            <th scope="col" style="width: 11%">Uom 2</th>
+            <th scope="col" style="width: 11%">Value 2</th>
+            <th scope="col" style="width: 2%">Action</th>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+        <tr class="fixed-row">
+            <td class="p-1 align-middle" style="width: 2%">
+            </td>
+            <td class="p-1 align-middle" style="width: 20%">
+                <select class="form-select select-select" id="_unit_id" name="_unit_id">
+
+                </select>
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="_item" name="_item">
+
+                </select>
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="_uom_1" name="_uom_1">
+                    <option value=""></option>
+                </select>
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="_uom_1" name="_uom_1">
+                <input type="text" class="form-control" id="_uom_1_" name="_uom_1_">
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="_uom_2" name="_uom_2">
+                    <option value=""></option>
+                </select>
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="_uom_2" name="_uom_2">
+                <input type="text" class="form-control" id="_uom_2_" name="_uom_2_">
+            </td>
+            <td class="p-1 align-middle" style="width:2%">
+                <div class="row row-cols-auto g-3">
+                    <div class="col">
+                        <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"
+                            id="addUnitButton"></button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
 <script>
     $('#refule_type').each(function() {
@@ -94,6 +160,55 @@
     });
 
     (() => {
+        $.ajax({
+            url: '{{ route('dailyreport.get_project_location') }}',
+            type: 'GET',
+            success: function(response) {
+                $('#arrival_location_id').empty();
+                $('#location_id').empty();
+                $.each(response.data, function(index, location) {
+                    $('#arrival_location_id').append('<option value="' + location.id +
+                        '">' +
+                        location.name +
+                        '</option>');
+
+                    $('#location_id').append('<option value="' + location.id +
+                        '">' +
+                        location.name +
+                        '</option>');
+                });
+
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: error,
+                });
+            }
+        });
+
+        $.ajax({
+            url: '{{ route('dailyreport.get_unit_all') }}',
+            type: 'GET',
+            success: function(response) {
+                $('#_unit_id').empty();
+                $.each(response.data, function(index, unit) {
+                    $('#_unit_id').append('<option value="' + unit.id +
+                        '">' +
+                        unit.vehicle_no +
+                        '</option>');
+                });
+            },
+            error: function(xhr, status, error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: error,
+                });
+            }
+        });
+
         $(".timepicker").flatpickr({
             enableTime: true,
             noCalendar: true,

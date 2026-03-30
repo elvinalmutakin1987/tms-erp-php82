@@ -394,4 +394,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dailyreport-get-detail/{daily_report}', [DailyReportController::class, 'get_detail'])
         ->middleware('role:superadmin|daily_report')
         ->name('dailyreport.get_detail');
+
+    Route::get('dailyreport-get-project-location', [DailyReportController::class, 'get_project_location'])
+        ->middleware('role:superadmin|daily_report')
+        ->name('dailyreport.get_project_location');
 });
