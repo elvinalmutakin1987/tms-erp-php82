@@ -13,23 +13,13 @@ class Daily_report_detail extends Model
 
     protected $guarded = [];
 
-    public function location(): BelongsTo
-    {
-        return $this->belongsTo(Location::class)->withDefault(['name' => null]);
-    }
-
-    public function depart_location(): BelongsTo
-    {
-        return $this->belongsTo(Location::class)->withDefault(['name' => null]);
-    }
-
     public function daily_report(): BelongsTo
     {
         return $this->belongsTo(Daily_report::class)->withDefault(['report_no' => null]);
     }
 
-    public function daily_report_unit(): HasMany
+    public function unit(): BelongsTo
     {
-        return $this->hasMany(Daily_report_unit::class);
+        return $this->belongsTo(Unit::class)->withDefault(['vehicle_no' => null]);
     }
 }

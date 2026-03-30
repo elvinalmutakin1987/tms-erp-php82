@@ -42,6 +42,17 @@ return new class extends Migration
             $table->text('remarks')->nullable();
             $table->time('duration_trip')->nullable();
             $table->string('input_method', 20)->nullable();
+            //-----------------------------------------------------------
+            //Shipping Information
+            //-----------------------------------------------------------
+            $table->unsignedBigInteger('location_id')->nullable();
+            $table->unsignedBigInteger('depart_location_id')->nullable();
+            $table->time('loading_at')->nullable();
+            $table->time('complete_loading_at')->nullable();
+            $table->time('depart_at')->nullable();
+            $table->time('arrived_at')->nullable();
+            $table->time('berthing_at')->nullable();
+            //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Open, Close
             $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
@@ -50,6 +61,8 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
             $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
+            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('depart_location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }
 

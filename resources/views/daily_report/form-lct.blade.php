@@ -1,51 +1,76 @@
-<table class="table mb-0" id="tableItem">
+{{-- <table class="table mb-0" id="tableItem">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col" colspan="2">Shipping Information</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="table-secondary">
+            <th class="align-middle" colspan="2">Trip</th>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <table class="mb-0" width="100%">
+                    <tr>
+                        <td class="p-1 align-middle w-25">From</td>
+                        <td class="p-1 align-middle w-25">
+                            <select class="form-select select-select" id="_location_id" name="_location_id">
+                            </select>
+                        </td>
+                        <td class="p-1 align-middle w-25">To</td>
+                        <td class="p-1 align-middle w-25">
+                            <select class="form-select select-select" id="_depart_location_id"
+                                name="_depart_location_id">
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-1 align-middle">Loading At</td>
+                        <td class="p-1 align-middle">
+                            <input type="text" class="form-control timepicker" id="_loading_at" name="_loading_at">
+                        </td>
+                        <td class="p-1 align-middle">Arrived At</td>
+                        <td class="p-1 align-middle">
+                            <input type="text" class="form-control timepicker" id="_complete_loading_at"
+                                name="_complete_loading_at">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-1 align-middle">Complete Loading At</td>
+                        <td class="p-1 align-middle">
+                            <input type="text" class="form-control timepicker" id="_complete_loading_at"
+                                name="_complete_loading_at">
+                        </td>
+                        <td class="p-1 align-middle">Berthing At</td>
+                        <td class="p-1 align-middle">
+                            <input type="text" class="form-control timepicker" id="_complete_loading_at"
+                                name="_complete_loading_at">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-1 align-middle">Depart At</td>
+                        <td class="p-1 align-middle">
+                            <input type="text" class="form-control timepicker" id="_depart_at" name="_depart_at">
+                        </td>
+                        <td class="p-1 align-middle"></td>
+                        <td class="p-1 align-middle">
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr class="table-secondary">
+            <th class="align-middle" colspan="2">Unit</th>
+        </tr>
+    </tbody>
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
-            <th scope="col">From</th>
-            <th scope="col">Loading</th>
-            <th scope="col">Complete Loading</th>
-            <th scope="col">Depart</th>
-            <th scope="col">To</th>
-            <th scope="col">Arrived</th>
-            <th scope="col">Berthing</th>
         </tr>
     </thead>
     <tbody id="tbody">
-        <tr class="table-secondary">
-            <th colspan="8" class="align-middle">Trip</th>
-        </tr>
-        <tr>
-            <td class="p-1 align-middle">1</td>
-            <td class="p-1 align-middle">
-                <select class="form-select select-select" id="_location_id" name="_location_id">
-                </select>
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control timepicker" id="_loading_at" name="_loading_at">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control timepicker" id="_complete_loading_at"
-                    name="_complete_loading_at">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control timepicker" id="_depart_at" name="_depart_at">
-            </td>
-            <td class="p-1 align-middle">
-                <select class="form-select select-select" id="_depart_location_id" name="_depart_location_id">
-
-                </select>
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control timepicker" id="_arrived_at" name="_arrived_at">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control timepicker" id="_berthing_at" name="_berthing_at">
-            </td>
-        </tr>
-
     </tbody>
-</table>
+</table> --}}
 
 <script>
     $('#refule_type').each(function() {
@@ -69,6 +94,14 @@
     });
 
     (() => {
+        $(".timepicker").flatpickr({
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 1
+        });
+
         $('.select-select').each(function() {
             const $el = $(this);
             $el.select2({

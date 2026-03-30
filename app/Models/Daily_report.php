@@ -36,4 +36,14 @@ class Daily_report extends Model implements Auditable
     {
         return $this->belongsTo(Unit::class)->withDefault(['vehicle_no' => null]);
     }
+
+    public function location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class)->withDefault(['name' => null]);
+    }
+
+    public function depart_location(): BelongsTo
+    {
+        return $this->belongsTo(Location::class)->withDefault(['name' => null]);
+    }
 }
