@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Mechanical_inspection extends Model
+class Mechanical_inspection extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
     protected $guarded = [];

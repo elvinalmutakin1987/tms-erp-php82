@@ -14,6 +14,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class DailyReportController extends Controller
 {
@@ -77,7 +78,8 @@ class DailyReportController extends Controller
                     if ($item->type != 'LCT') {
                         return $item->km_total;
                     }
-                    return $item->duration_trip;
+                    $totalDuration = addTime($item->duration_trip_1, $item->duration_trip_2);
+                    return $totalDuration;
                 })
                 ->make();
         }
@@ -105,12 +107,25 @@ class DailyReportController extends Controller
     {
         DB::beginTransaction();
         try {
-            if ($request->type == 'LCT') {
+            $unit = Unit::find($request->unit_id);
+            $type = 'Vehicle';
+            $duration_trip_1 = '00:00';
+            $duration_trip_2 = '00:00';
+            if ($unit && $unit->type == 'LCT') {
+                $type = 'LCT';
+            }
+            if ($type == 'LCT') {
                 $request->validate([
                     'unit_id' => ['required', 'not_in:All'],
                     'date' => 'required',
-                    'duration_trip' => 'required'
                 ]);
+                $berthing_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_berthing_at);
+                $depart_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_departed_at);
+                $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
+
+                $berthing_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_berthing_at);
+                $depart_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_departed_at);
+                $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
             } else {
                 $request->validate([
                     'unit_id' => ['required', 'not_in:All'],
@@ -120,32 +135,47 @@ class DailyReportController extends Controller
                     'km_total' => 'required',
                 ]);
             }
-            $unit = Unit::find($request->unit_id);
-            $type = 'Vehicle';
-            if ($unit->type == 'LCT') {
-                $type = 'LCT';
-            }
             $data = array_merge(
                 $request->except(
                     '_token',
                     '_method',
-                    'daily_report_id',
-                    'location_id',
-                    'loading_at',
-                    'complete_loading_at',
-                    'depart_at',
-                    'duration_trip',
-                    'lct_unit_id',
+                    'detail_unit_id',
+                    'unit_name',
                     'item',
-                    'uom',
-                    'value',
+                    'uom_1',
+                    'value_1',
+                    'value_1__',
+                    'uom_2',
+                    'value_2',
+                    'value_2__'
                 ),
                 [
                     'input_method' => 'Web',
-                    'type' => $type
+                    'type' => $type,
+                    'duration_trip_1' => $duration_trip_1,
+                    'duration_trip_2' => $duration_trip_2
                 ]
             );
             $daily_report = Daily_report::create($data);
+            if ($request->detail_unit_id) {
+                foreach ($request->detail_unit_id as $key => $item) {
+                    $daily_report->daily_report_detail()->updateOrCreate(
+                        [
+                            'unit_id' => $item,
+                            'item' => $request->item[$key]
+                        ],
+                        [
+                            'unit_id' => $request->detail_unit_id[$key],
+                            'daily_report_id' => $daily_report->id,
+                            'item' => $request->item[$key],
+                            'uom_1' => $request->uom_1[$key],
+                            'value_1' => $request->value_1[$key],
+                            'uom_2' => $request->uom_2[$key],
+                            'value_2' => $request->value_2[$key]
+                        ]
+                    );
+                }
+            }
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -189,7 +219,91 @@ class DailyReportController extends Controller
      */
     public function update(Request $request, Daily_report $daily_report)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $unit = Unit::find($request->unit_id);
+            $type = 'Vehicle';
+            $duration_trip_1 = '00:00';
+            $duration_trip_2 = '00:00';
+            if ($unit && $unit->type == 'LCT') {
+                $type = 'LCT';
+            }
+            if ($type == 'LCT') {
+                $request->validate([
+                    'unit_id' => ['required', 'not_in:All'],
+                    'date' => 'required',
+                ]);
+                $berthing_trip_1 = $request->trip_1_berthing_at;
+                $depart_trip_1 = $request->trip_1_departed_at;
+                $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
+
+                $berthing_trip_2 = $request->trip_2_berthing_at;
+                $depart_trip_2 = $request->trip_2_departed_at;
+                $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
+            } else {
+                $request->validate([
+                    'unit_id' => ['required', 'not_in:All'],
+                    'date' => 'required',
+                    'km_start' => 'required',
+                    'km_finish' => 'required',
+                    'km_total' => 'required',
+                ]);
+            }
+            $data = array_merge(
+                $request->except(
+                    '_token',
+                    '_method',
+                    'detail_unit_id',
+                    'unit_name',
+                    'item',
+                    'uom_1',
+                    'value_1',
+                    'value_1__',
+                    'uom_2',
+                    'value_2',
+                    'value_2__'
+                ),
+                [
+                    'input_method' => 'Web',
+                    'type' => $type,
+                    'duration_trip_1' => $duration_trip_1,
+                    'duration_trip_2' => $duration_trip_2
+                ]
+            );
+            $daily_report->lockForUpdate($data);
+            if ($request->detail_unit_id) {
+                foreach ($request->detail_unit_id as $key => $item) {
+                    $daily_report->daily_report_detail()->updateOrCreate(
+                        [
+                            'unit_id' => $item,
+                            'item' => $request->item[$key]
+                        ],
+                        [
+                            'unit_id' => $request->detail_unit_id[$key],
+                            'daily_report_id' => $daily_report->id,
+                            'item' => $request->item[$key],
+                            'uom_1' => $request->uom_1[$key],
+                            'value_1' => $request->value_1[$key],
+                            'uom_2' => $request->uom_2[$key],
+                            'value_2' => $request->value_2[$key]
+                        ]
+                    );
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -197,7 +311,23 @@ class DailyReportController extends Controller
      */
     public function destroy(Daily_report $daily_report)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $daily_report->daily_report_detail()->delete();
+            $daily_report->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -222,7 +352,7 @@ class DailyReportController extends Controller
     /**
      * Ngambil form tambah
      */
-    public function get_form_add(Request $request, Daily_report $daily_report)
+    public function get_form_add(Request $request)
     {
         try {
             $presenter = new DatePrefixPresenter('Y/m', '/');
@@ -259,7 +389,7 @@ class DailyReportController extends Controller
             $view = 'daily_report.form-edit';
             $unit = Unit::find($daily_report->unit_id);
             if ($unit && $unit->type == 'LCT') {
-                $view = 'daily_report.form-edit-lct';
+                $view = 'daily_report.form-lct-edit';
             }
             $html = view($view, compact('daily_report', 'daily_report_detail'))->render();
             return response()->json([
@@ -292,5 +422,91 @@ class DailyReportController extends Controller
                 'message' => $th->getMessage()
             ], 400);
         }
+    }
+
+    /**
+     * ngambil detail daily report
+     */
+    public function get_detail(Request $request, Daily_report $daily_report)
+    {
+        try {
+            $daily_report_detail = $daily_report->daily_report_detail;
+            $view = 'daily_report.detail';
+            return response()->view($view, compact('daily_report', 'daily_report_detail'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Daily_report $daily_report)
+    {
+        $pdf = Pdf::loadView('daily_report.print', [
+            'daily_report' => $daily_report,
+            'daily_report_detail' => $daily_report->daily_report_detail
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        $safeFilename = Str::of($daily_report->report_no)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->stream("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Daily_report $daily_report)
+    {
+        $pdf = Pdf::loadView('daily_report.print', [
+            'daily_report' => $daily_report,
+            'daily_report_detail' => $daily_report->daily_report_detail
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        $safeFilename = Str::of($daily_report->report_no)
+            ->replace(['/', '\\'], '-')   // ganti slash
+            ->toString();
+        return $pdf->download("report-{$safeFilename}.pdf");
     }
 }

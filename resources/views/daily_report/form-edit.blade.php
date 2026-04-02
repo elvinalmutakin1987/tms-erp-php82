@@ -89,7 +89,7 @@
             <th colspan="3" class="align-middle">Refule</th>
         </tr>
         <tr>
-            <td class="p-1 align-middle">7</td>
+            <td class="p-1 align-middle">6</td>
             <td class="p-1 align-middle">
                 From
             </td>
@@ -103,7 +103,7 @@
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle">8</td>
+            <td class="p-1 align-middle">7</td>
             <td class="p-1 align-middle">
                 Liter
             </td>
@@ -115,7 +115,7 @@
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle">9</td>
+            <td class="p-1 align-middle">8</td>
             <td class="p-1 align-middle">
                 KM
             </td>
@@ -123,7 +123,7 @@
                 <input type="hidden" class="form-control" id="refule_km" name="refule_km"
                     value="{{ $daily_report->refule_km }}">
                 <input type="text" class="form-control" id="_refule_km" name="_refule_km"
-                    value="{{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}">
+                    value="{{ $daily_report->refule_km ? Number::format($daily_report, precision: 0) : '' }}">
             </td>
         </tr>
     </tbody>
@@ -151,7 +151,7 @@
     });
 
     (() => {
-        $('#refule_type').each(function() {
+        $('.select-select').each(function() {
             const $el = $(this);
             $el.select2({
                     theme: "bootstrap-5",

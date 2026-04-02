@@ -213,7 +213,7 @@ class P2hController extends Controller
                 ),
                 ['input_method' => 'Web']
             );
-            $p2h->update($data);
+            $p2h->lockForUpdate($data);
             foreach ($request->inspection_item as $key => $item) {
                 $p2h->p2h_detail()->updateOrCreate(
                     [

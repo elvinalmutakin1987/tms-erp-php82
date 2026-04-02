@@ -16,8 +16,8 @@ class LocationSeeder extends Seeder
         $data = [
             ["loc_type" => "Unit Location", "name" => "Sangatta"],
             ["loc_type" => "Unit Location", "name" => "Bengalon"],
-            ["loc_type" => "Project Location", "name" => "Sangatta"],
-            ["loc_type" => "Project Location", "name" => "Bengalon"],
+            ["loc_type" => "Project Location", "name" => "Tanjung Bara"],
+            ["loc_type" => "Project Location", "name" => "Lubuk Tutung"],
         ];
         DB::table('locations')->insert($data);
     }

@@ -21,4 +21,9 @@ class Location extends Model
     {
         return $this->hasMany(Client_vendor::class);
     }
+
+    public function daily_report(): HasMany
+    {
+        return $this->hasMany(Unit::class);
+    }
 }

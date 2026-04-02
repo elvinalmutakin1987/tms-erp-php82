@@ -55,6 +55,7 @@
                                         <th>Report Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
+                                        <th>Type</th>
                                         <th>Total KM/Duration</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -73,6 +74,8 @@
     <!--end page wrapper -->
 
     @include('daily_report.modal')
+
+    @include('daily_report.modal-detail')
 @endsection
 
 @section('js')
@@ -138,10 +141,34 @@
                         searchable: true,
                     },
                     {
+                        data: 'type',
+                        name: 'type',
+                        orderable: true,
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (data == "LCT") {
+                                return '<span class="badge bg-success" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else {
+                                return '<span class="badge bg-info" style="font-size: 13px">' +
+                                    data + '</span>';
+                            }
+                        }
+                    },
+                    {
                         data: 'total_km_duration',
                         name: 'total_km_duration',
                         orderable: true,
                         searchable: true,
+                        render: function(data, type, row) {
+                            if (row.type == "LCT") {
+                                return data;
+                            } else {
+                                return numbro(data).format({
+                                    thousandSeparated: true
+                                });
+                            }
+                        }
                     },
                     {
                         data: 'action',

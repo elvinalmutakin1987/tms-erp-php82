@@ -40,18 +40,29 @@ return new class extends Migration
             $table->time('stand_by')->nullable();
             $table->decimal('hour_meter', 16, 2)->nullable();
             $table->text('remarks')->nullable();
-            $table->time('duration_trip')->nullable();
+            $table->time('duration_trip_1')->nullable();
+            $table->time('duration_trip_2')->nullable();
             $table->string('input_method', 20)->nullable();
             //-----------------------------------------------------------
-            //Shipping Information
+            //Trip 1
             //-----------------------------------------------------------
-            $table->unsignedBigInteger('location_id')->nullable();
-            $table->unsignedBigInteger('arrival_location_id')->nullable();
-            $table->time('loading_at')->nullable();
-            $table->time('complete_loading_at')->nullable();
-            $table->time('depart_at')->nullable();
-            $table->time('arrived_at')->nullable();
-            $table->time('berthing_at')->nullable();
+            $table->unsignedBigInteger('trip_1_location_id')->nullable();
+            $table->unsignedBigInteger('trip_1_arr_location_id')->nullable();
+            $table->time('trip_1_loading_at')->nullable();
+            $table->time('trip_1_complete_loading_at')->nullable();
+            $table->time('trip_1_departed_at')->nullable();
+            $table->time('trip_1_arrived_at')->nullable();
+            $table->time('trip_1_berthing_at')->nullable();
+            //-----------------------------------------------------------
+            //Trip 2
+            //-----------------------------------------------------------
+            $table->unsignedBigInteger('trip_2_location_id')->nullable();
+            $table->unsignedBigInteger('trip_2_arr_location_id')->nullable();
+            $table->time('trip_2_loading_at')->nullable();
+            $table->time('trip_2_complete_loading_at')->nullable();
+            $table->time('trip_2_departed_at')->nullable();
+            $table->time('trip_2_arrived_at')->nullable();
+            $table->time('trip_2_berthing_at')->nullable();
             //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Open, Close
             $table->unsignedBigInteger('checked_by')->nullable();
@@ -61,8 +72,11 @@ return new class extends Migration
             $table->timestamps();
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
             $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
-            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('arrival_location_id')->references('id')->on('locations')->onDelete('cascade');
+            //Trip
+            $table->foreign('trip_1_location_id')->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('trip_1_arr_location_id')->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('trip_2_location_id')->references('id')->on('locations')->onDelete('cascade');
+            $table->foreign('trip_2_arr_location_id')->references('id')->on('locations')->onDelete('cascade');
         });
     }
 

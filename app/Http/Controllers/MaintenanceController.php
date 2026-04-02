@@ -255,7 +255,7 @@ class MaintenanceController extends Controller
                 ),
                 ['input_method' => 'Web']
             );
-            $maintenance->update($data);
+            $maintenance->lockForUpdate($data);
             foreach ($request->maintenance_item_id as $key => $item) {
                 $maintenance->maintenance_detail()->updateOrCreate(
                     [

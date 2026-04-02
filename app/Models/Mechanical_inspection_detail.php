@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Yajra\DataTables\Html\Editor\Fields\BelongsTo;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Mechanical_inspection_detail extends Model
+class Mechanical_inspection_detail extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     use HasFactory;
 
     protected $guarded = [];
