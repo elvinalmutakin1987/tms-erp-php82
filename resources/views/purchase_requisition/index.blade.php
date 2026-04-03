@@ -27,6 +27,7 @@
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select select-top" id="_type" name="_type">
+                                        <option value="All">All</option>
                                         <option value="General">General</option>
                                         <option value="Equipment">Equipment</option>
                                     </select>
@@ -115,6 +116,7 @@
                 "ajax": {
                     url: ajax,
                     data: function(d) {
+                        d.type = $('#_type').val();
                         d.unit_id = $('#unit').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
