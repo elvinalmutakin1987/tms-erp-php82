@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Contracts\Auditable;
+
+class Purchase_requisition extends Model implements Auditable
+{
+    use \OwenIt\Auditing\Auditable;
+    use HasFactory;
+
+    protected $guarded = [];
+
+    protected static function booted()
+    {
+        static::creating(function ($purchase_requisition) {
+            $presenter = new DatePrefixPresenter('Y/m', '/');
+            $purchase_requisition->requisition_no = running_number()
+                ->type('pr')
+                ->formatter($presenter)
+                ->generate();
+        });
+    }
+
+    public function purchase_requisition_detail(): HasMany
+    {
+        return $this->hasMany(purchase_requisition_detail::class);
+    }
+}

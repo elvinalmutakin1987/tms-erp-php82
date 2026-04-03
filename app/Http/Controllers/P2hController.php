@@ -51,16 +51,27 @@ class P2hController extends Controller
                                 <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
-                                </li>
-                                <li>
+                                </li>';
+
+                    /**
+                     * user superadmin dan yang punya akses edit aja baru bisa muncul
+                     */
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h.edit')):
+                        $button .= '<li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
                                 </li>';
+                    endif;
+
+                    /**
+                     * user superadmin dan yang punya akses delete aja baru bisa muncul
+                     */
                     if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h.delete')):
                         $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
                     endif;
+
                     $button .= '</ul>
                         </div>
                     </div>

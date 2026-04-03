@@ -21,6 +21,7 @@ use App\Http\Controllers\MaintenanceItemController;
 use App\Http\Controllers\MechanicalInspectionController;
 use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
+use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\UnitRateController;
 
 Route::middleware('guest')->group(function () {
@@ -398,4 +399,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('dailyreport-get-project-location', [DailyReportController::class, 'get_project_location'])
         ->middleware('role:superadmin|daily_report')
         ->name('dailyreport.get_project_location');
+
+
+    /**
+     * Routenya Purchase Requisition
+     */
+    Route::resource('purchaserequisition', PurchaseRequisitionController::class)
+        ->parameters(['purchaserequisition' => 'purchase_requisition'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->names('purchaserequisition');
+
+    Route::get('purchaserequisition-print/{purchase_requisition}', [PurchaseRequisitionController::class, 'print'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.print');
+
+    Route::get('purchaserequisition-export-pdf/{purchase_requisition}', [PurchaseRequisitionController::class, 'export_pdf'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.export_pdf');
 });

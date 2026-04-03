@@ -66,10 +66,12 @@
                              Maintenance</a>
                      </li>
                  @endif
-
-                 <li>
-                     <a href="app-to-do.html"><i class='bx bx-radio-circle'></i>Purchase Requisition</a>
-                 </li>
+                 @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_requisition'))
+                     <li>
+                         <a href="{{ route('purchaserequisition.index') }}"><i class='bx bx-radio-circle'></i>Purchase
+                             Requisition</a>
+                     </li>
+                 @endif
                  <li>
                      <a href="app-invoice.html"><i class='bx bx-radio-circle'></i>Proforma Invoice</a>
                  </li>

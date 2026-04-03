@@ -64,6 +64,11 @@ class MaintenanceController extends Controller
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
                                 </li>';
+
+                    /**
+                     * kalo statusnya udah open
+                     * user superadmin dan yang punya akses edit cost aja baru bisa muncul
+                     */
                     if ($item->status == 'Open'):
                         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.cost')):
                             $button .= '<li>
@@ -72,16 +77,31 @@ class MaintenanceController extends Controller
                                 </li>';
                         endif;
                     endif;
+
+                    /**
+                     * kalo statusnya masih draft
+                     * user superadmin dan yang punya akses edit aja baru bisa muncul
+                     */
                     if ($item->status == 'Draft'):
-                        $button .= '<li>
+                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
+                            $button .= '<li>
                         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                         data-id="' . $item->id . '">Edit</a>
                     </li>';
+                        endif;
                     endif;
-                    $button .= '<li>
+
+
+                    /**
+                     * ini cuma user superadmin dan yang punya akses delete aja baru muncul
+                     */
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
+                        $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>
-                            </ul>
+                                </li>';
+                    endif;
+
+                    $button .= '</ul>
                         </div>
                     </div>
                     ';

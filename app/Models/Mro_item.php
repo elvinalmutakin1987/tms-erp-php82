@@ -18,4 +18,9 @@ class Mro_item extends Model
     {
         return $this->belongsToMany(Unit::class, 'mro_units');
     }
+
+    public function purchase_requisition_detail(): HasMany
+    {
+        return $this->hasMany(purchase_requisition_detail::class);
+    }
 }
