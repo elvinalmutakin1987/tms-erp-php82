@@ -343,21 +343,21 @@
             var action = $("#slc_action option:selected").text();
 
             var newRow = `
-                <tr>
-                    <td>
+                <tr class="row-number">
+                    <td class="p-1 align-middle row-number">
                         #
                     </td>
-                    <td>
+                    <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="username" name="username" readonly value="${user_name}">
                        <input type="hidden" class="form-control" id="user_id" name="user_id[]" value="${user_id}">
                     </td>
-                    <td>
+                    <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="action" name="action[]" readonly value="${action}">
                     </td>
-                    <td>
+                    <td class="p-1 align-middle"> 
                         <input type="number" class="form-control" id="order" name="order[]" value="${order}">
                     </td>
-                    <td class="text-center">
+                    <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
                             <div class="col">
                                 <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
@@ -370,10 +370,34 @@
             $("#txt_order").val('');
             tbody.append(newRow);
             gen_select2();
+
+            renumberRows();
         });
+
+        function renumberRows() {
+            let no = 1;
+
+            $('#tableStep > tbody > tr').each(function() {
+                // row khusus tidak ikut nomor
+                if ($(this).hasClass('fixed-row')) {
+                    $(this).find('.row-number').text('');
+                    return;
+                }
+
+                $(this).find('.row-number').text(no);
+                no++;
+            });
+        }
 
         $("#tableStep").on("click", ".delete-row", function() {
             $(this).closest("tr").remove();
+
+            if ($(this).hasClass('fixed-row')) {
+                return;
+            }
+
+            $(this).remove();
+            renumberRows();
         });
     </script>
     <!--app JS-->

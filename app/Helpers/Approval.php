@@ -46,6 +46,7 @@ if (! function_exists('createApprovalProcess')) {
             'action' => 'Create',
 
         ]);
+        return true;
     }
 }
 

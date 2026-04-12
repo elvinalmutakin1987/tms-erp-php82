@@ -1,0 +1,74 @@
+<style>
+    #formModal .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(100vh - 160px);
+        scroll-behavior: auto;
+    }
+</style>
+
+<!-- search modal -->
+<div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-md-down">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-header">
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data">
+                    @csrf
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label for="unit_id" class="form-label">Unit</label>
+                            <select class="form-select select-select" id="unit_id" name="unit_id">
+
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="text" class="form-control datepicker" id="date" name="date">
+                        </div>
+                        <div class="col">
+                            <label for="unit_id" class="form-label">Maintenance No.</label>
+                            <select class="form-select select-select" id="maintenance_id" name="maintenance_id">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col" id="div-table">
+                            <table class="table mb-0" id="tableItem">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col" style="width:3%">#</th>
+                                        <th scope="col" style="width:30%">Maintenance Item</th>
+                                        <th scope="col">MRO Item</th>
+                                        <th scope="col" style="width:15%">Uom</th>
+                                        <th scope="col" style="width:15%">Value</th>
+                                        <th scope="col" style="width:2%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="d-md-flex d-grid align-items-center gap-1">
+                    <button type="button" class="btn btn-secondary saveButton" id="saveButton1" name="status"
+                        value="Draft">Draft</button>
+                    <button type="button" class="btn btn-success saveButton" id="saveButton2" name="status"
+                        value="Open">Save</button>
+                    <button type="button" class="btn btn-light" id="cancelButton">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end search modal -->

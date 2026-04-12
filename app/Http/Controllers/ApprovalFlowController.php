@@ -77,7 +77,14 @@ class ApprovalFlowController extends Controller
             ]);
             $data = array_merge($request->except(
                 '_token',
-                '_method'
+                '_method',
+                'approver_id',
+                'action',
+                'user_id',
+                'slc_action',
+                'txt_order',
+                'username',
+                'order'
             ));
             $approval_flow = Approval_flow::create($data);
             if ($request->user_id) {
@@ -142,7 +149,14 @@ class ApprovalFlowController extends Controller
             ]);
             $data = array_merge($request->except(
                 '_token',
-                '_method'
+                '_method',
+                'approver_id',
+                'action',
+                'user_id',
+                'slc_action',
+                'txt_order',
+                'username',
+                'order'
             ));
             $approval_flow->update($data);
             if ($request->user_id) {

@@ -83,6 +83,7 @@ class UserController extends Controller
             $user->name = $request->name;
             $user->email = $request->email;
             $user->password = bcrypt($request->password);
+            $user->pass_mobile = bcrypt($request->password);
             $user->email_verified_at = now();
             $user->remember_token = Str::random(10);
             if ($request->sign_path) {

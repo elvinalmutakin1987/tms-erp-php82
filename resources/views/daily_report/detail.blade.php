@@ -294,6 +294,82 @@
                         </td>
                     </tr>
                 </tbody>
+                <thead class="table-dark">
+                    <tr>
+                        <th scope="col" colspan="6">Refule</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">
+                            From
+                        </td>
+                        <td class="p-1 align-middle" style="width: 5px">
+                            :
+                        </td>
+
+                        <td class="p-1 align-middle">
+                            {{ $daily_report->refule_type }}
+                        </td>
+
+                        <td class="p-1 align-middle" style="width: 15%">
+
+                        </td>
+                        <td class="p-1 align-middle" style="width: 5px">
+
+                        </td>
+
+                        <td class="p-1 align-middle">
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">
+                            KM
+                        </td>
+                        <td class="p-1 align-middle" style="width: 5px">
+                            :
+                        </td>
+
+                        <td class="p-1 align-middle">
+                            {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}
+                        </td>
+
+                        <td class="p-1 align-middle" style="width: 15%">
+
+                        </td>
+                        <td class="p-1 align-middle" style="width: 5px">
+
+                        </td>
+
+                        <td class="p-1 align-middle">
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">
+                            From
+                        </td>
+                        <td class="p-1 align-middle" style="width: 5px">
+                            :
+                        </td>
+
+                        <td class="p-1 align-middle">
+                            {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
+                        </td>
+
+                        <td class="p-1 align-middle" style="width: 15%">
+
+                        </td>
+                        <td class="p-1 align-middle" style="width: 5px">
+
+                        </td>
+
+                        <td class="p-1 align-middle">
+
+                        </td>
+                    </tr>
+                </tbody>
             </table>
             <table class="table mb-0">
                 <thead class="table-dark">

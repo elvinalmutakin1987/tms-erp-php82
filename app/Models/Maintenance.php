@@ -51,4 +51,9 @@ class Maintenance extends Model implements Auditable
     {
         return $this->belongsTo(Mechanical_inspection::class)->withDefault(['inspection_no' => null]);
     }
+
+    public function purchase_requisition(): HasMany
+    {
+        return $this->hasMany(Purchase_requisition::class);
+    }
 }

@@ -1,7 +1,7 @@
 @foreach ($approval_step as $d)
     <tr>
         <td>
-            #
+            {{ $loop->iteration }}
         </td>
         <td>
             <input type="text" class="form-control" id="username" name="username" readonly value="{{ $d->user->name }}">

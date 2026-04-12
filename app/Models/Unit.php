@@ -52,4 +52,9 @@ class Unit extends Model
     {
         return $this->hasMany(Maintenance::class);
     }
+
+    public function purchase_requisition(): HasMany
+    {
+        return $this->hasMany(Purchase_requisition::class);
+    }
 }

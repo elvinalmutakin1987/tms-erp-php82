@@ -28,23 +28,23 @@
                                  </tr>
                              </thead>
                              <tbody id='bodyTableStep'>
-                                 <tr>
-                                     <td></td>
-                                     <td>
+                                 <tr class="fixed-row">
+                                     <td class="p-1 align-middle"></td>
+                                     <td class="p-1 align-middle">
                                          <select class="form-select select-select" id="approver_id" name="approver_id">
                                          </select>
                                      </td>
-                                     <td>
+                                     <td class="p-1 align-middle">
                                          <select class="form-select select-select" id="slc_action" name="slc_action">
                                              <option value="Known">Known</option>
                                              <option value="Checked">Checked</option>
                                              <option value="Approved">Approved</option>
                                          </select>
                                      </td>
-                                     <td>
+                                     <td class="p-1 align-middle">
                                          <input type="number" class="form-control" id="txt_order" name="txt_order">
                                      </td>
-                                     <td class="text-center">
+                                     <td class="text-center p-1 align-middle">
                                          <div class="row row-cols-auto g-3">
                                              <div class="col">
                                                  <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"

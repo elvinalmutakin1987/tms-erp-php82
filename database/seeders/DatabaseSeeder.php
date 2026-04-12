@@ -27,7 +27,9 @@ class DatabaseSeeder extends Seeder
             UnitbrandSeeder::class,
             LocationSeeder::class,
             UnitmodelSeeder::class,
-            UnitSeeder::class
+            UnitSeeder::class,
+            MaintenanceItemSeeder::class,
+            MroItemSeeder::class
         ]);
     }
 }

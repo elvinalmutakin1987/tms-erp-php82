@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
-use Yajra\DataTables\Html\Editor\Fields\BelongsTo;
 
 class Purchase_requisition_detail extends Model implements Auditable
 {
@@ -15,16 +16,16 @@ class Purchase_requisition_detail extends Model implements Auditable
 
     public function purchase_requisition(): BelongsTo
     {
-        return $this->belongsTo(Purchase_requisition::class)->withDefault(['driver' => null]);
+        return $this->belongsTo(Purchase_requisition::class);
     }
 
     public function maintenance_item(): BelongsTo
     {
-        return $this->belongsTo(Maintenance_item::class)->withDefault(['driver' => null]);
+        return $this->belongsTo(Maintenance_item::class);
     }
 
     public function mro_item(): BelongsTo
     {
-        return $this->belongsTo(Mro_item::class)->withDefault(['driver' => null]);
+        return $this->belongsTo(Mro_item::class);
     }
 }

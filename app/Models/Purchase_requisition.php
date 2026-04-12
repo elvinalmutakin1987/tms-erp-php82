@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -26,6 +29,21 @@ class Purchase_requisition extends Model implements Auditable
 
     public function purchase_requisition_detail(): HasMany
     {
-        return $this->hasMany(purchase_requisition_detail::class);
+        return $this->hasMany(Purchase_requisition_detail::class);
+    }
+
+    public function maintenance(): BelongsTo
+    {
+        return $this->belongsTo(Maintenance::class)->withDefault(['maintenance_no' => null]);
+    }
+
+    public function unit(): BelongsTo
+    {
+        return $this->belongsTo(Unit::class)->withDefault(['vehicle_no' => null]);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class)->withDefault(['username' => null]);
     }
 }

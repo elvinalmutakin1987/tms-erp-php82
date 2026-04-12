@@ -38,6 +38,7 @@ return [
         'serv', //Untuk nomor service
         'main', //Untuk penomoran maintenance
         'insp', //Untuk penomoran maintenance
+        'pr', //Untuk penomoran maintenance
     ],
 
     'model' => RunningNumber::class,

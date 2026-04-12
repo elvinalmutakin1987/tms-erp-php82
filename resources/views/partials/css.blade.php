@@ -3,7 +3,9 @@
 <link href="{{ asset('assets/plugins/simplebar/css/simplebar.css') }}" rel="stylesheet">
 <link href="{{ asset('assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css') }}" rel="stylesheet">
 <link href="{{ asset('assets/plugins/metismenu/css/metisMenu.min.css') }}" rel="stylesheet">
+
 @yield('css')
+
 <!-- loader-->
 <link href="{{ asset('assets/css/pace.min.css') }}" rel="stylesheet">
 <script src="{{ asset('assets/js/pace.min.js') }}"></script>

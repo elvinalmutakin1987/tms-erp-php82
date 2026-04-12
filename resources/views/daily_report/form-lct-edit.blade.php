@@ -160,6 +160,70 @@
             </td>
         </tr>
     </tbody>
+    <thead class="table-dark">
+        <tr>
+            <th scope="col" style="width:3%">#</th>
+            <th scope="col" colspan="4">Refule</th>
+        </tr>
+    </thead>
+    <tbody id="tbody3">
+        <tr>
+            <td class="p-1 align-middle">5</td>
+            <td class="p-1 align-middle">
+                From
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="refule_type" name="refule_type">
+                    <option value="KPC" value="{{ $daily_report->refule_type == 'KPC' ? 'selected' : '' }}">KPC
+                    </option>
+                    <option value="POM Bensin"
+                        value="{{ $daily_report->refule_type == 'POM Bensin' ? 'selected' : '' }}">POM Bensin</option>
+                </select>
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">
+                Liter
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_liter" name="refule_liter"
+                    value="{{ $daily_report->refule_liter }}">
+                <input type="text" class="form-control" id="_refule_liter" name="_refule_liter"
+                    value="{{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}">
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">7</td>
+            <td class="p-1 align-middle">
+                KM
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_km" name="refule_km"
+                    value="{{ $daily_report->refule_km }}">
+                <input type="text" class="form-control" id="_refule_km" name="_refule_km"
+                    value="{{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}">
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
+    </tbody>
 </table>
 <table class="table mb-0" id="tableUnit">
     <thead class="table-dark">
@@ -421,6 +485,8 @@
 
         const $value_1 = $('#_value_1_');
         const $value_2 = $('#_value_2_');
+        const $refule_liter = $('#_refule_liter');
+        const $refule_km = $('#_refule_km');
 
         let isFmt = false;
         let userDecSep = null;
@@ -645,6 +711,18 @@
 
             $(this).remove();
             renumberRows();
+        });
+
+        $refule_liter.off('input').on('input', function(e) {
+            textInput("refule_liter", e);
+        });
+
+        $refule_km.off('keydown').on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $refule_km.off('input').on('input', function(e) {
+            textInput("refule_km", e);
         });
     })();
 </script>

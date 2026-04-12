@@ -61,7 +61,6 @@
                                         <th scope="col">Action Taken</th>
                                     </tr>
                                 </thead>
-
                                 <tbody id="tbody">
 
                                 </tbody>

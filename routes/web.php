@@ -23,6 +23,7 @@ use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
 use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\UnitRateController;
+use Illuminate\Support\Facades\Storage;
 
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'login'])->name('login');
@@ -333,7 +334,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('maintenance.get_table_edit');
 
     Route::get('maintenance-get-detail/{maintenance}', [MaintenanceController::class, 'get_detail'])
-        ->middleware('role:superadmin|v')
+        ->middleware('role:superadmin|maintenance')
         ->name('maintenance.get_detail');
 
     Route::get('maintenance-print/{maintenance}', [MaintenanceController::class, 'print'])
@@ -416,4 +417,40 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaserequisition-export-pdf/{purchase_requisition}', [PurchaseRequisitionController::class, 'export_pdf'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisition.export_pdf');
+
+    Route::get('purchaserequisition-get-detail/{daily_report}', [PurchaseRequisitionController::class, 'get_detail'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_detail');
+
+    Route::get('purchaserequisition-get-unit-all', [PurchaseRequisitionController::class, 'get_unit_all'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_unit_all');
+
+    Route::get('purchaserequisition-load-table-add', [PurchaseRequisitionController::class, 'get_table_add'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_table_add');
+
+    Route::get('purchaserequisition-load-table-edit/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_table_edit'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_table_edit');
+
+    Route::get('purchaserequisition-get-detail/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_detail'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_detail');
+
+    Route::get('purchaserequisition-get-requisition-item', [PurchaseRequisitionController::class, 'get_requisition_item'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_requisition_item');
+
+    Route::get('purchaserequisition-get-maintenance-item', [PurchaseRequisitionController::class, 'get_maintenance_item'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_maintenance_item');
+
+    Route::get('purchaserequisition-get-mro-item', [PurchaseRequisitionController::class, 'get_mro_item'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_mro_item');
+
+    Route::get('/files/{path}', function ($path) {
+        return Storage::disk('local')->response($path);
+    })->where('path', '.*')->name('files.show');
 });

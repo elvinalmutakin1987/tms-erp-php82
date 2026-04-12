@@ -22,19 +22,22 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add P2H"><i
+                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Requisition"><i
                                             class='bx bxs-plus-square'></i>New</a>
-                                </div>
-                                <div class="col-2">
-                                    <select class="form-select select-top" id="_type" name="_type">
-                                        <option value="All">All</option>
-                                        <option value="General">General</option>
-                                        <option value="Equipment">Equipment</option>
-                                    </select>
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select select-top" id="unit" name="unit">
                                         <option value="All">All Unit</option>
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <select class="form-select select-top" id="_status" name="_status">
+                                        <option value="All">All Status</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Approval">Approval</option>
+                                        <option value="Open">Open</option>
+                                        <option value="Cancel">Cancel</option>
+                                        <option value="Done">Done</option>
                                     </select>
                                 </div>
                                 <div class="col-2">
@@ -60,8 +63,8 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Requisition Number</th>
+                                        <th>Maintenance Number</th>
                                         <th>Date</th>
-                                        <th>Due Date</th>
                                         <th>Type</th>
                                         <th>Unit</th>
                                         <th>Status</th>
@@ -95,6 +98,7 @@
 
     <script>
         var requisitionId = '';
+        var maintenanceId = '';
         var unitId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -116,7 +120,7 @@
                 "ajax": {
                     url: ajax,
                     data: function(d) {
-                        d.type = $('#_type').val();
+                        d.status = $('#_status').val();
                         d.unit_id = $('#unit').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
@@ -138,14 +142,14 @@
                         searchable: true,
                     },
                     {
-                        data: 'date',
-                        name: 'date',
+                        data: 'maintenance_no',
+                        name: 'maintenance_no',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'due_date',
-                        name: 'due_date',
+                        data: 'date',
+                        name: 'date',
                         orderable: true,
                         searchable: true,
                     },
@@ -167,11 +171,18 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (data == 100) {
-                                return '<span class="badge bg-success" style="font-size: 13px">Fit</span>';
+                            if (data == "Done") {
+                                return '<span class="badge bg-success" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Open') {
+                                return '<span class="badge bg-primary" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Approval') {
+                                return '<span class="badge bg-info" style="font-size: 13px">' +
+                                    data + '</span>';
                             } else {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    row.broken + ' broken</span>';
+                                return '<span class="badge bg-secondary" style="font-size: 13px">' +
+                                    data + '</span>';
                             }
                         }
                     },
@@ -188,29 +199,21 @@
             });
 
             $(document).on('click', '.editButton', function() {
-                p2hId = $(this).data('id');
-                $('#modal-header').text('Edit P2H');
-                $('#id').val(p2hId);
-                let url = '{{ route('p2h.show', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+                requisitionId = $(this).data('id');
+                $('#modal-header').text('Edit Requisition');
+                $('#id').val(requisitionId);
+                let url = '{{ route('purchaserequisition.show', ':_id') }}';
+                url = url.replace(':_id', requisitionId);
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit P2H');
-                        $("#driver").val(response.data.driver);
-                        $("#date").val(response.data.date);
+                        $('#modal-header').text('Edit Requisition');
                         $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#shift").val(response.data.shift).trigger('change');
-                        $('#km_start').val(response.data.km_start);
-                        $('#_km_start').val(numbro(response.data.km_start).format({
-                            thousandSeparated: true
-                        }));
-                        $('#km_finish').val(response.data.km_finish);
-                        $('#_km_finish').val(numbro(response.data.km_finish).format({
-                            thousandSeparated: true
-                        }));
+                        $("#maintenance_id").val(response.data.maintenance_id).trigger(
+                            'change');
+                        $("#date").val(response.data.date);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -219,8 +222,8 @@
             });
 
             $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail P2H');
-                let url = '{{ route('p2h.get_detail', ':_id') }}';
+                $('#modal-detail-header').text('Detail Requisition');
+                let url = '{{ route('purchaserequisition.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -253,7 +256,7 @@
             });
 
             $.ajax({
-                url: '{{ route('p2h.get_unit_all') }}',
+                url: '{{ route('purchaserequisition.get_unit_all') }}',
                 type: 'GET',
                 success: function(response) {
                     $('#unit').empty();
@@ -303,7 +306,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('p2h.destroy', ':_id') }}';
+                    let url = '{{ route('purchaserequisition.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -337,13 +340,54 @@
             });
         }
 
-        $('#saveButton').on('click', function() {
+        // $('#saveButton').on('click', function() {
+        //     var formData = new FormData($('#formModal').find('form')[0]);
+        //     var url = '{{ route('purchaserequisition.store') }}';
+        //     var type = 'POST';
+        //     if (requisitionId != '') {
+        //         url = '{{ route('purchaserequisition.update', ':_id') }}';
+        //         url = url.replace(':_id', requisitionId);
+        //         formData.append('_method', 'PUT');
+        //     }
+        //     $.ajax({
+        //         url: url,
+        //         type: type,
+        //         data: formData,
+        //         contentType: false,
+        //         processData: false,
+        //         success: function(response) {
+        //             Swal.fire({
+        //                 title: response.title,
+        //                 text: response.message,
+        //                 icon: "success",
+        //                 timer: 5000,
+        //                 didOpen: () => {},
+        //                 willClose: () => {
+        //                     $('#table-data').DataTable().ajax.reload(null, false);
+        //                     $('#formModal form')[0].reset();
+        //                     p2hId = '';
+        //                     $('#formModal').modal('hide');
+        //                 }
+        //             });
+        //         },
+        //         error: function(xhr, status, error) {
+        //             var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+        //             Swal.fire({
+        //                 icon: "error",
+        //                 title: "Oops...",
+        //                 text: errorMessage,
+        //             });
+        //         }
+        //     });
+        // });
+        $('.saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('p2h.store') }}';
+            var url = '{{ route('purchaserequisition.store') }}';
             var type = 'POST';
-            if (p2hId != '') {
-                url = '{{ route('p2h.update', ':_id') }}';
-                url = url.replace(':_id', p2hId);
+            formData.append('status', $(this).val());
+            if (requisitionId != '') {
+                url = '{{ route('purchaserequisition.update', ':_id') }}';
+                url = url.replace(':_id', requisitionId);
                 formData.append('_method', 'PUT');
             }
             $.ajax({
@@ -362,7 +406,7 @@
                         willClose: () => {
                             $('#table-data').DataTable().ajax.reload(null, false);
                             $('#formModal form')[0].reset();
-                            p2hId = '';
+                            requisitionId = '';
                             $('#formModal').modal('hide');
                         }
                     });
@@ -378,6 +422,7 @@
             });
         });
 
+
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
@@ -387,17 +432,18 @@
             var tbody = $("#tableItem > tbody");
             tbody.append(`
                     <tr>
-                        <td colspan="5">
+                        <td colspan="6">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="visually">Loading...</span>
                         </td>
                     </tr>
                     `);
             setTimeout(function() {
-                const isEdit = p2hId != '';
+                const isEdit = requisitionId != '';
                 const url = isEdit ?
-                    '{{ route('p2h.get_table_edit', ':_id') }}'.replace(':_id', p2hId) :
-                    '{{ route('p2h.get_table_add') }}';
+                    '{{ route('purchaserequisition.get_table_edit', ':_id') }}'.replace(':_id',
+                        requisitionId) :
+                    '{{ route('purchaserequisition.get_table_add') }}';
 
                 $.ajax({
                     url: url,
@@ -405,8 +451,9 @@
                     success: function(response) {
                         $("#tableItem > tbody").html(response.html);
 
-                        const titleText = isEdit ? 'Edit P2H' : 'Add P2H';
-                        const number = isEdit ? response.p2h_no : response.p2h_prev_no;
+                        const titleText = isEdit ? 'Edit Requisition' : 'Add Requisition';
+                        const number = isEdit ? response.requisition_no : response
+                            .requisition_prev_no;
 
                         $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
                     },
@@ -418,11 +465,12 @@
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            p2hId = '';
+            requisitionId = '';
+            maintenanceId = '';
             unitId = '';
             $('#tableItem tbody').empty();
             $("#unit_id").val('All').trigger('change');
-            $("#shift").val('Day').trigger('change');
+            $("#maintenance_id").val('All').trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -451,174 +499,6 @@
                 });
             });
         }
-
-        const $km_start = $('#_km_start');
-        const $km_finish = $('#_km_finish');
-
-        let isFmt = false;
-        let userDecSep = null;
-
-        function sanitize(s) {
-            return (s ?? '').toString().replace(/[^0-9.,]/g, '');
-        }
-
-        function groupThousands(digits, sep) {
-            digits = digits.replace(/^0+(?=\d)/, '');
-            if (digits === '') digits = '0';
-            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
-        }
-
-        function countDigitsLeft(str, pos) {
-            return (str.slice(0, pos).match(/\d/g) || []).length;
-        }
-
-        function caretByDigits(str, digitCount) {
-            let c = 0;
-            for (let i = 0; i < str.length; i++) {
-                if (/\d/.test(str[i])) c++;
-                if (c >= digitCount) return i + 1;
-            }
-            return str.length;
-        }
-
-        function textKeyDown(e) {
-            if (e.ctrlKey || e.metaKey || e.altKey) return;
-
-            const okNav = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter'];
-            if (okNav.includes(e.key)) return;
-
-            if (/^[0-9.,]$/.test(e.key)) return;
-
-            e.preventDefault();
-        }
-
-        function textInput(key, e) {
-            if (isFmt) return;
-            isFmt = true;
-
-            const el = e.target;
-            const raw = el.value || '';
-            const caretRaw = (typeof el.selectionStart === 'number') ? el.selectionStart : raw.length;
-
-            const oe = e.originalEvent || e;
-            const inserted = (oe && typeof oe.data === 'string') ? oe.data : '';
-
-            const prevDecSep = userDecSep;
-            const justTypedSep = (inserted === '.' || inserted === ',');
-
-            const san = sanitize(raw);
-            const leftSan = sanitize(raw.slice(0, caretRaw));
-            const caretSan = leftSan.length;
-
-            if (userDecSep && !san.includes(userDecSep)) userDecSep = null;
-
-            const justSetDecSep = (!prevDecSep && justTypedSep);
-            if (justSetDecSep) userDecSep = inserted;
-
-            const digitsLeft = countDigitsLeft(san, caretSan);
-
-            let intDigits = '';
-            let fracDigits = '';
-            let keepDec = false;
-
-            if (userDecSep && san.includes(userDecSep)) {
-                const pos = san.indexOf(userDecSep);
-                keepDec = true;
-                intDigits = san.slice(0, pos).replace(/[.,]/g, '');
-                fracDigits = san.slice(pos + 1).replace(/[.,]/g, '');
-                if (intDigits === '') intDigits = '0';
-            } else {
-                intDigits = san.replace(/[.,]/g, '');
-            }
-
-            const thousandsSep = userDecSep ? (userDecSep === ',' ? '.' : ',') : ',';
-
-            const formattedInt = groupThousands(intDigits, thousandsSep);
-            const formatted = keepDec ? (formattedInt + userDecSep + fracDigits) : formattedInt;
-
-            el.value = formatted;
-
-            if (typeof el.setSelectionRange === 'function') {
-                if (justSetDecSep && keepDec) {
-                    const decPosNew = formatted.indexOf(userDecSep);
-                    const newCaret = decPosNew + 1;
-                    el.setSelectionRange(newCaret, newCaret);
-                } else {
-                    const newCaret = caretByDigits(formatted, digitsLeft);
-                    el.setSelectionRange(newCaret, newCaret);
-                }
-            }
-
-            isFmt = false;
-
-            $("#" + key).val(numbro.unformat(el.value));
-        }
-
-        $km_start.on('keydown', function(e) {
-            textKeyDown(e);
-        });
-
-        $km_start.on('input', function(e) {
-            textInput("km_start", e);
-        });
-
-        $km_finish.on('keydown', function(e) {
-            textKeyDown(e);
-        });
-
-        $km_finish.on('input', function(e) {
-            textInput("km_finish", e);
-        });
-
-        $("#unit_id").on('change', function() {
-            const modalEl = document.getElementById('formModal');
-            const modalBody = modalEl.querySelector('.modal-body');
-            const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
-
-            $(this).select2('close');
-            $(this).blur();
-
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
-
-            const $tbody = $("#tableItem > tbody");
-            $tbody.html(`
-                <tr>
-                    <td colspan="5" class="text-center">
-                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                        <span class="visually-hidden">Loading...</span>
-                    </td>
-                </tr>
-            `);
-            let url = '{{ route('p2h.get_p2h_item') }}';
-            if ($(this).val() == 'All') {
-                url = '{{ route('p2h.get_table_add') }}';
-            }
-            $.ajax({
-                url: url,
-                type: 'GET',
-                data: {
-                    unit_id: $(this).val()
-                },
-                success: function(response) {
-                    $tbody.html(response.html);
-
-                    requestAnimationFrame(function() {
-                        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modalInstance.handleUpdate();
-
-                        if (modalBody) {
-                            modalBody.scrollTop = lastScrollTop;
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    $tbody.empty();
-                }
-            });
-        });
     </script>
     <!--app JS-->
 @endsection

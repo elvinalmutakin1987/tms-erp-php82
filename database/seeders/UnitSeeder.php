@@ -19,7 +19,8 @@ class UnitSeeder extends Seeder
             "unit_brand_id" => 1,
             "unit_model_id" => 1,
             "vehicle_no" => "TMS01",
-            "registration_no" => "KT1123RR"
+            "registration_no" => "KT1123RR",
+            "type" => "Vehicle"
         ];
         DB::table('units')->insert($data);
     }

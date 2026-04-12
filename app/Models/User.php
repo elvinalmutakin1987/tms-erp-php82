@@ -69,4 +69,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Mechanical_inspection::class);
     }
+
+    public function purchase_requisition(): HasMany
+    {
+        return $this->hasMany(Purchase_requisition::class);
+    }
 }
