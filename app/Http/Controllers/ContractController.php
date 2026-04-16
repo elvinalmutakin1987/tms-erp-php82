@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\Client_vendor;
+use App\Models\Contract_rate;
 use App\Models\Service;
+use App\Models\Service_item;
+use App\Models\Unit;
+use App\Models\Unit_target;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -88,10 +92,48 @@ class ContractController extends Controller
                 'service_id' => 'required',
                 'start_date' => 'required',
                 'end_date' => 'required',
-                'value' => 'required'
             ]);
-            $data = array_merge($request->except('_token', '_method'));
-            Contract::create($data);
+            $data = array_merge(
+                $request->only(
+                    'contract_no',
+                    'client_vendor_id',
+                    'service_id',
+                    'start_date',
+                    'end_date',
+                    'value',
+                    'notes'
+                ),
+                [
+                    'status' => 'Active'
+                ]
+            );
+            $contract = Contract::create($data);
+            foreach ($request->service_item_id as $i => $item) {
+                $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
+                $contract->contract_rate()->updateOrCreate(
+                    [
+                        'contract_id' => $contract->id,
+                        'service_item_id' => $item,
+                    ],
+                    [
+                        'rate' => $rate
+                    ]
+                );
+            }
+            foreach ($request->unit_id as $i => $item) {
+                $target = isset($request->target[$i]) ? $request->target[$i] : 0;
+                $price = isset($request->price[$i]) ? $request->price[$i] : 0;
+                $contract->unit_target()->updateOrCreate(
+                    [
+                        'contract_id' => $contract->id,
+                        'unit_id' => $item,
+                    ],
+                    [
+                        'target' => $target,
+                        'price' => $price
+                    ]
+                );
+            }
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -113,10 +155,19 @@ class ContractController extends Controller
      */
     public function show(Contract $contract)
     {
+        $service_item = Service_item::where('service_id', $contract->service_id)->get();
+        $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+        $unit_target = Unit_target::where('contract_id', $contract->id)->get();
+        $view = 'contract.rate-edit';
+        $html = view($view, compact('service_item', 'contract_rate', 'contract'))->render();
+        $view_target = 'contract.target-edit';
+        $html_target = view($view_target, compact('unit_target'))->render();
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $contract,
+            'html' => $html,
+            'html_target' => $html_target
         ], 200);
     }
 
@@ -141,10 +192,45 @@ class ContractController extends Controller
                 'service_id' => 'required',
                 'start_date' => 'required',
                 'end_date' => 'required',
-                'value' => 'required'
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge(
+                $request->only(
+                    'contract_no',
+                    'client_vendor_id',
+                    'service_id',
+                    'start_date',
+                    'end_date',
+                    'value',
+                    'notes'
+                )
+            );
             $contract->update($data);
+            foreach ($request->service_item_id as $i => $item) {
+                $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
+                $contract->contract_rate()->updateOrCreate(
+                    [
+                        'contract_id' => $contract->id,
+                        'service_item_id' => $item,
+                    ],
+                    [
+                        'rate' => $rate
+                    ]
+                );
+            }
+            foreach ($request->unit_id as $i => $item) {
+                $target = isset($request->target[$i]) ? $request->target[$i] : 0;
+                $price = isset($request->price[$i]) ? $request->price[$i] : 0;
+                $contract->unit_target()->updateOrCreate(
+                    [
+                        'contract_id' => $contract->id,
+                        'unit_id' => $item,
+                    ],
+                    [
+                        'target' => $target,
+                        'price' => $price
+                    ]
+                );
+            }
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -245,6 +331,46 @@ class ContractController extends Controller
             return response()->json([
                 'success' => false,
                 'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil service item
+     */
+    public function get_service_item(Request $request)
+    {
+        try {
+            $service_item = Service_item::where('service_id', $request->service_id)->get();
+            $view = 'contract.rate';
+            $html = view($view, compact('service_item'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil data unit
+     */
+    public function get_unit_all(Request $request)
+    {
+        try {
+            $unit = Unit::all();
+            return response()->json([
+                'success' => true,
+                'data' => $unit
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
                 'message' => $th->getMessage()
             ], 400);
         }

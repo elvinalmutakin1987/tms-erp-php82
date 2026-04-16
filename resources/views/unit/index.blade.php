@@ -186,6 +186,7 @@
                         $("#exp_stnk").val(response.data.exp_stnk);
                         $("#exp_tax").val(response.data.exp_tax);
                         $("#exp_comm").val(response.data.exp_comm);
+                        $("#description").val(response.data.description);
                     },
                     error: function() {
                         alert('Error fetching data');

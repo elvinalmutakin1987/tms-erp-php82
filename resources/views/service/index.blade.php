@@ -141,7 +141,7 @@
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit User');
+                        $('#modal-header').text('Edit Service');
                         $('#name').val(response.data.name);
                         $('#type').val(response.data.type);
                     },
@@ -380,6 +380,31 @@
                     });
             });
         }
+
+        function renumberRows() {
+            let no = 1;
+            $('#tableStep > tbody > tr').each(function() {
+                // row khusus tidak ikut nomor
+                if ($(this).hasClass('fixed-row')) {
+                    $(this).find('.row-number').text('');
+                    return;
+                }
+
+                $(this).find('.row-number').text(no);
+                no++;
+            });
+        }
+
+        $("#tableStep").on("click", ".delete-row", function() {
+            $(this).closest("tr").remove();
+
+            if ($(this).hasClass('fixed-row')) {
+                return;
+            }
+
+            $(this).remove();
+            renumberRows();
+        });
     </script>
     <!--app JS-->
 @endsection

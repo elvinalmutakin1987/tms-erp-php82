@@ -59,6 +59,12 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-12 mb-2">
+                                    <label for="description" class="form-label">Description</label>
+                                    <input type="text" class="form-control" id="description" name="description">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-2">
                                     <label for="certificate_no" class="form-label">Certificate Number</label>
                                     <input type="text" class="form-control" id="certificate_no"
                                         name="certificate_no">
@@ -76,6 +82,8 @@
                                     <input type="text" class="form-control" id="chassis_no" name="chassis_no">
                                 </div>
                             </div>
+                        </div>
+                        <div class="col">
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="code_access" class="form-label">Code Access</label>
@@ -88,8 +96,6 @@
                                     <input type="text" class="form-control" id="plr_no" name="plr_no">
                                 </div>
                             </div>
-                        </div>
-                        <div class="col">
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="exp_crane" class="form-label">Exp. Crane</label>

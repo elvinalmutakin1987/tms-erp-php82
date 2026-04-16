@@ -72,9 +72,12 @@
                              Requisition</a>
                      </li>
                  @endif
-                 <li>
-                     <a href="app-invoice.html"><i class='bx bx-radio-circle'></i>Proforma Invoice</a>
-                 </li>
+                 @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('proforma_invoice'))
+                     <li>
+                         <a href="{{ route('proformainvoice.index') }}"><i class='bx bx-radio-circle'></i>Proforma
+                             Invoice</a>
+                     </li>
+                 @endif
              </ul>
          </li>
          <li>

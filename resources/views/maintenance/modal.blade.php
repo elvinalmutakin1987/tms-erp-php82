@@ -55,6 +55,12 @@
                         </div>
                     </div>
                     <div class="row mb-2">
+                        <div class="col">
+                            <label for="remarks" class="form-label">Remarks</label>
+                            <textarea class="form-control" id="remarks" name="remarks" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
                         <div class="col" id="div-table">
                             <table class="table mb-0" id="tableItem">
                                 <thead class="table-dark">
@@ -103,6 +109,7 @@
                             </table>
                         </div>
                     </div>
+
                 </form>
             </div>
             <div class="modal-footer">

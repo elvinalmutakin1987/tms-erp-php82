@@ -54,6 +54,11 @@
                         <b>{{ \Carbon\Carbon::parse($maintenance->work_duration)->format('H:i') }}</b>
                     </td>
                 </tr>
+                <tr>
+                    <td colspan="3">Remarks : <br>
+                        {!! $maintenance->remarks !!}
+                    </td>
+                </tr>
             </table>
         </div>
     </div>

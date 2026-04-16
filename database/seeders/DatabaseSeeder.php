@@ -29,7 +29,9 @@ class DatabaseSeeder extends Seeder
             UnitmodelSeeder::class,
             UnitSeeder::class,
             MaintenanceItemSeeder::class,
-            MroItemSeeder::class
+            MroItemSeeder::class,
+            ClientSeeder::class,
+            VendorSeeder::class
         ]);
     }
 }

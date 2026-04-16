@@ -126,6 +126,18 @@
                     value="{{ $daily_report->refule_km ? Number::format($daily_report, precision: 0) : '' }}">
             </td>
         </tr>
+        <tr class="table-secondary">
+            <th colspan="3" class="align-middle">Remark</th>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">9</td>
+            <td class="p-1 align-middle">
+                Remark
+            </td>
+            <td class="p-1 align-middle">
+                <textarea class="form-control" id="remarks" name="remarks" rows="5" required>{!! $daily_report->remarks !!}</textarea>
+            </td>
+        </tr>
     </tbody>
 </table>
 

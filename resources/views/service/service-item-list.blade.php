@@ -1,7 +1,7 @@
 @foreach ($service_item as $d)
     <tr>
         <td class="p-1 align-middle">
-            #
+            {{ $loop->iteration }}
         </td>
         <td class="p-1 align-middle">
             <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="{{ $d->item_no }}">

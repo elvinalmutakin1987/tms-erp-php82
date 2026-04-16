@@ -33,6 +33,12 @@
                         </div>
                     </div>
                     <div class="row mb-2">
+                        <div class="col">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
                         <div class="col" id="div-table">
                             <table class="table mb-0" id="tableItem">
                                 <thead class="table-dark">
@@ -51,12 +57,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="row mb-2">
-                        <div class="col">
-                            <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
-                        </div>
-                    </div>
+
                 </form>
             </div>
             <div class="modal-footer">

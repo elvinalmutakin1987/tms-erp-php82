@@ -77,7 +77,8 @@ class ServiceController extends Controller
                 'txt_item_no',
                 'txt_item_des',
                 'item_no',
-                'item_des'
+                'item_des',
+                'service_item_id'
             ));
             $service = Service::create($data);
             if ($request->item_no) {
@@ -145,9 +146,10 @@ class ServiceController extends Controller
                 'txt_item_no',
                 'txt_item_des',
                 'item_no',
-                'item_des'
+                'item_des',
+                'service_item_id'
             ));
-            $service = Service::update($data);
+            $service->update($data);
             if ($request->item_no) {
                 foreach ($request->item_no as $key => $item_no) {
                     $detail[] = [

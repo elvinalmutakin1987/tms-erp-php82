@@ -219,7 +219,8 @@ class MechanicalInspectionController extends Controller
                 ),
                 ['input_method' => 'Web']
             );
-            $mechanical_inspection->lockForUpdate($data);
+            $lockMechanical_inspection = Mechanical_inspection::where('id', $mechanical_inspection->id)->lockForUpdate()->first();
+            $lockMechanical_inspection->lockForUpdate($data);
             foreach ($request->inspection_item as $key => $item) {
                 $mechanical_inspection->mechanical_inspection_detail()->updateOrCreate(
                     [

@@ -280,7 +280,8 @@ class DailyReportController extends Controller
                     'duration_trip_2' => $duration_trip_2
                 ]
             );
-            $daily_report->lockForUpdate($data);
+            $lockDaily_report = Daily_report::where('id', $daily_report->id)->lockForUpdate()->first();
+            $lockDaily_report->lockForUpdate($data);
             if ($request->detail_unit_id) {
                 foreach ($request->detail_unit_id as $key => $item) {
                     $daily_report->daily_report_detail()->updateOrCreate(

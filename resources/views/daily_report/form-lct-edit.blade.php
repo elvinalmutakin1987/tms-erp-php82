@@ -163,6 +163,23 @@
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
+            <th scope="col" colspan="4">Remarks</th>
+        </tr>
+    </thead>
+    <tbody id="tbody4">
+        <tr>
+            <td class="p-1 align-middle">9</td>
+            <td class="p-1 align-middle">
+                Remarks
+            </td>
+            <td class="p-1 align-middle" colspan="3">
+                <textarea class="form-control" id="remarks" name="remarks" rows="5" required>{!! $daily_report->remarks !!}</textarea>
+            </td>
+        </tr>
+    </tbody>
+    <thead class="table-dark">
+        <tr>
+            <th scope="col" style="width:3%">#</th>
             <th scope="col" colspan="4">Refule</th>
         </tr>
     </thead>

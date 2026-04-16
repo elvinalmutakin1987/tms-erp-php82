@@ -184,6 +184,8 @@ class MaintenanceController extends Controller
                     '_method',
                     'maintenance_item_id',
                     'mro_item_id',
+                    '_hour_meter',
+                    '_km_km',
                     'notes',
                     'action',
                     'act',
@@ -267,6 +269,8 @@ class MaintenanceController extends Controller
                     '_method',
                     'maintenance_item_id',
                     'mro_item_id',
+                    '_hour_meter',
+                    '_km_hm',
                     'notes',
                     'action',
                     'act',
@@ -275,7 +279,8 @@ class MaintenanceController extends Controller
                 ),
                 ['input_method' => 'Web']
             );
-            $maintenance->lockForUpdate($data);
+            $lockMaintenance = Maintenance::where('id', $maintenance->id)->lockForUpdate()->first();
+            $lockMaintenance->update($data);
             foreach ($request->maintenance_item_id as $key => $item) {
                 $maintenance->maintenance_detail()->updateOrCreate(
                     [

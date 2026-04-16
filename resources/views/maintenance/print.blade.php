@@ -88,7 +88,7 @@
     }
 
     .docno {
-        font-size: 14pt;
+        font-size: 9.2pt;
         font-weight: 700;
         line-height: 1.1;
     }
@@ -423,6 +423,11 @@
                                                 </td>
                                             </tr>
                                         </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">Remarks : <br>
+                                        {!! $maintenance->remarks !!}
                                     </td>
                                 </tr>
                             </table>

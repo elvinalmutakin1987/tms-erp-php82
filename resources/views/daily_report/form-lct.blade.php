@@ -154,12 +154,29 @@
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
+            <th scope="col" colspan="4">Remarks</th>
+        </tr>
+    </thead>
+    <tbody id="tbody4">
+        <tr>
+            <td class="p-1 align-middle">9</td>
+            <td class="p-1 align-middle">
+                Remarks
+            </td>
+            <td class="p-1 align-middle" colspan="3">
+                <textarea class="form-control" id="remarks" name="remarks" rows="5" required></textarea>
+            </td>
+        </tr>
+    </tbody>
+    <thead class="table-dark">
+        <tr>
+            <th scope="col" style="width:3%">#</th>
             <th scope="col" colspan="4">Refule</th>
         </tr>
     </thead>
     <tbody id="tbody3">
         <tr>
-            <td class="p-1 align-middle">5</td>
+            <td class="p-1 align-middle">10</td>
             <td class="p-1 align-middle">
                 From
             </td>
@@ -177,7 +194,7 @@
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">11</td>
             <td class="p-1 align-middle">
                 Liter
             </td>
@@ -193,7 +210,7 @@
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle">7</td>
+            <td class="p-1 align-middle">12</td>
             <td class="p-1 align-middle">
                 KM
             </td>
@@ -615,7 +632,7 @@
         });
 
         function renumberRows() {
-            let no = 9;
+            let no = 13;
 
             $('#tableUnit > tbody > tr').each(function() {
                 // row khusus tidak ikut nomor

@@ -14,6 +14,8 @@ return [
     'Crane Truck',
     'Prime Truck',
     'Fuel Truck',
+    'Flat Deck Crane Truck',
+    'Flat Deck Crane',
     'Light Gas',
     'LCT'
 ];

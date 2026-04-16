@@ -38,6 +38,7 @@ return new class extends Migration
             $table->date('exp_stnk')->nullable();
             $table->date('exp_tax')->nullable();
             $table->date('exp_comm')->nullable(); //Commissioning
+            $table->string('description')->nullable();
             $table->string('status', 30)->nullable();
             $table->timestamps();
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');

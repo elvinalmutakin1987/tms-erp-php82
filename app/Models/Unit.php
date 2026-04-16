@@ -57,4 +57,9 @@ class Unit extends Model
     {
         return $this->hasMany(Purchase_requisition::class);
     }
+
+    public function unit_target(): HasMany
+    {
+        return $this->hasMany(Unit_target::class);
+    }
 }

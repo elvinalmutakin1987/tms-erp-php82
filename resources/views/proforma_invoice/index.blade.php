@@ -24,18 +24,26 @@
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Requisition"><i
                                             class='bx bxs-plus-square'></i>New</a>
+
+                                    <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
+                                        data-bs-toggle="modal" data-bs-target="#formBulkModal"
+                                        data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a>
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select select-top" id="unit" name="unit">
                                         <option value="All">All Unit</option>
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <div class="col-3">
                                     <select class="form-select select-top" id="_status" name="_status">
                                         <option value="All">All Status</option>
                                         <option value="Draft">Draft</option>
                                         <option value="Approval">Approval</option>
                                         <option value="Open">Open</option>
+                                        <option value="Send User">Send User</option>
+                                        <option value="User Approval">User Approval</option>
+                                        <option value="Custodian">Custodian Approval</option>
+                                        <option value="Received">Received</option>
                                         <option value="Cancel">Cancel</option>
                                         <option value="Done">Done</option>
                                     </select>
@@ -62,10 +70,9 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Requisition Number</th>
-                                        <th>Maintenance Number</th>
+                                        <th>Prof. Invoice Number</th>
+                                        <th>Contract Number</th>
                                         <th>Date</th>
-                                        <th>Type</th>
                                         <th>Unit</th>
                                         <th>Status</th>
                                         <th width="20">Action</th>
@@ -84,9 +91,9 @@
     </div>
     <!--end page wrapper -->
 
-    @include('purchase_requisition.modal')
+    @include('proforma_invoice.modal')
 
-    @include('purchase_requisition.modal-detail')
+    @include('proforma_invoice.modal-bulk')
 @endsection
 
 @section('js')
@@ -136,26 +143,20 @@
                         targets: '_all'
                     },
                     {
-                        data: 'requisition_no',
-                        name: 'requisition_no',
+                        data: 'proforma_no',
+                        name: 'proforma_no',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'maintenance_no',
-                        name: 'maintenance_no',
+                        data: 'contract_no',
+                        name: 'contract_no',
                         orderable: true,
                         searchable: true,
                     },
                     {
                         data: 'date',
                         name: 'date',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'type',
-                        name: 'type',
                         orderable: true,
                         searchable: true,
                     },
@@ -341,6 +342,46 @@
             });
         }
 
+        // $('#saveButton').on('click', function() {
+        //     var formData = new FormData($('#formModal').find('form')[0]);
+        //     var url = '{{ route('purchaserequisition.store') }}';
+        //     var type = 'POST';
+        //     if (requisitionId != '') {
+        //         url = '{{ route('purchaserequisition.update', ':_id') }}';
+        //         url = url.replace(':_id', requisitionId);
+        //         formData.append('_method', 'PUT');
+        //     }
+        //     $.ajax({
+        //         url: url,
+        //         type: type,
+        //         data: formData,
+        //         contentType: false,
+        //         processData: false,
+        //         success: function(response) {
+        //             Swal.fire({
+        //                 title: response.title,
+        //                 text: response.message,
+        //                 icon: "success",
+        //                 timer: 5000,
+        //                 didOpen: () => {},
+        //                 willClose: () => {
+        //                     $('#table-data').DataTable().ajax.reload(null, false);
+        //                     $('#formModal form')[0].reset();
+        //                     p2hId = '';
+        //                     $('#formModal').modal('hide');
+        //                 }
+        //             });
+        //         },
+        //         error: function(xhr, status, error) {
+        //             var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+        //             Swal.fire({
+        //                 icon: "error",
+        //                 title: "Oops...",
+        //                 text: errorMessage,
+        //             });
+        //         }
+        //     });
+        // });
         $('.saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('purchaserequisition.store') }}';

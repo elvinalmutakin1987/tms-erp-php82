@@ -250,7 +250,8 @@ class PurchaseRequisitionController extends Controller
                     'user_id' => Auth::user()->id
                 ]
             );
-            $purchase_requisition->update($data);
+            $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
+            $lockPurchase_requisition->update($data);
             foreach ($request->maintenance_item_id as $i => $item) {
                 $purchase_requisition->purchase_requisition_detail()->updateOrCreate(
                     [

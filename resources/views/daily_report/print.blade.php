@@ -93,7 +93,7 @@
     }
 
     .docno {
-        font-size: 14pt;
+        font-size: 10pt;
         font-weight: 700;
         line-height: 1.1;
     }
@@ -501,6 +501,44 @@
                 </td>
             </tr>
         </tbody>
+
+        <thead>
+            <tr class="checklist-head">
+                <th colspan="4">Remarks</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td class="p-1 align-middle" colspan="4">
+                    {!! $daily_report->remarks !!}
+                </td>
+            </tr>
+        </tbody>
+
+        <thead>
+            <tr class="checklist-head">
+                <th colspan="4">Refule</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <tr>
+                <td class="p-1 align-middle" style="width: 20%">From</td>
+                <td class="p-1 align-middle" colspan="3">{{ $daily_report->refule_type }}</td>
+            </tr>
+            <tr>
+                <td class="p-1 align-middle" style="width: 20%">Liter</td>
+                <td class="p-1 align-middle" colspan="3">
+                    {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
+                </td>
+            </tr>
+            <tr>
+                <td class="p-1 align-middle" style="width: 20%">KM</td>
+                <td class="p-1 align-middle" colspan="3">
+                    {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}</td>
+            </tr>
+        </tbody>
     </table>
 
     <table class="table-p2h">
@@ -624,6 +662,16 @@
                 <td class="p-1 align-middle">KM</td>
                 <td class="p-1 align-middle">
                     {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}</td>
+            </tr>
+            <tr style="background-color: #D9D2D0">
+                <td class="p-1 align-middle" colspan="3">
+                    <b>Remarks</b>
+                </td>
+            </tr>
+            <tr>
+                <td class="p-1 align-middle" colspan="3">
+                    {!! $daily_report->remarks !!}
+                </td>
             </tr>
         </tbody>
     </table>

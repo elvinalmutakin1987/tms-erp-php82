@@ -201,7 +201,6 @@
             isFmt = false;
 
             $("#" + key).val(numbro.unformat(el.value));
-            updateKmTotal();
         }
 
         $qty.on('keydown', function(e) {

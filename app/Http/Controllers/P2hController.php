@@ -224,7 +224,8 @@ class P2hController extends Controller
                 ),
                 ['input_method' => 'Web']
             );
-            $p2h->lockForUpdate($data);
+            $lockP2h = P2h::where('id', $p2h->id)->lockForUpdate()->first();
+            $lockP2h->update($data);
             foreach ($request->inspection_item as $key => $item) {
                 $p2h->p2h_detail()->updateOrCreate(
                     [

@@ -179,13 +179,18 @@
                         $('#contract_no').val(response.data.contract_no);
                         $('#start_date').val(response.data.start_date);
                         $('#end_date').val(response.data.end_date);
-                        $('#_value').val(numbro(response.data.value).format({
-                            thousandSeparated: true,
-                        }));
+                        $('#_value').val(response.data.value ? numbro(response.data.value)
+                            .format({
+                                thousandSeparated: true,
+                            }) : '');
                         $('#value').val(response.data.value);
                         $('#notes').val(response.data.notes);
+                        $('#service_id').val(response.data.service_id).trigger('change');
                         clientVendorId = response.data.client_vendor_id;
                         serviceId = response.data.service_id;
+                        $("#div-rate").html(response.html);
+                        var newRow = $(response.html_target);
+                        $("#tbody_tableTarget tr").eq(0).after(newRow);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -286,16 +291,39 @@
             });
 
             $.ajax({
+                url: '{{ route('contract.get_unit_all') }}',
+                type: 'GET',
+                success: function(response) {
+                    $('#unit').empty();
+                    $.each(response.data, function(index, unit) {
+                        $('#unit').append('<option value="' + unit.id +
+                            '">' +
+                            unit.vehicle_no +
+                            '</client>');
+                    });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: error,
+                    });
+                }
+            });
+
+            $('#service_id').val('').trigger('change');
+            $.ajax({
                 url: '{{ route('contract.get_service_all') }}',
                 type: 'GET',
                 success: function(response) {
                     $('#service_id').empty();
+                    $('#service_id').append(
+                        '<option value="">-- Pilih Service --</option>'); // placeholder
                     $.each(response.data, function(index, service) {
-                        $('#service_id').append('<option value="' + service.id +
-                            '">' +
-                            service.name +
-                            '</client>');
+                        $('#service_id').append('<option value="' + service.id + '">' + service
+                            .name + '</option>');
                     });
+
                     if (serviceId != '') {
                         $("#service_id").val(serviceId).trigger('change');
                     }
@@ -310,6 +338,14 @@
             });
 
             $("#client").select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                    'w-100') ? '100%' : 'style',
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            $("#unit").select2({
                 theme: "bootstrap-5",
                 width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
                     'w-100') ? '100%' : 'style',
@@ -418,6 +454,11 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             contractId = '';
+            clientId = '';
+            clientVendorId = '';
+            serviceId = '';
+            $('#tableTarget tbody tr').not(':first').remove();
+            $('#service_id').val(null).trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -429,12 +470,13 @@
                 const $el = $(this);
                 $el.select2({
                         theme: "bootstrap-5",
-                        dropdownParent: $(
-                            '#formModal'),
+                        dropdownParent: $('#formModal'),
                         width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                             'style'),
                         selectOnClose: false,
                         minimumResultsForSearch: 0,
+                        placeholder: "",
+                        allowClear: true,
                     })
                     .on('select2:open', function() {
                         setTimeout(function() {
@@ -442,12 +484,40 @@
                             $search.trigger('focus');
                             $('.select2-container--open').css('z-index', 1056);
                         }, 0);
+                    })
+                    .on('change', function() {
+                        if ($(this).attr('id') === 'service_id') {
+                            $("#div-rate").html("");
+                            const val = $(this).val();
+                            if (val !== null && val !== "") {
+                                $.ajax({
+                                    url: '{{ route('contract.get_service_item') }}',
+                                    type: 'GET',
+                                    data: {
+                                        service_id: val
+                                    },
+                                    success: function(response) {
+                                        if (serviceId == "") {
+                                            $("#div-rate").html(response.html);
+                                        }
+                                    },
+                                    error: function(xhr, status, error) {
+                                        Swal.fire({
+                                            icon: "error",
+                                            title: "Oops...",
+                                            text: error,
+                                        });
+                                    }
+                                });
+                            }
+                        }
                     });
             });
         }
 
-
         const $value = $('#_value');
+        const $target = $('#_target');
+        const $price = $('#_price');
 
         let isFmt = false;
         let userDecSep = null;
@@ -475,7 +545,7 @@
             return str.length;
         }
 
-        $value.on('keydown', function(e) {
+        function textKeyDown(e) {
             if (e.ctrlKey || e.metaKey || e.altKey) return;
 
             const okNav = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter'];
@@ -484,18 +554,18 @@
             if (/^[0-9.,]$/.test(e.key)) return;
 
             e.preventDefault();
-        });
+        }
 
-        $value.on('input', function(e) {
+        function textInput(key, e) {
             if (isFmt) return;
             isFmt = true;
 
-            const el = this;
-            const raw = el.value;
-            const caretRaw = el.selectionStart ?? raw.length;
+            const el = e.target;
+            const raw = el.value || '';
+            const caretRaw = (typeof el.selectionStart === 'number') ? el.selectionStart : raw.length;
 
-            const oe = e.originalEvent || {};
-            const inserted = typeof oe.data === 'string' ? oe.data : '';
+            const oe = e.originalEvent || e;
+            const inserted = (oe && typeof oe.data === 'string') ? oe.data : '';
 
             const prevDecSep = userDecSep;
             const justTypedSep = (inserted === '.' || inserted === ',');
@@ -532,17 +602,113 @@
 
             el.value = formatted;
 
-            if (justSetDecSep && keepDec) {
-                const decPosNew = formatted.indexOf(userDecSep);
-                const newCaret = decPosNew + 1;
-                el.setSelectionRange(newCaret, newCaret);
-            } else {
-                const newCaret = caretByDigits(formatted, digitsLeft);
-                el.setSelectionRange(newCaret, newCaret);
+            if (typeof el.setSelectionRange === 'function') {
+                if (justSetDecSep && keepDec) {
+                    const decPosNew = formatted.indexOf(userDecSep);
+                    const newCaret = decPosNew + 1;
+                    el.setSelectionRange(newCaret, newCaret);
+                } else {
+                    const newCaret = caretByDigits(formatted, digitsLeft);
+                    el.setSelectionRange(newCaret, newCaret);
+                }
             }
 
             isFmt = false;
-            $("#value").val(numbro.unformat(el.value));
+
+            $("#" + key).val(numbro.unformat(el.value));
+        }
+
+        $value.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $value.on('input', function(e) {
+            textInput("value", e);
+        });
+
+        $target.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $target.on('input', function(e) {
+            textInput("target", e);
+        });
+
+        $price.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $price.on('input', function(e) {
+            textInput("price", e);
+        });
+
+        $('#addItemButton').on('click', function() {
+            var tbody = $("#tableTarget > tbody");
+            var unit_id = $("#unit").val();
+            var unit_name = $("#unit option:selected").text();
+            var target = $("#target").val();
+            var _target = $("#_target").val();
+            var price = $("#price").val();
+            var _price = $("#_price").val();
+            var newRow = `
+                <tr>
+                    <td class="p-1 align-middle row-number">
+                        #
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="unit_id" name="unit_id[]" readonly value="${unit_id}">
+                       <input type="text" class="form-control" id="unit_name" name="unit_name[]" readonly value="${unit_name}">
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="target" name="target[]" readonly value="${target}">
+                       <input type="text" class="form-control" id="_target" name="_target[]" readonly value="${_target}">
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${price}">
+                       <input type="text" class="form-control" id="_price" name="_price[]" readonly value="${_price}">
+                    </td>
+                    <td class="text-center p-1 align-middle">
+                        <div class="row row-cols-auto g-3">
+                            <div class="col">
+                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+                                    id="removeItemButton"></button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            $("#target").val('');
+            $("#_target").val('');
+            $("#price").val('');
+            $("#_price").val('');
+            $("#unit").val('').trigger('change');
+            tbody.append(newRow);
+            renumberRows();
+        });
+
+        function renumberRows() {
+            let no = 1;
+
+            $('#tableTarget > tbody > tr').each(function() {
+                if ($(this).hasClass('fixed-row')) {
+                    $(this).find('.row-number').text('');
+                    return;
+                }
+
+                $(this).find('.row-number').text(no);
+                no++;
+            });
+        }
+
+        $("#tableTarget").on("click", ".delete-row", function() {
+            $(this).closest("tr").remove();
+
+            if ($(this).hasClass('fixed-row')) {
+                return;
+            }
+
+            $(this).remove();
+            renumberRows();
         });
     </script>
     <!--app JS-->

@@ -88,7 +88,7 @@
     }
 
     .docno {
-        font-size: 14pt;
+        font-size: 10pt;
         font-weight: 700;
         line-height: 1.1;
     }

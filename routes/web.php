@@ -21,6 +21,7 @@ use App\Http\Controllers\MaintenanceItemController;
 use App\Http\Controllers\MechanicalInspectionController;
 use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
+use App\Http\Controllers\ProformaInvoiceController;
 use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\UnitRateController;
 use Illuminate\Support\Facades\Storage;
@@ -171,6 +172,15 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin')
         ->name('contract.update_status');
 
+    Route::get('contract-get-service-item', [ContractController::class, 'get_service_item'])
+        ->middleware('role:superadmin')
+        ->name('contract.get_service_item');
+
+    Route::get('contract-get-unit-all', [ContractController::class, 'get_unit_all'])
+        ->middleware('role:superadmin')
+        ->name('contract.get_unit_all');
+
+
 
     /**
      * Routenya Unit rate buat perhitungan proforma invoice
@@ -191,6 +201,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('unitrate-get-contract', [UnitRateController::class, 'get_contract'])
         ->middleware('role:superadmin')
         ->name('unitrate.get_contract');
+
 
     /**
      * Routenya MRO Item / Item barang buat pesan2
@@ -453,4 +464,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/files/{path}', function ($path) {
         return Storage::disk('local')->response($path);
     })->where('path', '.*')->name('files.show');
+
+
+    /**
+     * Routenya Proforma Invoice
+     */
+    Route::resource('proformainvoice', ProformaInvoiceController::class)
+        ->parameters(['proformainvoice' => 'proforma_invoice'])
+        ->middleware('role:superadmin|proforma_invoice')
+        ->names('proformainvoice');
+
+    Route::get('proformainvoice-get-unit-all', [ProformaInvoiceController::class, 'get_unit_all'])
+        ->middleware('role:superadmin|proforma_invoice')
+        ->name('proformainvoice.get_unit_all');
+
+    Route::get('proformainvoice-get-client-all', [ProformaInvoiceController::class, 'get_client_all'])
+        ->middleware('role:superadmin|proforma_invoice')
+        ->name('proformainvoice.get_client_all');
 });
