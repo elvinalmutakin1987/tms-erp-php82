@@ -16,4 +16,9 @@ class Service extends Model
     {
         return $this->hasMany(Service_item::class);
     }
+
+    public function contract(): HasMany
+    {
+        return $this->hasMany(Contract::class);
+    }
 }

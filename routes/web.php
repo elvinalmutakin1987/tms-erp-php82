@@ -481,4 +481,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('proformainvoice-get-client-all', [ProformaInvoiceController::class, 'get_client_all'])
         ->middleware('role:superadmin|proforma_invoice')
         ->name('proformainvoice.get_client_all');
+
+    Route::get('proformainvoice-load-table-add', [ProformaInvoiceController::class, 'get_table_add'])
+        ->middleware('role:superadmin|proforma_invoice')
+        ->name('proformainvoice.get_table_add');
 });

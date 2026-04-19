@@ -8,19 +8,25 @@
         </tr>
     </thead>
     <tbody>
-        @foreach ($service_item as $d)
+        @if ($service_item->count() > 0)
+            @foreach ($service_item as $d)
+                <tr>
+                    <td class="p-1 align-middle">{{ $loop->iteration }}</td>
+                    <td class="p-1 align-middle">{{ $d->item_no }}</td>
+                    <td class="p-1 align-middle">{{ $d->item_des }}</td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="service_item_id{{ $d->id }}"
+                            name="service_item_id[]" value="{{ $d->id }}">
+                        <input type="hidden" class="form-control" id="rate{{ $d->id }}" name="rate[]">
+                        <input type="text" class="form-control" id="_rate{{ $d->id }}" name="_rate[]">
+                    </td>
+                </tr>
+            @endforeach
+        @else
             <tr>
-                <td class="p-1 align-middle">{{ $loop->iteration }}</td>
-                <td class="p-1 align-middle">{{ $d->item_no }}</td>
-                <td class="p-1 align-middle">{{ $d->item_des }}</td>
-                <td class="p-1 align-middle">
-                    <input type="hidden" class="form-control" id="service_item_id{{ $d->id }}"
-                        name="service_item_id[]" value="{{ $d->id }}">
-                    <input type="hidden" class="form-control" id="rate{{ $d->id }}" name="rate[]">
-                    <input type="text" class="form-control" id="_rate{{ $d->id }}" name="_rate[]">
-                </td>
+                <td class="p-1 align-middle" colspan="4">No data showed.</td>
             </tr>
-        @endforeach
+        @endif
     </tbody>
 </table>
 

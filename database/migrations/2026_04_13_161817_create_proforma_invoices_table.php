@@ -22,8 +22,8 @@ return new class extends Migration
             $table->string('periode')->nullable();
             $table->date('periode_start')->nullable();
             $table->date('periode_finish')->nullable();
-            $table->decimal('target', 16, 2)->nullable();
-            $table->decimal('price', 16, 2)->nullable();
+            $table->decimal('target', 16, 2)->nullable(); //Target PA
+            $table->decimal('price', 16, 2)->nullable(); //Rate
             $table->integer('act_work_day')->nullable();
             $table->integer('act_work_hour')->nullable();
             $table->decimal('breakdown', 16, 2)->nullable();

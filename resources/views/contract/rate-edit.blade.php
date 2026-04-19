@@ -12,27 +12,33 @@
         </tr>
     </thead>
     <tbody>
-        @foreach ($service_item as $d)
-            @php
-                $contract_rate = Contract_rate::where('contract_id', $contract->id)
-                    ->where('service_item_id', $d->id)
-                    ->first();
-                $rate = $contract_rate ? $contract_rate->rate : 0;
-            @endphp
+        @if ($service_item->count() > 0)
+            @foreach ($service_item as $d)
+                @php
+                    $contract_rate = Contract_rate::where('contract_id', $contract->id)
+                        ->where('service_item_id', $d->id)
+                        ->first();
+                    $rate = $contract_rate ? $contract_rate->rate : 0;
+                @endphp
+                <tr>
+                    <td class="p-1 align-middle">{{ $loop->iteration }}</td>
+                    <td class="p-1 align-middle">{{ $d->item_no }}</td>
+                    <td class="p-1 align-middle">{{ $d->item_des }}</td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="service_item_id{{ $d->id }}"
+                            name="service_item_id[]" value="{{ $d->id }}">
+                        <input type="hidden" class="form-control" id="rate{{ $d->id }}" name="rate[]"
+                            value="{{ $rate }}">
+                        <input type="text" class="form-control" id="_rate{{ $d->id }}" name="_rate[]"
+                            value="{{ Number::format($rate, precision: 0) }}">
+                    </td>
+                </tr>
+            @endforeach
+        @else
             <tr>
-                <td class="p-1 align-middle">{{ $loop->iteration }}</td>
-                <td class="p-1 align-middle">{{ $d->item_no }}</td>
-                <td class="p-1 align-middle">{{ $d->item_des }}</td>
-                <td class="p-1 align-middle">
-                    <input type="hidden" class="form-control" id="service_item_id{{ $d->id }}"
-                        name="service_item_id[]" value="{{ $d->id }}">
-                    <input type="hidden" class="form-control" id="rate{{ $d->id }}" name="rate[]"
-                        value="{{ $rate }}">
-                    <input type="text" class="form-control" id="_rate{{ $d->id }}" name="_rate[]"
-                        value="{{ Number::format($rate, precision: 0) }}">
-                </td>
+                <td class="p-1 align-middle" colspan="4">No data showed.</td>
             </tr>
-        @endforeach
+        @endif
     </tbody>
 </table>
 

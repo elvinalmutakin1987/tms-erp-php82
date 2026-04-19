@@ -108,31 +108,35 @@ class ContractController extends Controller
                 ]
             );
             $contract = Contract::create($data);
-            foreach ($request->service_item_id as $i => $item) {
-                $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
-                $contract->contract_rate()->updateOrCreate(
-                    [
-                        'contract_id' => $contract->id,
-                        'service_item_id' => $item,
-                    ],
-                    [
-                        'rate' => $rate
-                    ]
-                );
+            if ($request->service_item_id) {
+                foreach ($request->service_item_id as $i => $item) {
+                    $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
+                    $contract->contract_rate()->updateOrCreate(
+                        [
+                            'contract_id' => $contract->id,
+                            'service_item_id' => $item,
+                        ],
+                        [
+                            'rate' => $rate
+                        ]
+                    );
+                }
             }
-            foreach ($request->unit_id as $i => $item) {
-                $target = isset($request->target[$i]) ? $request->target[$i] : 0;
-                $price = isset($request->price[$i]) ? $request->price[$i] : 0;
-                $contract->unit_target()->updateOrCreate(
-                    [
-                        'contract_id' => $contract->id,
-                        'unit_id' => $item,
-                    ],
-                    [
-                        'target' => $target,
-                        'price' => $price
-                    ]
-                );
+            if ($request->unit_id) {
+                foreach ($request->unit_id as $i => $item) {
+                    $target = isset($request->target[$i]) ? $request->target[$i] : 0;
+                    $price = isset($request->price[$i]) ? $request->price[$i] : 0;
+                    $contract->unit_target()->updateOrCreate(
+                        [
+                            'contract_id' => $contract->id,
+                            'unit_id' => $item,
+                        ],
+                        [
+                            'target' => $target,
+                            'price' => $price
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([
@@ -205,31 +209,35 @@ class ContractController extends Controller
                 )
             );
             $contract->update($data);
-            foreach ($request->service_item_id as $i => $item) {
-                $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
-                $contract->contract_rate()->updateOrCreate(
-                    [
-                        'contract_id' => $contract->id,
-                        'service_item_id' => $item,
-                    ],
-                    [
-                        'rate' => $rate
-                    ]
-                );
+            if ($request->service_item_id) {
+                foreach ($request->service_item_id as $i => $item) {
+                    $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
+                    $contract->contract_rate()->updateOrCreate(
+                        [
+                            'contract_id' => $contract->id,
+                            'service_item_id' => $item,
+                        ],
+                        [
+                            'rate' => $rate
+                        ]
+                    );
+                }
             }
-            foreach ($request->unit_id as $i => $item) {
-                $target = isset($request->target[$i]) ? $request->target[$i] : 0;
-                $price = isset($request->price[$i]) ? $request->price[$i] : 0;
-                $contract->unit_target()->updateOrCreate(
-                    [
-                        'contract_id' => $contract->id,
-                        'unit_id' => $item,
-                    ],
-                    [
-                        'target' => $target,
-                        'price' => $price
-                    ]
-                );
+            if ($request->unit_id) {
+                foreach ($request->unit_id as $i => $item) {
+                    $target = isset($request->target[$i]) ? $request->target[$i] : 0;
+                    $price = isset($request->price[$i]) ? $request->price[$i] : 0;
+                    $contract->unit_target()->updateOrCreate(
+                        [
+                            'contract_id' => $contract->id,
+                            'unit_id' => $item,
+                        ],
+                        [
+                            'target' => $target,
+                            'price' => $price
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([

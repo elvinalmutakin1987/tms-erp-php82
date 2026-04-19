@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('contract_id')->nullable();
             $table->unsignedBigInteger('service_item_id')->nullable();
+            $table->string('item_no')->nullable();
+            $table->string('service_item')->nullable();
             $table->decimal('rate', 16, 2)->nullable();
             $table->timestamps();
             $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');

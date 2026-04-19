@@ -34,4 +34,9 @@ class Contract extends Model implements Auditable
     {
         return $this->hasMany(Unit_target::class);
     }
+
+    public function service(): BelongsTo
+    {
+        return $this->belongsTo(Service::class)->withDefault(['name' => null]);
+    }
 }

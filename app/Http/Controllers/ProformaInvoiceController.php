@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contract;
 use App\Models\Proforma_invoice;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -93,13 +94,14 @@ class ProformaInvoiceController extends Controller
                 })
                 ->make();
         }
+        $contract = Contract::where('status', 'Active')->get();
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
             'sub-module' => 'Proforma Invoice',
-            'route-sub-module' => 'proformainvoice.index',
+            'route-sub-module' => 'proformainvoice.index'
         ];
-        return view('proforma_invoice.index', compact('breadcrum'));
+        return view('proforma_invoice.index', compact('breadcrum', 'contract'));
     }
 
     /**
@@ -215,6 +217,73 @@ class ProformaInvoiceController extends Controller
      */
     public function destroy(Proforma_invoice $proforma_invoice)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $proforma_invoice->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Hitung summary breakdown
+     */
+    public function summary_breakdown(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $html = view($view, compact('uom'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'requisition_prev_no' => $requisition_prev_no
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Hitung summary transport
+     */
+    public function summary_transport() {}
+
+    /**
+     * Ngambil tabel add
+     */
+    public function get_table_add(Request $request)
+    {
+        try {
+            $contract = Contract::find($request->contract_id);
+            if ($contract->service->type == 'Unit Rental') {
+                $view = "proforma_invoice.table-rental-add";
+            } else {
+                $view = "proforma_invoice.table-transport-add";
+            }
+            $html = view($view)->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

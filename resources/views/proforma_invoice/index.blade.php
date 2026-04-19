@@ -22,8 +22,8 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Requisition"><i
-                                            class='bx bxs-plus-square'></i>New</a>
+                                        data-bs-toggle="modal" data-bs-target="#formModal"
+                                        data-title="Add Proforma Invoice"><i class='bx bxs-plus-square'></i>New</a>
 
                                     <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formBulkModal"
@@ -90,8 +90,7 @@
         </div>
     </div>
     <!--end page wrapper -->
-
-    @include('proforma_invoice.modal')
+    @include('proforma_invoice.modal', $contract)
 
     @include('proforma_invoice.modal-bulk')
 @endsection
@@ -104,8 +103,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        var requisitionId = '';
-        var maintenanceId = '';
+        var proformaInvoiceId = '';
+        var contractId = '';
         var unitId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -257,43 +256,6 @@
                 $('#table-data').DataTable().draw();
             });
 
-            $.ajax({
-                url: '{{ route('purchaserequisition.get_unit_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#unit').empty();
-                    $('#unit').append('<option value="All">All Unit</option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                    if (unitId != '') {
-                        $("#unit").val(unitId).trigger('change');
-                    }
-
-                    $('#unit_id').empty();
-                    $('#unit_id').append('<option value="All">All Unit</option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit_id').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                    if (unitId != '') {
-                        $("#unit_id").val(unitId).trigger('change');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
-
             gen_select2();
         });
 
@@ -308,7 +270,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('purchaserequisition.destroy', ':_id') }}';
+                    let url = '{{ route('proformainvoice.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -342,53 +304,13 @@
             });
         }
 
-        // $('#saveButton').on('click', function() {
-        //     var formData = new FormData($('#formModal').find('form')[0]);
-        //     var url = '{{ route('purchaserequisition.store') }}';
-        //     var type = 'POST';
-        //     if (requisitionId != '') {
-        //         url = '{{ route('purchaserequisition.update', ':_id') }}';
-        //         url = url.replace(':_id', requisitionId);
-        //         formData.append('_method', 'PUT');
-        //     }
-        //     $.ajax({
-        //         url: url,
-        //         type: type,
-        //         data: formData,
-        //         contentType: false,
-        //         processData: false,
-        //         success: function(response) {
-        //             Swal.fire({
-        //                 title: response.title,
-        //                 text: response.message,
-        //                 icon: "success",
-        //                 timer: 5000,
-        //                 didOpen: () => {},
-        //                 willClose: () => {
-        //                     $('#table-data').DataTable().ajax.reload(null, false);
-        //                     $('#formModal form')[0].reset();
-        //                     p2hId = '';
-        //                     $('#formModal').modal('hide');
-        //                 }
-        //             });
-        //         },
-        //         error: function(xhr, status, error) {
-        //             var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-        //             Swal.fire({
-        //                 icon: "error",
-        //                 title: "Oops...",
-        //                 text: errorMessage,
-        //             });
-        //         }
-        //     });
-        // });
         $('.saveButton').on('click', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('purchaserequisition.store') }}';
+            var url = '{{ route('proformainvoice.store') }}';
             var type = 'POST';
             formData.append('status', $(this).val());
-            if (requisitionId != '') {
-                url = '{{ route('purchaserequisition.update', ':_id') }}';
+            if (proformaInvoiceId != '') {
+                url = '{{ route('proformainvoice.update', ':_id') }}';
                 url = url.replace(':_id', requisitionId);
                 formData.append('_method', 'PUT');
             }
@@ -430,49 +352,15 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-
-            var tbody = $("#tableItem > tbody");
-            tbody.append(`
-                    <tr>
-                        <td colspan="6">
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually">Loading...</span>
-                        </td>
-                    </tr>
-                    `);
-            setTimeout(function() {
-                const isEdit = requisitionId != '';
-                const url = isEdit ?
-                    '{{ route('purchaserequisition.get_table_edit', ':_id') }}'.replace(':_id',
-                        requisitionId) :
-                    '{{ route('purchaserequisition.get_table_add') }}';
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $("#tableItem > tbody").html(response.html);
-
-                        const titleText = isEdit ? 'Edit Requisition' : 'Add Requisition';
-                        const number = isEdit ? response.requisition_no : response
-                            .requisition_prev_no;
-
-                        $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
-            }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            requisitionId = '';
-            maintenanceId = '';
+            proformaInvoiceId = '';
+            contractId = '';
             unitId = '';
-            $('#tableItem tbody').empty();
+            $("#div-table").html("");
+            $("#contract_id").val('').trigger('change');
             $("#unit_id").val('All').trigger('change');
-            $("#maintenance_id").val('All').trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -501,6 +389,30 @@
                 });
             });
         }
+
+        $('#contract_id').on('change', function() {
+            var val = $(this).val();
+            if (val != null) {
+                $("#div-table").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually">Loading...</span>`);
+                setTimeout(function() {
+                    $.ajax({
+                        url: "{{ route('proformainvoice.get_table_add') }}",
+                        data: {
+                            contract_id: val
+                        },
+                        type: 'GET',
+                        success: function(response) {
+                            $("#div-table").html(response.html);
+
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+                }, 500);
+            }
+        });
     </script>
     <!--app JS-->
 @endsection

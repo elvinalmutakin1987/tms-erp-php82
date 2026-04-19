@@ -39,7 +39,6 @@
 
                                 </tbody>
                             </table>
-
                         </div>
                     </div>
                     <div class="row mb-2">
