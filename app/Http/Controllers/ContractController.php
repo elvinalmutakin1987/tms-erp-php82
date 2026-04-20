@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\Client_vendor;
+use App\Models\Contract_fmf;
 use App\Models\Contract_rate;
 use App\Models\Service;
 use App\Models\Service_item;
@@ -108,20 +109,23 @@ class ContractController extends Controller
                 ]
             );
             $contract = Contract::create($data);
-            if ($request->service_item_id) {
-                foreach ($request->service_item_id as $i => $item) {
+            //service rate
+            if ($request->item_no) {
+                foreach ($request->item_no as $i => $item) {
                     $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
                     $contract->contract_rate()->updateOrCreate(
                         [
                             'contract_id' => $contract->id,
-                            'service_item_id' => $item,
+                            'item_no' => $item,
                         ],
                         [
+                            'service_item' => $request->service_item[$i],
                             'rate' => $rate
                         ]
                     );
                 }
             }
+            //unit rate
             if ($request->unit_id) {
                 foreach ($request->unit_id as $i => $item) {
                     $target = isset($request->target[$i]) ? $request->target[$i] : 0;
@@ -134,6 +138,21 @@ class ContractController extends Controller
                         [
                             'target' => $target,
                             'price' => $price
+                        ]
+                    );
+                }
+            }
+            //fmf
+            if ($request->year) {
+                foreach ($request->year as $i => $item) {
+                    $value = isset($request->value[$i]) ? $request->value[$i] : 0;
+                    $contract->contract_fmf()->updateOrCreate(
+                        [
+                            'contract_id' => $contract->id,
+                            'year' => $item,
+                        ],
+                        [
+                            'value' => $value,
                         ]
                     );
                 }
@@ -162,16 +181,20 @@ class ContractController extends Controller
         $service_item = Service_item::where('service_id', $contract->service_id)->get();
         $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
         $unit_target = Unit_target::where('contract_id', $contract->id)->get();
-        $view = 'contract.rate-edit';
-        $html = view($view, compact('service_item', 'contract_rate', 'contract'))->render();
+        $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->get();
+        $view_item = 'contract.item-edit';
         $view_target = 'contract.target-edit';
+        $view_fmf = 'contract.fmf-edit';
+        $html_item = view($view_item, compact('contract_rate'))->render();
         $html_target = view($view_target, compact('unit_target'))->render();
+        $html_fmf = view($view_fmf, compact('contract_fmf'))->render();
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $contract,
-            'html' => $html,
-            'html_target' => $html_target
+            'html_item' => $html_item,
+            'html_target' => $html_target,
+            'html_fmf' => $html_fmf
         ], 200);
     }
 
@@ -209,20 +232,25 @@ class ContractController extends Controller
                 )
             );
             $contract->update($data);
-            if ($request->service_item_id) {
-                foreach ($request->service_item_id as $i => $item) {
+            //service rate
+            if ($request->item_no) {
+                foreach ($request->item_no as $i => $item) {
                     $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
                     $contract->contract_rate()->updateOrCreate(
                         [
                             'contract_id' => $contract->id,
-                            'service_item_id' => $item,
+                            'item_no' => $item,
                         ],
                         [
+                            'service_item' => $request->service_item[$i],
                             'rate' => $rate
                         ]
                     );
                 }
+            } else {
+                $contract->contract_rate()->delete();
             }
+            //unit rate
             if ($request->unit_id) {
                 foreach ($request->unit_id as $i => $item) {
                     $target = isset($request->target[$i]) ? $request->target[$i] : 0;
@@ -238,6 +266,25 @@ class ContractController extends Controller
                         ]
                     );
                 }
+            } else {
+                $contract->unit_target()->delete();
+            }
+            //fmf
+            if ($request->year) {
+                foreach ($request->year as $i => $item) {
+                    $value = isset($request->value[$i]) ? $request->value[$i] : 0;
+                    $contract->contract_fmf()->updateOrCreate(
+                        [
+                            'contract_id' => $contract->id,
+                            'year' => $item,
+                        ],
+                        [
+                            'value' => $value,
+                        ]
+                    );
+                }
+            } else {
+                $contract->contract_fmf()->delete();
             }
             DB::commit();
             return response()->json([

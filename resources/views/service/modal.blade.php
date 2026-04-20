@@ -19,7 +19,7 @@
                          <label for="name" class="form-label">Name</label>
                          <input type="text" class="form-control" id="name" name="name">
                      </div>
-                     <div class="col-md-12 mb-2">
+                     {{-- <div class="col-md-12 mb-2">
                          <table class="table mb-0" id="tableStep">
                              <thead class="table-light">
                                  <tr>
@@ -50,7 +50,7 @@
                                  </tr>
                              </tbody>
                          </table>
-                     </div>
+                     </div> --}}
                  </form>
 
              </div>

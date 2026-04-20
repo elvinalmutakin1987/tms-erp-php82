@@ -253,111 +253,111 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-            var tbody = $("#tableStep > tbody");
-            tbody.append(`
-                    <tr>
-                        <td colspan="5">
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually">Loading...</span>
-                        </td>
-                    </tr>
-                    `);
+            // var tbody = $("#tableStep > tbody");
+            // tbody.append(`
+        //         <tr>
+        //             <td colspan="5">
+        //                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        //                 <span class="visually">Loading...</span>
+        //             </td>
+        //         </tr>
+        //         `);
 
-            setTimeout(function() {
-                var data = {
-                    'form': 'create'
-                };
-                if (serviceId != '') {
-                    data = {
-                        'form': 'edit',
-                        'service_id': serviceId
-                    };
-                    $.ajax({
-                        url: '{{ route('service.get_service_item_list') }}',
-                        data: data,
-                        type: 'GET',
-                        success: function(response) {
-                            setTimeout(function() {
-                                $('#tableStep tbody tr').not(':first').remove();
-                                tbody.append(response);
-                            }, 500);
-                        },
-                        error: function(xhr, status, error) {
-                            console.log(error)
-                        }
-                    });
-                } else {
-                    $('#tableStep tbody tr').not(':first').remove();
-                }
-            }, 500);
+            // setTimeout(function() {
+            //     var data = {
+            //         'form': 'create'
+            //     };
+            //     if (serviceId != '') {
+            //         data = {
+            //             'form': 'edit',
+            //             'service_id': serviceId
+            //         };
+            //         $.ajax({
+            //             url: '{{ route('service.get_service_item_list') }}',
+            //             data: data,
+            //             type: 'GET',
+            //             success: function(response) {
+            //                 setTimeout(function() {
+            //                     $('#tableStep tbody tr').not(':first').remove();
+            //                     tbody.append(response);
+            //                 }, 500);
+            //             },
+            //             error: function(xhr, status, error) {
+            //                 console.log(error)
+            //             }
+            //         });
+            //     } else {
+            //         $('#tableStep tbody tr').not(':first').remove();
+            //     }
+            // }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
             serviceId = '';
-            $('#tableStep tbody tr').not(':first').remove();
+            // $('#tableStep tbody tr').not(':first').remove();
         });
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
         });
 
-        $('#addItemButton').on('click', function() {
-            var tbody = $("#tableStep > tbody");
-            var item_no = $("#txt_item_no").val();
-            var item_des = $("#txt_item_des").val();
-            var newRow = `
-                <tr>
-                    <td class="p-1 align-middle row-number">
-                        #
-                    </td>
-                    <td class="p-1 align-middle">
-                       <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="${item_no}">
-                    </td>
-                    <td class="p-1 align-middle">
-                       <input type="text" class="form-control" id="item_des" name="item_des[]" readonly value="${item_des}">
-                    </td>
-                    <td class="text-center p-1 align-middle">
-                        <div class="row row-cols-auto g-3">
-                            <div class="col">
-                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-                                                        id="removeItemButton"></button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            `;
-            $("#txt_item_no").val('');
-            $("#txt_item_des").val('');
-            tbody.append(newRow);
+        // $('#addItemButton').on('click', function() {
+        //     var tbody = $("#tableStep > tbody");
+        //     var item_no = $("#txt_item_no").val();
+        //     var item_des = $("#txt_item_des").val();
+        //     var newRow = `
+    //         <tr>
+    //             <td class="p-1 align-middle row-number">
+    //                 #
+    //             </td>
+    //             <td class="p-1 align-middle">
+    //                <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="${item_no}">
+    //             </td>
+    //             <td class="p-1 align-middle">
+    //                <input type="text" class="form-control" id="item_des" name="item_des[]" readonly value="${item_des}">
+    //             </td>
+    //             <td class="text-center p-1 align-middle">
+    //                 <div class="row row-cols-auto g-3">
+    //                     <div class="col">
+    //                         <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+    //                                                 id="removeItemButton"></button>
+    //                     </div>
+    //                 </div>
+    //             </td>
+    //         </tr>
+    //     `;
+        //     $("#txt_item_no").val('');
+        //     $("#txt_item_des").val('');
+        //     tbody.append(newRow);
 
-            renumberRows();
-        });
+        //     renumberRows();
+        // });
 
-        function renumberRows() {
-            let no = 1;
+        // function renumberRows() {
+        //     let no = 1;
 
-            $('#tableStep > tbody > tr').each(function() {
-                // row khusus tidak ikut nomor
-                if ($(this).hasClass('fixed-row')) {
-                    $(this).find('.row-number').text('');
-                    return;
-                }
+        //     $('#tableStep > tbody > tr').each(function() {
+        //         // row khusus tidak ikut nomor
+        //         if ($(this).hasClass('fixed-row')) {
+        //             $(this).find('.row-number').text('');
+        //             return;
+        //         }
 
-                $(this).find('.row-number').text(no);
-                no++;
-            });
-        }
+        //         $(this).find('.row-number').text(no);
+        //         no++;
+        //     });
+        // }
 
-        $("#tableStep").on("click", ".delete-row", function() {
-            $(this).closest("tr").remove();
+        // $("#tableStep").on("click", ".delete-row", function() {
+        //     $(this).closest("tr").remove();
 
-            if ($(this).hasClass('fixed-row')) {
-                return;
-            }
+        //     if ($(this).hasClass('fixed-row')) {
+        //         return;
+        //     }
 
-            $(this).remove();
-            renumberRows();
-        });
+        //     $(this).remove();
+        //     renumberRows();
+        // });
 
         function gen_select2() {
             $('#type').each(function() {
@@ -381,30 +381,30 @@
             });
         }
 
-        function renumberRows() {
-            let no = 1;
-            $('#tableStep > tbody > tr').each(function() {
-                // row khusus tidak ikut nomor
-                if ($(this).hasClass('fixed-row')) {
-                    $(this).find('.row-number').text('');
-                    return;
-                }
+        // function renumberRows() {
+        //     let no = 1;
+        //     $('#tableStep > tbody > tr').each(function() {
+        //         // row khusus tidak ikut nomor
+        //         if ($(this).hasClass('fixed-row')) {
+        //             $(this).find('.row-number').text('');
+        //             return;
+        //         }
 
-                $(this).find('.row-number').text(no);
-                no++;
-            });
-        }
+        //         $(this).find('.row-number').text(no);
+        //         no++;
+        //     });
+        // }
 
-        $("#tableStep").on("click", ".delete-row", function() {
-            $(this).closest("tr").remove();
+        // $("#tableStep").on("click", ".delete-row", function() {
+        //     $(this).closest("tr").remove();
 
-            if ($(this).hasClass('fixed-row')) {
-                return;
-            }
+        //     if ($(this).hasClass('fixed-row')) {
+        //         return;
+        //     }
 
-            $(this).remove();
-            renumberRows();
-        });
+        //     $(this).remove();
+        //     renumberRows();
+        // });
     </script>
     <!--app JS-->
 @endsection

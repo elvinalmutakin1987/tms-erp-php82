@@ -30,6 +30,11 @@ class Contract extends Model implements Auditable
         return $this->hasMany(Contract_rate::class);
     }
 
+    public function contract_fmf(): HasMany
+    {
+        return $this->hasMany(Contract_fmf::class);
+    }
+
     public function unit_target(): HasMany
     {
         return $this->hasMany(Unit_target::class);
