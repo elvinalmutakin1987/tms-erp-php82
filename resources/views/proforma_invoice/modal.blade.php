@@ -8,7 +8,7 @@
 
 <!-- search modal -->
 <div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
         <div class="modal-content">
             <div class="modal-header" id="modal-header">
             </div>
@@ -25,28 +25,26 @@
                                 @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="row mb-2">
                         <div class="col">
-                            <label for="periode" class="form-label">Periode</label>
-                            <select class="form-select select-select" id="periode" name="periode">
-
+                            <label for="month" class="form-label">Periode</label>
+                            <select class="form-select select-select" id="month" name="month">
+                                @foreach (range(1, 12) as $m)
+                                    <option value="{{ $m }}" {{ $m == date('n') ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
-                    </div>
-                    <div class="row mb-2">
                         <div class="col">
-                            <label for="unit_id" class="form-label">Unit</label>
-                            <select class="form-select select-select" id="unit_id" name="unit_id">
-
-                            </select>
+                            <label for="year" class="form-label">&nbsp;</label>
+                            <input type="number" class="form-control" id="year" name="year"
+                                value="{{ now()->year }}">
                         </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col" id="div-table">
                         </div>
                     </div>
-
                 </form>
             </div>
             <div class="modal-footer">

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->unsignedBigInteger('maintenance_item_id')->nullable();
             $table->unsignedBigInteger('mro_item_id')->nullable();
+            $table->text('description')->nullable();
             $table->string('uom', 30)->nullable();
             $table->decimal('qty', 16, 2)->nullable();
             $table->timestamps();

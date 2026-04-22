@@ -23,6 +23,7 @@ use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
 use App\Http\Controllers\ProformaInvoiceController;
 use App\Http\Controllers\PurchaseRequisitionController;
+use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
 use Illuminate\Support\Facades\Storage;
 
@@ -485,4 +486,16 @@ Route::middleware(['auth'])->group(function () {
     Route::get('proformainvoice-load-table-add', [ProformaInvoiceController::class, 'get_table_add'])
         ->middleware('role:superadmin|proforma_invoice')
         ->name('proformainvoice.get_table_add');
+
+    /**
+     * Routenya Unit Epxired
+     */
+    Route::resource('unitexpired', UnitExpiredController::class)
+        ->parameters(['unitexpired' => 'unit'])
+        ->middleware('role:superadmin|unit_expired')
+        ->names('unitexpired');
+
+    Route::get('unitexpired-export', [UnitExpiredController::class, 'export'])
+        ->middleware('role:superadmin|unit')
+        ->name('unitexpired.export');
 });

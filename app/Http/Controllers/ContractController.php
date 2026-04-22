@@ -61,6 +61,9 @@ class ContractController extends Controller
                 ->addColumn('client', function ($item) {
                     return $item->client_vendor->name;
                 })
+                ->addColumn('service', function ($item) {
+                    return $item->service->name;
+                })
                 ->make();
         }
         $breadcrum = [

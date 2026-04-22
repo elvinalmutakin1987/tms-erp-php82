@@ -46,6 +46,7 @@
                                         <th width="10">No</th>
                                         <th>Client</th>
                                         <th>Contract Number</th>
+                                        <th>Type</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Status</th>
@@ -120,6 +121,12 @@
                     {
                         data: 'contract_no',
                         name: 'contract_no',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
+                        data: 'service',
+                        name: 'service',
                         orderable: true,
                         searchable: true,
                     },

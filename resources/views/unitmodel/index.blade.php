@@ -130,6 +130,7 @@
                     success: function(response) {
                         $('#modal-header').text('Edit Unit Model');
                         $('#desc').val(response.data.desc);
+                        unitbrandId = response.data.unit_brand_id;
                     },
                     error: function() {
                         alert('Error fetching data');

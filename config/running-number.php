@@ -39,6 +39,7 @@ return [
         'main', //Untuk penomoran maintenance
         'insp', //Untuk penomoran maintenance
         'pr', //Untuk penomoran maintenance
+        'pi', //Untuk penomoran proforma invoice
     ],
 
     'model' => RunningNumber::class,

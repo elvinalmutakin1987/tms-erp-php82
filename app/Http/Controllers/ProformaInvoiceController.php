@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\Proforma_invoice;
+use App\Models\Unit;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -268,16 +269,25 @@ class ProformaInvoiceController extends Controller
     public function get_table_add(Request $request)
     {
         try {
+            $presenter = new DatePrefixPresenter('Y/m', '/');
             $contract = Contract::find($request->contract_id);
-            if ($contract->service->type == 'Unit Rental') {
+            if ($contract->service->name == 'Unit Rental') {
                 $view = "proforma_invoice.table-rental-add";
+            } else if ($contract->service->name == 'Ex-Pallet') {
+                $view = "proforma_invoice.table-pallet-add";
             } else {
                 $view = "proforma_invoice.table-transport-add";
             }
-            $html = view($view)->render();
+            $unit = Unit::all();
+            $proforma_invoice_prev_no = Generator::make()
+                ->type('pi')
+                ->formatter($presenter)
+                ->preview();
+            $html = view($view, compact('proforma_invoice_prev_no', 'unit'))->render();
             return response()->json([
                 'success' => true,
-                'html' => $html
+                'html' => $html,
+                'proforma_invoice_prev_no' => $proforma_invoice_prev_no
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
