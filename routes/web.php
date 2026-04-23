@@ -23,6 +23,7 @@ use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
 use App\Http\Controllers\ProformaInvoiceController;
 use App\Http\Controllers\PurchaseRequisitionController;
+use App\Http\Controllers\PurchaseRequisitionGeneralController;
 use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
 use Illuminate\Support\Facades\Storage;
@@ -430,7 +431,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisition.export_pdf');
 
-    Route::get('purchaserequisition-get-detail/{daily_report}', [PurchaseRequisitionController::class, 'get_detail'])
+    Route::get('purchaserequisition-get-detail/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_detail'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_detail');
 
@@ -462,6 +463,9 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_mro_item');
 
+    /**
+     * Buat ambil file
+     */
     Route::get('/files/{path}', function ($path) {
         return Storage::disk('local')->response($path);
     })->where('path', '.*')->name('files.show');
@@ -498,4 +502,34 @@ Route::middleware(['auth'])->group(function () {
     Route::get('unitexpired-export', [UnitExpiredController::class, 'export'])
         ->middleware('role:superadmin|unit')
         ->name('unitexpired.export');
+
+    /**
+     * Routenya Purchase Requisition General untuk semua department
+     */
+    Route::resource('purchaserequisitiongeneral', PurchaseRequisitionGeneralController::class)
+        ->parameters(['purchaserequisitiongeneral' => 'purchase_requisition'])
+        ->middleware('role:superadmin|purchase_requisition_general')
+        ->names('purchaserequisitiongeneral');
+
+
+    Route::get('purchaserequisitiongeneral-print/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'print'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.print');
+
+    Route::get('purchaserequisitiongeneral-export-pdf/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'export_pdf'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.export_pdf');
+
+    Route::get('purchaserequisitiongeneral-get-detail/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_detail'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.get_detail');
+
+
+    Route::get('purchaserequisitiongeneral-load-table-add', [PurchaseRequisitionGeneralController::class, 'get_table_add'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.get_table_add');
+
+    Route::get('purchaserequisitiongeneral-load-table-edit/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_table_edit'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.get_table_edit');
 });

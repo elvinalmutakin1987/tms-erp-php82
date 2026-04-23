@@ -3,12 +3,12 @@
 
     </td>
     <td class="p-1 align-middle">
-        <select class="form-select select-select" id="maintenance_item" name="maintenance_item">
+        <select class="form-select select-select" id="maintenance_item_" name="maintenance_item_">
 
         </select>
     </td>
     <td class="p-1 align-middle">
-        <select class="form-select select-select" id="mro_item" name="mro_item">
+        <select class="form-select select-select" id="mro_item_" name="mro_item_">
 
         </select>
     </td>
@@ -37,7 +37,7 @@
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
 
-        $('.select-select, #maintenance_item, #mro_item').each(function() {
+        $('.select-select, #maintenance_item_, #mro_item_').each(function() {
             const $el = $(this);
 
             let config = {
@@ -49,9 +49,8 @@
                 minimumResultsForSearch: 0
             };
 
-            if ($el.attr('id') === 'maintenance_item') {
-                // config.placeholder = "- Maintenance Item -";
-                config.allowClear = true;
+            if ($el.attr('id') === 'maintenance_item_') {
+                // config.allowClear = true;
                 config.ajax = {
                     url: '{{ route('purchaserequisition.get_maintenance_item') }}',
                     dataType: 'json',
@@ -71,9 +70,8 @@
                 };
             }
 
-            if ($el.attr('id') === 'mro_item') {
-                // config.placeholder = "- Maintenance Item -";
-                config.allowClear = true;
+            if ($el.attr('id') === 'mro_item_') {
+                // config.allowClear = true;
                 config.ajax = {
                     url: '{{ route('purchaserequisition.get_mro_item') }}',
                     dataType: 'json',
@@ -213,10 +211,10 @@
 
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
-            var maintenance_item_id = $("#maintenance_item").val();
-            var maintenance_item = $("#maintenance_item option:selected").text();
-            var mro_item_id = $("#mro_item").val();
-            var mro_item = $("#mro_item option:selected").text();
+            var maintenance_item_id = $("#maintenance_item_").val();
+            var maintenance_item = $("#maintenance_item_ option:selected").text();
+            var mro_item_id = $("#mro_item_").val();
+            var mro_item = $("#mro_item_ option:selected").text();
             var uom = $("#_uom").val();
             var _qty = $("#_qty").val();
             var _qty_ = $("#_qty_").val();
@@ -252,10 +250,10 @@
             `;
             $("#_qty").val('');
             $("#_qty_").val('');
-            $("#maintenance_item").val('').trigger('change');
-            $("#mro_item").val('').trigger('change');
+            $("#maintenance_item_").val('').trigger('change');
+            $("#mro_item_").val('').trigger('change');
+            $("#_uom").val('').trigger('change');
             tbody.append(newRow);
-
             renumberRows();
         });
 
@@ -263,7 +261,6 @@
             let no = 1;
 
             $('#tableItem > tbody > tr').each(function() {
-                // row khusus tidak ikut nomor
                 if ($(this).hasClass('fixed-row')) {
                     $(this).find('.row-number').text('');
                     return;

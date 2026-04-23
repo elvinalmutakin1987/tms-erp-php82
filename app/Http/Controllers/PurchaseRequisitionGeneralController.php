@@ -6,11 +6,7 @@ use App\Models\Approval_flow;
 use App\Models\Approval_process;
 use App\Models\Approval_status;
 use App\Models\Approval_step;
-use App\Models\Maintenance;
-use App\Models\Maintenance_item;
-use App\Models\Mro_item;
 use App\Models\Purchase_requisition;
-use App\Models\Unit;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -22,7 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 
-class PurchaseRequisitionController extends Controller
+class PurchaseRequisitionGeneralController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -34,8 +30,8 @@ class PurchaseRequisitionController extends Controller
             if (request()->status != 'All') {
                 $purchase_requisition = $purchase_requisition->where('status', request()->status);
             }
-            if (request()->unit_id != 'All') {
-                $purchase_requisition = $purchase_requisition->where('unit_id', request()->unit_id);
+            if (request()->department != 'All') {
+                $purchase_requisition = $purchase_requisition->where('department', request()->department);
             }
             if (request()->date_start != '') {
                 $purchase_requisition = $purchase_requisition->where('date', '>=', request()->date_start);
@@ -43,7 +39,7 @@ class PurchaseRequisitionController extends Controller
             if (request()->date_end != '') {
                 $purchase_requisition = $purchase_requisition->where('date', '<=', request()->date_end);
             }
-            $purchase_requisition = $purchase_requisition->where('type', 'Equipment');
+            $purchase_requisition = $purchase_requisition->where('type', 'General');
             $purchase_requisition = $purchase_requisition->orderBy('date', 'desc')->get();
             return DataTables::of($purchase_requisition)
                 ->addIndexColumn()
@@ -55,10 +51,10 @@ class PurchaseRequisitionController extends Controller
                                 aria-expanded="false">Action</button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('purchaserequisition.export_pdf', $item->id) . '">Export PDF</a>
+                                    <a class="dropdown-item exportPdfButton" href="' . route('purchaserequisitiongeneral.export_pdf', $item->id) . '">Export PDF</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item printButton" href="' . route('purchaserequisition.print', $item->id) . '" target="_blank">Print</a>
+                                    <a class="dropdown-item printButton" href="' . route('purchaserequisitiongeneral.print', $item->id) . '" target="_blank">Print</a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
@@ -69,7 +65,7 @@ class PurchaseRequisitionController extends Controller
                      * user superadmin dan yang punya akses edit aja yang bisa muncul
                      */
                     if ($item->status == 'Draft'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaserequisition.edit')):
+                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaserequisitiongeneral.edit')):
                             $button .= '<li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
@@ -82,7 +78,7 @@ class PurchaseRequisitionController extends Controller
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
                     if ($item->status != 'Done'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaserequisition.delete')):
+                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaserequisitiongeneral.delete')):
                             $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
@@ -96,24 +92,17 @@ class PurchaseRequisitionController extends Controller
 
                     return $button;
                 })
-                ->addColumn('unit', function ($item) {
-                    $unit = Unit::find($item->unit_id);
-                    return $unit->vehicle_no;
-                })
-                ->addColumn('maintenance_no', function ($item) {
-                    $maintenance = Maintenance::find($item->maintenance_id);
-                    return $maintenance->maintenance_no ?? '';
-                })
                 ->make();
         }
         $uom = config('uom');
+        $department = config('department');
         $breadcrum = [
-            'module' => 'Equipment',
+            'module' => 'Purchase Requisition',
             'route-module' => null,
-            'sub-module' => 'Purchase Requisition',
-            'route-sub-module' => 'purchaserequisition.index',
+            'sub-module' => '',
+            'route-sub-module' => '',
         ];
-        return view('purchase_requisition.index', compact('breadcrum', 'uom'));
+        return view('purchase_requisition_general.index', compact('breadcrum', 'uom', 'department'));
     }
 
     /**
@@ -132,7 +121,7 @@ class PurchaseRequisitionController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'unit_id' => ['required', 'not_in:All'],
+                'department' => ['required', 'not_in:All'],
                 'date' => 'required',
             ]);
             $data = array_merge(
@@ -141,32 +130,30 @@ class PurchaseRequisitionController extends Controller
                     '_method',
                     '_uom',
                     '__qty',
-                    'maintenance_item_id',
-                    'maintenance_item',
-                    'mro_item_id',
-                    'mro_item',
+                    'order',
+                    'description',
                     'uom',
                     'qty',
                 ),
                 [
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
-                    'type' => 'Equipment'
+                    'type' => 'General'
                 ]
             );
             $purchase_requisition = Purchase_requisition::create($data);
-            if ($request->has('maintenance_item_id')) {
-                foreach ($request->maintenance_item_id as $i => $item) {
+            if ($request->has('description')) {
+                foreach ($request->description as $i => $item) {
                     $purchase_requisition->purchase_requisition_detail()->create(
                         [
-                            'maintenance_item_id' => $item,
-                            'mro_item_id' => $request->mro_item_id[$i],
+                            'description' => $item,
                             'uom' => $request->uom[$i],
                             'qty' => $request->qty[$i]
                         ]
                     );
                 }
             }
+
             /**
              * Buat check ada approvalnya gak
              * Kalo ada statusnya jadi Approval.
@@ -186,7 +173,6 @@ class PurchaseRequisitionController extends Controller
                     $purchase_requisition->save();
                 }
             }
-
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -233,7 +219,7 @@ class PurchaseRequisitionController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'unit_id' => ['required', 'not_in:All'],
+                'department' => ['required', 'not_in:All'],
                 'date' => 'required',
             ]);
             $data = array_merge(
@@ -242,10 +228,8 @@ class PurchaseRequisitionController extends Controller
                     '_method',
                     '_uom',
                     '__qty',
-                    'maintenance_item_id',
-                    'maintenance_item',
-                    'mro_item_id',
-                    'mro_item',
+                    'order',
+                    'description',
                     'uom',
                     'qty',
                 ),
@@ -257,14 +241,13 @@ class PurchaseRequisitionController extends Controller
             $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
             $lockPurchase_requisition->update($data);
             $purchase_requisition->purchase_requisition_detail()->delete();
-            if ($request->has('maintenance_item_id')) {
-                foreach ($request->maintenance_item_id as $i => $item) {
+            if ($request->has('description')) {
+                foreach ($request->description as $i => $item) {
                     $purchase_requisition->purchase_requisition_detail()->create(
                         [
-                            'maintenance_item_id' => $item,
-                            'mro_item_id' => $request->mro_item_id[$i],
+                            'description' => $item,
                             'uom' => $request->uom[$i],
-                            'qty' => $request->qty[$i]
+                            'qty' => $request->qty[$i],
                         ]
                     );
                 }
@@ -329,33 +312,15 @@ class PurchaseRequisitionController extends Controller
     }
 
     /**
-     * Ngambil data unit
-     */
-    public function get_unit_all(Request $request)
-    {
-        try {
-            $unit = Unit::all();
-            return response()->json([
-                'success' => true,
-                'data' => $unit
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
-    }
-
-    /**
      * Ngambil tabel list requisition nya
      */
     public function get_table_add(Request $request, Purchase_requisition $purchase_requisition)
     {
         try {
             $presenter = new DatePrefixPresenter('Y/m', '/');
-            $view = 'purchase_requisition.table-add';
+            $view = 'purchase_requisition_general.table-add';
             $uom = config('uom');
+            $department = config('department');
             $requisition_prev_no = Generator::make()
                 ->type('pr')
                 ->formatter($presenter)
@@ -380,207 +345,16 @@ class PurchaseRequisitionController extends Controller
     public function get_table_edit(Request $request, Purchase_requisition $purchase_requisition)
     {
         try {
-            $view = 'purchase_requisition.table-edit';
+            $view = 'purchase_requisition_general.table-edit';
             $uom = config('uom');
+            $department = config('department');
             $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
-            $html = view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'uom'))->render();
+            $html = view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'uom', 'department'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
                 'requisition_no' => $purchase_requisition->requisition_no
             ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
-    }
-
-    /**
-     * Ngambil data maintenance item
-     */
-    public function get_maintenance_item(Request $request)
-    {
-        if ($request->ajax()) {
-            $term = trim($request->term);
-            $maintenance_item = Maintenance_item::selectRaw("id, name as text")
-                ->where('name', 'like', '%' . $term . '%')
-                ->orderBy('name')->simplePaginate(10);
-            $total_count = count($maintenance_item);
-            $morePages = true;
-            $pagination_obj = json_encode($maintenance_item);
-            if (empty($maintenance_item->nextPageUrl())) {
-                $morePages = false;
-            }
-            $result = [
-                "results" => $maintenance_item->items(),
-                "pagination" => [
-                    "more" => $morePages
-                ],
-                "total_count" => $total_count
-            ];
-            return response()->json($result);
-        }
-    }
-
-    /**
-     * Ngambil data mro item
-     */
-    public function get_mro_item(Request $request)
-    {
-        if ($request->ajax()) {
-            $term = trim($request->term);
-            $mro_item = Mro_item::selectRaw("id, name as text")
-                ->where('name', 'like', '%' . $term . '%')
-                ->orderBy('name')->simplePaginate(10);
-            $total_count = count($mro_item);
-            $morePages = true;
-            $pagination_obj = json_encode($mro_item);
-            if (empty($mro_item->nextPageUrl())) {
-                $morePages = false;
-            }
-            $result = [
-                "results" => $mro_item->items(),
-                "pagination" => [
-                    "more" => $morePages
-                ],
-                "total_count" => $total_count
-            ];
-            return response()->json($result);
-        }
-    }
-
-    /**
-     * ngeprint
-     */
-    public function print(Request $request, Purchase_requisition $purchase_requisition)
-    {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
-        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
-        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $pdf = Pdf::loadView('purchase_requisition.print', [
-            'purchase_requisition' => $purchase_requisition,
-            'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
-            'approval_flow' => $approval_flow,
-            'approval_step' => $approval_step,
-            'approval_process' => $approval_process,
-            'approval_status' => $approval_status
-        ])->setPaper('a4', 'portrait');
-
-        // WAJIB: render dulu
-        $dompdf = $pdf->getDomPDF();
-        $dompdf->render();
-
-        // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
-        $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
-
-        // Tulis nomor halaman ke semua halaman
-        $canvas->page_text(
-            255, // X (geser kiri/kanan kalau perlu)
-            58,  // Y (geser atas/bawah kalau perlu)
-            "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
-            10,
-            [0, 0, 0]
-        );
-
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
-        if (in_array($purchase_requisition->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
-            $size = 48;
-            $text = "Status : " . $purchase_requisition->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
-            $text = $purchase_requisition->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
-        }
-
-        $safeFilename = Str::of($purchase_requisition->requisition_no)
-            ->replace(['/', '\\'], '-')   // ganti 
-            ->toString();
-        return $pdf->stream("report-{$safeFilename}.pdf");
-    }
-
-    /**
-     * export pdf
-     */
-
-    public function export_pdf(Request $request, Purchase_requisition $purchase_requisition)
-    {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
-        $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
-        $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $pdf = Pdf::loadView('purchase_requisition.print', [
-            'purchase_requisition' => $purchase_requisition,
-            'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
-            'approval_flow' => $approval_flow,
-            'approval_step' => $approval_step,
-            'approval_process' => $approval_process,
-            'approval_status' => $approval_status
-        ])->setPaper('a4', 'portrait');
-
-        // WAJIB: render dulu
-        $dompdf = $pdf->getDomPDF();
-        $dompdf->render();
-
-        // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
-        $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
-
-        // Tulis nomor halaman ke semua halaman
-        $canvas->page_text(
-            255, // X (geser kiri/kanan kalau perlu)
-            58,  // Y (geser atas/bawah kalau perlu)
-            "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
-            10,
-            [0, 0, 0]
-        );
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
-        if (in_array($purchase_requisition->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
-            $size = 48;
-            $text = "Status : " . $purchase_requisition->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
-            $text = $purchase_requisition->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
-        }
-
-        $safeFilename = Str::of($purchase_requisition->requisition_no)
-            ->replace(['/', '\\'], '-')   // ganti slash
-            ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
-    }
-
-    /**
-     * ngambil detail purchase requisition
-     */
-    public function get_detail(Request $request, $pr_id)
-    {
-        try {
-            $purchase_requisition = Purchase_requisition::find($pr_id);
-            $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
-            $view = 'purchase_requisition.detail';
-            return response()->view($view, compact('purchase_requisition', 'purchase_requisition_detail'), 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,

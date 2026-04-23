@@ -143,19 +143,18 @@ class MechanicalInspectionController extends Controller
                 ['input_method' => 'Web']
             );
             $mechanical_inspection = Mechanical_inspection::create($data);
-            foreach ($request->inspection_item as $key => $item) {
-                $mechanical_inspection->mechanical_inspection_detail()->updateOrCreate(
-                    [
-                        'inspection_item' => $item,
-                        'inspection_group' => $request->inspection_group[$key],
-                    ],
-                    [
-                        'inspection_group' => $request->inspection_group[$key],
-                        'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
-                        'remarks' => $request->remarks[$key],
-                        'inspected_by' => $request->inspected_by[$key]
-                    ]
-                );
+            if ($request->has('inspection_item')) {
+                foreach ($request->inspection_item as $key => $item) {
+                    $mechanical_inspection->mechanical_inspection_detail()->create(
+                        [
+                            'inspection_item' => $item,
+                            'inspection_group' => $request->inspection_group[$key],
+                            'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
+                            'remarks' => $request->remarks[$key],
+                            'inspected_by' => $request->inspected_by[$key]
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([
@@ -221,19 +220,19 @@ class MechanicalInspectionController extends Controller
             );
             $lockMechanical_inspection = Mechanical_inspection::where('id', $mechanical_inspection->id)->lockForUpdate()->first();
             $lockMechanical_inspection->lockForUpdate($data);
-            foreach ($request->inspection_item as $key => $item) {
-                $mechanical_inspection->mechanical_inspection_detail()->updateOrCreate(
-                    [
-                        'inspection_item' => $item,
-                        'inspection_group' => $request->inspection_group[$key],
-                    ],
-                    [
-                        'inspection_group' => $request->inspection_group[$key],
-                        'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
-                        'remarks' => $request->remarks[$key],
-                        'inspected_by' => $request->inspected_by[$key]
-                    ]
-                );
+            $mechanical_inspection->mechanical_inspection_detail()->delete();
+            if ($request->has('inspection_item')) {
+                foreach ($request->inspection_item as $key => $item) {
+                    $mechanical_inspection->mechanical_inspection_detail()->create(
+                        [
+                            'inspection_item' => $item,
+                            'inspection_group' => $request->inspection_group[$key],
+                            'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
+                            'remarks' => $request->remarks[$key],
+                            'inspected_by' => $request->inspected_by[$key]
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([

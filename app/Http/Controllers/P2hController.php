@@ -146,19 +146,18 @@ class P2hController extends Controller
                 ['input_method' => 'Web']
             );
             $p2h = P2h::create($data);
-            foreach ($request->inspection_item as $i => $item) {
-                $p2h->p2h_detail()->updateOrCreate(
-                    [
-                        'inspection_item' => $item,
-                        'inspection_group' => $request->inspection_group[$i]
-                    ],
-                    [
-                        'inspection_group' => $request->inspection_group[$i],
-                        'check' => (int) ($request->check[$item][$request->inspection_group[$i]] ?? 0),
-                        'defect_listed' => $request->defect_listed[$i],
-                        'action_taken' => $request->action_taken[$i]
-                    ]
-                );
+            if ($request->has('inspection_item')) {
+                foreach ($request->inspection_item as $i => $item) {
+                    $p2h->p2h_detail()->create(
+                        [
+                            'inspection_item' => $item,
+                            'inspection_group' => $request->inspection_group[$i],
+                            'check' => (int) ($request->check[$item][$request->inspection_group[$i]] ?? 0),
+                            'defect_listed' => $request->defect_listed[$i],
+                            'action_taken' => $request->action_taken[$i]
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([
@@ -226,19 +225,19 @@ class P2hController extends Controller
             );
             $lockP2h = P2h::where('id', $p2h->id)->lockForUpdate()->first();
             $lockP2h->update($data);
-            foreach ($request->inspection_item as $key => $item) {
-                $p2h->p2h_detail()->updateOrCreate(
-                    [
-                        'inspection_item' => $item,
-                        'inspection_group' => $request->inspection_group[$key]
-                    ],
-                    [
-                        'inspection_group' => $request->inspection_group[$key],
-                        'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
-                        'defect_listed' => $request->defect_listed[$key],
-                        'action_taken' => $request->action_taken[$key]
-                    ]
-                );
+            $p2h->p2h_detail()->delete();
+            if ($request->has('inspection_item')) {
+                foreach ($request->inspection_item as $key => $item) {
+                    $p2h->p2h_detail()->create(
+                        [
+                            'inspection_item' => $item,
+                            'inspection_group' => $request->inspection_group[$key],
+                            'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
+                            'defect_listed' => $request->defect_listed[$key],
+                            'action_taken' => $request->action_taken[$key]
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([

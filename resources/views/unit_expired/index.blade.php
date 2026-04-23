@@ -65,7 +65,7 @@
                             <table id="table-data" class="table table-bordered">
                                 <thead class="table-light">
                                     <tr>
-                                        <th width="10">No</th>
+                                        <th>No</th>
                                         <th>Type</th>
                                         <th>Location</th>
                                         <th>Vehicle No.</th>
@@ -80,7 +80,7 @@
                                         <th>Exp. STNK</th>
                                         <th>Exp. Tax</th>
                                         <th>Exp. Commisioning</th>
-                                        <th width="20">Action</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>

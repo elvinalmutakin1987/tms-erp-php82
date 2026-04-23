@@ -26,8 +26,11 @@
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
                                 <div class="col-2">
-                                    <select class="form-select select-top" id="unit" name="unit">
-                                        <option value="All">All Unit</option>
+                                    <select class="form-select select-top" id="depart" name="depart">
+                                        <option value="All">All Department</option>
+                                        @foreach ($department as $key => $value)
+                                            <option value="{{ $value }}">{{ $value }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col-2">
@@ -63,9 +66,8 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Requisition Number</th>
-                                        <th>Maintenance Number</th>
                                         <th>Date</th>
-                                        <th>Unit</th>
+                                        <th>Department</th>
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -83,9 +85,9 @@
     </div>
     <!--end page wrapper -->
 
-    @include('purchase_requisition.modal')
+    @include('purchase_requisition_general.modal')
 
-    @include('purchase_requisition.modal-detail')
+    @include('purchase_requisition_general.modal-detail')
 @endsection
 
 @section('js')
@@ -97,8 +99,6 @@
 
     <script>
         var requisitionId = '';
-        var maintenanceId = '';
-        var unitId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -120,7 +120,7 @@
                     url: ajax,
                     data: function(d) {
                         d.status = $('#_status').val();
-                        d.unit_id = $('#unit').val();
+                        d.department = $('#depart').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
                     }
@@ -141,20 +141,14 @@
                         searchable: true,
                     },
                     {
-                        data: 'maintenance_no',
-                        name: 'maintenance_no',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
                         data: 'date',
                         name: 'date',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'unit',
-                        name: 'unit',
+                        data: 'department',
+                        name: 'department',
                         orderable: true,
                         searchable: true,
                     },
@@ -164,7 +158,7 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (data == "Done" || data == "Approved") {
+                            if (data == "Done") {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
                                     data + '</span>';
                             } else if (data == 'Open') {
@@ -195,7 +189,7 @@
                 requisitionId = $(this).data('id');
                 $('#modal-header').text('Edit Requisition');
                 $('#id').val(requisitionId);
-                let url = '{{ route('purchaserequisition.show', ':_id') }}';
+                let url = '{{ route('purchaserequisitiongeneral.show', ':_id') }}';
                 url = url.replace(':_id', requisitionId);
                 $.ajax({
                     url: url,
@@ -203,11 +197,9 @@
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Requisition');
-                        $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#maintenance_id").val(response.data.maintenance_id).trigger(
-                            'change');
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
+                        $("#department").val(response.data.department).trigger('change');
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -217,7 +209,7 @@
 
             $(document).on('click', '.detailButton', function() {
                 $('#modal-detail-header').text('Detail Requisition');
-                let url = '{{ route('purchaserequisition.get_detail', ':_id') }}';
+                let url = '{{ route('purchaserequisitiongeneral.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -249,43 +241,6 @@
                 $('#table-data').DataTable().draw();
             });
 
-            $.ajax({
-                url: '{{ route('purchaserequisition.get_unit_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#unit').empty();
-                    $('#unit').append('<option value="All">All Unit</option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                    if (unitId != '') {
-                        $("#unit").val(unitId).trigger('change');
-                    }
-
-                    $('#unit_id').empty();
-                    $('#unit_id').append('<option value="All">All Unit</option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit_id').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                    if (unitId != '') {
-                        $("#unit_id").val(unitId).trigger('change');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
-
             gen_select2();
         });
 
@@ -300,7 +255,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('purchaserequisition.destroy', ':_id') }}';
+                    let url = '{{ route('purchaserequisitiongeneral.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -335,67 +290,45 @@
         }
 
         $('.saveButton').on('click', function() {
-            const status = $(this).val();
-            const form = $('#formModal').find('form')[0];
-            const formData = new FormData(form);
-
-            formData.append('status', status);
-
-            let url = '{{ route('purchaserequisition.store') }}';
-            let type = 'POST';
-
-            if (requisitionId) {
-                url = '{{ route('purchaserequisition.update', ':_id') }}'.replace(':_id', requisitionId);
+            var formData = new FormData($('#formModal').find('form')[0]);
+            var url = '{{ route('purchaserequisitiongeneral.store') }}';
+            var type = 'POST';
+            formData.append('status', $(this).val());
+            if (requisitionId != '') {
+                url = '{{ route('purchaserequisitiongeneral.update', ':_id') }}';
+                url = url.replace(':_id', requisitionId);
                 formData.append('_method', 'PUT');
             }
-
-            const submitForm = () => {
-                $.ajax({
-                    url,
-                    type,
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-                    success: function(response) {
-                        Swal.fire({
-                            title: response.title,
-                            text: response.message,
-                            icon: 'success',
-                            timer: 5000,
-                            willClose: () => {
-                                $('#table-data').DataTable().ajax.reload(null, false);
-                                form.reset();
-                                requisitionId = '';
-                                $('#formModal').modal('hide');
-                            }
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        const errorMessage = xhr.responseJSON?.message || error;
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: errorMessage,
-                        });
-                    }
-                });
-            };
-
-            if (status === 'Open') {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#5156be',
-                    cancelButtonColor: '#fd625e',
-                    confirmButtonText: 'Yes, Save it!',
-                    cancelButtonText: 'Cancel'
-                }).then((result) => {
-                    if (result.isConfirmed) submitForm();
-                });
-            } else {
-                submitForm();
-            }
+            $.ajax({
+                url: url,
+                type: type,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: response.title,
+                        text: response.message,
+                        icon: "success",
+                        timer: 5000,
+                        didOpen: () => {},
+                        willClose: () => {
+                            $('#table-data').DataTable().ajax.reload(null, false);
+                            $('#formModal form')[0].reset();
+                            requisitionId = '';
+                            $('#formModal').modal('hide');
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: errorMessage,
+                    });
+                }
+            });
         });
 
 
@@ -417,9 +350,9 @@
             setTimeout(function() {
                 const isEdit = requisitionId != '';
                 const url = isEdit ?
-                    '{{ route('purchaserequisition.get_table_edit', ':_id') }}'.replace(':_id',
+                    '{{ route('purchaserequisitiongeneral.get_table_edit', ':_id') }}'.replace(':_id',
                         requisitionId) :
-                    '{{ route('purchaserequisition.get_table_add') }}';
+                    '{{ route('purchaserequisitiongeneral.get_table_add') }}';
 
                 $.ajax({
                     url: url,
@@ -442,11 +375,7 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             requisitionId = '';
-            maintenanceId = '';
-            unitId = '';
             $('#tableItem tbody').empty();
-            $("#unit_id").val('All').trigger('change');
-            $("#maintenance_id").val('All').trigger('change');
         });
 
         $('#cancelButton').on('click', function() {

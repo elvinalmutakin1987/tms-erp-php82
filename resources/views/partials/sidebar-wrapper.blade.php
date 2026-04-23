@@ -126,13 +126,15 @@
                  </ul>
              </li>
          @endif
-         <li>
-             <a href="user-profile.html">
-                 <div class="parent-icon"><i class="bx bx-file"></i>
-                 </div>
-                 <div class="menu-title">Purchase Requisition</div>
-             </a>
-         </li>
+         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_requisition_general'))
+             <li>
+                 <a href="{{ route('purchaserequisitiongeneral.index') }}">
+                     <div class="parent-icon"><i class="bx bx-file"></i>
+                     </div>
+                     <div class="menu-title">Purchase Requisition</div>
+                 </a>
+             </li>
+         @endif
          <li>
              <a href="javascript:;" class="has-arrow">
                  <div class="parent-icon"><i class="bx bx-dollar-circle"></i>

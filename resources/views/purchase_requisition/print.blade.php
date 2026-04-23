@@ -457,12 +457,14 @@
                             Created By
                             <br>
                         </td>
-                        @foreach ($approval_step as $d)
-                            <td style="border: none; text-align: center">
-                                {{ $d->action }} By
-                                <br>
-                            </td>
-                        @endforeach
+                        @if ($approval_step)
+                            @foreach ($approval_step as $d)
+                                <td style="border: none; text-align: center">
+                                    {{ $d->action }} By
+                                    <br>
+                                </td>
+                            @endforeach
+                        @endif
                     </tr>
                     <tr>
                         <td style="border: none; text-align: center">
@@ -473,29 +475,31 @@
                             <br>
                             {{ $purchase_requisition->user->name }}
                         </td>
-                        @foreach ($approval_step as $d)
-                            <td style="border: none; text-align: center">
-                                @php
-                                    $approval_status = $approval_status
-                                        ->where('approval_flow_id', $approval_flow->id)
-                                        ->where('approvable_id', $purchase_requisition->id)
-                                        ->where('step', $d->order)
-                                        ->first();
-                                @endphp
-                                @if ($approval_status->status == 'Open')
-                                    <b>Approval Process</b>
-                                @elseif($approval_status->status == 'Rejected')
-                                    <b>Rejected</b>
-                                @else
-                                    @if ($d->user->sign_path)
-                                        <img src="{{ public_path('storage/' . $d->user->sign_path) }}" alt="Logo"
-                                            style="max-width:100px;height:auto;margin:0 auto;">
+                        @if ($approval_step)
+                            @foreach ($approval_step as $d)
+                                <td style="border: none; text-align: center">
+                                    @php
+                                        $approval_status = $approval_status
+                                            ->where('approval_flow_id', $approval_flow->id)
+                                            ->where('approvable_id', $purchase_requisition->id)
+                                            ->where('step', $d->order)
+                                            ->first();
+                                    @endphp
+                                    @if ($approval_status->status == 'Open')
+                                        <b>Approval Process</b>
+                                    @elseif($approval_status->status == 'Rejected')
+                                        <b>Rejected</b>
+                                    @else
+                                        @if ($d->user->sign_path)
+                                            <img src="{{ public_path('storage/' . $d->user->sign_path) }}"
+                                                alt="Logo" style="max-width:100px;height:auto;margin:0 auto;">
+                                        @endif
                                     @endif
-                                @endif
-                                <br>
-                                {{ $d->user->name }}
-                            </td>
-                        @endforeach
+                                    <br>
+                                    {{ $d->user->name }}
+                                </td>
+                            @endforeach
+                        @endif
                     </tr>
                 </table>
             </td>

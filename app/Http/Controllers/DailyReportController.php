@@ -167,13 +167,9 @@ class DailyReportController extends Controller
                 ]
             );
             $daily_report = Daily_report::create($data);
-            if ($request->detail_unit_id) {
+            if ($request->has('detail_unit_id')) {
                 foreach ($request->detail_unit_id as $key => $item) {
-                    $daily_report->daily_report_detail()->updateOrCreate(
-                        [
-                            'unit_id' => $item,
-                            'item' => $request->item[$key]
-                        ],
+                    $daily_report->daily_report_detail()->create(
                         [
                             'unit_id' => $request->detail_unit_id[$key],
                             'daily_report_id' => $daily_report->id,
@@ -282,13 +278,10 @@ class DailyReportController extends Controller
             );
             $lockDaily_report = Daily_report::where('id', $daily_report->id)->lockForUpdate()->first();
             $lockDaily_report->lockForUpdate($data);
-            if ($request->detail_unit_id) {
+            $daily_report->daily_report_detail()->delete();
+            if ($request->has('detail_unit_id')) {
                 foreach ($request->detail_unit_id as $key => $item) {
-                    $daily_report->daily_report_detail()->updateOrCreate(
-                        [
-                            'unit_id' => $item,
-                            'item' => $request->item[$key]
-                        ],
+                    $daily_report->daily_report_detail()->create(
                         [
                             'unit_id' => $request->detail_unit_id[$key],
                             'daily_report_id' => $daily_report->id,
