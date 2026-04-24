@@ -158,7 +158,7 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (data == "Done") {
+                            if (data == "Done" || data == "Approved") {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
                                     data + '</span>';
                             } else if (data == 'Open') {
@@ -290,45 +290,67 @@
         }
 
         $('.saveButton').on('click', function() {
-            var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('purchaserequisitiongeneral.store') }}';
-            var type = 'POST';
-            formData.append('status', $(this).val());
-            if (requisitionId != '') {
-                url = '{{ route('purchaserequisitiongeneral.update', ':_id') }}';
-                url = url.replace(':_id', requisitionId);
+            const status = $(this).val();
+            const form = $('#formModal').find('form')[0];
+            const formData = new FormData(form);
+
+            formData.append('status', status);
+
+            let url = '{{ route('purchaserequisitiongeneral.store') }}';
+            let type = 'POST';
+
+            if (requisitionId) {
+                url = '{{ route('purchaserequisitiongeneral.update', ':_id') }}'.replace(':_id', requisitionId);
                 formData.append('_method', 'PUT');
             }
-            $.ajax({
-                url: url,
-                type: type,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: "success",
-                        timer: 5000,
-                        didOpen: () => {},
-                        willClose: () => {
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formModal form')[0].reset();
-                            requisitionId = '';
-                            $('#formModal').modal('hide');
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage,
-                    });
-                }
-            });
+
+            const submitForm = () => {
+                $.ajax({
+                    url,
+                    type,
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+                            willClose: () => {
+                                $('#table-data').DataTable().ajax.reload(null, false);
+                                form.reset();
+                                requisitionId = '';
+                                $('#formModal').modal('hide');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON?.message || error;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage,
+                        });
+                    }
+                });
+            };
+
+            if (status === 'Open') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, Save it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) submitForm();
+                });
+            } else {
+                submitForm();
+            }
         });
 
 

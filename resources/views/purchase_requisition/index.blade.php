@@ -408,7 +408,7 @@
             var tbody = $("#tableItem > tbody");
             tbody.append(`
                     <tr>
-                        <td colspan="6">
+                        <td colspan="8">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="visually">Loading...</span>
                         </td>

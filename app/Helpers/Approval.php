@@ -9,9 +9,11 @@ use App\Models\Approval_step;
  * cek ada ngeset approval gak?
  */
 if (! function_exists('checkHasApproval')) {
-    function checkHasApproval(string $model): string
+    function checkHasApproval(string $model, string $department): string
     {
-        return Approval_flow::where('approvable_model', $model)->exists();
+        return Approval_flow::where('approvable_model', $model)
+            ->where('department', $department)
+            ->exists();
     }
 }
 
@@ -19,9 +21,11 @@ if (! function_exists('checkHasApproval')) {
  * ambil id approval flow
  */
 if (! function_exists('getApprovalFlowId')) {
-    function getApprovalFlowId(string $model): string
+    function getApprovalFlowId(string $model, string $department): string
     {
-        $approval_flow = Approval_flow::where('approvable_model', $model)->first();
+        $approval_flow = Approval_flow::where('approvable_model', $model)
+            ->where('department', $department)
+            ->first();
         return $approval_flow->id;
     }
 }
@@ -62,14 +66,21 @@ if (! function_exists('nextStep')) {
     }
 }
 
-if (! function_exists('nextStep')) {
-    function nextStep(string $model, string $id, string $approval_flow_id): string
+/**
+ * buat ngereject approval
+ */
+if (! function_exists('rejected')) {
+    function rejected(string $model, string $id, string $approval_flow_id): string
     {
 
         return sprintf('%02d:%02d', $hour, $minute);
     }
 }
 
+/**
+ * ini buat nyelesaiin approvalnya.
+ * approval terakhir
+ */
 if (! function_exists('doneApproval')) {
     function doneApproval(string $model, string $id, string $approval_flow_id): string
     {

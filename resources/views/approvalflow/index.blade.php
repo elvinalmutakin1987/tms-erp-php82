@@ -38,7 +38,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Name</th>
+                                        <th>Department</th>
                                         <th>Model</th>
                                         <th>Step Total</th>
                                         <th width="20">Action</th>
@@ -96,8 +96,8 @@
                         targets: '_all'
                     },
                     {
-                        data: 'name',
-                        name: 'name',
+                        data: 'department',
+                        name: 'department',
                         orderable: true,
                         searchable: true,
                     },
@@ -139,8 +139,10 @@
                         $('#username').prop('readonly', true);
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit User');
-                        $('#name').val(response.data.name);
-                        $('#approvable_model').val(response.data.approvable_model);
+                        // $('#name').val(response.data.name);
+                        $('#department').val(response.data.department).trigger('change');
+                        $('#approvable_model').val(response.data.approvable_model).trigger(
+                            'change');
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -310,6 +312,8 @@
         });
 
         $('#cancelButton').on('click', function() {
+            $('#department').val('').trigger('change');
+            $('#approvable_model').val('').trigger('change');
             $('#formModal').modal('hide');
         });
 

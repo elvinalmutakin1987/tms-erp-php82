@@ -362,4 +362,142 @@ class PurchaseRequisitionGeneralController extends Controller
             ], 400);
         }
     }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Purchase_requisition $purchase_requisition)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
+        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $pdf = Pdf::loadView('purchase_requisition_general.print', [
+            'purchase_requisition' => $purchase_requisition,
+            'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+
+        /**
+         * Buat check statusnya, kalo draft, open, approval, cancel
+         * nanti ada watermarknya
+         */
+        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
+        if (in_array($purchase_requisition->status, $status, true)) {
+            $w = $canvas->get_width();
+            $h = $canvas->get_height();
+            $font = $fontMetrics->getFont('Helvetica', 'bold');
+            $size = 48;
+            $text = "Status : " . $purchase_requisition->status;
+            $x = ($w / 2) - 100;
+            $y = $h / 2 - 350;
+            $text = $purchase_requisition->status;
+            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+        }
+
+        $safeFilename = Str::of($purchase_requisition->requisition_no)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->stream("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Purchase_requisition $purchase_requisition)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
+        $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $pdf = Pdf::loadView('purchase_requisition_general.print', [
+            'purchase_requisition' => $purchase_requisition,
+            'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        /**
+         * Buat check statusnya, kalo draft, open, approval, cancel
+         * nanti ada watermarknya
+         */
+        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
+        if (in_array($purchase_requisition->status, $status, true)) {
+            $w = $canvas->get_width();
+            $h = $canvas->get_height();
+            $font = $fontMetrics->getFont('Helvetica', 'bold');
+            $size = 48;
+            $text = "Status : " . $purchase_requisition->status;
+            $x = ($w / 2) - 100;
+            $y = $h / 2 - 350;
+            $text = $purchase_requisition->status;
+            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+        }
+
+        $safeFilename = Str::of($purchase_requisition->requisition_no)
+            ->replace(['/', '\\'], '-')   // ganti slash
+            ->toString();
+        return $pdf->download("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * ngambil detail purchase requisition
+     */
+    public function get_detail(Request $request, $pr_id)
+    {
+        try {
+            $purchase_requisition = Purchase_requisition::find($pr_id);
+            $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
+            $view = 'purchase_requisition_general.detail';
+            return response()->view($view, compact('purchase_requisition', 'purchase_requisition_detail'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
 }

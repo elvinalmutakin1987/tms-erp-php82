@@ -107,13 +107,14 @@ class PurchaseRequisitionController extends Controller
                 ->make();
         }
         $uom = config('uom');
+        $system_setting = config('system_setting');
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
             'sub-module' => 'Purchase Requisition',
             'route-sub-module' => 'purchaserequisition.index',
         ];
-        return view('purchase_requisition.index', compact('breadcrum', 'uom'));
+        return view('purchase_requisition.index', compact('breadcrum', 'uom', 'system_setting'));
     }
 
     /**

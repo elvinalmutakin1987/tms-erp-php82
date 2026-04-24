@@ -23,6 +23,14 @@
         <input type="hidden" class="form-control" id="_qty" name="_qty">
         <input type="text" class="form-control" id="_qty_" name="_qty_">
     </td>
+    <td class="p-1 align-middle">
+        <input type="hidden" class="form-control" id="_price" name="_price">
+        <input type="text" class="form-control" id="_price_" name="_price_">
+    </td>
+    <td class="p-1 align-middle">
+        <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
+        <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
+    </td>
     <td class="p-1 align-middle" style="width:2%">
         <div class="row row-cols-auto g-3">
             <div class="col">
@@ -101,6 +109,7 @@
         });
 
         const $qty = $('#_qty_');
+        const $price = $('#_price_');
 
         let isFmt = false;
         let userDecSep = null;
@@ -206,6 +215,14 @@
         });
 
         $qty.on('input', function(e) {
+            textInput("_qty", e);
+        });
+
+        $price.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $price.on('input', function(e) {
             textInput("_qty", e);
         });
 

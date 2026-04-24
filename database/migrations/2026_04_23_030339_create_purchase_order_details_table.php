@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchase_requisition_details', function (Blueprint $table) {
+        Schema::create('purchase_order_details', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('purchase_requisition_id')->nullable();
+            $table->unsignedBigInteger('purchase_order_id')->nullable();
             $table->unsignedBigInteger('maintenance_item_id')->nullable();
             $table->unsignedBigInteger('mro_item_id')->nullable();
             $table->text('description')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('amount', 16, 2)->nullable();
             $table->timestamps();
-            $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
+            $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
             $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
             $table->foreign('mro_item_id')->references('id')->on('mro_items')->onDelete('cascade');
         });
@@ -34,6 +34,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchase_requisition_details');
+        Schema::dropIfExists('purchase_order_details');
     }
 };

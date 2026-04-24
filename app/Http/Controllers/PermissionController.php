@@ -111,7 +111,7 @@ class PermissionController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|unique:permissions,name' . $permission->id . ',id',
+                'name' => 'required|unique:permissions,name,' . $permission->id . ',id',
             ]);
             $data = array_merge($request->except('_token', '_method'));
             $permission->update($data);

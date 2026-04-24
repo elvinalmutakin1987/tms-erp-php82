@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\Query\Builder;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
@@ -50,13 +52,15 @@ class ApprovalFlowController extends Controller
                 })
                 ->make();
         }
+        $department = config('department');
+        $approvable_model = config('approvable_model');
         $breadcrum = [
             'module' => 'Setting',
             'route-module' => null,
             'sub-module' => 'Approval Flow',
             'route-sub-module' => 'approval_flow.index',
         ];
-        return view('approvalflow.index', compact('breadcrum'));
+        return view('approvalflow.index', compact('breadcrum', 'department', 'approvable_model'));
     }
 
     /**
@@ -72,8 +76,15 @@ class ApprovalFlowController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|unique:approval_flows,name',
-                'approvable_model' => 'required'
+                'department' => [
+                    'required',
+                    Rule::unique('approval_flows', 'department')
+                        ->where(fn(Builder $query) => $query->where(
+                            'approvable_model',
+                            $request->approvable_model
+                        )),
+                ],
+                'approvable_model' => ['required'],
             ]);
             $data = array_merge($request->except(
                 '_token',
@@ -144,8 +155,16 @@ class ApprovalFlowController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|unique:approval_flows,name,' . $approval_flow->id . ',id',
-                'approvable_model' => 'required'
+                'department' => [
+                    'required',
+                    Rule::unique('approval_flows', 'department')
+                        ->where(fn(Builder $query) => $query->where(
+                            'approvable_model',
+                            $request->approvable_model
+                        ))
+                        ->ignore($approval_flow->id),
+                ],
+                'approvable_model' => ['required'],
             ]);
             $data = array_merge($request->except(
                 '_token',

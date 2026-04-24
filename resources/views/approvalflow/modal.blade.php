@@ -8,13 +8,24 @@
                  <form enctype="multipart/form-data">
                      @csrf
                      <div class="col-md-12 mb-2">
+                         <label for="department" class="form-label">Department</label>
+                         <select class="form-select select-select" id="department" name="department">
+                             @foreach ($department as $key => $value)
+                                 <option value="{{ $value }}">{{ $value }}</option>
+                             @endforeach
+                         </select>
+                     </div>
+                     {{-- <div class="col-md-12 mb-2">
                          <label for="name" class="form-label">Name</label>
                          <input type="text" class="form-control" id="name" name="name">
-                     </div>
+                     </div> --}}
                      <div class="col-md-12 mb-2">
                          <label for="approvable_model" class="form-label">Model</label>
-                         <input type="text" class="form-control" id="approvable_model" name="approvable_model"
-                             value="App\Models\" placeholder="App\Models\NamaModel">
+                         <select class="form-select select-select" id="approvable_model" name="approvable_model">
+                             @foreach ($approvable_model as $key => $value)
+                                 <option value="{{ $value }}">{{ $value }}</option>
+                             @endforeach
+                         </select>
                      </div>
                      <div class="col-md-12 mb-2">
                          <table class="table mb-0" id="tableStep">

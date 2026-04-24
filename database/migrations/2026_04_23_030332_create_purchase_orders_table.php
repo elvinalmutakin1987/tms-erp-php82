@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('purchase_requisitions', function (Blueprint $table) {
+        Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->unsignedBigInteger('maintenance_id')->nullable();
+            $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->string('number', 30)->nullable();
             $table->string('requisition_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //General / equipment
@@ -33,10 +32,10 @@ return new class extends Migration
             $table->timestamp('sync_at')->nullable();
             $table->string('input_method', 20)->nullable();
             $table->string('department', 30)->nullable();
+            $table->text('vendor_offer_path')->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            $table->foreign('maintenance_id')->references('id')->on('maintenances')->onDelete('cascade');
+            $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
         });
     }
@@ -46,6 +45,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('purchase_requisitions');
+        Schema::dropIfExists('purchase_orders');
     }
 };
