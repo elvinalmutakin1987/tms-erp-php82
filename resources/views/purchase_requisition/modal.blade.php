@@ -31,6 +31,15 @@
                             <select class="form-select select-select" id="maintenance_id" name="maintenance_id">
                             </select>
                         </div>
+                        <div class="col">
+                            <label for="urgency" class="form-label">Urgency</label>
+                            <select class="form-select select-select" id="urgency" name="urgency">
+                                <option value="P4">P4</option>
+                                <option value="P3">P3</option>
+                                <option value="P2">P2</option>
+                                <option value="P1">P1</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col">
@@ -91,7 +100,6 @@
                             </table>
                         </div>
                     </div>
-
                 </form>
             </div>
             <div class="modal-footer">

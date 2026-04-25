@@ -403,8 +403,8 @@
         <tr class="checklist-head">
             <th class="col-no" style="width:5px;">#</th>
             <th class="col-description">Description</th>
-            <th class="col-uom" style="width:15%;">Uom</th>
-            <th class="col-qty" style="width:15%;">Qty</th>
+            <th class="col-uom" style="width:12%;">Uom</th>
+            <th class="col-qty" style="width:12%;">Qty</th>
             <th class="col-price" style="width:15%;">Price</th>
             <th class="col-amount" style="width:15%;">Amount</th>
         </tr>
@@ -421,7 +421,7 @@
                 <td class="p-1 align-middle" style="text-align: center">
                     {{ $d->uom }}
                 </td>
-                <td class="p-1 align-middle" style="text-align: right">
+                <td class="p-1 align-middle" style="text-align: center">
                     {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
                 </td>
                 <td class="p-1 align-middle" style="text-align: right">
@@ -435,19 +435,19 @@
     </tbody>
     <tfoot>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="5">Total</td>
+            <td class="p-1 align-middle" style="text-align: right" colspan="5"><b>Total</b></td>
             <td class="p-1 align-middle" style="text-align: right">
                 {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="5">Tax</td>
+            <td class="p-1 align-middle" style="text-align: right" colspan="5"><b>Tax</b></td>
             <td class="p-1 align-middle" style="text-align: right">
                 {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="5">Grand Total</td>
+            <td class="p-1 align-middle" style="text-align: right" colspan="5"><b>Grand Total</b></td>
             <td class="p-1 align-middle" style="text-align: right">
                 {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
             </td>

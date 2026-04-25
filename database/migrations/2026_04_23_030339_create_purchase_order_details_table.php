@@ -22,6 +22,8 @@ return new class extends Migration
             $table->decimal('price', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('amount', 16, 2)->nullable();
+            $table->string('part_number')->nullable();
+            $table->string('desc_vendor')->nullable();
             $table->timestamps();
             $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
             $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');

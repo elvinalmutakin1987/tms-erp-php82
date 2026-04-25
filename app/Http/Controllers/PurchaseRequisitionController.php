@@ -43,6 +43,9 @@ class PurchaseRequisitionController extends Controller
             if (request()->date_end != '') {
                 $purchase_requisition = $purchase_requisition->where('date', '<=', request()->date_end);
             }
+            if (request()->urgency != 'All') {
+                $purchase_requisition = $purchase_requisition->where('urgency', request()->urgency);
+            }
             $purchase_requisition = $purchase_requisition->where('type', 'Equipment');
             $purchase_requisition = $purchase_requisition->orderBy('date', 'desc')->get();
             return DataTables::of($purchase_requisition)
@@ -146,7 +149,8 @@ class PurchaseRequisitionController extends Controller
                     'total',
                     'tax',
                     'grand_total',
-                    'status'
+                    'status',
+                    'urgency'
                 ),
                 [
                     'input_method' => 'Web',
@@ -250,7 +254,8 @@ class PurchaseRequisitionController extends Controller
                     'total',
                     'tax',
                     'grand_total',
-                    'status'
+                    'status',
+                    'urgency'
                 ),
                 [
                     'input_method' => 'Web',

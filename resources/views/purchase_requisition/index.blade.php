@@ -41,6 +41,15 @@
                                     </select>
                                 </div>
                                 <div class="col-2">
+                                    <select class="form-select select-top" id="_urgency" name="_urgency">
+                                        <option value="All">All Urgency</option>
+                                        <option value="P4">P4</option>
+                                        <option value="P3">P3</option>
+                                        <option value="P2">P2</option>
+                                        <option value="P1">P1</option>
+                                    </select>
+                                </div>
+                                <div class="col-2">
                                     <input type="text" class="form-control datepicker" id="date_start" name="date_start"
                                         placeholder="Start Date">
                                 </div>
@@ -66,6 +75,7 @@
                                         <th>Maintenance Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
+                                        <th>Urgency </th>
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -123,6 +133,7 @@
                         d.unit_id = $('#unit').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
+                        d.urgency = $('#_urgency').val();
                     }
                 },
                 "columns": [{
@@ -157,6 +168,27 @@
                         name: 'unit',
                         orderable: true,
                         searchable: true,
+                    },
+                    {
+                        data: 'urgency',
+                        name: 'urgency',
+                        orderable: true,
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (data == "P4") {
+                                return '<span class="badge bg-success" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'P3') {
+                                return '<span class="badge bg-primary" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'P2') {
+                                return '<span class="badge bg-warning" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else {
+                                return '<span class="badge bg-danger" style="font-size: 13px">' +
+                                    data + '</span>';
+                            }
+                        }
                     },
                     {
                         data: 'status',
@@ -223,6 +255,8 @@
                             thousandSeparated: true,
                             mantissa: 0
                         }));
+                        $("#urgency").val(response.data.urgency).trigger(
+                            'change');
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -462,6 +496,12 @@
             $('#tableItem tbody').empty();
             $("#unit_id").val('All').trigger('change');
             $("#maintenance_id").val('All').trigger('change');
+            $("#total").val('');
+            $("#total_").val('');
+            $("#tax").val('');
+            $("#tax_").val('');
+            $("#grand_total").val('');
+            $("#grand_total_").val('');
         });
 
         $('#cancelButton').on('click', function() {

@@ -7,7 +7,7 @@
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
                 <td width="30%">Number <br>
-                    <b>{{ $purchase_requisition->requsition_no }}</b>
+                    <b>{{ $purchase_requisition->requisition_no }}</b>
                 </td>
                 <td colspan="2"></td>
             </tr>
@@ -35,7 +35,7 @@
                 <tr>
                     <th scope="col" style="width: 5%">#</th>
                     <th scope="col">Description</th>
-                    <th scope="col" style="width: 15%">Uom</th>
+                    <th scope="col" style="width: 12%">Uom</th>
                     <th scope="col" style="width: 12%; text-align: right">Qty</th>
                     <th scope="col" style="width: 15%; text-align: right">Price</th>
                     <th scope="col" style="width: 15%; text-align: right">Amount</th>
@@ -57,19 +57,19 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td style="text-align:right" colspan="5">Total</td>
+                    <td style="text-align:right" colspan="5"><b>Total</b></td>
                     <td style="text-align:right">
                         {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:right" colspan="5">Tax</td>
+                    <td style="text-align:right" colspan="5"><b>Tax</b></td>
                     <td style="text-align:right">
                         {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:right" colspan="5">Grand Total</td>
+                    <td style="text-align:right" colspan="5"><b>Grand Total</b></td>
                     <td style="text-align:right">
                         {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
                     </td>

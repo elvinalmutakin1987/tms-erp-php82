@@ -33,6 +33,7 @@ return new class extends Migration
             $table->timestamp('sync_at')->nullable();
             $table->string('input_method', 20)->nullable();
             $table->string('department', 30)->nullable();
+            $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');

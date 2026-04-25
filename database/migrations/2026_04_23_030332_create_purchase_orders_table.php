@@ -25,6 +25,7 @@ return new class extends Migration
             $table->decimal('total', 16, 2)->nullable();
             $table->decimal('discount', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
+            $table->decimal('pph_21', 16, 2)->nullable();
             $table->decimal('grand_total', 16, 2)->nullable();
             $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
@@ -33,6 +34,7 @@ return new class extends Migration
             $table->string('input_method', 20)->nullable();
             $table->string('department', 30)->nullable();
             $table->text('vendor_offer_path')->nullable();
+            $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');

@@ -22,6 +22,9 @@ return new class extends Migration
             $table->decimal('price', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('amount', 16, 2)->nullable();
+            $table->date('received_at')->nullable();
+            $table->string('received_by', 30)->nullable();
+            $table->string('received_note')->nullable();
             $table->timestamps();
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
