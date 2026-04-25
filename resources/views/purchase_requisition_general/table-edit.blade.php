@@ -19,6 +19,14 @@
         <input type="hidden" class="form-control" id="_qty" name="_qty">
         <input type="text" class="form-control" id="_qty_" name="_qty_">
     </td>
+    <td class="p-1 align-middle">
+        <input type="hidden" class="form-control" id="_price" name="_price">
+        <input type="text" class="form-control" id="_price_" name="_price_">
+    </td>
+    <td class="p-1 align-middle">
+        <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
+        <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
+    </td>
     <td class="p-1 align-middle" style="width:2%">
         <div class="row row-cols-auto g-3">
             <div class="col">
@@ -49,6 +57,18 @@
             <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
                 value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
         </td>
+        <td class="p-1 align-middle">
+            <input type="hidden" class="form-control" id="price" name="price[]" readonly
+                value="{{ $d->price }}">
+            <input type="text" class="form-control" id="__price" name="__price[]" readonly
+                value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}">
+        </td>
+        <td class="p-1 align-middle">
+            <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
+                value="{{ $d->amount }}">
+            <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
+                value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}">
+        </td>
         <td class="text-center p-1 align-middle">
             <div class="row row-cols-auto g-3">
                 <div class="col">
@@ -62,6 +82,7 @@
 
 <script>
     (() => {
+        const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
 
@@ -83,6 +104,7 @@
         });
 
         const $qty = $('#_qty_');
+        const $price = $('#_price_');
 
         let isFmt = false;
         let userDecSep = null;
@@ -191,12 +213,25 @@
             textInput("_qty", e);
         });
 
+        $price.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $price.on('input', function(e) {
+            textInput("_price", e);
+            calculateAmount();
+        });
+
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
             var description = $("#_description").val();
             var uom = $("#_uom").val();
             var _qty = $("#_qty").val();
             var _qty_ = $("#_qty_").val();
+            var _price = $("#_price").val();
+            var _price_ = $("#_price_").val();
+            var _amount = $("#_amount").val();
+            var _amount_ = $("#_amount_").val();
             var newRow = `
                 <tr>
                     <td class="p-1 align-middle row-number">
@@ -225,17 +260,20 @@
             `;
             $("#_qty").val('');
             $("#_qty_").val('');
+            $("#_price").val('');
+            $("#_price_").val('');
+            $("#_amount").val('');
+            $("#_amount_").val('');
             $("#_description").val('');
             tbody.append(newRow);
-
             renumberRows();
+            calculateTotal();
         });
 
         function renumberRows() {
             let no = 1;
 
             $('#tableItem > tbody > tr').each(function() {
-                // row khusus tidak ikut nomor
                 if ($(this).hasClass('fixed-row')) {
                     $(this).find('.row-number').text('');
                     $(this).find('.order').val('');
@@ -257,6 +295,54 @@
 
             $(this).remove();
             renumberRows();
+            calculateTotal();
         });
+
+        function calculateAmount() {
+            const qty = parseFloat($("#_qty").val()) || 0;
+            const price = parseFloat($("#_price").val()) || 0;
+
+            const amount = qty * price;
+
+            $("#_amount").val(amount);
+            $("#_amount_").val(numbro(amount).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
+        }
+
+        function calculateTotal() {
+            let total = 0;
+
+            $('input[name="amount[]"]').each(function() {
+                total += parseFloat($(this).val()) || 0;
+            });
+
+            let tax = 0;
+            let grandTotal = 0;
+
+            if (total > 0) {
+                tax = tax_ / 100 * total;
+                grandTotal = total + tax;
+            }
+
+            $("#total").val(total || '');
+            $("#total_").val(total ? numbro(total).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+
+            $("#tax").val(tax || '');
+            $("#tax_").val(tax ? numbro(tax).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+
+            $("#grand_total").val(grandTotal || '');
+            $("#grand_total_").val(grandTotal ? numbro(grandTotal).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+        }
     })();
 </script>

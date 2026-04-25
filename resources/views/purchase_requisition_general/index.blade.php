@@ -200,6 +200,21 @@
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
                         $("#department").val(response.data.department).trigger('change');
+                        $("#total").val(response.data.total);
+                        $("#total_").val(numbro(response.data.total).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
+                        $("#tax").val(response.data.tax);
+                        $("#tax_").val(numbro(response.data.tax).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
+                        $("#grand_total").val(response.data.grand_total);
+                        $("#grand_total_").val(numbro(response.data.grand_total).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
                     },
                     error: function() {
                         alert('Error fetching data');

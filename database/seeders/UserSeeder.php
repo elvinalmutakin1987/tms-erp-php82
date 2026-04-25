@@ -38,6 +38,14 @@ class UserSeeder extends Seeder
         Permission::create(['name' => 'permission.update']);
         Permission::create(['name' => 'permission.delete']);
 
+         /**
+         * Role
+         */
+        Permission::create(['name' => 'role.read']);
+        Permission::create(['name' => 'role.create']);
+        Permission::create(['name' => 'role.update']);
+        Permission::create(['name' => 'role.delete']);
+
 
         $data = [
             "username" => "superadmin",

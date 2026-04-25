@@ -48,7 +48,7 @@
                                         <th scope="col">MRO Item</th>
                                         <th scope="col" style="width:12%">Uom</th>
                                         <th scope="col" style="width:10%">Qty</th>
-                                        <th scope="col" style="width:10%">Price</th>
+                                        <th scope="col" style="width:15%">Price</th>
                                         <th scope="col" style="width:15%">Amount</th>
                                         <th scope="col" style="width:2%">Action</th>
                                     </tr>
@@ -58,29 +58,34 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end"><b>Total</b></td>
-                                        <td scope="col">
+                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Total</b>
+                                        </td>
+                                        <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="total" name="total" readonly>
                                             <input type="text" class="form-control" id="total_" name="total_"
                                                 readonly>
                                         </td>
-                                        <td scope="col"></td>
+                                        <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end"><b>Tax</b></td>
-                                        <td scope="col">
+                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Tax</b>
+                                        </td>
+                                        <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="tax" name="tax" readonly>
                                             <input type="text" class="form-control" id="tax_" name="tax_"
                                                 readonly>
                                         </td>
-                                        <td scope="col"></td>
+                                        <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end"><b>Grand Total</b></td>
-                                        <td scope="col">
-
+                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Grand
+                                                Total</b></td>
+                                        <td scope="col" class="p-1 align-middle">
+                                            <input type="hidden" id="grand_total" name="grand_total" readonly>
+                                            <input type="text" class="form-control" id="grand_total_"
+                                                name="grand_total_" readonly>
                                         </td>
-                                        <td scope="col"></td>
+                                        <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                 </tfoot>
                             </table>

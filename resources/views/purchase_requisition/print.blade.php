@@ -228,6 +228,14 @@
         width: 15%;
     }
 
+    .col-price {
+        width: 15%;
+    }
+
+    .col-amount {
+        width: 15%;
+    }
+
     /* Make "BROKEN" fit on narrow col */
     .checklist-head th.col-broken {
         font-size: 8pt;
@@ -353,11 +361,13 @@
         <col class="col-mro-item" style="width:35%;">
         <col class="col-uom" style="width:15%;">
         <col class="col-qty" style="width:15%;">
+        <col class="col-price" style="width:15%;">
+        <col class="col-amount" style="width:15%;">
     </colgroup>
 
     <thead>
         <tr>
-            <th colspan="5" class="doc-header-wrapper">
+            <th colspan="7" class="doc-header-wrapper">
                 <table class="doc-header-table">
                     <tr>
                         <td class="logo-cell">
@@ -414,6 +424,8 @@
             <th class="col-mro-item">MRO Item</th>
             <th class="col-uom">Uom</th>
             <th class="col-qty">Qty</th>
+            <th class="col-qty">Price</th>
+            <th class="col-qty">Amount</th>
         </tr>
     </thead>
     <tbody>
@@ -428,18 +440,44 @@
                 <td class="p-1 align-middle">
                     {{ $d->mro_item->name }}
                 </td>
-                <td class="p-1 align-middle">
+                <td class="p-1 align-middle" style="text-align: center">
                     {{ $d->uom }}
                 </td>
                 <td class="p-1 align-middle" style="text-align: right">
                     {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
                 </td>
+                <td class="p-1 align-middle" style="text-align: right">
+                    {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
+                </td>
+                <td class="p-1 align-middle" style="text-align: right">
+                    {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
+                </td>
             </tr>
         @endforeach
     </tbody>
+    <tfoot>
+        <tr>
+            <td class="p-1 align-middle" style="text-align: right" colspan="6">Total</td>
+            <td class="p-1 align-middle" style="text-align: right">
+                {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle" style="text-align: right" colspan="6">Tax</td>
+            <td class="p-1 align-middle" style="text-align: right">
+                {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle" style="text-align: right" colspan="6">Grand Total</td>
+            <td class="p-1 align-middle" style="text-align: right">
+                {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
+            </td>
+        </tr>
+    </tfoot>
     <thead>
         <tr>
-            <td colspan="5" class="p-1">
+            <td colspan="7" class="p-1">
                 Notes : <br>
                 @if ($purchase_requisition->notes != '')
                     {!! $purchase_requisition->notes !!}
@@ -450,7 +488,7 @@
     </thead>
     <thead>
         <tr>
-            <td colspan="5" class="p-1">
+            <td colspan="7" class="p-1">
                 <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
                     <tr>
                         <td style="border: none; text-align: center">

@@ -42,6 +42,7 @@
 
 <script>
     (() => {
+        const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
 
@@ -216,6 +217,7 @@
 
         $qty.on('input', function(e) {
             textInput("_qty", e);
+            calculateAmount();
         });
 
         $price.on('keydown', function(e) {
@@ -223,7 +225,8 @@
         });
 
         $price.on('input', function(e) {
-            textInput("_qty", e);
+            textInput("_price", e);
+            calculateAmount();
         });
 
         $('#addItemButton').on('click', function() {
@@ -235,6 +238,10 @@
             var uom = $("#_uom").val();
             var _qty = $("#_qty").val();
             var _qty_ = $("#_qty_").val();
+            var _price = $("#_price").val();
+            var _price_ = $("#_price_").val();
+            var _amount = $("#_amount").val();
+            var _amount_ = $("#_amount_").val();
             var newRow = `
                 <tr>
                     <td class="p-1 align-middle row-number">
@@ -255,6 +262,14 @@
                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly value="${_qty}">
                        <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}">
                     </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${_price}">
+                       <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}">
+                    </td>
+                     <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
+                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}">
+                    </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
                             <div class="col">
@@ -267,11 +282,16 @@
             `;
             $("#_qty").val('');
             $("#_qty_").val('');
+            $("#_price").val('');
+            $("#_price_").val('');
+            $("#_amount").val('');
+            $("#_amount_").val('');
             $("#maintenance_item_").val('').trigger('change');
             $("#mro_item_").val('').trigger('change');
             $("#_uom").val('').trigger('change');
             tbody.append(newRow);
             renumberRows();
+            calculateTotal();
         });
 
         function renumberRows() {
@@ -297,6 +317,54 @@
 
             $(this).remove();
             renumberRows();
+            calculateTotal();
         });
+
+        function calculateAmount() {
+            const qty = parseFloat($("#_qty").val()) || 0;
+            const price = parseFloat($("#_price").val()) || 0;
+
+            const amount = qty * price;
+
+            $("#_amount").val(amount);
+            $("#_amount_").val(numbro(amount).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
+        }
+
+        function calculateTotal() {
+            let total = 0;
+
+            $('input[name="amount[]"]').each(function() {
+                total += parseFloat($(this).val()) || 0;
+            });
+
+            let tax = 0;
+            let grandTotal = 0;
+
+            if (total > 0) {
+                tax = tax_ / 100 * total;
+                grandTotal = total + tax;
+            }
+
+            $("#total").val(total || '');
+            $("#total_").val(total ? numbro(total).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+
+            $("#tax").val(tax || '');
+            $("#tax_").val(tax ? numbro(tax).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+
+            $("#grand_total").val(grandTotal || '');
+            $("#grand_total_").val(grandTotal ? numbro(grandTotal).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+        }
     })();
 </script>

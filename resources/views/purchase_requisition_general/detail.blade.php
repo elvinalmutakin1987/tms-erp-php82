@@ -24,13 +24,21 @@
 </div>
 <div class="row mb-2">
     <div class="col">
+        Notes : <br>
+        {!! $purchase_requisition->notes !!}
+    </div>
+</div>
+<div class="row mb-2">
+    <div class="col">
         <table class="table mb-0">
             <thead class="table-dark">
                 <tr>
                     <th scope="col" style="width: 5%">#</th>
                     <th scope="col">Description</th>
                     <th scope="col" style="width: 15%">Uom</th>
-                    <th scope="col" style="width: 15%; text-align: right">Qty</th>
+                    <th scope="col" style="width: 12%; text-align: right">Qty</th>
+                    <th scope="col" style="width: 15%; text-align: right">Price</th>
+                    <th scope="col" style="width: 15%; text-align: right">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,15 +48,33 @@
                         <td>{{ $d->description }}</td>
                         <td>{{ $d->uom }}</td>
                         <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}</td>
+                        <td style="text-align: right">{{ $d->price ? Number::format($d->price, precision: 0) : '' }}
+                        </td>
+                        <td style="text-align: right">{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
+                        </td>
                     </tr>
                 @endforeach
             </tbody>
+            <tfoot>
+                <tr>
+                    <td style="text-align:right" colspan="5">Total</td>
+                    <td style="text-align:right">
+                        {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right" colspan="5">Tax</td>
+                    <td style="text-align:right">
+                        {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right" colspan="5">Grand Total</td>
+                    <td style="text-align:right">
+                        {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
+                    </td>
+                </tr>
+            </tfoot>
         </table>
-    </div>
-</div>
-<div class="row mb-2">
-    <div class="col">
-        Notes : <br>
-        {!! $purchase_requisition->notes !!}
     </div>
 </div>

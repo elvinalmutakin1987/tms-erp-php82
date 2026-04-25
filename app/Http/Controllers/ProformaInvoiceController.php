@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Contract;
 use App\Models\Proforma_invoice;
+use App\Models\Purchase_requisition;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -164,11 +165,12 @@ class ProformaInvoiceController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_requisition';
-            if (checkHasApproval($model)) {
+            $department = 'Equipment';
+            if (checkHasApproval($model, $department)) {
                 if ($purchase_requisition->status == 'Open') {
                     $purchase_requisition->status = 'Approval';
                     $purchase_requisition->save();
-                    $approval_flow_id = getApprovalFlowId($model);
+                    $approval_flow_id = getApprovalFlowId($model, $department);
                     createApprovalProcess($approval_flow_id, $purchase_requisition->id);
                 }
             }

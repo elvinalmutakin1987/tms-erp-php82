@@ -124,21 +124,21 @@ class PurchaseRequisitionGeneralController extends Controller
                 'department' => ['required', 'not_in:All'],
                 'date' => 'required',
             ]);
+            $system_setting = config('system_setting');
             $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    '_uom',
-                    '__qty',
-                    'order',
-                    'description',
-                    'uom',
-                    'qty',
+                $request->only(
+                    'department',
+                    'date',
+                    'notes',
+                    'total',
+                    'tax',
+                    'grand_total'
                 ),
                 [
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
-                    'type' => 'General'
+                    'type' => 'General',
+                    'status' => $request->status
                 ]
             );
             $purchase_requisition = Purchase_requisition::create($data);
@@ -148,7 +148,10 @@ class PurchaseRequisitionGeneralController extends Controller
                         [
                             'description' => $item,
                             'uom' => $request->uom[$i],
-                            'qty' => $request->qty[$i]
+                            'qty' => $request->qty[$i],
+                            'price' => $request->price[$i],
+                            'tax' => $system_setting['tax'],
+                            'amount' => $request->amount[$i]
                         ]
                     );
                 }
@@ -160,11 +163,11 @@ class PurchaseRequisitionGeneralController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_requisition';
-            if (checkHasApproval($model)) {
+            if (checkHasApproval($model, $request->department)) {
                 if ($request->status == 'Open') {
                     $purchase_requisition->status = 'Approval';
                     $purchase_requisition->save();
-                    $approval_flow_id = getApprovalFlowId($model);
+                    $approval_flow_id = getApprovalFlowId($model, $request->department);
                     createApprovalProcess($approval_flow_id, $purchase_requisition->id);
                 }
             } else {
@@ -222,20 +225,20 @@ class PurchaseRequisitionGeneralController extends Controller
                 'department' => ['required', 'not_in:All'],
                 'date' => 'required',
             ]);
+            $system_setting = config('system_setting');
             $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    '_uom',
-                    '__qty',
-                    'order',
-                    'description',
-                    'uom',
-                    'qty',
+                $request->only(
+                    'department',
+                    'date',
+                    'notes',
+                    'total',
+                    'tax',
+                    'grand_total'
                 ),
                 [
                     'input_method' => 'Web',
-                    'user_id' => Auth::user()->id
+                    'user_id' => Auth::user()->id,
+                    'status' => $request->status
                 ]
             );
             $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
@@ -248,6 +251,9 @@ class PurchaseRequisitionGeneralController extends Controller
                             'description' => $item,
                             'uom' => $request->uom[$i],
                             'qty' => $request->qty[$i],
+                            'price' => $request->price[$i],
+                            'tax' => $system_setting['tax'],
+                            'amount' => $request->amount[$i]
                         ]
                     );
                 }
@@ -258,11 +264,11 @@ class PurchaseRequisitionGeneralController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_requisition';
-            if (checkHasApproval($model)) {
+            if (checkHasApproval($model, $request->department)) {
                 if ($request->status == 'Open') {
                     $purchase_requisition->status = 'Approval';
                     $purchase_requisition->save();
-                    $approval_flow_id = getApprovalFlowId($model);
+                    $approval_flow_id = getApprovalFlowId($model, $request->department);
                     createApprovalProcess($approval_flow_id, $purchase_requisition->id);
                 }
             } else {
@@ -321,11 +327,12 @@ class PurchaseRequisitionGeneralController extends Controller
             $view = 'purchase_requisition_general.table-add';
             $uom = config('uom');
             $department = config('department');
+            $system_setting = config('system_setting');
             $requisition_prev_no = Generator::make()
                 ->type('pr')
                 ->formatter($presenter)
                 ->preview();
-            $html = view($view, compact('uom'))->render();
+            $html = view($view, compact('uom', 'system_setting'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -349,7 +356,8 @@ class PurchaseRequisitionGeneralController extends Controller
             $uom = config('uom');
             $department = config('department');
             $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
-            $html = view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'uom', 'department'))->render();
+            $system_setting = config('system_setting');
+            $html = view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'uom', 'department', 'system_setting'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,

@@ -12,6 +12,7 @@ use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
 use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 class MechanicalInspectionController extends Controller
@@ -52,6 +53,7 @@ class MechanicalInspectionController extends Controller
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
                                 </li>';
+
                     /**
                      * user superadmin dan yang punya akses edit aja yang bisa muncul
                      */
