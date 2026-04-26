@@ -475,7 +475,11 @@
                     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     <span class="visually">Loading...</span>
                     `);
-            let url = '{{ route('dailyreport.get_form_add') }}';
+            var url = '{{ route('dailyreport.get_form_add') }}';
+            if (reportId != '') {
+                url = '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
+                    reportId);
+            }
             $.ajax({
                 url: url,
                 type: 'GET',

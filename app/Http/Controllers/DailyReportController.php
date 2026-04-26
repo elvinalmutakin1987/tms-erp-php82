@@ -295,7 +295,7 @@ class DailyReportController extends Controller
                 ]
             );
             $lockDaily_report = Daily_report::where('id', $daily_report->id)->lockForUpdate()->first();
-            $lockDaily_report->lockForUpdate($data);
+            $lockDaily_report->update($data);
             $daily_report->daily_report_detail()->delete();
             if ($request->has('detail_unit_id')) {
                 foreach ($request->detail_unit_id as $key => $item) {
