@@ -35,7 +35,7 @@
                                         <option value="All">All Status</option>
                                         <option value="Draft">Draft</option>
                                         <option value="Approval">Approval</option>
-                                        <option value="Open">Open</option>
+                                        <option value="Approved">Approved</option>
                                         <option value="Cancel">Cancel</option>
                                         <option value="Done">Done</option>
                                     </select>

@@ -544,4 +544,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaserequisitiongeneral-load-table-edit/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_table_edit'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.get_table_edit');
+
+    Route::get('purchaserequisitiongeneral-get-receive/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_receive'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.get_receive');
+
+    Route::put('purchaserequisitiongeneral-receive/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'receive'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisitiongeneral.receive');
 });

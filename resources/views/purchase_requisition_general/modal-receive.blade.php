@@ -10,7 +10,11 @@
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-3">
-                    <button type="button" class="btn btn-light" id="cancelDetailButton">Cancel</button>
+                    <button type="button" class="btn btn-warning saveButton" id="saveButton" name="status"
+                        value="Open">Save</button>
+                    <button type="button" class="btn btn-success closeButton" id="closeButton" name="status"
+                        value="Draft">Save & Close </button>
+                    <button type="button" class="btn btn-light" id="cancelReceiveButton">Cancel</button>
                 </div>
             </div>
         </div>

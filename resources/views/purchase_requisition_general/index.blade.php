@@ -38,7 +38,7 @@
                                         <option value="All">All Status</option>
                                         <option value="Draft">Draft</option>
                                         <option value="Approval">Approval</option>
-                                        <option value="Open">Open</option>
+                                        <option value="Approved">Approved</option>
                                         <option value="Cancel">Cancel</option>
                                         <option value="Done">Done</option>
                                     </select>
@@ -98,6 +98,8 @@
     @include('purchase_requisition_general.modal')
 
     @include('purchase_requisition_general.modal-detail')
+
+    @include('purchase_requisition_general.modal-receive')
 @endsection
 
 @section('js')
@@ -268,6 +270,24 @@
                     type: 'GET',
                     success: function(response) {
                         $('#modal-detail-body').html(response);
+                    },
+                    error: function() {
+                        alert('Error fetching data');
+                    }
+                });
+            });
+
+            $(document).on('click', '.receiveButton', function() {
+                requisitionId = $(this).data('id');
+                $('#modal-receive-header').text('Receive Requisition');
+                $('#id').val(requisitionId);
+                let url = '{{ route('purchaserequisitiongeneral.get_receive', ':_id') }}';
+                url = url.replace(':_id', requisitionId);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-receive-body').html(response);
                     },
                     error: function() {
                         alert('Error fetching data');
