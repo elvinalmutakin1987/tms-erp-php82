@@ -143,9 +143,12 @@ class P2hController extends Controller
                     'defect_listed',
                     'action_taken'
                 ),
-                ['input_method' => 'Web']
+                [
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web'
+                ]
             );
-            $p2h = P2h::create($data);
+            $p2h = P2h::firstOrCreate($data);
             if ($request->has('inspection_item')) {
                 foreach ($request->inspection_item as $i => $item) {
                     $p2h->p2h_detail()->create(
@@ -220,6 +223,7 @@ class P2hController extends Controller
                     'check',
                     'defect_listed',
                     'action_taken',
+                    'request_token'
                 ),
                 ['input_method' => 'Web']
             );
@@ -230,6 +234,7 @@ class P2hController extends Controller
                 foreach ($request->inspection_item as $key => $item) {
                     $p2h->p2h_detail()->create(
                         [
+                            'request_token' => $p2h->request_token,
                             'inspection_item' => $item,
                             'inspection_group' => $request->inspection_group[$key],
                             'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),

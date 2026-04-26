@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class MroItemSeeder extends Seeder
@@ -14,12 +15,30 @@ class MroItemSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ["name" => "Tread"],
-            ["name" => "Sidewall"],
-            ["name" => "Bead"],
-            ["name" => "Carcass"],
-            ["name" => "Breaker"],
-            ["name" => "Inner Liner"],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Tread"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Sidewall"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Bead"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Carcass"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Breaker"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Inner Liner"
+            ],
         ];
         DB::table('mro_items')->insert($data);
     }

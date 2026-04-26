@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('maintenance_items', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->string('action', 30)->nullable(); //Repair / Replace / Washing / Add / Flushing
             $table->string('name')->nullable();
             $table->timestamps();

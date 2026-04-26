@@ -75,7 +75,7 @@ class MaintenanceItemController extends Controller
                 // 'action' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Maintenance_item::create($data);
+            Maintenance_item::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -123,7 +123,7 @@ class MaintenanceItemController extends Controller
                 'name' => 'required',
                 // 'action' => 'required',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $maintenance_item->update($data);
             DB::commit();
             return response()->json([

@@ -139,11 +139,12 @@ class ProformaInvoiceController extends Controller
                     'qty',
                 ),
                 [
+                    'request_token' => $request->request_token,
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id
                 ]
             );
-            $purchase_requisition = Purchase_requisition::create($data);
+            $purchase_requisition = Purchase_requisition::firstOrCreate($data);
             foreach ($request->maintenance_item_id as $i => $item) {
                 $purchase_requisition->purchase_requisition_detail()->updateOrCreate(
                     [
@@ -153,6 +154,7 @@ class ProformaInvoiceController extends Controller
                         'qty' => $request->qty[$i]
                     ],
                     [
+                        'request_token' => $purchase_requisition->request_token,
                         'mro_item_id' => $request->mro_item_id[$i],
                         'uom' => $request->uom[$i],
                         'qty' => $request->qty[$i]

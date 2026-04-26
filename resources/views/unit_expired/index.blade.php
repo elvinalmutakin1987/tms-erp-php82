@@ -126,6 +126,7 @@
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var unitId = '';
         var locationId = '';
         var unitbrandId = '';
@@ -496,6 +497,7 @@
         });
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('unitexpired.update', ':_id') }}';
             url = url.replace(':_id', unitId);
@@ -544,11 +546,20 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             unitId = '';
+            enableButton();
         });
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

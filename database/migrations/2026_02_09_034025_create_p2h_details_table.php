@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('p2h_details', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('p2h_id')->nullable();
             $table->text('inspection_group')->nullable();
             $table->text('inspection_item')->nullable();

@@ -193,16 +193,18 @@ class MaintenanceController extends Controller
                     'main_item_id'
                 ),
                 [
+                    'request_token' => $request->request_token,
                     'input_method' => 'Web'
                 ]
             );
-            $maintenance = Maintenance::create($data);
+            $maintenance = Maintenance::firstOrCreate($data);
             foreach ($request->maintenance_item_id as $key => $item) {
-                $maintenance->maintenance_detail()->updateOrCreate(
+                $maintenance->maintenance_detail()->create(
                     [
                         'maintenance_item_id' => $item,
                     ],
                     [
+                        'request_token' => $maintenance->request_token,
                         'maintenance_item_id' => $request->maintenance_item_id[$key],
                         'action' => $request->action[$key],
                     ]
@@ -275,22 +277,27 @@ class MaintenanceController extends Controller
                     'action',
                     'act',
                     'main_item',
-                    'main_item_id'
+                    'main_item_id',
+                    'request_token'
                 ),
                 ['input_method' => 'Web']
             );
             $lockMaintenance = Maintenance::where('id', $maintenance->id)->lockForUpdate()->first();
             $lockMaintenance->update($data);
-            foreach ($request->maintenance_item_id as $key => $item) {
-                $maintenance->maintenance_detail()->updateOrCreate(
-                    [
-                        'maintenance_item_id' => $item,
-                    ],
-                    [
-                        'maintenance_item_id' => $request->maintenance_item_id[$key],
-                        'action' => $request->action[$key]
-                    ]
-                );
+            $maintenance->maintenance_detail()->delete();
+            if ($request->maintenance_item_id) {
+                foreach ($request->maintenance_item_id as $key => $item) {
+                    $maintenance->maintenance_detail()->create(
+                        [
+                            'maintenance_item_id' => $item,
+                        ],
+                        [
+                            'request_token' => $maintenance->request_token,
+                            'maintenance_item_id' => $request->maintenance_item_id[$key],
+                            'action' => $request->action[$key]
+                        ]
+                    );
+                }
             }
             DB::commit();
             return response()->json([

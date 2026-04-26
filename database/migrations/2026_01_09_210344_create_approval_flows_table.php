@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('approval_flows', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->string('name')->nullable();
             $table->string('department')->nullable();
             $table->string('approvable_model')->nullable();

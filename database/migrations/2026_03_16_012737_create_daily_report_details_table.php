@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('daily_report_details', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('daily_report_id')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->string('item', 30)->nullable();

@@ -88,6 +88,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var p2hId = '';
         var unitId = '';
         $(document).ready(function() {
@@ -228,6 +229,7 @@
                         $('#_km_finish').val(numbro(response.data.km_finish).format({
                             thousandSeparated: true
                         }));
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -355,6 +357,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('p2h.store') }}';
             var type = 'POST';
@@ -400,7 +403,6 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-
             var tbody = $("#tableItem > tbody");
             tbody.append(`
                     <tr>
@@ -431,12 +433,31 @@
                         console.error('Error:', error);
                     }
                 });
+
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
             }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
             p2hId = '';
             unitId = '';
+            enableButton();
+            $("#request_token").val();
             $('#tableItem tbody').empty();
             $("#unit_id").val('All').trigger('change');
             $("#shift").val('Day').trigger('change');
@@ -636,6 +657,14 @@
                 }
             });
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

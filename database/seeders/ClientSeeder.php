@@ -18,6 +18,7 @@ class ClientSeeder extends Seeder
     public function run(): void
     {
         $data = [
+            "request_token" => (string) Str::uuid(),
             "location_id" => 1,
             "type" => "Client",
             "name" => "PT. Kaltim Prima Coal",

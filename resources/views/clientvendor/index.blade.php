@@ -78,6 +78,8 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script>
+        const saveButton = document.getElementById('saveButton');
+
         var clientvendorId = '';
         var locationId = '';
         var type = '';
@@ -245,6 +247,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('clientvendor.store') }}';
             var typeAjax = 'POST';
@@ -298,6 +301,21 @@
                         'form': 'edit',
                         'client_vendor_id': clientvendorId
                     };
+                } else {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
                 }
                 $.ajax({
                     url: '{{ route('clientvendor.get_location_all') }}',
@@ -349,6 +367,8 @@
         $('#formModal').on('hidden.bs.modal', function() {
             locationId = '';
             clientvendorId = '';
+            enableButton();
+            $('#request_token').val("");
             $("#type").val(type).trigger('change');
         });
 
@@ -376,6 +396,14 @@
                         }, 0);
                     });
             });
+        }
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
         }
     </script>
     <!--app JS-->

@@ -67,6 +67,7 @@
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var approvalFlowId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -139,7 +140,7 @@
                         $('#username').prop('readonly', true);
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit User');
-                        // $('#name').val(response.data.name);
+                        $('#request_token').val(response.data.request_token);
                         $('#department').val(response.data.department).trigger('change');
                         $('#approvable_model').val(response.data.approvable_model).trigger(
                             'change');
@@ -199,6 +200,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('approval_flow.store') }}';
             var type = 'POST';
@@ -301,6 +303,20 @@
                         }
                     });
                 } else {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
                     $('#tableStep tbody tr').not(':first').remove();
                 }
             }, 500);
@@ -308,6 +324,8 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             approvalFlowId = '';
+            enableButton();
+            $('#request_token').val("");
             $('#tableStep tbody tr').not(':first').remove();
         });
 
@@ -403,6 +421,14 @@
             $(this).remove();
             renumberRows();
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

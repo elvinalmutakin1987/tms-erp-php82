@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -47,5 +48,23 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect()->route('login');
+    }
+
+    /**
+     * Membuat request token
+     */
+    public function gen_request_token(Request $request)
+    {
+        try {
+            return response()->json([
+                'success' => true,
+                'data' => (string) Str::uuid()
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

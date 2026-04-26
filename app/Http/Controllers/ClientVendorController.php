@@ -70,7 +70,7 @@ class ClientVendorController extends Controller
                 'name' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Client_vendor::create($data);
+            Client_vendor::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -117,7 +117,7 @@ class ClientVendorController extends Controller
             $request->validate([
                 'name' => 'required',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $client_vendor->update($data);
             DB::commit();
             return response()->json([

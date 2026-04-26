@@ -79,6 +79,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var unitId = '';
         var locationId = '';
         var unitbrandId = '';
@@ -187,6 +188,7 @@
                         $("#exp_tax").val(response.data.exp_tax);
                         $("#exp_comm").val(response.data.exp_comm);
                         $("#description").val(response.data.description);
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -252,6 +254,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('unit.store') }}';
             var type = 'POST';
@@ -309,12 +312,29 @@
                         'form': 'edit',
                         'unit_id': unitId
                     };
+                } else {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
                 }
                 $.ajax({
                     url: '{{ route('unit.get_location_all') }}',
                     type: 'GET',
                     success: function(response) {
                         $('#location_id').empty();
+                        $('#location_id').append(
+                            '<option value="" selected disabled></option>');
                         $.each(response.data, function(index, location) {
                             $('#location_id').append('<option value="' + location.id +
                                 '">' +
@@ -340,6 +360,8 @@
                     type: 'GET',
                     success: function(response) {
                         $('#unit_brand_id').empty();
+                        $('#unit_brand_id').append(
+                            '<option value="" selected disabled></option>');
                         $.each(response.data, function(index, brand) {
                             $('#unit_brand_id').append('<option value="' + brand.id +
                                 '">' +
@@ -368,6 +390,8 @@
             locationId = '';
             unitbrandId = '';
             unitmodelId = '';
+            enableButton();
+            $("#request_token").val("");
         });
 
         $('#cancelButton').on('click', function() {
@@ -405,6 +429,7 @@
                 type: 'GET',
                 success: function(response) {
                     $('#unit_model_id').empty();
+                    $('#unit_model_id').append('<option value="" selected disabled></option>');
                     $.each(response.data, function(index, brand) {
                         $('#unit_model_id').append('<option value="' + brand.id +
                             '">' +
@@ -423,6 +448,22 @@
                     });
                 }
             });
+        }
+
+        $("#unit_brand_id").select2({
+            theme: "bootstrap-5",
+            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                'w-100') ? '100%' : 'style',
+        }).on('change', function() {
+            get_unit_model($(this).val());
+        });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
         }
     </script>
     <!--app JS-->

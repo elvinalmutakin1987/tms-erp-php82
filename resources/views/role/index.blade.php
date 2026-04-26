@@ -59,6 +59,7 @@
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
     <script>
+        const saveButton = document.getElementById('saveButton');
         var roleId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -117,6 +118,7 @@
                     success: function(response) {
                         $('#modal-header').text('Edit Role');
                         $('#name').val(response.data.name);
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -171,6 +173,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('role.store') }}';
             var type = 'POST';
@@ -232,6 +235,21 @@
                         'form': 'edit',
                         'role_id': roleId
                     };
+                } else {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
                 }
                 $.ajax({
                     url: '{{ route('role.get_permission_all') }}',
@@ -252,11 +270,21 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             roleId = '';
+            enableButton();
+            $("#request_token").val("");
         });
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

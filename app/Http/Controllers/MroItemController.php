@@ -76,13 +76,14 @@ class MroItemController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'part_number' => 'required|unique:mro_items,part_number',
                 'name' => 'required',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
-            $mro_item = Mro_item::create($data);
+            $data = array_merge($request->except('_token', '_method', 'unit_id'));
+            $mro_item = Mro_item::firstOrCreate($data);
             if ($request->has('unit_id')) {
-                $mro_item->mro_unit()->attach($request->unit_id);
+                $mro_item->mro_unit()->attach($request->unit_id, [
+                    'request_token' => $request->request_token
+                ]);
             }
             DB::commit();
             return response()->json([
@@ -130,13 +131,14 @@ class MroItemController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'part_number' => 'required|unique:mro_items,part_number,' . $mro_item->id . ',id',
                 'name' => 'required',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token', 'unit_id'));
             $mro_item->update($data);
             if ($request->has('unit_id')) {
-                $mro_item->mro_unit()->sync($request->unit_id);
+                $mro_item->mro_unit()->sync($request->unit_id, [
+                    'request_token' => $request->request_token
+                ]);
             }
             DB::commit();
             return response()->json([

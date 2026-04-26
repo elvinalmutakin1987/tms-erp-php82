@@ -5,8 +5,10 @@
              <div class="modal-header" id="modal-header">
              </div>
              <div class="modal-body">
-                 <form enctype="multipart/form-data">
+                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                      @csrf
+                     <input type="hidden" name="request_token" id="request_token">
+
                      <div class="col-md-12 mb-2">
                          <label for="loc_type" class="form-label">Type</label>
                          <select class="form-select" id="loc_type" name="loc_type">

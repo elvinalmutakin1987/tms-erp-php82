@@ -98,7 +98,7 @@ class UnitRateController extends Controller
                 'target' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Unit_rate::create($data);
+            Unit_rate::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -150,7 +150,7 @@ class UnitRateController extends Controller
                 'rate' => 'required',
                 'target' => 'required',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $unit_rate->update($data);
             DB::commit();
             return response()->json([

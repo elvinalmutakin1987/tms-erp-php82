@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('unit_models', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('unit_brand_id')->nullable();
             $table->string('desc', 100)->nullable();
             $table->timestamps();

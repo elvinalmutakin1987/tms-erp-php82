@@ -142,13 +142,17 @@ class MechanicalInspectionController extends Controller
                     'remarks',
                     'inspected_by',
                 ),
-                ['input_method' => 'Web']
+                [
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web'
+                ]
             );
-            $mechanical_inspection = Mechanical_inspection::create($data);
+            $mechanical_inspection = Mechanical_inspection::firstOrCreate($data);
             if ($request->has('inspection_item')) {
                 foreach ($request->inspection_item as $key => $item) {
                     $mechanical_inspection->mechanical_inspection_detail()->create(
                         [
+                            'request_token' => $mechanical_inspection->request_token,
                             'inspection_item' => $item,
                             'inspection_group' => $request->inspection_group[$key],
                             'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
@@ -216,7 +220,8 @@ class MechanicalInspectionController extends Controller
                     'inspection_item',
                     'check',
                     'remarks',
-                    'inspected_by'
+                    'inspected_by',
+                    'request_token'
                 ),
                 ['input_method' => 'Web']
             );
@@ -227,6 +232,7 @@ class MechanicalInspectionController extends Controller
                 foreach ($request->inspection_item as $key => $item) {
                     $mechanical_inspection->mechanical_inspection_detail()->create(
                         [
+                            'request_token' => $mechanical_inspection->request_token,
                             'inspection_item' => $item,
                             'inspection_group' => $request->inspection_group[$key],
                             'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),

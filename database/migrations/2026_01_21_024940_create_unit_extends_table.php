@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('unit_extends', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->string('ext_type')->nullable(); //ngambil dari type unit
             $table->date('submit_date')->nullable();

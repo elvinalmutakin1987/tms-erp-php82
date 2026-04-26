@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('contract_fmfs', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('contract_id')->nullable();
             $table->string('year')->nullable();
             $table->decimal('value', 16, 2)->nullable();

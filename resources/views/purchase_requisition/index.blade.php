@@ -106,6 +106,8 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        const saveButton1 = document.getElementById('saveButton1');
+        const saveButton2 = document.getElementById('saveButton2');
         var requisitionId = '';
         var maintenanceId = '';
         var unitId = '';
@@ -257,6 +259,7 @@
                         }));
                         $("#urgency").val(response.data.urgency).trigger(
                             'change');
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -384,6 +387,7 @@
         }
 
         $('.saveButton').on('click', function() {
+            disableButton();
             const status = $(this).val();
             const form = $('#formModal').find('form')[0];
             const formData = new FormData(form);
@@ -486,6 +490,23 @@
                         console.error('Error:', error);
                     }
                 });
+
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
             }, 500);
         });
 
@@ -493,6 +514,8 @@
             requisitionId = '';
             maintenanceId = '';
             unitId = '';
+            enableButton();
+            $("#request_token").val("");
             $('#tableItem tbody').empty();
             $("#unit_id").val('All').trigger('change');
             $("#maintenance_id").val('All').trigger('change');
@@ -502,6 +525,7 @@
             $("#tax_").val('');
             $("#grand_total").val('');
             $("#grand_total_").val('');
+            enableButton();
         });
 
         $('#cancelButton').on('click', function() {
@@ -529,6 +553,16 @@
                     }
                 });
             });
+        }
+
+        function disableButton() {
+            saveButton1.disabled = true;
+            saveButton2.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton1.disabled = false;
+            saveButton2.disabled = false;
         }
     </script>
     <!--app JS-->

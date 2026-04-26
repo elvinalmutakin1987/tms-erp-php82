@@ -76,6 +76,8 @@
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
+        const saveButton = document.getElementById('saveButton');
+
         var contractId = '';
         var clientId = '';
         var clientVendorId = '';
@@ -195,6 +197,7 @@
                         $('#service_id').val(response.data.service_id).trigger('change');
                         $('#client_vendor_id').val(response.data.client_vendor_id).trigger(
                             'change');
+                        $('#request_token').val(response.data.request_token);
                         clientVendorId = response.data.client_vendor_id;
                         serviceId = response.data.service_id;
 
@@ -308,11 +311,12 @@
                 type: 'GET',
                 success: function(response) {
                     $('#unit').empty();
+                    $('#unit').append('<option value="" selected disabled></option>');
                     $.each(response.data, function(index, unit) {
                         $('#unit').append('<option value="' + unit.id +
                             '">' +
                             unit.vehicle_no +
-                            '</client>');
+                            '</option>');
                     });
                 },
                 error: function(xhr, status, error) {
@@ -417,6 +421,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('contract.store') }}';
             var type = 'POST';
@@ -463,6 +468,20 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
+            $.ajax({
+                url: '{{ route('gen_request_token') }}',
+                type: 'GET',
+                success: function(response) {
+                    $('#request_token').val(response.data);
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: error,
+                    });
+                }
+            });
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
@@ -470,11 +489,14 @@
             clientId = '';
             clientVendorId = '';
             serviceId = '';
+            enableButton();
             $('#tableTarget tbody tr').not(':first').remove();
             $('#tableItem tbody tr').not(':first').remove();
             $('#tableFmf tbody tr').not(':first').remove();
             $('#service_id').val(null).trigger('change');
             $('#client_vendor_id').prop('selectedIndex', -1);
+            $("#unit").val(null).trigger('change');
+            $('#request_token').val("");
             // $('#client_vendor_id').val(null).trigger('change');
         });
 
@@ -622,7 +644,7 @@
         });
 
         $target.on('input', function(e) {
-            textInput("_target", e);
+            textInput("target_", e);
         });
 
         $price.on('keydown', function(e) {
@@ -816,6 +838,14 @@
                 $(this).find('.row-number').text(no);
                 no++;
             });
+        }
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
         }
     </script>
     <!--app JS-->

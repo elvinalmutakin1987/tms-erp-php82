@@ -67,7 +67,7 @@ class UnitBrandController extends Controller
                 'name' => 'required|unique:unit_brands,name',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Unit_brand::create($data);
+            Unit_brand::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -114,7 +114,7 @@ class UnitBrandController extends Controller
             $request->validate([
                 'name' => 'required|unique:unit_brands,name,' . $unit_brand->id . ',id',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $unit_brand->update($data);
             DB::commit();
             return response()->json([

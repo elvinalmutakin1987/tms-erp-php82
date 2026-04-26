@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('proforma_invoices', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('client_vendor_id')->nullable();
             $table->unsignedBigInteger('contract_id')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();

@@ -86,21 +86,22 @@ class ApprovalFlowController extends Controller
                 ],
                 'approvable_model' => ['required'],
             ]);
-            $data = array_merge($request->except(
-                '_token',
-                '_method',
-                'approver_id',
-                'action',
-                'user_id',
-                'slc_action',
-                'txt_order',
-                'username',
-                'order'
-            ));
-            $approval_flow = Approval_flow::create($data);
+            $data = array_merge(
+                $request->only(
+                    'request_token',
+                    'name',
+                    'department',
+                    'approvable_model'
+                ),
+                [
+                    'request_token' => $request->request_token,
+                ]
+            );
+            $approval_flow = Approval_flow::firstOrCreate($data);
             if ($request->user_id) {
                 foreach ($request->user_id as $key => $user_id) {
                     $detail[] = [
+                        'request_token' => $approval_flow->request_token,
                         'approval_flow_id' => $approval_flow->id,
                         'user_id' => $user_id,
                         'action' => $request->action[$key],
@@ -166,21 +167,16 @@ class ApprovalFlowController extends Controller
                 ],
                 'approvable_model' => ['required'],
             ]);
-            $data = array_merge($request->except(
-                '_token',
-                '_method',
-                'approver_id',
-                'action',
-                'user_id',
-                'slc_action',
-                'txt_order',
-                'username',
-                'order'
+            $data = array_merge($request->only(
+                'name',
+                'department',
+                'approvable_model'
             ));
             $approval_flow->update($data);
             if ($request->user_id) {
                 foreach ($request->user_id as $key => $user_id) {
                     $detail[] = [
+                        'request_token' => $approval_flow->request_token,
                         'approval_flow_id' => $approval_flow->id,
                         'user_id' => $request->user_id[$key],
                         'action' => $request->action[$key],

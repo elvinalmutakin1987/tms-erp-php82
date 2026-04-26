@@ -103,6 +103,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var proformaInvoiceId = '';
         var contractId = '';
         var unitId = '';
@@ -215,6 +216,7 @@
                             'change');
                         $("#date").val(response.data.date);
                         $("#remarks").val(response.data.remarks);
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -350,6 +352,22 @@
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
+            if (proformaInvoiceId = '') {
+                $.ajax({
+                    url: '{{ route('gen_request_token') }}',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#request_token').val(response.data);
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: error,
+                        });
+                    }
+                });
+            }
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
         });
@@ -358,6 +376,7 @@
             proformaInvoiceId = '';
             contractId = '';
             unitId = '';
+            $("#request_token").val("");
             $("#div-table").html("");
             $("#contract_id").val('').trigger('change');
             $("#unit_id").val('All').trigger('change');
@@ -413,6 +432,14 @@
                 }, 500);
             }
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

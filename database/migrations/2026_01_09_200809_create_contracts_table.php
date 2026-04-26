@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('client_vendor_id')->nullable();
             $table->unsignedBigInteger('service_id')->nullable();
             $table->string('contract_no', 25)->nullable();

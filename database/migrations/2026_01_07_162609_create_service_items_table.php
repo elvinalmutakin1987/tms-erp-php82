@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('service_items', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('service_id')->nullable();
             $table->string('item_no', 50)->nullable();
             $table->string('item_des')->nullable();

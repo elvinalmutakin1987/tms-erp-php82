@@ -15,6 +15,7 @@ use App\Http\Controllers\UnitBrandController;
 use App\Http\Controllers\UnitModelController;
 use App\Http\Controllers\ClientVendorController;
 use App\Http\Controllers\ContractController;
+use App\Http\Controllers\Controller;
 use App\Http\Controllers\DailyReportController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MaintenanceItemController;
@@ -37,6 +38,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
+
+    Route::get('request-token', [AuthController::class, 'gen_request_token'])
+        ->name('gen_request_token');
+
     /**
      * Routenya permission
      */
@@ -54,7 +59,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('role-get-permission-all', [RoleController::class, 'get_permission_all'])
         ->middleware('role:superadmin')
         ->name('role.get_permission_all');
-
     /**
      * Routenya user
      */
@@ -462,6 +466,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaserequisition-get-mro-item', [PurchaseRequisitionController::class, 'get_mro_item'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_mro_item');
+
+    Route::get('purchaserequisition-get-receive/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_receive'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.get_receive');
+
+    Route::put('purchaserequisition-receive/{purchase_requisition}', [PurchaseRequisitionController::class, 'receive'])
+        ->middleware('role:superadmin|purchase_requisition')
+        ->name('purchaserequisition.receive');
 
     /**
      * Buat ambil file

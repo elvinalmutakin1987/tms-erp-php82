@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('unit_rates', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('contract_id')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->decimal('rate', 16, 2)->nullable();

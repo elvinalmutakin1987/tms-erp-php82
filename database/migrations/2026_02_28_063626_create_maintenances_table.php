@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('maintenances', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->unsignedBigInteger('mechanical_inspection_id')->nullable();
             $table->unsignedBigInteger('p2h_id')->nullable();

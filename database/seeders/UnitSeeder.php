@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class UnitSeeder extends Seeder
@@ -14,6 +15,7 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         $data = [
+            "request_token" => (string) Str::uuid(),
             "location_id" => 1,
             "company_id" => null,
             "unit_brand_id" => 1,

@@ -77,6 +77,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script>
+        const saveButton = document.getElementById('saveButton');
         var unitrateId = '';
         var clientvendorId = '';
         var contractId = '';
@@ -182,6 +183,7 @@
                             thousandSeparated: true,
                             mantissa: 2
                         }));
+                        $("#request_token").val();
                         unitId = response.data.unit_id;
                         clientvendorId = response.data.contract.client_vendor_id;
                         contractId = response.data.contract_id;
@@ -289,6 +291,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('unitrate.store') }}';
             var type = 'POST';
@@ -394,6 +397,21 @@
                     if (unitId != '') {
                         $("#unit_id").val(unitId).trigger('change');
                     }
+                } else {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
                 }
             }, 500);
 
@@ -404,6 +422,8 @@
             clientvendorId = '';
             contractId = '';
             unitId = '';
+            enableButton();
+            $("#request_token").val("");
         });
 
         $('#cancelButton').on('click', function() {
@@ -608,6 +628,14 @@
         $target.on('input', function(e) {
             textInput("target", e);
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

@@ -71,19 +71,25 @@ class ServiceController extends Controller
                 'name' => 'required|unique:services,name',
                 'type' => 'required'
             ]);
-            $data = array_merge($request->except(
-                '_token',
-                '_method',
-                'txt_item_no',
-                'txt_item_des',
-                'item_no',
-                'item_des',
-                'service_item_id'
-            ));
-            $service = Service::create($data);
+            $data = array_merge(
+                $request->except(
+                    '_token',
+                    '_method',
+                    'txt_item_no',
+                    'txt_item_des',
+                    'item_no',
+                    'item_des',
+                    'service_item_id'
+                ),
+                [
+                    'request_token' => $request->request_token,
+                ]
+            );
+            $service = Service::firstOrCreate($data);
             if ($request->item_no) {
                 foreach ($request->item_no as $key => $item_no) {
                     $detail[] = [
+                        'request_token' => $service->request_token,
                         'service_id' => $service->id,
                         'item_no' => $item_no,
                         'item_des' => $request->item_des[$key],

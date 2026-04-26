@@ -5,8 +5,10 @@
             <div class="modal-header" id="modal-header">
             </div>
             <div class="modal-body">
-                <form enctype="multipart/form-data">
+                <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
+                    <input type="hidden" name="request_token" id="request_token">
+
                     <div class="col-md-12 mb-2">
                         <label for="client_vendor_id" class="form-label">Client</label>
                         <select class="form-select select-select" id="client_vendor_id" name="client_vendor_id">

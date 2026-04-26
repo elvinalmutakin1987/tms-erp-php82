@@ -86,6 +86,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var reportId = '';
         var unitId = '';
         $(document).ready(function() {
@@ -197,6 +198,8 @@
                         $("#date").val(response.data.date);
                         $("#unit_id").val(response.data.unit_id).trigger('change');
                         $("#shift").val(response.data.shift).trigger('change');
+                        $("#remarks").val(response.data.remarks);
+                        $('#request_token').val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -324,6 +327,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('dailyreport.store') }}';
             var type = 'POST';
@@ -396,12 +400,31 @@
                         console.error('Error:', error);
                     }
                 });
+
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
             }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
             reportId = '';
             unitId = '';
+            enableButton();
+            $('#request_token').val("");
             $('#div-form').html('');
             $("#unit_id").val('All').trigger('change');
         });
@@ -477,6 +500,14 @@
                 }
             });
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

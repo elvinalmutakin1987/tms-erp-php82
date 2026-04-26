@@ -65,6 +65,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script>
+        const saveButton = document.getElementById('saveButton');
         var locationId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -131,6 +132,7 @@
                         $('#modal-header').text('Edit Location');
                         $('#name').val(response.data.name);
                         $("#loc_type").val(response.data.loc_type).trigger('change');
+                        $("#request_token").val("");
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -187,6 +189,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('location.store') }}';
             var type = 'POST';
@@ -230,12 +233,30 @@
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
+            if (locationId == '') {
+                $.ajax({
+                    url: '{{ route('gen_request_token') }}',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#request_token').val(response.data);
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: error,
+                        });
+                    }
+                });
+            }
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
             locationId = '';
+            enableButton();
+            $("#request_token").val('');
             $("#loc_type").val('Unit Location').trigger('change');
         });
 
@@ -263,6 +284,14 @@
                         }, 0);
                     });
             });
+        }
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
         }
     </script>
     <!--app JS-->

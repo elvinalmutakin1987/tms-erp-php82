@@ -8,7 +8,7 @@
             {{ $loop->iteration }}
         </td>
         <td class="p-1 align-middle">
-            <input type="hidden" class="form-control" id="unit_id" name="unit_id[]" readonly value="{{ $d->unit_id }}}">
+            <input type="hidden" class="form-control" id="unit_id" name="unit_id[]" readonly value="{{ $d->unit_id }}">
             <input type="text" class="form-control" id="unit_name" name="unit_name[]" readonly
                 value="{{ $d->unit->vehicle_no }}">
         </td>

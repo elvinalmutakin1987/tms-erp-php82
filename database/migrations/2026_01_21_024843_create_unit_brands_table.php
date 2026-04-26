@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('unit_brands', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->string('name', 100)->nullable();
             $table->timestamps();
         });

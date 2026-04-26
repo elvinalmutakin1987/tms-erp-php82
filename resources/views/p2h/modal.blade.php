@@ -13,8 +13,10 @@
             <div class="modal-header" id="modal-header">
             </div>
             <div class="modal-body">
-                <form enctype="multipart/form-data">
+                <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
+                    <input type="hidden" name="request_token" id="request_token">
+
                     <div class="row mb-2">
                         <div class="col">
                             <label for="unit_id" class="form-label">Unit</label>

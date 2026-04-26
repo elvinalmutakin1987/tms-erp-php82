@@ -157,20 +157,30 @@ class DailyReportController extends Controller
                     'value_1__',
                     'uom_2',
                     'value_2',
-                    'value_2__'
+                    'value_2__',
+                    '_km_start',
+                    '_km_finish',
+                    '_km_total',
+                    '_load',
+                    '_refule_filter',
+                    '_refule_km',
+                    '_refule_liter'
                 ),
                 [
+                    'request_token' => $request->request_token,
                     'input_method' => 'Web',
                     'type' => $type,
                     'duration_trip_1' => $duration_trip_1,
-                    'duration_trip_2' => $duration_trip_2
+                    'duration_trip_2' => $duration_trip_2,
+                    'remarks' => $request->remarks,
                 ]
             );
-            $daily_report = Daily_report::create($data);
+            $daily_report = Daily_report::firstOrCreate($data);
             if ($request->has('detail_unit_id')) {
                 foreach ($request->detail_unit_id as $key => $item) {
                     $daily_report->daily_report_detail()->create(
                         [
+                            'request_token' => $daily_report->request_token,
                             'unit_id' => $request->detail_unit_id[$key],
                             'daily_report_id' => $daily_report->id,
                             'item' => $request->item[$key],
@@ -267,13 +277,21 @@ class DailyReportController extends Controller
                     'value_1__',
                     'uom_2',
                     'value_2',
-                    'value_2__'
+                    'value_2__',
+                    '_km_start',
+                    '_km_finish',
+                    '_km_total',
+                    '_load',
+                    '_refule_filter',
+                    '_refule_km',
+                    '_refule_liter'
                 ),
                 [
                     'input_method' => 'Web',
                     'type' => $type,
                     'duration_trip_1' => $duration_trip_1,
-                    'duration_trip_2' => $duration_trip_2
+                    'duration_trip_2' => $duration_trip_2,
+                    'remarks' => $request->remarks,
                 ]
             );
             $lockDaily_report = Daily_report::where('id', $daily_report->id)->lockForUpdate()->first();
@@ -283,6 +301,7 @@ class DailyReportController extends Controller
                 foreach ($request->detail_unit_id as $key => $item) {
                     $daily_report->daily_report_detail()->create(
                         [
+                            'request_token' => $daily_report->request_token,
                             'unit_id' => $request->detail_unit_id[$key],
                             'daily_report_id' => $daily_report->id,
                             'item' => $request->item[$key],

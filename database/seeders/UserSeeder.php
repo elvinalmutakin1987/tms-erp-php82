@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
         Permission::create(['name' => 'permission.update']);
         Permission::create(['name' => 'permission.delete']);
 
-         /**
+        /**
          * Role
          */
         Permission::create(['name' => 'role.read']);
@@ -49,6 +49,7 @@ class UserSeeder extends Seeder
 
         $data = [
             "username" => "superadmin",
+            "request_token" => (string) Str::uuid(),
             "name" => "Super Admin",
             "email" => "it.staff@tunasmitrasejati.com",
             "password" => bcrypt("Tmssgt2026"),

@@ -85,7 +85,7 @@ class UnitController extends Controller
                 'type' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Unit::create($data);
+            Unit::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -134,7 +134,7 @@ class UnitController extends Controller
                 'location_id' => 'required',
                 'type' => 'required',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $unit->update($data);
             DB::commit();
             return response()->json([

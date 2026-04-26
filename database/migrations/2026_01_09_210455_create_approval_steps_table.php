@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('approval_steps', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('approval_flow_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('role_id')->nullable();

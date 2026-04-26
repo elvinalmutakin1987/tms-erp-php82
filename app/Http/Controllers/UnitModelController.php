@@ -72,7 +72,7 @@ class UnitModelController extends Controller
                 'unit_brand_id' => 'required'
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Unit_model::create($data);
+            Unit_model::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -120,7 +120,7 @@ class UnitModelController extends Controller
                 'desc' => 'required|unique:unit_models,desc,' . $unit_model->id . ',id',
                 'unit_brand_id' => 'required'
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $unit_model->update($data);
             DB::commit();
             return response()->json([

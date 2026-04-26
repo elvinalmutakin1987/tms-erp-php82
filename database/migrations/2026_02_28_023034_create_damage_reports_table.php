@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('damage_reports', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->date('date')->nullable();
             $table->string('number', 30)->nullable();

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class UnitbrandSeeder extends Seeder
@@ -14,10 +15,22 @@ class UnitbrandSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ["name" => "Toyota"],
-            ["name" => "Daihatsu"],
-            ["name" => "Mercedes"],
-            ["name" => "Carterpilar"],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Toyota"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Daihatsu"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Mercedes"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Carterpilar"
+            ],
         ];
         DB::table('unit_brands')->insert($data);
     }

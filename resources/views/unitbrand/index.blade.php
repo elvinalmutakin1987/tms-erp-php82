@@ -59,6 +59,7 @@
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
     <script>
+        const saveButton = document.getElementById('saveButton');
         var unitbrandId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -117,6 +118,7 @@
                     success: function(response) {
                         $('#modal-header').text('Edit Unit Brand');
                         $('#name').val(response.data.name);
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -171,6 +173,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('unitbrand.store') }}';
             var type = 'POST';
@@ -216,17 +219,43 @@
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
+            if (unitbrandId == '') {
+                $.ajax({
+                    url: '{{ route('gen_request_token') }}',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#request_token').val(response.data);
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: error,
+                        });
+                    }
+                });
+            }
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
             unitbrandId = '';
+            enableButton();
+            $("#request_token").val("");
         });
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

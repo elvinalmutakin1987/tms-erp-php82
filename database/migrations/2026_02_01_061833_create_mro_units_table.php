@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('mro_units', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token');
             $table->integer('mro_item_id')->nullable();
             $table->integer('unit_id')->nullable();
             $table->timestamps();

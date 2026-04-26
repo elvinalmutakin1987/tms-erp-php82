@@ -18,6 +18,7 @@ class VendorSeeder extends Seeder
     public function run(): void
     {
         $data = [
+            "request_token" => (string) Str::uuid(),
             "type" => "Vendor",
             "name" => "PT. Volvo Kaltim",
             "pic" => "-",

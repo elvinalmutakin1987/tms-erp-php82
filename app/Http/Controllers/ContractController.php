@@ -99,6 +99,7 @@ class ContractController extends Controller
             ]);
             $data = array_merge(
                 $request->only(
+                    'request_token',
                     'contract_no',
                     'client_vendor_id',
                     'service_id',
@@ -108,23 +109,23 @@ class ContractController extends Controller
                     'notes'
                 ),
                 [
+                    'request_token' => $request->request_token,
                     'status' => 'Active'
                 ]
             );
-            $contract = Contract::create($data);
+            $contract = Contract::firstOrCreate($data);
             //service rate
             if ($request->item_no) {
                 foreach ($request->item_no as $i => $item) {
                     $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
-                    $contract->contract_rate()->updateOrCreate(
+                    $contract->contract_rate()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
                             'item_no' => $item,
-                        ],
-                        [
+                            'request_token' => $contract->request_token,
                             'service_item' => $request->service_item[$i],
                             'rate' => $rate
-                        ]
+                        ],
                     );
                 }
             }
@@ -133,15 +134,14 @@ class ContractController extends Controller
                 foreach ($request->unit_id as $i => $item) {
                     $target = isset($request->target[$i]) ? $request->target[$i] : 0;
                     $price = isset($request->price[$i]) ? $request->price[$i] : 0;
-                    $contract->unit_target()->updateOrCreate(
+                    $contract->unit_target()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
                             'unit_id' => $item,
-                        ],
-                        [
+                            'request_token' => $contract->request_token,
                             'target' => $target,
                             'price' => $price
-                        ]
+                        ],
                     );
                 }
             }
@@ -149,14 +149,13 @@ class ContractController extends Controller
             if ($request->year) {
                 foreach ($request->year as $i => $item) {
                     $value = isset($request->value[$i]) ? $request->value[$i] : 0;
-                    $contract->contract_fmf()->updateOrCreate(
+                    $contract->contract_fmf()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
                             'year' => $item,
-                        ],
-                        [
+                            'request_token' => $contract->request_token,
                             'value' => $value,
-                        ]
+                        ],
                     );
                 }
             }
@@ -236,58 +235,52 @@ class ContractController extends Controller
             );
             $contract->update($data);
             //service rate
+            $contract->contract_rate()->delete();
             if ($request->item_no) {
                 foreach ($request->item_no as $i => $item) {
                     $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
-                    $contract->contract_rate()->updateOrCreate(
+                    $contract->contract_rate()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
                             'item_no' => $item,
-                        ],
-                        [
+                            'request_token' => $contract->request_token,
                             'service_item' => $request->service_item[$i],
                             'rate' => $rate
                         ]
                     );
                 }
-            } else {
-                $contract->contract_rate()->delete();
             }
             //unit rate
+            $contract->unit_target()->delete();
             if ($request->unit_id) {
                 foreach ($request->unit_id as $i => $item) {
                     $target = isset($request->target[$i]) ? $request->target[$i] : 0;
                     $price = isset($request->price[$i]) ? $request->price[$i] : 0;
-                    $contract->unit_target()->updateOrCreate(
+                    $contract->unit_target()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
                             'unit_id' => $item,
-                        ],
-                        [
+                            'request_token' => $contract->request_token,
                             'target' => $target,
                             'price' => $price
                         ]
                     );
                 }
-            } else {
-                $contract->unit_target()->delete();
             }
             //fmf
+            $contract->contract_fmf()->delete();
             if ($request->year) {
                 foreach ($request->year as $i => $item) {
                     $value = isset($request->value[$i]) ? $request->value[$i] : 0;
-                    $contract->contract_fmf()->updateOrCreate(
+                    $contract->contract_fmf()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
                             'year' => $item,
-                        ],
-                        [
+                            'request_token' => $contract->request_token,
                             'value' => $value,
                         ]
                     );
                 }
-            } else {
-                $contract->contract_fmf()->delete();
             }
             DB::commit();
             return response()->json([

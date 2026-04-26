@@ -67,7 +67,7 @@ class LocationController extends Controller
                 'loc_type' => 'required'
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            Location::create($data);
+            Location::firstOrCreate($data);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -115,7 +115,7 @@ class LocationController extends Controller
                 'name' => 'required',
                 'loc_type' => 'required'
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = array_merge($request->except('_token', '_method', 'request_token'));
             $location->update($data);
             DB::commit();
             return response()->json([

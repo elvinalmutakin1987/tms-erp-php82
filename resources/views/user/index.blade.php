@@ -96,6 +96,7 @@
     </script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var userId = '';
         var roleId = '';
         $(document).ready(function() {
@@ -171,6 +172,7 @@
                         $('#username').val(response.data.username);
                         $('#name').val(response.data.name);
                         $('#email').val(response.data.email);
+                        $("#request_token").val(response.data.request_token);
                         roleId = response.role_id;
                         if (response.data.sign_path != null) {
                             var imageUrl = response.sign_path;
@@ -232,6 +234,7 @@
         }
 
         $('#saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('user.store') }}';
             var type = 'POST';
@@ -289,6 +292,21 @@
                         'user_id': userId
                     };
                     $('#deleteSignButton').show();
+                } else {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
                 }
                 $.ajax({
                     url: '{{ route('user.get_role_all') }}',
@@ -320,6 +338,8 @@
         $('#formModal').on('hidden.bs.modal', function() {
             userId = '';
             roleId = '';
+            enableButton();
+            $("#request_token").val("");
         });
 
         $('#cancelButton').on('click', function() {
@@ -369,6 +389,14 @@
                 }
             });
         });
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection

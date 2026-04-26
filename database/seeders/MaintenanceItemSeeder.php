@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class MaintenanceItemSeeder extends Seeder
@@ -14,7 +15,10 @@ class MaintenanceItemSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ["name" => "Tyre"],
+            [
+                "request_token" => (string) Str::uuid(),
+                "name" => "Tyre"
+            ],
         ];
         DB::table('maintenance_items')->insert($data);
     }

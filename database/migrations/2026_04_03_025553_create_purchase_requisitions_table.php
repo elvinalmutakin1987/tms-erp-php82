@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('purchase_requisitions', function (Blueprint $table) {
             $table->id();
+            $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('unit_id')->nullable();
             $table->unsignedBigInteger('maintenance_id')->nullable();

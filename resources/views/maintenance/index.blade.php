@@ -111,6 +111,7 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
+        const saveButton = document.getElementById('saveButton');
         var maintenanceId = '';
         var unitId = '';
         var clientVendorId = '';
@@ -258,6 +259,7 @@
                         $("#start").val(time_format(response.data.start));
                         $("#finish").val(time_format(response.data.finish));
                         $("#work_duration").val(time_format(response.data.work_duration));
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -472,6 +474,7 @@
         }
 
         $('.saveButton').on('click', function() {
+            disableButton();
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('maintenance.store') }}';
             var type = 'POST';
@@ -627,6 +630,23 @@
                         console.error('Error:', error);
                     }
                 });
+
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
             }, 500);
         });
 
@@ -635,6 +655,8 @@
             unitId = '';
             clientVendorId = '';
             typeId = '';
+            enableButton();
+            $("#request_token").val('');
             $('#tableItem tbody tr').not(':first').remove();
             $("#unit_id").val('All').trigger('change');
             $("#client_vendor_id").val('All').trigger('change');
@@ -676,6 +698,7 @@
 
         $('#formCost').on('hidden.bs.modal', function() {
             maintenanceId = '';
+            $("#request_token").val("");
         });
 
         $('#cancelButton').on('click', function() {
@@ -953,6 +976,14 @@
         document.getElementById('finish').addEventListener('input', hitungSelisihWaktu);
         document.getElementById('start').addEventListener('change', hitungSelisihWaktu);
         document.getElementById('finish').addEventListener('change', hitungSelisihWaktu);
+
+        function disableButton() {
+            saveButton.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton.disabled = false;
+        }
     </script>
     <!--app JS-->
 @endsection
