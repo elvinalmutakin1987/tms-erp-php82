@@ -84,10 +84,10 @@ class PurchaseRequisitionController extends Controller
                      * status approved
                      * buat edit status jadi done. sambil check penerimaan barang
                      */
-                    if ($item->status == 'Approved'):
+                    if ($item->status == 'Approved' || $item->status == 'Received'):
                         if (Auth::user()->hasRole('superadmin') || Auth::user()->id == $item->user_id):
                             $button .= '<li>
-                                    <a class="dropdown-item editReceive" href="#" data-bs-toggle="modal" data-bs-target="#formReceive"
+                                     <a class="dropdown-item receiveButton" href="#" data-bs-toggle="modal" data-bs-target="#formReceive"
                                     data-id="' . $item->id . '">Receive</a>
                                 </li>';
                         endif;
@@ -97,7 +97,7 @@ class PurchaseRequisitionController extends Controller
                      * status bukan done, bisa di hapus.
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
-                    if ($item->status != 'Done'):
+                    if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval' && $item->status != 'Received'):
                         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaserequisition.delete')):
                             $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
@@ -177,6 +177,7 @@ class PurchaseRequisitionController extends Controller
                 foreach ($request->maintenance_item_id as $i => $item) {
                     $purchase_requisition->purchase_requisition_detail()->create(
                         [
+                            'request_token' => $purchase_requisition->request_token,
                             'maintenance_item_id' => $item,
                             'mro_item_id' => $request->mro_item_id[$i],
                             'uom' => $request->uom[$i],
@@ -521,7 +522,7 @@ class PurchaseRequisitionController extends Controller
          * Buat check statusnya, kalo draft, open, approval, cancel
          * nanti ada watermarknya
          */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
         if (in_array($purchase_requisition->status, $status, true)) {
             $w = $canvas->get_width();
             $h = $canvas->get_height();
@@ -581,7 +582,7 @@ class PurchaseRequisitionController extends Controller
          * Buat check statusnya, kalo draft, open, approval, cancel
          * nanti ada watermarknya
          */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
         if (in_array($purchase_requisition->status, $status, true)) {
             $w = $canvas->get_width();
             $h = $canvas->get_height();
@@ -625,7 +626,7 @@ class PurchaseRequisitionController extends Controller
     {
         try {
             $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
-            $view = 'purchase_requisition.receive';
+            $view = 'purchase_requisition.table-receive';
             return response()->view($view, compact('purchase_requisition', 'purchase_requisition_detail'), 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -642,17 +643,20 @@ class PurchaseRequisitionController extends Controller
     {
         DB::beginTransaction();
         try {
-            if ($request->has('maintenance_item_id')) {
-                foreach ($request->maintenance_item_id as $i => $item) {
-                    $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
+            $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
+            $lockPurchase_requisition->update([
+                'status' => $request->status
+            ]);
+            if ($request->has('purchase_requisition_detail_id')) {
+                foreach ($request->purchase_requisition_detail_id as $i => $item) {
                     $lockPurchase_requisition->purchase_requisition_detail()->updateOrCreate(
                         [
-                            'maintenance_item_id' => $item,
+                            'id' => $item,
                         ],
                         [
                             'received_at' => $request->received_at[$i],
                             'received_by' => $request->received_by[$i],
-                            'reveived_note' => $request->received_note[$i]
+                            'received_note' => $request->received_note[$i]
                         ]
                     );
                 }

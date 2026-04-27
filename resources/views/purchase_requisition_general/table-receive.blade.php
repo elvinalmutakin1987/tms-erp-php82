@@ -40,6 +40,8 @@
                     <tr>
                         <td class="p-1 align-middle">{{ $loop->iteration }}</td>
                         <td class="p-1 align-middle">
+                            <input type="hidden" id="purchase_requisition_detail_id"
+                                name="purchase_requisition_detail_id[]" value="{{ $d->id }}">
                             <input type="text" class="form-control" readonly value=" {{ $d->description }}">
                         </td>
                         <td class="p-1 align-middle">

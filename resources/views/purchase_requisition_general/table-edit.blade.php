@@ -248,6 +248,14 @@
                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly value="${_qty}">
                        <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}">
                     </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${_price}">
+                       <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}">
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="amount" name="amount[]" readonly value="${_amount}">
+                       <input type="text" class="form-control" id="__amount" name="__amount[]" readonly value="${_amount_}">
+                    </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
                             <div class="col">

@@ -80,7 +80,7 @@ class PurchaseRequisitionGeneralController extends Controller
                      * status approved
                      * buat edit status jadi done. sambil check penerimaan barang
                      */
-                    if ($item->status == 'Approved'):
+                    if ($item->status == 'Approved' || $item->status == 'Received'):
                         if (Auth::user()->hasRole('superadmin') || Auth::user()->id == $item->user_id):
                             $button .= '<li>
                                      <a class="dropdown-item receiveButton" href="#" data-bs-toggle="modal" data-bs-target="#formReceive"
@@ -93,7 +93,7 @@ class PurchaseRequisitionGeneralController extends Controller
                      * status bukan done, approved, approval bisa di hapus.
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
-                    if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval'):
+                    if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval' && $item->status != 'Received'):
                         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaserequisitiongeneral.delete')):
                             $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
@@ -433,7 +433,7 @@ class PurchaseRequisitionGeneralController extends Controller
          * Buat check statusnya, kalo draft, open, approval, cancel
          * nanti ada watermarknya
          */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
         if (in_array($purchase_requisition->status, $status, true)) {
             $w = $canvas->get_width();
             $h = $canvas->get_height();
@@ -493,7 +493,7 @@ class PurchaseRequisitionGeneralController extends Controller
          * Buat check statusnya, kalo draft, open, approval, cancel
          * nanti ada watermarknya
          */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
         if (in_array($purchase_requisition->status, $status, true)) {
             $w = $canvas->get_width();
             $h = $canvas->get_height();
@@ -554,17 +554,20 @@ class PurchaseRequisitionGeneralController extends Controller
     {
         DB::beginTransaction();
         try {
-            if ($request->has('maintenance_item_id')) {
-                foreach ($request->maintenance_item_id as $i => $item) {
-                    $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
+            $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
+            $lockPurchase_requisition->update([
+                'status' => $request->status
+            ]);
+            if ($request->has('purchase_requisition_detail_id')) {
+                foreach ($request->purchase_requisition_detail_id as $i => $item) {
                     $lockPurchase_requisition->purchase_requisition_detail()->updateOrCreate(
                         [
-                            'maintenance_item_id' => $item,
+                            'id' => $item,
                         ],
                         [
                             'received_at' => $request->received_at[$i],
                             'received_by' => $request->received_by[$i],
-                            'reveived_note' => $request->received_note[$i]
+                            'received_note' => $request->received_note[$i]
                         ]
                     );
                 }

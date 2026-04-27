@@ -112,6 +112,9 @@
     <script>
         const saveButton1 = document.getElementById('saveButton1');
         const saveButton2 = document.getElementById('saveButton2');
+        const receiveSaveButton1 = document.getElementById('receiveSaveButton1');
+        const receiveSaveButton2 = document.getElementById('receiveSaveButton2');
+
         var requisitionId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
@@ -194,14 +197,20 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (data == "Done" || data == "Approved") {
+                            if (data == "Done") {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Approved' || data == 'Received') {
+                                return '<span class="badge bg-warning" style="font-size: 13px">' +
                                     data + '</span>';
                             } else if (data == 'Open') {
                                 return '<span class="badge bg-primary" style="font-size: 13px">' +
                                     data + '</span>';
                             } else if (data == 'Approval') {
                                 return '<span class="badge bg-info" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Cancel') {
+                                return '<span class="badge bg-danger" style="font-size: 13px">' +
                                     data + '</span>';
                             } else {
                                 return '<span class="badge bg-secondary" style="font-size: 13px">' +
@@ -262,9 +271,10 @@
             });
 
             $(document).on('click', '.detailButton', function() {
+                requisitionId = $(this).data('id');
                 $('#modal-detail-header').text('Detail Requisition');
                 let url = '{{ route('purchaserequisitiongeneral.get_detail', ':_id') }}';
-                url = url.replace(':_id', $(this).data('id'));
+                url = url.replace(':_id', requisitionId);
                 $.ajax({
                     url: url,
                     type: 'GET',
@@ -287,7 +297,7 @@
                     url: url,
                     type: 'GET',
                     success: function(response) {
-                        $('#modal-receive-body').html(response);
+                        $('#divReceive').html(response);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -426,6 +436,66 @@
             }
         });
 
+        $('.receiveButton').on('click', function() {
+            disableButton();
+            const status = $(this).val();
+            const formR = $('#formReceive').find('form')[0];
+            const formData = new FormData(formR);
+
+            formData.append('status', status);
+
+            let url = '{{ route('purchaserequisitiongeneral.receive', ':_id') }}'.replace(':_id', requisitionId);
+            let type = 'POST';
+
+            formData.append('_method', 'PUT');
+
+            const submitReceived = () => {
+                $.ajax({
+                    url,
+                    type,
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+                            willClose: () => {
+                                $('#table-data').DataTable().ajax.reload(null, false);
+                                requisitionId = '';
+                                $('#formReceive').modal('hide');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON?.message || error;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage,
+                        });
+                    }
+                });
+            };
+
+            if (status === 'Done') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, Save it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) submitReceived();
+                });
+            } else {
+                submitReceived();
+            }
+        });
 
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
@@ -498,12 +568,20 @@
             $("#grand_total_").val('');
         });
 
+        $('#formReceive').on('hidden.bs.modal', function() {
+            enableButton();
+        });
+
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
         });
 
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
+        });
+
+        $('#cancelReceiveButton').on('click', function() {
+            $('#formReceive').modal('hide');
         });
 
         function gen_select2() {
@@ -528,11 +606,15 @@
         function disableButton() {
             saveButton1.disabled = true;
             saveButton2.disabled = true;
+            receiveSaveButton1.disabled = true;
+            receiveSaveButton2.disabled = true;
         }
 
         function enableButton() {
             saveButton1.disabled = false;
             saveButton2.disabled = false;
+            receiveSaveButton1.disabled = false;
+            receiveSaveButton2.disabled = false;
         }
     </script>
     <!--app JS-->

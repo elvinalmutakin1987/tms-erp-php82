@@ -9,7 +9,22 @@
                 <td width="30%">Number <br>
                     <b>{{ $purchase_requisition->requisition_no }}</b>
                 </td>
-                <td colspan="2"></td>
+                <td colspan="2">Status <br>
+                    @if ($purchase_requisition->status == 'Draft')
+                        <span class="badge bg-secondary"
+                            style="font-size: 13px">{{ $purchase_requisition->status }}</span>
+                    @elseif($purchase_requisition->status == 'Approval')
+                        <span class="badge bg-info" style="font-size: 13px">{{ $purchase_requisition->status }}</span>
+                    @elseif($purchase_requisition->status == 'Open')
+                        <span class="badge bg-primary" style="font-size: 13px">{{ $purchase_requisition->status }}</span>
+                    @elseif(
+                        $purchase_requisition->status == 'Done' ||
+                            $purchase_requisition->status == 'Approved' ||
+                            $purchase_received->status == 'Received')
+                        <span class="badge bg-success"
+                            style="font-size: 13px">{{ $purchase_requisition->status }}</span>
+                    @endif
+                </td>
             </tr>
             <tr>
                 <td width="30%">Department <br>
