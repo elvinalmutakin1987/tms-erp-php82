@@ -39,6 +39,7 @@
                                         <option value="Draft">Draft</option>
                                         <option value="Approval">Approval</option>
                                         <option value="Approved">Approved</option>
+                                        <option value="Received">Received</option>
                                         <option value="Cancel">Cancel</option>
                                         <option value="Done">Done</option>
                                     </select>

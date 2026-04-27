@@ -141,7 +141,9 @@ class P2hController extends Controller
                     'inspection_item',
                     'check',
                     'defect_listed',
-                    'action_taken'
+                    'action_taken',
+                    '_km_start',
+                    '_km_finish'
                 ),
                 [
                     'request_token' => $request->request_token,
@@ -153,6 +155,7 @@ class P2hController extends Controller
                 foreach ($request->inspection_item as $i => $item) {
                     $p2h->p2h_detail()->create(
                         [
+                            'request_token' => $p2h->request_token,
                             'inspection_item' => $item,
                             'inspection_group' => $request->inspection_group[$i],
                             'check' => (int) ($request->check[$item][$request->inspection_group[$i]] ?? 0),
@@ -223,7 +226,9 @@ class P2hController extends Controller
                     'check',
                     'defect_listed',
                     'action_taken',
-                    'request_token'
+                    'request_token',
+                    '_km_start',
+                    '_km_finish'
                 ),
                 ['input_method' => 'Web']
             );
