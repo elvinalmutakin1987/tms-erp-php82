@@ -7,8 +7,6 @@
             <div class="modal-body">
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
-                    <input type="hidden" name="request_token" id="request_token">
-
                     <div class="row">
                         <div class="col-md-12 mb-2">
                             <label for="code_access" class="form-label">Code Access</label>

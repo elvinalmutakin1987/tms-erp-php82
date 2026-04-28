@@ -36,6 +36,7 @@ return new class extends Migration
             $table->string('department', 30)->nullable();
             $table->text('vendor_offer_path')->nullable();
             $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
+            $table->string('cancel_notes')->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
