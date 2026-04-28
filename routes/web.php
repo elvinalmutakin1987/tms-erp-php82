@@ -23,6 +23,7 @@ use App\Http\Controllers\MechanicalInspectionController;
 use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
 use App\Http\Controllers\ProformaInvoiceController;
+use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\PurchaseRequisitionGeneralController;
 use App\Http\Controllers\UnitExpiredController;
@@ -523,7 +524,6 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_requisition_general')
         ->names('purchaserequisitiongeneral');
 
-
     Route::get('purchaserequisitiongeneral-print/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'print'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.print');
@@ -535,7 +535,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaserequisitiongeneral-get-detail/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_detail'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.get_detail');
-
 
     Route::get('purchaserequisitiongeneral-load-table-add', [PurchaseRequisitionGeneralController::class, 'get_table_add'])
         ->middleware('role:superadmin|purchase_requisition')
@@ -552,4 +551,40 @@ Route::middleware(['auth'])->group(function () {
     Route::put('purchaserequisitiongeneral-receive/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'receive'])
         ->middleware('role:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.receive');
+
+    /**
+     * Routenya Purchase Order
+     */
+    Route::resource('purchaseorder', PurchaseOrderController::class)
+        ->parameters(['purchaseorder' => 'purchase_order'])
+        ->middleware('role:superadmin|purchase_order')
+        ->names('purchaseorder');
+
+    Route::get('purchaseorder-print/{purchase_order}', [PurchaseOrderController::class, 'print'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.print');
+
+    Route::get('purchaseorder-export-pdf/{purchase_order}', [PurchaseOrderController::class, 'export_pdf'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.export_pdf');
+
+    Route::get('purchaseorder-get-detail/{purchase_order}', [PurchaseOrderController::class, 'get_detail'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_detail');
+
+    Route::get('purchaseorder-load-table-add', [PurchaseOrderController::class, 'get_table_add'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_table_add');
+
+    Route::get('purchaseorder-load-table-edit/{purchase_order}', [PurchaseOrderController::class, 'get_table_edit'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_table_edit');
+
+    Route::get('purchaseorder-get-monitoring/{purchase_order}', [PurchaseOrderController::class, 'get_monitoring'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_monitoring');
+
+    Route::put('purchaseorder-moitoring/{purchase_order}', [PurchaseOrderController::class, 'monitoring'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.monitoring');
 });

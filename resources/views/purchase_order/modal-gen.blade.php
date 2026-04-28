@@ -19,19 +19,16 @@
 
                     <div class="row mb-2">
                         <div class="col">
-                            <label for="unit_id" class="form-label">Unit</label>
-                            <select class="form-select select-select" id="unit_id" name="unit_id">
-
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select select-select" id="department" name="department">
+                                @foreach ($department as $key => $value)
+                                    <option value="{{ $value }}">{{ $value }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col">
                             <label for="date" class="form-label">Date</label>
                             <input type="text" class="form-control datepicker" id="date" name="date">
-                        </div>
-                        <div class="col">
-                            <label for="unit_id" class="form-label">Maintenance No.</label>
-                            <select class="form-select select-select" id="maintenance_id" name="maintenance_id">
-                            </select>
                         </div>
                         <div class="col">
                             <label for="urgency" class="form-label">Urgency</label>
@@ -55,8 +52,7 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col" style="width:3%">#</th>
-                                        <th scope="col" style="width:20%">Maintenance Item</th>
-                                        <th scope="col">MRO Item</th>
+                                        <th scope="col">Description</th>
                                         <th scope="col" style="width:12%">Uom</th>
                                         <th scope="col" style="width:10%">Qty</th>
                                         <th scope="col" style="width:15%">Price</th>
@@ -69,7 +65,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Total</b>
+                                        <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Total</b>
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="total" name="total" readonly>
@@ -79,7 +75,7 @@
                                         <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Tax</b>
+                                        <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Tax</b>
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="tax" name="tax" readonly>
@@ -89,7 +85,7 @@
                                         <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Grand
+                                        <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Grand
                                                 Total</b></td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="grand_total" name="grand_total" readonly>

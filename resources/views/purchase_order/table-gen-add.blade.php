@@ -1,19 +1,9 @@
-@php
-    use Illuminate\Support\Number;
-@endphp
 <tr class="fixed-row">
     <td class="p-1 align-middle">
 
     </td>
     <td class="p-1 align-middle">
-        <select class="form-select select-select" id="maintenance_item_" name="maintenance_item_">
-
-        </select>
-    </td>
-    <td class="p-1 align-middle">
-        <select class="form-select select-select" id="mro_item_" name="mro_item_">
-
-        </select>
+        <input type="text" class="form-control" id="_description" name="_description">
     </td>
     <td class="p-1 align-middle">
         <select class="form-select select-select" id="_uom" name="_uom">
@@ -43,122 +33,26 @@
     </td>
 </tr>
 
-@foreach ($purchase_requisition_detail as $d)
-    <tr>
-        <td class="p-1 align-middle row-number">
-            {{ $loop->iteration }}
-        </td>
-        <td class="p-1 align-middle">
-            <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]" readonly
-                value="{{ $d->maintenance_item_id }}">
-            <input type="text" class="form-control" id="maintenance_item" name="maintenance_item[]" readonly
-                value="{{ $d->maintenance_item->name }}">
-        </td>
-        <td class="p-1 align-middle">
-            <input type="hidden" class="form-control" id="mro_item_id" name="mro_item_id[]" readonly
-                value="{{ $d->mro_item_id }}">
-            <input type="text" class="form-control" id="mro_item" name="mro_item[]" readonly
-                value="{{ $d->mro_item->name }}">
-        </td>
-        <td class="p-1 align-middle">
-            <input type="text" class="form-control" id="uom" name="uom[]" readonly
-                value="{{ $d->uom }}">
-        </td>
-        <td class="p-1 align-middle">
-            <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
-                value="{{ $d->qty }}">
-            <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
-        </td>
-        <td class="p-1 align-middle">
-            <input type="hidden" class="form-control" id="price" name="price[]" readonly
-                value="{{ $d->price }}">
-            <input type="text" class="form-control" id="__price" name="__price[]" readonly
-                value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}">
-        </td>
-        <td class="p-1 align-middle">
-            <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
-                value="{{ $d->amount }}">
-            <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
-                value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}">
-        </td>
-        <td class="text-center p-1 align-middle">
-            <div class="row row-cols-auto g-3">
-                <div class="col">
-                    <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-                        id="removeItemButton"></button>
-                </div>
-            </div>
-        </td>
-    </tr>
-@endforeach
-
 <script>
     (() => {
         const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
 
-        $('.select-select, #maintenance_item_, #mro_item_').each(function() {
+        $('.select-select').each(function() {
             const $el = $(this);
-
-            let config = {
+            $el.select2({
                 theme: "bootstrap-5",
                 dropdownParent: $('#formModal'),
                 width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                     'style'),
                 selectOnClose: false,
-                minimumResultsForSearch: 0
-            };
-
-            if ($el.attr('id') === 'maintenance_item_') {
-                // config.allowClear = true;
-                config.ajax = {
-                    url: '{{ route('purchaserequisition.get_maintenance_item') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
-                };
-            }
-
-            if ($el.attr('id') === 'mro_item_') {
-                // config.allowClear = true;
-                config.ajax = {
-                    url: '{{ route('purchaserequisition.get_mro_item') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
-                };
-            }
-
-            $el.select2(config).on('select2:open', function() {
-                setTimeout(function() {
-                    const $search = $('.select2-container--open .select2-search__field');
-                    $search.trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
+                minimumResultsForSearch: 0,
+            }).on('select2:close', function() {
+                $(this).blur();
+                if (document.activeElement) {
+                    document.activeElement.blur();
+                }
             });
         });
 
@@ -270,6 +164,7 @@
 
         $qty.on('input', function(e) {
             textInput("_qty", e);
+            calculateAmount();
         });
 
         $price.on('keydown', function(e) {
@@ -283,10 +178,7 @@
 
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
-            var maintenance_item_id = $("#maintenance_item_").val();
-            var maintenance_item = $("#maintenance_item_ option:selected").text();
-            var mro_item_id = $("#mro_item_").val();
-            var mro_item = $("#mro_item_ option:selected").text();
+            var description = $("#_description").val();
             var uom = $("#_uom").val();
             var _qty = $("#_qty").val();
             var _qty_ = $("#_qty_").val();
@@ -300,12 +192,8 @@
                         #
                     </td>
                     <td class="p-1 align-middle">
-                       <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]" readonly value="${maintenance_item_id}">
-                       <input type="text" class="form-control" id="maintenance_item" name="maintenance_item[]" readonly value="${maintenance_item}">
-                    </td>
-                    <td class="p-1 align-middle">
-                       <input type="hidden" class="form-control" id="mro_item_id" name="mro_item_id[]" readonly value="${mro_item_id}">
-                       <input type="text" class="form-control" id="mro_item" name="mro_item[]" readonly value="${mro_item}">
+                       <input type="hidden" class="form-control order" id="order" name="order[]">
+                       <input type="text" class="form-control" id="description" name="description[]" readonly value="${description}">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="text" class="form-control" id="uom" name="uom[]" readonly value="${uom}">
@@ -319,8 +207,8 @@
                        <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}">
                     </td>
                     <td class="p-1 align-middle">
-                       <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
-                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}">
+                       <input type="hidden" class="form-control" id="amount" name="amount[]" readonly value="${_amount}">
+                       <input type="text" class="form-control" id="__amount" name="__amount[]" readonly value="${_amount_}">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
@@ -338,9 +226,7 @@
             $("#_price_").val('');
             $("#_amount").val('');
             $("#_amount_").val('');
-            $("#maintenance_item_").val('').trigger('change');
-            $("#mro_item_").val('').trigger('change');
-            $("#_uom").val('').trigger('change');
+            $("#_description").val('');
             tbody.append(newRow);
             renumberRows();
             calculateTotal();
@@ -352,10 +238,12 @@
             $('#tableItem > tbody > tr').each(function() {
                 if ($(this).hasClass('fixed-row')) {
                     $(this).find('.row-number').text('');
+                    $(this).find('.order').val('');
                     return;
                 }
 
                 $(this).find('.row-number').text(no);
+                $(this).find('.order').val(no);
                 no++;
             });
         }
