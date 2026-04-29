@@ -131,7 +131,13 @@ class PurchaseOrderController extends Controller
      */
     public function show(Purchase_order $purchase_order)
     {
-        //
+        $purchase_order_detail = $purchase_order->purchase_order_detail;
+        return response()->json([
+            'success' => true,
+            'message' => 'Data showed',
+            'data' => $purchase_order,
+            'purchase_order_detail' => $purchase_order_detail
+        ], 200);
     }
 
     /**
@@ -155,6 +161,93 @@ class PurchaseOrderController extends Controller
      */
     public function destroy(Purchase_order $purchase_order)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $purchase_order->purchase_order_detail()->delete();
+            $purchase_order->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil data unit
+     */
+    public function get_purchase_order(Request $request)
+    {
+        try {
+            $purchase_order = Purchase_order::whereIn('status', ['Approved', 'Received'])->get();
+            return response()->json([
+                'success' => true,
+                'data' => $purchase_order
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil tabel list requisition nya
+     */
+    public function get_table_add(Request $request, Purchase_order $purchase_order)
+    {
+        try {
+            $presenter = new DatePrefixPresenter('Y/m', '/');
+            $view = 'purchase_order.table-add';
+            $uom = config('uom');
+            $system_setting = config('system_setting');
+            $order_prev_no = Generator::make()
+                ->type('po')
+                ->formatter($presenter)
+                ->preview();
+            $html = view($view, compact('uom', 'system_setting'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'order_prev_no' => $order_prev_no
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil tabel list requisition nya
+     */
+    public function get_table_edit(Request $request, Purchase_order $purchase_order)
+    {
+        try {
+            $view = 'purchase_order.table-edit';
+            $uom = config('uom');
+            $system_setting = config('system_setting');
+            $purchase_order_detail = $purchase_order->purchase_order_detail;
+            $html = view($view, compact('purchase_order', 'purchase_order_detail', 'uom', 'system_setting'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'order_no' => $purchase_order->order_no
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }
