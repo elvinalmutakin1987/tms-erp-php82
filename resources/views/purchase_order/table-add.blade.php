@@ -52,6 +52,7 @@
                 <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
                 <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
             </td>
+
             <td class="p-1 align-middle" style="width:2%">
                 <div class="row row-cols-auto g-3">
                     <div class="col">

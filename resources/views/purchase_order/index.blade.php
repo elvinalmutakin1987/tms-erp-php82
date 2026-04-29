@@ -69,6 +69,7 @@
                                         <th width="10">No</th>
                                         <th>Order Number</th>
                                         <th>Requisition Number</th>
+                                        <th>Vendor</th>
                                         <th>Date</th>
                                         <th>Urgency </th>
                                         <th>Status</th>
@@ -158,6 +159,12 @@
                         searchable: true,
                     },
                     {
+                        data: 'vendor',
+                        name: 'vendor',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
                         data: 'date',
                         name: 'date',
                         orderable: true,
@@ -224,7 +231,7 @@
             });
 
             $(document).on('click', '.editButton', function() {
-                requisitionId = $(this).data('id');
+                orderId = $(this).data('id');
                 $('#modal-header').text('Edit Order');
                 $('#id').val(orderId);
                 let url = '{{ route('purchaseorder.show', ':_id') }}';
@@ -235,29 +242,38 @@
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Requisition');
-                        $("#purchase_requisition_id").val(response.data.purchase_requisition_id)
-                            .trigger(
-                                'change');
+
+                        $("#purchase_requisition_id")
+                            .val(response.data.purchase_requisition_id)
+                            .trigger('change.select2');
+
+                        const vendorId = response.data.client_vendor_id;
+                        const vendorText = response.vendor.name;
+
+                        const $vendor = $("#client_vendor_id");
+
+                        if (vendorId && vendorText) {
+                            const optionExists = $vendor.find('option').filter(function() {
+                                return String(this.value) === String(vendorId);
+                            }).length > 0;
+
+                            if (optionExists) {
+                                $vendor.val(vendorId).trigger('change');
+                            } else {
+                                const newOption = new Option(vendorText, vendorId, true, true);
+                                $vendor.append(newOption).trigger('change');
+                            }
+                        }
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
-                        $("#total").val(response.data.total);
-                        $("#total_").val(numbro(response.data.total).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        $("#tax").val(response.data.tax);
-                        $("#tax_").val(numbro(response.data.tax).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        $("#grand_total").val(response.data.grand_total);
-                        $("#grand_total_").val(numbro(response.data.grand_total).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        $("#urgency").val(response.data.urgency).trigger(
-                            'change');
+
+                        $("#urgency")
+                            .val(response.data.urgency)
+                            .trigger('change');
+
                         $("#request_token").val(response.data.request_token);
+
+                        requisitionId = response.data.purchase_requisition_id;
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -323,7 +339,7 @@
                 success: function(response) {
                     $('#purchase_requisition_id').empty();
                     $('#purchase_requisition_id').append(
-                        '<option value="" selected disabled></option>');
+                        '<option value="">Direct PO</option>');
                     $.each(response.data, function(index, purchase_requisition) {
                         $('#purchase_requisition_id').append('<option value="' +
                             purchase_requisition.id +
@@ -342,6 +358,38 @@
             });
 
             gen_select2();
+
+            $('#client_vendor_id').select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: '100%',
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('purchaseorder.get_client_vendor') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results || data
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    const $search = $('.select2-container--open .select2-search__field');
+                    $search.trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+
         });
 
         function delete_(id) {
@@ -433,6 +481,7 @@
                             title: 'Oops...',
                             text: errorMessage,
                         });
+                        enableButton();
                     }
                 });
             };
@@ -447,7 +496,8 @@
                     confirmButtonText: 'Yes, Save it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
-                    if (result.isConfirmed) submitForm();
+                    // if (result.isConfirmed) submitForm();
+                    result.isConfirmed ? submitForm() : enableButton();
                 });
             } else {
                 submitForm();
@@ -508,7 +558,7 @@
                     confirmButtonText: 'Yes, Save it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
-                    if (result.isConfirmed) submitReceived();
+                    // if (result.isConfirmed) submitReceived();
                 });
             } else {
                 submitReceived();
@@ -534,6 +584,9 @@
 
                 $.ajax({
                     url: url,
+                    data: {
+                        purchase_requisition_id: requisitionId
+                    },
                     type: 'GET',
                     success: function(response) {
                         $("#div-table").html(response.html);
@@ -601,22 +654,32 @@
         });
 
         function gen_select2() {
-            $('.select-select').each(function() {
-                const $el = $(this);
-                $el.select2({
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0,
-                }).on('select2:close', function() {
-                    $(this).blur();
-                    if (document.activeElement) {
-                        document.activeElement.blur();
-                    }
-                });
-            });
+            function gen_select2() {
+                $('.select-select')
+                    .not('#purchase_requisition_id, #client_vendor_id')
+                    .each(function() {
+                        const $el = $(this);
+
+                        if ($el.hasClass('select2-hidden-accessible')) {
+                            $el.select2('destroy');
+                        }
+
+                        $el.select2({
+                            theme: "bootstrap-5",
+                            dropdownParent: $('#formModal'),
+                            width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                                'style'),
+                            selectOnClose: false,
+                            minimumResultsForSearch: 0,
+                        }).on('select2:close', function() {
+                            $(this).blur();
+
+                            if (document.activeElement) {
+                                document.activeElement.blur();
+                            }
+                        });
+                    });
+            }
         }
 
         function disableButton() {
@@ -646,11 +709,11 @@
                     <span class="visually">Loading...</span>
                     `);
                 const isEdit = orderId != '';
-                const url = isEdit ?
+                const url = isEdit && requisitionId == $(this).val() ?
                     '{{ route('purchaseorder.get_table_edit', ':_id') }}'.replace(':_id',
                         orderId) :
                     '{{ route('purchaseorder.get_table_add') }}';
-
+                requisitionId = $(this).val();
                 $.ajax({
                     url: url,
                     data: {

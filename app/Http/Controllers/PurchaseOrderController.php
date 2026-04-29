@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client_vendor;
 use App\Models\Maintenance_item;
 use App\Models\Mro_item;
 use App\Models\Purchase_order;
@@ -94,6 +95,9 @@ class PurchaseOrderController extends Controller
                 ->addColumn('requisition_no', function ($item) {
                     $purchase_requisition = Purchase_requisition::find($item->purchase_requisition_id);
                     return $purchase_requisition?->requisition_no ?? '';
+                })->addColumn('vendor', function ($item) {
+                    $vendor = Client_vendor::find($item->client_vendor_id);
+                    return $vendor?->name ?? '';
                 })
                 ->make();
         }
@@ -124,16 +128,17 @@ class PurchaseOrderController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'purchase_requisition_id' => ['required'],
                 'date' => 'required',
+                'client_vendor_id' => 'required',
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
-            $type = $purchase_requisition->type;
-            $department = $purchase_requisition->department;
+            $type = $purchase_requisition?->type ?? 'General';
+            $department = $purchase_requisition?->department ?? 'Equipment';
             $system_setting = config('system_setting');
             $data = array_merge(
-                $request->only(
-                    'purcahse_requisition_id',
+                $request->only([
+                    'purchase_requisition_id',
+                    'client_vendor_id',
                     'date',
                     'notes',
                     'total',
@@ -141,7 +146,7 @@ class PurchaseOrderController extends Controller
                     'grand_total',
                     'status',
                     'urgency',
-                ),
+                ]),
                 [
                     'request_token' => $request->request_token,
                     'input_method' => 'Web',
@@ -230,11 +235,13 @@ class PurchaseOrderController extends Controller
     public function show(Purchase_order $purchase_order)
     {
         $purchase_order_detail = $purchase_order->purchase_order_detail;
+        $vendor = Client_vendor::find($purchase_order->client_vendor_id);
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $purchase_order,
-            'purchase_order_detail' => $purchase_order_detail
+            'purchase_order_detail' => $purchase_order_detail,
+            'vendor' => $vendor
         ], 200);
     }
 
@@ -251,7 +258,110 @@ class PurchaseOrderController extends Controller
      */
     public function update(Request $request, Purchase_order $purchase_order)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'date' => 'required',
+                'client_vendor_id' => 'required',
+            ]);
+            $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
+            $type = $purchase_requisition?->type ?? 'General';
+            $department = $purchase_requisition?->department ?? 'Equipment';
+            $system_setting = config('system_setting');
+            $data = array_merge(
+                $request->only([
+                    'purchase_requisition_id',
+                    'date',
+                    'notes',
+                    'total',
+                    'tax',
+                    'grand_total',
+                    'status',
+                    'urgency',
+                    'client_vendor_id',
+                ]),
+                [
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web',
+                    'user_id' => Auth::user()->id,
+                    'type' => $type,
+                    'department' => $department
+                ]
+            );
+            $lockPurchase_order = Purchase_order::where('id', $purchase_order->id)->lockForUpdate()->first();
+            $lockPurchase_order->update($data);
+            $purchase_order->purchase_order_detail()->delete();
+            if ($type == 'Equipment') {
+                if ($request->has('maintenance_item_id')) {
+                    foreach ($request->maintenance_item_id as $i => $item) {
+                        $purchase_order->purchase_order_detail()->create(
+                            [
+                                'request_token' => $purchase_order->request_token,
+                                'maintenance_item_id' => $item,
+                                'mro_item_id' => $request->mro_item_id[$i],
+                                'desc_vendor' => $request->desc_vendor[$i],
+                                'uom' => $request->uom[$i],
+                                'qty' => $request->qty[$i],
+                                'price' => $request->price[$i],
+                                'tax' => $system_setting['tax'],
+                                'amount' => $request->amount[$i]
+                            ]
+                        );
+                    }
+                }
+            } else {
+                if ($request->has('description')) {
+                    foreach ($request->description as $i => $item) {
+                        $purchase_order->purchase_order_detail()->create(
+                            [
+                                'request_token' => $purchase_order->request_token,
+                                'description' => $item,
+                                'desc_vendor' => $request->desc_vendor[$i],
+                                'uom' => $request->uom[$i],
+                                'qty' => $request->qty[$i],
+                                'price' => $request->price[$i],
+                                'tax' => $system_setting['tax'],
+                                'amount' => $request->amount[$i]
+                            ]
+                        );
+                    }
+                }
+            }
+
+            /**
+             * Buat check ada approvalnya gak
+             * Kalo ada statusnya jadi Approval.
+             * Nanti kalo approval beres baru jadi Open
+             */
+            $model = 'App\Models\Purchase_order';
+            if (checkHasApproval($model, $department)) {
+                if ($request->status == 'Open') {
+                    $purchase_order->status = 'Approval';
+                    $purchase_order->save();
+                    $approval_flow_id = getApprovalFlowId($model, $department);
+                    createApprovalProcess($approval_flow_id, $purchase_order->id);
+                }
+            } else {
+                if ($request->status == 'Open') {
+                    $purchase_order->status = 'Approved';
+                    $purchase_order->save();
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -304,6 +414,7 @@ class PurchaseOrderController extends Controller
     {
         try {
             $type = 'General';
+            $purchase_requisition_id = $request?->purchase_requisition_id ?? 'Direct PO';
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             if ($purchase_requisition) {
                 $type = $purchase_requisition->type;
@@ -319,7 +430,7 @@ class PurchaseOrderController extends Controller
                 ->type('po')
                 ->formatter($presenter)
                 ->preview();
-            $html = view($view, compact('uom', 'system_setting', 'purchase_requisition'))->render();
+            $html = view($view, compact('uom', 'system_setting', 'purchase_requisition', 'purchase_requisition_id'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -340,15 +451,24 @@ class PurchaseOrderController extends Controller
     public function get_table_edit(Request $request, Purchase_order $purchase_order)
     {
         try {
+            $type = 'General';
+            $purchase_requisition_id = $request?->purchase_requisition_id ?? 'Direct PO';
+            $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
+            if ($purchase_requisition) {
+                $type = $purchase_requisition->type;
+            }
             $view = 'purchase_order.table-edit';
+            if ($type == 'General') {
+                $view = 'purchase_order.table-gen-edit';
+            }
             $uom = config('uom');
             $system_setting = config('system_setting');
             $purchase_order_detail = $purchase_order->purchase_order_detail;
-            $html = view($view, compact('purchase_order', 'purchase_order_detail', 'uom', 'system_setting'))->render();
+            $html = view($view, compact('purchase_order', 'purchase_order_detail', 'uom', 'system_setting', 'purchase_requisition_id'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
-                'order_no' => $purchase_order->order_no
+                'order_no' => $purchase_order->order_no,
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([
@@ -403,6 +523,34 @@ class PurchaseOrderController extends Controller
             }
             $result = [
                 "results" => $mro_item->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
+        }
+    }
+
+    /**
+     * Ngambil data maintenance item
+     */
+    public function get_client_vendor(Request $request)
+    {
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $client_vendor = Client_vendor::selectRaw("id, name as text")
+                ->where('type', 'Vendor')
+                ->where('name', 'like', '%' . $term . '%')
+                ->orderBy('name')->simplePaginate(10);
+            $total_count = count($client_vendor);
+            $morePages = true;
+            $pagination_obj = json_encode($client_vendor);
+            if (empty($client_vendor->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $client_vendor->items(),
                 "pagination" => [
                     "more" => $morePages
                 ],

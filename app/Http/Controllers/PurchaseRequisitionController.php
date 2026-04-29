@@ -154,7 +154,7 @@ class PurchaseRequisitionController extends Controller
             ]);
             $system_setting = config('system_setting');
             $data = array_merge(
-                $request->only(
+                $request->only([
                     'unit_id',
                     'date',
                     'maintenance_id',
@@ -164,7 +164,7 @@ class PurchaseRequisitionController extends Controller
                     'grand_total',
                     'status',
                     'urgency',
-                ),
+                ]),
                 [
                     'request_token' => $request->request_token,
                     'input_method' => 'Web',
@@ -173,7 +173,7 @@ class PurchaseRequisitionController extends Controller
                     'Department' => 'Equipment'
                 ]
             );
-            $purchase_requisition = Purchase_requisition::firstOrCreate($data);
+            $purchase_requisition = Purchase_requisition::firstOrCreate(['request_token' => $request->request_token], $data);
             if ($request->has('maintenance_item_id')) {
                 foreach ($request->maintenance_item_id as $i => $item) {
                     $purchase_requisition->purchase_requisition_detail()->create(
@@ -262,7 +262,7 @@ class PurchaseRequisitionController extends Controller
             ]);
             $system_setting = config('system_setting');
             $data = array_merge(
-                $request->only(
+                $request->only([
                     'unit_id',
                     'date',
                     'maintenance_id',
@@ -272,7 +272,7 @@ class PurchaseRequisitionController extends Controller
                     'grand_total',
                     'status',
                     'urgency'
-                ),
+                ]),
                 [
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id

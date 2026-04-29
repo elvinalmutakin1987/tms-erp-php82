@@ -460,6 +460,7 @@
                             title: 'Oops...',
                             text: errorMessage,
                         });
+                        enableButton();
                     }
                 });
             };
@@ -474,7 +475,8 @@
                     confirmButtonText: 'Yes, Save it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
-                    if (result.isConfirmed) submitForm();
+                    // if (result.isConfirmed) submitForm();
+                    result.isConfirmed ? submitForm() : enableButton();
                 });
             } else {
                 submitForm();
@@ -535,7 +537,8 @@
                     confirmButtonText: 'Yes, Save it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
-                    if (result.isConfirmed) submitReceived();
+                    // if (result.isConfirmed) submitReceived();
+                    result.isConfirmed ? submitReceived() : enableButton();
                 });
             } else {
                 submitReceived();

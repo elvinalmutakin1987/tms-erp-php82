@@ -21,4 +21,9 @@ class Maintenance_item extends Model
     {
         return $this->hasMany(purchase_requisition_detail::class);
     }
+
+    public function purchase_order_detail(): HasMany
+    {
+        return $this->hasMany(Purchase_order_detail::class);
+    }
 }

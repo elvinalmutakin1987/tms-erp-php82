@@ -18,6 +18,11 @@
                     <input type="hidden" name="request_token" id="request_token">
                     <div class="row mb-2">
                         <div class="col">
+                            <label for="client_vendor_id" class="form-label">Vendor</label>
+                            <select class="form-select" id="client_vendor_id" name="client_vendor_id">
+                            </select>
+                        </div>
+                        <div class="col">
                             <label for="purchase_requisition_id" class="form-label">Requisition No.</label>
                             <select class="form-select select-select" id="purchase_requisition_id"
                                 name="purchase_requisition_id">
@@ -41,7 +46,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
+                            <textarea class="form-control" id="notes" name="notes" rows="2" required></textarea>
                         </div>
                     </div>
                     <div class="row mb-2">

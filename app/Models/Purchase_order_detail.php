@@ -19,4 +19,14 @@ class Purchase_order_detail extends Model implements Auditable
     {
         return $this->belongsTo(Purchase_order::class);
     }
+
+    public function maintenance_item(): BelongsTo
+    {
+        return $this->belongsTo(Maintenance_item::class);
+    }
+
+    public function mro_item(): BelongsTo
+    {
+        return $this->belongsTo(Mro_item::class);
+    }
 }

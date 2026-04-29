@@ -599,4 +599,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaseorder-get-mro-item', [PurchaseOrderController::class, 'get_mro_item'])
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.get_mro_item');
+
+    Route::get('purchaseorder-get-client-vendor', [PurchaseOrderController::class, 'get_client_vendor'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_client_vendor');
 });

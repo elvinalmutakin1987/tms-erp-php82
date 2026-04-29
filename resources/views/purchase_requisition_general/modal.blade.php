@@ -43,7 +43,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <label for="notes" class="form-label">Notes</label>
-                            <textarea class="form-control" id="notes" name="notes" rows="5" required></textarea>
+                            <textarea class="form-control" id="notes" name="notes" rows="2" required></textarea>
                         </div>
                     </div>
                     <div class="row mb-2">

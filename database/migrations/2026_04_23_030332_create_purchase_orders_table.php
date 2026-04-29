@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('client_vendor_id')->nullable();
             $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->string('number', 30)->nullable();
             $table->string('order_no', 30)->nullable();
