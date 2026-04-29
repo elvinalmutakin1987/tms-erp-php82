@@ -19,20 +19,19 @@
 
                     <div class="row mb-2">
                         <div class="col">
-                            <label for="unit_id" class="form-label">Unit</label>
-                            <select class="form-select select-select" id="unit_id" name="unit_id">
-
+                            <label for="purchase_requisition_id" class="form-label">Requisition No.</label>
+                            <select class="form-select select-select" id="purchase_requisition_id"
+                                name="purchase_requisition_id">
+                                {{-- @foreach ($purchase_requisition as $d)
+                                    <option value="{{ $d->id }}">{{ $d->requisiiton_no }}</option>
+                                @endforeach --}}
                             </select>
                         </div>
                         <div class="col">
                             <label for="date" class="form-label">Date</label>
                             <input type="text" class="form-control datepicker" id="date" name="date">
                         </div>
-                        <div class="col">
-                            <label for="unit_id" class="form-label">Maintenance No.</label>
-                            <select class="form-select select-select" id="maintenance_id" name="maintenance_id">
-                            </select>
-                        </div>
+
                         <div class="col">
                             <label for="urgency" class="form-label">Urgency</label>
                             <select class="form-select select-select" id="urgency" name="urgency">
@@ -51,55 +50,7 @@
                     </div>
                     <div class="row mb-2">
                         <div class="col" id="div-table">
-                            <table class="table mb-0" id="tableItem">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th scope="col" style="width:3%">#</th>
-                                        <th scope="col" style="width:20%">Maintenance Item</th>
-                                        <th scope="col">MRO Item</th>
-                                        <th scope="col" style="width:12%">Uom</th>
-                                        <th scope="col" style="width:10%">Qty</th>
-                                        <th scope="col" style="width:15%">Price</th>
-                                        <th scope="col" style="width:15%">Amount</th>
-                                        <th scope="col" style="width:2%">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody">
 
-                                </tbody>
-                                <tfoot>
-                                    <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Total</b>
-                                        </td>
-                                        <td scope="col" class="p-1 align-middle">
-                                            <input type="hidden" id="total" name="total" readonly>
-                                            <input type="text" class="form-control" id="total_" name="total_"
-                                                readonly>
-                                        </td>
-                                        <td scope="col" class="p-1 align-middle"></td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Tax</b>
-                                        </td>
-                                        <td scope="col" class="p-1 align-middle">
-                                            <input type="hidden" id="tax" name="tax" readonly>
-                                            <input type="text" class="form-control" id="tax_" name="tax_"
-                                                readonly>
-                                        </td>
-                                        <td scope="col" class="p-1 align-middle"></td>
-                                    </tr>
-                                    <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Grand
-                                                Total</b></td>
-                                        <td scope="col" class="p-1 align-middle">
-                                            <input type="hidden" id="grand_total" name="grand_total" readonly>
-                                            <input type="text" class="form-control" id="grand_total_"
-                                                name="grand_total_" readonly>
-                                        </td>
-                                        <td scope="col" class="p-1 align-middle"></td>
-                                    </tr>
-                                </tfoot>
-                            </table>
                         </div>
                     </div>
                 </form>

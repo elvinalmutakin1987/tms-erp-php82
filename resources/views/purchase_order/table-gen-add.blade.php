@@ -1,37 +1,145 @@
-<tr class="fixed-row">
-    <td class="p-1 align-middle">
+@php
+    use Illuminate\Support\Number;
+@endphp
+<table class="table mb-0" id="tableItem">
+    <thead class="table-dark">
+        <tr>
+            <th scope="col" style="width:3%">#</th>
+            <th scope="col">Description</th>
+            <th scope="col">Alter Name</th>
+            <th scope="col" style="width:10%">Uom</th>
+            <th scope="col" style="width:10%">Qty</th>
+            <th scope="col" style="width:13%">Price</th>
+            <th scope="col" style="width:13%">Amount</th>
+            <th scope="col" style="width:2%">Action</th>
+        </tr>
+    </thead>
+    <tbody id="tbody">
+        <tr class="fixed-row">
+            <td class="p-1 align-middle">
 
-    </td>
-    <td class="p-1 align-middle">
-        <input type="text" class="form-control" id="_description" name="_description">
-    </td>
-    <td class="p-1 align-middle">
-        <select class="form-select select-select" id="_uom" name="_uom">
-            @foreach ($uom as $d => $value)
-                <option value="{{ $value }}">{{ $value }}</option>
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control" id="_description" name="_description">
+            </td>
+            <td class="p-1 align-middle">
+                <input type="text" class="form-control" id="_desc_vendor" name="_desc_vendor">
+            </td>
+            <td class="p-1 align-middle">
+                <select class="form-select select-select" id="_uom" name="_uom">
+                    @foreach ($uom as $d => $value)
+                        <option value="{{ $value }}">{{ $value }}</option>
+                    @endforeach
+                </select>
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="_qty" name="_qty">
+                <input type="text" class="form-control" id="_qty_" name="_qty_">
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="_price" name="_price">
+                <input type="text" class="form-control" id="_price_" name="_price_">
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
+                <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
+            </td>
+            <td class="p-1 align-middle" style="width:2%">
+                <div class="row row-cols-auto g-3">
+                    <div class="col">
+                        <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"
+                            id="addItemButton"></button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+
+        @if ($purchase_requisition)
+            @foreach ($purchase_requisition->purchase_requisition_detail as $d)
+                <tr>
+                    <td class="p-1 align-middle row-number">
+                        {{ $loop->iteration }}
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control order" id="order" name="order[]"
+                            value="{{ $loop->iteration }}">
+                        <input type="text" class="form-control" id="description" name="description[]" readonly
+                            value="{{ $d->description }}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" id="desc_vendor" name="desc_vendor[]"
+                            value="{{ $d->desc_vendor }}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" id="uom" name="uom[]" readonly
+                            value="{{ $d->uom }}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
+                            value="{{ $d->qty }}">
+                        <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
+                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="price" name="price[]" readonly
+                            value="{{ $d->price }}">
+                        <input type="text" class="form-control" id="__price" name="__price[]" readonly
+                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
+                            value="{{ $d->amount }}">
+                        <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
+                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}">
+                    </td>
+                    <td class="text-center p-1 align-middle">
+                        <div class="row row-cols-auto g-3">
+                            <div class="col">
+                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+                                    id="removeItemButton"></button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
             @endforeach
-        </select>
-    </td>
-    <td class="p-1 align-middle">
-        <input type="hidden" class="form-control" id="_qty" name="_qty">
-        <input type="text" class="form-control" id="_qty_" name="_qty_">
-    </td>
-    <td class="p-1 align-middle">
-        <input type="hidden" class="form-control" id="_price" name="_price">
-        <input type="text" class="form-control" id="_price_" name="_price_">
-    </td>
-    <td class="p-1 align-middle">
-        <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
-        <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
-    </td>
-    <td class="p-1 align-middle" style="width:2%">
-        <div class="row row-cols-auto g-3">
-            <div class="col">
-                <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1" id="addItemButton"></button>
-            </div>
-        </div>
-    </td>
-</tr>
+        @endif
+    </tbody>
+    <tfoot>
+        <tr>
+            <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Total</b>
+            </td>
+            <td scope="col" class="p-1 align-middle">
+                <input type="hidden" id="total" name="total" readonly
+                    value="{{ $purchase_requisition?->total ?? '' }}">
+                <input type="text" class="form-control" id="total_" name="total_" readonly
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->total, precision: 0) : '' }}">
+            </td>
+            <td scope="col" class="p-1 align-middle"></td>
+        </tr>
+        <tr>
+            <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Tax</b>
+            </td>
+            <td scope="col" class="p-1 align-middle">
+                <input type="hidden" id="tax" name="tax" readonly
+                    value="{{ $purchase_requisition?->tax ?? '' }}">
+                <input type="text" class="form-control" id="tax_" name="tax_" readonly
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->tax, precision: 0) : '' }}">
+            </td>
+            <td scope="col" class="p-1 align-middle"></td>
+        </tr>
+        <tr>
+            <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Grand
+                    Total</b></td>
+            <td scope="col" class="p-1 align-middle">
+                <input type="hidden" id="grand_total" name="grand_total" readonly
+                    value="{{ $purchase_requisition?->grand_total ?? '' }}">
+                <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}">
+            </td>
+            <td scope="col" class="p-1 align-middle"></td>
+        </tr>
+    </tfoot>
+</table>
 
 <script>
     (() => {
@@ -179,6 +287,7 @@
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
             var description = $("#_description").val();
+            var desc_vendor = $("#_desc_vendor").val();
             var uom = $("#_uom").val();
             var _qty = $("#_qty").val();
             var _qty_ = $("#_qty_").val();
@@ -194,6 +303,9 @@
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control order" id="order" name="order[]">
                        <input type="text" class="form-control" id="description" name="description[]" readonly value="${description}">
+                    </td>
+                     <td class="p-1 align-middle">
+                       <input type="text" class="form-control" id="desc_vendor" name="desc_vendor[]" readonly value="${desc_vendor}">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="text" class="form-control" id="uom" name="uom[]" readonly value="${uom}">
@@ -227,6 +339,7 @@
             $("#_amount").val('');
             $("#_amount_").val('');
             $("#_description").val('');
+            $("#_desc_vendor").val('');
             tbody.append(newRow);
             renumberRows();
             calculateTotal();

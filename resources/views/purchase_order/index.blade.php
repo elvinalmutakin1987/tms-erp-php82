@@ -318,6 +318,30 @@
                 $('#table-data').DataTable().draw();
             });
 
+            $.ajax({
+                url: '{{ route('purchaseorder.get_purchase_requisition') }}',
+                type: 'GET',
+                success: function(response) {
+                    $('#purchase_requisition_id').empty();
+                    $('#purchase_requisition_id').append(
+                        '<option value="" selected disabled></option>');
+                    $.each(response.data, function(index, purchase_requisition) {
+                        $('#purchase_requisition_id').append('<option value="' +
+                            purchase_requisition.id +
+                            '">' +
+                            purchase_requisition.requisition_no +
+                            '</option>');
+                    });
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: error,
+                    });
+                }
+            });
+
             gen_select2();
         });
 
@@ -498,14 +522,9 @@
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
 
-            var tbody = $("#tableItem > tbody");
-            tbody.append(`
-                    <tr>
-                        <td colspan="8">
-                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually">Loading...</span>
-                        </td>
-                    </tr>
+            $("#div-table").html(`
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually">Loading...</span>
                     `);
             setTimeout(function() {
                 const isEdit = orderId != '';
@@ -518,7 +537,7 @@
                     url: url,
                     type: 'GET',
                     success: function(response) {
-                        $("#tableItem > tbody").html(response.html);
+                        $("#div-table").html(response.html);
 
                         const titleText = isEdit ? 'Edit Order' : 'Add Order';
                         const number = isEdit ? response.order_no : response
@@ -555,8 +574,8 @@
             requisitionId = '';
             enableButton();
             $("#request_token").val("");
-            $('#tableItem tbody').empty();
-            $("#purchase_requisition_id").val('All').trigger('change');
+            $('#div-table').html("");
+            $("#purchase_requisition_id").val('').trigger('change');
             $("#total").val('');
             $("#total_").val('');
             $("#tax").val('');
@@ -614,6 +633,42 @@
             monitoringSaveButton1.disabled = false;
             monitoringSaveButton2.disabled = false;
         }
+
+        $('#purchase_requisition_id').each(function() {
+            const $el = $(this);
+            $el.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                    'style'),
+                selectOnClose: false,
+                minimumResultsForSearch: 0,
+            }).on('change', function() {
+                $("#div-table").html(`
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually">Loading...</span>
+                    `);
+                const isEdit = orderId != '';
+                const url = isEdit ?
+                    '{{ route('purchaseorder.get_table_edit', ':_id') }}'.replace(':_id',
+                        orderId) :
+                    '{{ route('purchaseorder.get_table_add') }}';
+
+                $.ajax({
+                    url: url,
+                    data: {
+                        purchase_requisition_id: $(this).val()
+                    },
+                    type: 'GET',
+                    success: function(response) {
+                        $("#div-table").html(response.html);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        });
     </script>
     <!--app JS-->
 @endsection

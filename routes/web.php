@@ -587,4 +587,16 @@ Route::middleware(['auth'])->group(function () {
     Route::put('purchaseorder-moitoring/{purchase_order}', [PurchaseOrderController::class, 'monitoring'])
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.monitoring');
+
+    Route::get('purchaseorder-get-purchase-requisition', [PurchaseOrderController::class, 'get_purchase_requisition'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_purchase_requisition');
+
+    Route::get('purchaseorder-get-maintenance-item', [PurchaseOrderController::class, 'get_maintenance_item'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_maintenance_item');
+
+    Route::get('purchaseorder-get-mro-item', [PurchaseOrderController::class, 'get_mro_item'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_mro_item');
 });

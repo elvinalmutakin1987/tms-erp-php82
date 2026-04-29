@@ -17,7 +17,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->string('number', 30)->nullable();
-            $table->string('requisition_no', 30)->nullable();
+            $table->string('order_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //General / equipment
             $table->date('date')->nullable();
             $table->date('due_date')->nullable();

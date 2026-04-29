@@ -169,7 +169,8 @@ class PurchaseRequisitionController extends Controller
                     'request_token' => $request->request_token,
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
-                    'type' => 'Equipment'
+                    'type' => 'Equipment',
+                    'Department' => 'Equipment'
                 ]
             );
             $purchase_requisition = Purchase_requisition::firstOrCreate($data);

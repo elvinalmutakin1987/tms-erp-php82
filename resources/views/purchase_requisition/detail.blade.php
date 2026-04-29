@@ -17,10 +17,10 @@
                         <span class="badge bg-info" style="font-size: 13px">{{ $purchase_requisition->status }}</span>
                     @elseif($purchase_requisition->status == 'Open')
                         <span class="badge bg-primary" style="font-size: 13px">{{ $purchase_requisition->status }}</span>
-                    @elseif(
-                        $purchase_requisition->status == 'Done' ||
-                            $purchase_requisition->status == 'Approved' ||
-                            $purchase_received->status == 'Received')
+                    @elseif($purchase_requisition->status == 'Approved' || $purchase_received->status == 'Received')
+                        <span class="badge bg-warning"
+                            style="font-size: 13px">{{ $purchase_requisition->status }}</span>
+                    @elseif($purchase_requisition->status == 'Done')
                         <span class="badge bg-success"
                             style="font-size: 13px">{{ $purchase_requisition->status }}</span>
                     @endif
