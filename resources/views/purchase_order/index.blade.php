@@ -105,8 +105,7 @@
     <script>
         const saveButton1 = document.getElementById('saveButton1');
         const saveButton2 = document.getElementById('saveButton2');
-        const monitoringSaveButton1 = document.getElementById('monitoringSaveButton1');
-        const monitoringSaveButton2 = document.getElementById('monitoringSaveButton2');
+        const monitoringSaveButton = document.getElementById('monitoringSaveButton');
 
         var orderId = '';
         var requisitionId = '';
@@ -623,15 +622,13 @@
         function disableButton() {
             saveButton1.disabled = true;
             saveButton2.disabled = true;
-            monitoringSaveButton1.disabled = true;
-            monitoringSaveButton2.disabled = true;
+            monitoringSaveButton.disabled = true;
         }
 
         function enableButton() {
             saveButton1.disabled = false;
             saveButton2.disabled = false;
-            monitoringSaveButton1.disabled = false;
-            monitoringSaveButton2.disabled = false;
+            monitoringSaveButton.disabled = false;
         }
 
         $('#purchase_requisition_id').each(function() {

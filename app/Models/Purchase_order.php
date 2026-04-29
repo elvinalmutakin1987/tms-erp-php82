@@ -21,7 +21,7 @@ class Purchase_order extends Model implements Auditable
     {
         static::creating(function ($purchase_order) {
             $presenter = new DatePrefixPresenter('Y/m', '/');
-            $purchase_order->requisition_no = running_number()
+            $purchase_order->order_no = running_number()
                 ->type('po')
                 ->formatter($presenter)
                 ->generate();

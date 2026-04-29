@@ -91,13 +91,9 @@ class PurchaseOrderController extends Controller
 
                     return $button;
                 })
-                ->addColumn('unit', function ($item) {
-                    $unit = Unit::find($item->unit_id);
-                    return $unit->vehicle_no;
-                })
                 ->addColumn('requisition_no', function ($item) {
                     $purchase_requisition = Purchase_requisition::find($item->purchase_requisition_id);
-                    return $purchase_requisition->requisition_no ?? '';
+                    return $purchase_requisition?->requisition_no ?? '';
                 })
                 ->make();
         }
@@ -133,7 +129,7 @@ class PurchaseOrderController extends Controller
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             $type = $purchase_requisition->type;
-            $department = $purchase_requisition->departmnet;
+            $department = $purchase_requisition->department;
             $system_setting = config('system_setting');
             $data = array_merge(
                 $request->only(
@@ -150,7 +146,8 @@ class PurchaseOrderController extends Controller
                     'request_token' => $request->request_token,
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
-                    'type' => $type
+                    'type' => $type,
+                    'department' => $department
                 ]
             );
             $purchase_order = Purchase_order::firstOrCreate($data);

@@ -16,15 +16,11 @@
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
-
                     <div class="row mb-2">
                         <div class="col">
                             <label for="purchase_requisition_id" class="form-label">Requisition No.</label>
                             <select class="form-select select-select" id="purchase_requisition_id"
                                 name="purchase_requisition_id">
-                                {{-- @foreach ($purchase_requisition as $d)
-                                    <option value="{{ $d->id }}">{{ $d->requisiiton_no }}</option>
-                                @endforeach --}}
                             </select>
                         </div>
                         <div class="col">
