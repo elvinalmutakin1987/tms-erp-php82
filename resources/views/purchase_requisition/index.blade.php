@@ -259,6 +259,11 @@
                             thousandSeparated: true,
                             mantissa: 0
                         }));
+                        $("#discount").val(response.data.discount);
+                        $("#discount_").val(numbro(response.data.discount).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
                         $("#tax").val(response.data.tax);
                         $("#tax_").val(numbro(response.data.tax).format({
                             thousandSeparated: true,
@@ -616,12 +621,15 @@
             $("#total_").val('');
             $("#tax").val('');
             $("#tax_").val('');
+            $("#discount").val('');
+            $("#discount_").val('');
             $("#grand_total").val('');
             $("#grand_total_").val('');
             enableButton();
         });
 
         $('#formReceive').on('hidden.bs.modal', function() {
+            requisitionId = '';
             enableButton();
         });
 

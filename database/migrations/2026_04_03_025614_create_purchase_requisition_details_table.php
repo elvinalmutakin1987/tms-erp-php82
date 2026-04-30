@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('uom', 30)->nullable();
             $table->decimal('qty', 16, 2)->nullable();
             $table->decimal('price', 16, 2)->nullable();
+            $table->decimal('discount_item', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('amount', 16, 2)->nullable();
             $table->date('received_at')->nullable();

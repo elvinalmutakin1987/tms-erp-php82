@@ -47,22 +47,24 @@
 
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_qty" name="_qty">
-                <input type="text" class="form-control" id="_qty_" name="_qty_">
+                <input type="text" class="form-control" id="_qty_" name="_qty_" style="text-align: right;">
             </td>
 
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_price" name="_price">
-                <input type="text" class="form-control" id="_price_" name="_price_">
+                <input type="text" class="form-control" id="_price_" name="_price_" style="text-align: right;">
             </td>
 
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_discount_item" name="_discount_item">
-                <input type="text" class="form-control" id="_discount_item_" name="_discount_item_">
+                <input type="text" class="form-control" id="_discount_item_" name="_discount_item_"
+                    style="text-align: right;">
             </td>
 
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
-                <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
+                <input type="text" class="form-control" id="_amount_" name="_amount_" readonly
+                    style="text-align: right;">
             </td>
 
             <td class="p-1 align-middle" style="width:2%">
@@ -94,7 +96,8 @@
                     </td>
 
                     <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control order" name="order[]" value="{{ $loop->iteration }}">
+                        <input type="hidden" class="form-control order" name="order[]"
+                            value="{{ $loop->iteration }}">
                         <input type="text" class="form-control" name="description[]" readonly
                             value="{{ $d->description }}">
                     </td>
@@ -113,28 +116,32 @@
                         <input type="hidden" class="form-control" name="qty[]" readonly
                             value="{{ $d->qty }}">
                         <input type="text" class="form-control" name="__qty[]" readonly
-                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
+                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="price[]" readonly
                             value="{{ $d->price }}">
                         <input type="text" class="form-control" name="__price[]" readonly
-                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}">
+                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="discount_item[]" readonly
                             value="{{ $d->discount_item }}">
                         <input type="text" class="form-control" name="__discount_item[]" readonly
-                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}">
+                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="amount[]" readonly
                             value="{{ $d->amount }}">
                         <input type="text" class="form-control" name="__amount[]" readonly
-                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}">
+                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
 
                     <td class="text-center p-1 align-middle">
@@ -159,7 +166,8 @@
                 <input type="hidden" id="total" name="total" readonly
                     value="{{ $purchase_requisition?->total ?? '' }}">
                 <input type="text" class="form-control" id="total_" name="total_" readonly
-                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->total, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->total, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -172,7 +180,8 @@
                 <input type="hidden" id="discount" name="discount" readonly
                     value="{{ $purchase_requisition?->discount ?? '' }}">
                 <input type="text" class="form-control" id="discount_" name="discount_" readonly
-                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->discount, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->discount, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -185,7 +194,8 @@
                 <input type="hidden" id="tax" name="tax" readonly
                     value="{{ $purchase_requisition?->tax ?? '' }}">
                 <input type="text" class="form-control" id="tax_" name="tax_" readonly
-                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->tax, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->tax, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -198,7 +208,8 @@
                 <input type="hidden" id="grand_total" name="grand_total" readonly
                     value="{{ $purchase_requisition?->grand_total ?? '' }}">
                 <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
-                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -465,22 +476,22 @@
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="qty[]" readonly value="${_qty}">
-                        <input type="text" class="form-control" name="__qty[]" readonly value="${_qty_}">
+                        <input type="text" class="form-control" name="__qty[]" readonly value="${_qty_}" style="text-align: right;">
                     </td>
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="price[]" readonly value="${_price}">
-                        <input type="text" class="form-control" name="__price[]" readonly value="${_price_}">
+                        <input type="text" class="form-control" name="__price[]" readonly value="${_price_}" style="text-align: right;">
                     </td>
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="discount_item[]" readonly value="${_discount_item}">
-                        <input type="text" class="form-control" name="__discount_item[]" readonly value="${_discount_item_}">
+                        <input type="text" class="form-control" name="__discount_item[]" readonly value="${_discount_item_}" style="text-align: right;">
                     </td>
 
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="amount[]" readonly value="${_amount}">
-                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}">
+                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}" style="text-align: right;">
                     </td>
 
                     <td class="text-center p-1 align-middle">

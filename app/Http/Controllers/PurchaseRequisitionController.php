@@ -164,6 +164,7 @@ class PurchaseRequisitionController extends Controller
                     'grand_total',
                     'status',
                     'urgency',
+                    'discount'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -184,6 +185,7 @@ class PurchaseRequisitionController extends Controller
                             'uom' => $request->uom[$i],
                             'qty' => $request->qty[$i],
                             'price' => $request->price[$i],
+                            'discount_item' => $request->discount_item[$i],
                             'tax' => $system_setting['tax'],
                             'amount' => $request->amount[$i]
                         ]
@@ -271,7 +273,8 @@ class PurchaseRequisitionController extends Controller
                     'tax',
                     'grand_total',
                     'status',
-                    'urgency'
+                    'urgency',
+                    'discount'
                 ]),
                 [
                     'input_method' => 'Web',
@@ -291,6 +294,7 @@ class PurchaseRequisitionController extends Controller
                             'uom' => $request->uom[$i],
                             'qty' => $request->qty[$i],
                             'price' => $request->price[$i],
+                            'discount_item' => $request->discount_item[$i],
                             'tax' => $system_setting['tax'],
                             'amount' => $request->amount[$i]
                         ]

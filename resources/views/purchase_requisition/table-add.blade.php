@@ -21,15 +21,20 @@
     </td>
     <td class="p-1 align-middle">
         <input type="hidden" class="form-control" id="_qty" name="_qty">
-        <input type="text" class="form-control" id="_qty_" name="_qty_">
+        <input type="text" class="form-control" id="_qty_" name="_qty_" style="text-align: right;">
     </td>
     <td class="p-1 align-middle">
         <input type="hidden" class="form-control" id="_price" name="_price">
-        <input type="text" class="form-control" id="_price_" name="_price_">
+        <input type="text" class="form-control" id="_price_" name="_price_" style="text-align: right;">
+    </td>
+    <td class="p-1 align-middle">
+        <input type="hidden" class="form-control" id="_discount_item" name="_discount_item">
+        <input type="text" class="form-control" id="_discount_item_" name="_discount_item_"
+            style="text-align: right;">
     </td>
     <td class="p-1 align-middle">
         <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
-        <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
+        <input type="text" class="form-control" id="_amount_" name="_amount_" readonly style="text-align: right;">
     </td>
     <td class="p-1 align-middle" style="width:2%">
         <div class="row row-cols-auto g-3">
@@ -111,6 +116,7 @@
 
         const $qty = $('#_qty_');
         const $price = $('#_price_');
+        const $discount_item = $('#_discount_item_');
 
         let isFmt = false;
         let userDecSep = null;
@@ -229,6 +235,15 @@
             calculateAmount();
         });
 
+        $discount_item.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $discount_item.on('input', function(e) {
+            textInput("_discount_item", e);
+            calculateAmount();
+        });
+
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
             var maintenance_item_id = $("#maintenance_item_").val();
@@ -240,6 +255,8 @@
             var _qty_ = $("#_qty_").val();
             var _price = $("#_price").val();
             var _price_ = $("#_price_").val();
+            var _discount_item = $("#_discount_item").val();
+            var _discount_item_ = $("#_discount_item_").val();
             var _amount = $("#_amount").val();
             var _amount_ = $("#_amount_").val();
             var newRow = `
@@ -260,15 +277,19 @@
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly value="${_qty}">
-                       <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}">
+                       <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}" style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${_price}">
-                       <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}">
+                       <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}" style="text-align: right;">
                     </td>
-                     <td class="p-1 align-middle">
+                    <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly value="${_discount_item}">
+                       <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly value="${_discount_item_}" style="text-align: right;">
+                    </td>
+                    <td class="p-1 align-middle">
                        <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
-                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}">
+                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}" style="text-align: right;">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
@@ -284,6 +305,8 @@
             $("#_qty_").val('');
             $("#_price").val('');
             $("#_price_").val('');
+            $("#_discount_item").val('');
+            $("#_discount_item_").val('');
             $("#_amount").val('');
             $("#_amount_").val('');
             $("#maintenance_item_").val('').trigger('change');
@@ -323,8 +346,9 @@
         function calculateAmount() {
             const qty = parseFloat($("#_qty").val()) || 0;
             const price = parseFloat($("#_price").val()) || 0;
+            const discount_item = parseFloat($("#_discount_item").val()) || 0;
 
-            const amount = qty * price;
+            const amount = (qty * price) - discount_item;
 
             $("#_amount").val(amount);
             $("#_amount_").val(numbro(amount).format({
@@ -335,9 +359,14 @@
 
         function calculateTotal() {
             let total = 0;
+            let discount = 0;
 
             $('input[name="amount[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0;
+            });
+
+            $('input[name="discount_item[]"]').each(function() {
+                discount += parseFloat($(this).val()) || 0;
             });
 
             let tax = 0;
@@ -350,6 +379,12 @@
 
             $("#total").val(total || '');
             $("#total_").val(total ? numbro(total).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+
+            $("#discount").val(discount || '');
+            $("#discount_").val(discount ? numbro(discount).format({
                 thousandSeparated: true,
                 mantissa: 0
             }) : '');

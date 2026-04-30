@@ -55,9 +55,10 @@
                     <th scope="col">Maintenance Item</th>
                     <th scope="col">MRO Item</th>
                     <th scope="col" style="width: 10%">Uom</th>
-                    <th scope="col" style="width: 12%; text-align: right">Qty</th>
-                    <th scope="col" style="width: 15%; text-align: right">Price</th>
-                    <th scope="col" style="width: 15%; text-align: right">Amount</th>
+                    <th scope="col" style="width: 10%; text-align: right">Qty</th>
+                    <th scope="col" style="width: 13%; text-align: right">Price</th>
+                    <th scope="col" style="width: 13%; text-align: right">Discount</th>
+                    <th scope="col" style="width: 13%; text-align: right">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,6 +71,8 @@
                         <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}</td>
                         <td style="text-align: right">{{ $d->price ? Number::format($d->price, precision: 0) : '' }}
                         </td>
+                        <td style="text-align: right">
+                            {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}</td>
                         <td style="text-align: right">{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
                         </td>
                     </tr>
@@ -77,19 +80,25 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td style="text-align:right" colspan="6"><b>Total</b></td>
+                    <td style="text-align:right" colspan="7"><b>Total</b></td>
                     <td style="text-align:right">
                         {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:right" colspan="6"><b>Tax</b></td>
+                    <td style="text-align:right" colspan="7"><b>Discount</b></td>
+                    <td style="text-align:right">
+                        {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="text-align:right" colspan="7"><b>Tax</b></td>
                     <td style="text-align:right">
                         {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
                     </td>
                 </tr>
                 <tr>
-                    <td style="text-align:right" colspan="6"><b>Grand Total</b></td>
+                    <td style="text-align:right" colspan="7"><b>Grand Total</b></td>
                     <td style="text-align:right">
                         {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
                     </td>

@@ -142,15 +142,16 @@ class PurchaseRequisitionGeneralController extends Controller
             ]);
             $system_setting = config('system_setting');
             $data = array_merge(
-                $request->only(
+                $request->only([
                     'department',
                     'date',
                     'notes',
                     'total',
                     'tax',
                     'grand_total',
-                    'urgency'
-                ),
+                    'urgency',
+                    'discount'
+                ]),
                 [
                     'request_token' => $request->request_token,
                     'input_method' => 'Web',
@@ -169,6 +170,7 @@ class PurchaseRequisitionGeneralController extends Controller
                             'uom' => $request->uom[$i],
                             'qty' => $request->qty[$i],
                             'price' => $request->price[$i],
+                            'discount_item' => $request->discount_item[$i],
                             'tax' => $system_setting['tax'],
                             'amount' => $request->amount[$i]
                         ]
@@ -246,15 +248,16 @@ class PurchaseRequisitionGeneralController extends Controller
             ]);
             $system_setting = config('system_setting');
             $data = array_merge(
-                $request->only(
+                $request->only([
                     'department',
                     'date',
                     'notes',
                     'total',
                     'tax',
                     'grand_total',
-                    'urgency'
-                ),
+                    'urgency',
+                    'discount'
+                ]),
                 [
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
@@ -273,6 +276,7 @@ class PurchaseRequisitionGeneralController extends Controller
                             'uom' => $request->uom[$i],
                             'qty' => $request->qty[$i],
                             'price' => $request->price[$i],
+                            'discount_item' => $request->discount_item[$i],
                             'tax' => $system_setting['tax'],
                             'amount' => $request->amount[$i]
                         ]

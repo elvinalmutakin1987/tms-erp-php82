@@ -251,6 +251,11 @@
                             thousandSeparated: true,
                             mantissa: 0
                         }));
+                        $("#discount").val(response.data.discount);
+                        $("#discount_").val(numbro(response.data.discount).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
                         $("#tax").val(response.data.tax);
                         $("#tax_").val(numbro(response.data.tax).format({
                             thousandSeparated: true,
@@ -272,10 +277,9 @@
             });
 
             $(document).on('click', '.detailButton', function() {
-                requisitionId = $(this).data('id');
                 $('#modal-detail-header').text('Detail Requisition');
                 let url = '{{ route('purchaserequisitiongeneral.get_detail', ':_id') }}';
-                url = url.replace(':_id', requisitionId);
+                url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
                     type: 'GET',
@@ -510,7 +514,7 @@
             var tbody = $("#tableItem > tbody");
             tbody.append(`
                     <tr>
-                        <td colspan="6">
+                        <td colspan="7">
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                             <span class="visually">Loading...</span>
                         </td>
@@ -568,11 +572,14 @@
             $("#total_").val('');
             $("#tax").val('');
             $("#tax_").val('');
+            $("#discount").val('');
+            $("#discount_").val('');
             $("#grand_total").val('');
             $("#grand_total_").val('');
         });
 
         $('#formReceive').on('hidden.bs.modal', function() {
+            requisitionId = '';
             enableButton();
         });
 

@@ -5,14 +5,14 @@
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
-            <th scope="col" style="width:18%">Maintenance Item</th>
-            <th scope="col" style="width:18%">MRO Item</th>
-            <th scope="col" style="width:18%">Alter Name</th>
-            <th scope="col" style="width:10%">Uom</th>
+            <th scope="col">Maintenance Item</th>
+            <th scope="col">MRO Item</th>
+            <th scope="col">Alter Name</th>
+            <th scope="col" style="width:9%">Uom</th>
             <th scope="col" style="width:8%">Qty</th>
-            <th scope="col" style="width:9%">Price</th>
-            <th scope="col" style="width:9%">Discount</th>
-            <th scope="col" style="width:9%">Amount</th>
+            <th scope="col" style="width:10%">Price</th>
+            <th scope="col" style="width:10%">Discount</th>
+            <th scope="col" style="width:10%">Amount</th>
             <th scope="col" style="width:2%">Action</th>
         </tr>
     </thead>
@@ -43,19 +43,21 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_qty" name="_qty">
-                <input type="text" class="form-control" id="_qty_" name="_qty_">
+                <input type="text" class="form-control" id="_qty_" name="_qty_" style="text-align: right;">
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_price" name="_price">
-                <input type="text" class="form-control" id="_price_" name="_price_">
+                <input type="text" class="form-control" id="_price_" name="_price_" style="text-align: right;">
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_discount_item" name="_discount_item">
-                <input type="text" class="form-control" id="_discount_item_" name="_discount_item_">
+                <input type="text" class="form-control" id="_discount_item_" name="_discount_item_"
+                    style="text-align: right;">
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
-                <input type="text" class="form-control" id="_amount_" name="_amount_" readonly>
+                <input type="text" class="form-control" id="_amount_" name="_amount_" readonly
+                    style="text-align: right;">
             </td>
 
             <td class="p-1 align-middle" style="width:2%">
@@ -98,26 +100,30 @@
                         <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
                             value="{{ $d->qty }}">
                         <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
+                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" id="price" name="price[]" readonly
                             value="{{ $d->price }}">
                         <input type="text" class="form-control" id="__price" name="__price[]" readonly
-                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}">
+                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" id="discount_item" name="discount_item[]"
                             readonly value="{{ $d->discount_item }}">
                         <input type="text" class="form-control" id="__discount_item" name="__discount_item[]"
                             readonly
-                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}">
+                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
                             value="{{ $d->amount }}">
                         <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
-                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}">
+                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}"
+                            style="text-align: right;">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
@@ -139,7 +145,8 @@
                 <input type="hidden" id="total" name="total" readonly
                     value="{{ $purchase_requisition?->total ?? '' }}">
                 <input type="text" class="form-control" id="total_" name="total_" readonly
-                    value="{{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -150,7 +157,8 @@
                 <input type="hidden" id="discount" name="discount" readonly
                     value="{{ $purchase_requisition?->discount ?? '' }}">
                 <input type="text" class="form-control" id="discount_" name="discount_" readonly
-                    value="{{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -161,7 +169,8 @@
                 <input type="hidden" id="tax" name="tax" readonly
                     value="{{ $purchase_requisition?->tax ?? '' }}">
                 <input type="text" class="form-control" id="tax_" name="tax_" readonly
-                    value="{{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}">
+                    value="{{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -172,7 +181,8 @@
                 <input type="hidden" id="grand_total" name="grand_total" readonly
                     value="{{ $purchase_requisition?->grand_total ?? '' }}">
                 <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
-                    value="{{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total) : '' }}">
+                    value="{{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total) : '' }}"
+                    style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
@@ -414,19 +424,19 @@
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly value="${_qty}">
-                       <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}">
+                       <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}" style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${_price}">
-                       <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}">
+                       <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}" style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly value="${_discount_item}">
-                       <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly value="${_discount_item_}">
+                       <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly value="${_discount_item_}" style="text-align: right;">
                     </td>
                      <td class="p-1 align-middle">
                        <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
-                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}">
+                        <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}" style="text-align: right;">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
@@ -506,8 +516,6 @@
             $('input[name="discount_item[]"]').each(function() {
                 discount += parseFloat($(this).val()) || 0;
             });
-
-            total -= discount;
 
             let tax = 0;
             let grandTotal = 0;

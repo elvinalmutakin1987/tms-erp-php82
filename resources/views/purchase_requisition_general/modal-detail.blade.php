@@ -1,6 +1,6 @@
 <!-- search modal -->
 <div class="modal" id="formDetail" aria-labelledby="formModalLabel" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+    <div class="modal-dialog modal-fullscreen modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
         <div class="modal-content">
             <div class="modal-header" id="modal-detail-header">
             </div>

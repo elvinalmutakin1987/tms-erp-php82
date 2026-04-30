@@ -424,8 +424,9 @@
             <th class="col-mro-item">MRO Item</th>
             <th class="col-uom">Uom</th>
             <th class="col-qty">Qty</th>
-            <th class="col-qty">Price</th>
-            <th class="col-qty">Amount</th>
+            <th class="col-price">Price</th>
+            <th class="col-discount">Discount</th>
+            <th class="col-amount">Amount</th>
         </tr>
     </thead>
     <tbody>
@@ -450,6 +451,9 @@
                     {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
                 </td>
                 <td class="p-1 align-middle" style="text-align: right">
+                    {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}
+                </td>
+                <td class="p-1 align-middle" style="text-align: right">
                     {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
                 </td>
             </tr>
@@ -457,19 +461,25 @@
     </tbody>
     <tfoot>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Total</b></td>
+            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Total</b></td>
             <td class="p-1 align-middle" style="text-align: right">
                 {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Tax</b></td>
+            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Discount</b></td>
+            <td class="p-1 align-middle" style="text-align: right">
+                {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Tax</b></td>
             <td class="p-1 align-middle" style="text-align: right">
                 {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Grand Total</b></td>
+            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Grand Total</b></td>
             <td class="p-1 align-middle" style="text-align: right">
                 {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
             </td>
@@ -477,7 +487,7 @@
     </tfoot>
     <thead>
         <tr>
-            <td colspan="7" class="p-1">
+            <td colspan="8" class="p-1">
                 Notes : <br>
                 @if ($purchase_requisition->notes != '')
                     {!! $purchase_requisition->notes !!}
@@ -488,7 +498,7 @@
     </thead>
     <thead>
         <tr>
-            <td colspan="7" class="p-1">
+            <td colspan="8" class="p-1">
                 <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
                     <tr>
                         <td style="border: none; text-align: center">

@@ -8,7 +8,7 @@
 
 <!-- search modal -->
 <div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable modal-fullscreen-md-down">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable modal-fullscreen-md-down">
         <div class="modal-content">
             <div class="modal-header" id="modal-header">
             </div>
@@ -57,10 +57,11 @@
                                         <th scope="col" style="width:3%">#</th>
                                         <th scope="col" style="width:20%">Maintenance Item</th>
                                         <th scope="col">MRO Item</th>
-                                        <th scope="col" style="width:12%">Uom</th>
+                                        <th scope="col" style="width:10%">Uom</th>
                                         <th scope="col" style="width:10%">Qty</th>
-                                        <th scope="col" style="width:15%">Price</th>
-                                        <th scope="col" style="width:15%">Amount</th>
+                                        <th scope="col" style="width:13%">Price</th>
+                                        <th scope="col" style="width:13%">Discount</th>
+                                        <th scope="col" style="width:13%">Amount</th>
                                         <th scope="col" style="width:2%">Action</th>
                                     </tr>
                                 </thead>
@@ -69,32 +70,44 @@
                                 </tbody>
                                 <tfoot>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Total</b>
+                                        <td scope="col" colspan="7" class="text-end p-1 align-middle"><b>Total</b>
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="total" name="total" readonly>
                                             <input type="text" class="form-control" id="total_" name="total_"
-                                                readonly>
+                                                readonly style="text-align: right;">
                                         </td>
                                         <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Tax</b>
+                                        <td scope="col" colspan="7" class="text-end p-1 align-middle">
+                                            <b>Discount</b>
+                                        </td>
+                                        <td scope="col" class="p-1 align-middle">
+                                            <input type="hidden" id="discount" name="discount" readonly>
+                                            <input type="text" class="form-control" id="discount_"
+                                                name="discount_" readonly style="text-align: right;">
+                                        </td>
+                                        <td scope="col" class="p-1 align-middle"></td>
+                                    </tr>
+                                    <tr>
+                                        <td scope="col" colspan="7" class="text-end p-1 align-middle">
+                                            <b>Tax</b>
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="tax" name="tax" readonly>
                                             <input type="text" class="form-control" id="tax_" name="tax_"
-                                                readonly>
+                                                readonly style="text-align: right;">
                                         </td>
                                         <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Grand
+                                        <td scope="col" colspan="7" class="text-end p-1 align-middle"><b>Grand
                                                 Total</b></td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="grand_total" name="grand_total" readonly>
                                             <input type="text" class="form-control" id="grand_total_"
-                                                name="grand_total_" readonly>
+                                                name="grand_total_" readonly style="text-align: right;">
                                         </td>
                                         <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
