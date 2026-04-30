@@ -38,6 +38,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
+                                        <th>Type</th>
                                         <th>Part Number</th>
                                         <th>Name</th>
                                         <th>Unit</th>
@@ -97,6 +98,12 @@
                         targets: '_all'
                     },
                     {
+                        data: 'type',
+                        name: 'type',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
                         data: 'part_number',
                         name: 'part_number',
                         orderable: true,
@@ -139,6 +146,7 @@
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Item');
                         $('#part_number').val(response.data.part_number);
+                        $('#type').val(response.data.type).trigger('change');
                         $('#name').val(response.data.name);
                         $("#request_token").val(response.data.request_token);
                         mro_unit = response.mro_unit;

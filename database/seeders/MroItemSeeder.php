@@ -16,28 +16,39 @@ class MroItemSeeder extends Seeder
     {
         $data = [
             [
+                "type" => "Good",
                 "request_token" => (string) Str::uuid(),
                 "name" => "Tread"
             ],
             [
+                "type" => "Good",
                 "request_token" => (string) Str::uuid(),
                 "name" => "Sidewall"
             ],
             [
+                "type" => "Good",
                 "request_token" => (string) Str::uuid(),
                 "name" => "Bead"
             ],
             [
+                "type" => "Good",
                 "request_token" => (string) Str::uuid(),
                 "name" => "Carcass"
             ],
             [
+                "type" => "Good",
                 "request_token" => (string) Str::uuid(),
                 "name" => "Breaker"
             ],
             [
+                "type" => "Good",
                 "request_token" => (string) Str::uuid(),
                 "name" => "Inner Liner"
+            ],
+            [
+                "type" => "Service",
+                "request_token" => (string) Str::uuid(),
+                "name" => "Jasa Service"
             ],
         ];
         DB::table('mro_items')->insert($data);

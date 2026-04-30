@@ -27,7 +27,7 @@ return new class extends Migration
             $table->decimal('total', 16, 2)->nullable();
             $table->decimal('discount', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
-            $table->decimal('pph_21', 16, 2)->nullable();
+            $table->decimal('pph_23', 16, 2)->nullable();
             $table->decimal('grand_total', 16, 2)->nullable();
             $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();

@@ -146,6 +146,7 @@ class PurchaseOrderController extends Controller
                     'grand_total',
                     'status',
                     'urgency',
+                    'discount'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -168,8 +169,9 @@ class PurchaseOrderController extends Controller
                                 'uom' => $request->uom[$i],
                                 'qty' => $request->qty[$i],
                                 'price' => $request->price[$i],
+                                'discount_item' => $request->discount_item[$i],
                                 'tax' => $system_setting['tax'],
-                                'amount' => $request->amount[$i]
+                                'amount' => $request->amount[$i],
                             ]
                         );
                     }
@@ -180,11 +182,13 @@ class PurchaseOrderController extends Controller
                         $purchase_order->purchase_order_detail()->create(
                             [
                                 'request_token' => $purchase_order->request_token,
+                                'type' => $request->type[$i],
                                 'description' => $item,
                                 'desc_vendor' => $request->desc_vendor[$i],
                                 'uom' => $request->uom[$i],
                                 'qty' => $request->qty[$i],
                                 'price' => $request->price[$i],
+                                'discount_item' => $request->discount_item[$i],
                                 'tax' => $system_setting['tax'],
                                 'amount' => $request->amount[$i]
                             ]
@@ -279,6 +283,7 @@ class PurchaseOrderController extends Controller
                     'status',
                     'urgency',
                     'client_vendor_id',
+                    'discount'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -303,6 +308,7 @@ class PurchaseOrderController extends Controller
                                 'uom' => $request->uom[$i],
                                 'qty' => $request->qty[$i],
                                 'price' => $request->price[$i],
+                                'discount_item' => $request->discount_item[$i],
                                 'tax' => $system_setting['tax'],
                                 'amount' => $request->amount[$i]
                             ]
@@ -315,11 +321,13 @@ class PurchaseOrderController extends Controller
                         $purchase_order->purchase_order_detail()->create(
                             [
                                 'request_token' => $purchase_order->request_token,
+                                'type' => $request->type[$i],
                                 'description' => $item,
                                 'desc_vendor' => $request->desc_vendor[$i],
                                 'uom' => $request->uom[$i],
                                 'qty' => $request->qty[$i],
                                 'price' => $request->price[$i],
+                                'discount_item' => $request->discount_item[$i],
                                 'tax' => $system_setting['tax'],
                                 'amount' => $request->amount[$i]
                             ]

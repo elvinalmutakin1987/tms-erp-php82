@@ -18,9 +18,11 @@ return new class extends Migration
             $table->unsignedBigInteger('maintenance_item_id')->nullable();
             $table->unsignedBigInteger('mro_item_id')->nullable();
             $table->text('description')->nullable();
+            $table->string('type', 30)->nullable(); //Good, Service
             $table->string('uom', 30)->nullable();
             $table->decimal('qty', 16, 2)->nullable();
             $table->decimal('price', 16, 2)->nullable();
+            $table->decimal('discount_item', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('amount', 16, 2)->nullable();
             $table->string('part_number')->nullable();

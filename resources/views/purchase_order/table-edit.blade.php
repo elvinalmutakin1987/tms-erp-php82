@@ -10,8 +10,9 @@
             <th scope="col" style="width:18%">Alter Name</th>
             <th scope="col" style="width:10%">Uom</th>
             <th scope="col" style="width:8%">Qty</th>
-            <th scope="col" style="width:12%">Price</th>
-            <th scope="col" style="width:12%">Amount</th>
+            <th scope="col" style="width:9%">Price</th>
+            <th scope="col" style="width:9%">Discount</th>
+            <th scope="col" style="width:9%">Amount</th>
             <th scope="col" style="width:2%">Action</th>
         </tr>
     </thead>
@@ -47,6 +48,10 @@
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_price" name="_price">
                 <input type="text" class="form-control" id="_price_" name="_price_">
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="_discount_item" name="_discount_item">
+                <input type="text" class="form-control" id="_discount_item_" name="_discount_item_">
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
@@ -100,6 +105,13 @@
                             value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}">
                     </td>
                     <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="discount_item" name="discount_item[]"
+                            readonly value="{{ $d->discount_item }}">
+                        <input type="text" class="form-control" id="__discount_item" name="__discount_item[]"
+                            readonly
+                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}">
+                    </td>
+                    <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
                             value="{{ $d->amount }}">
                         <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
@@ -120,7 +132,7 @@
 
     <tfoot>
         <tr>
-            <td scope="col" colspan="7" class="text-end p-1 align-middle"><b>Total</b>
+            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Total</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="total" name="total" readonly
@@ -131,7 +143,18 @@
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="7" class="text-end p-1 align-middle"><b>Tax</b>
+            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Discount</b>
+            </td>
+            <td scope="col" class="p-1 align-middle">
+                <input type="hidden" id="discount" name="discount" readonly
+                    value="{{ $purchase_order?->discount ?? '' }}">
+                <input type="text" class="form-control" id="discount_" name="discount_" readonly
+                    value="{{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : '' }}">
+            </td>
+            <td scope="col" class="p-1 align-middle"></td>
+        </tr>
+        <tr>
+            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Tax</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
@@ -142,7 +165,7 @@
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="7" class="text-end p-1 align-middle"><b>Grand
+            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Grand
                     Total</b></td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="grand_total" name="grand_total" readonly
@@ -226,6 +249,7 @@
 
         const $qty = $('#_qty_');
         const $price = $('#_price_');
+        const $discount_item = $('#_discount_item_');
 
         let isFmt = false;
         let userDecSep = null;
@@ -344,6 +368,15 @@
             calculateAmount();
         });
 
+        $discount_item.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $discount_item.on('input', function(e) {
+            textInput("_discount_item", e);
+            calculateAmount();
+        });
+
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
             var maintenance_item_id = $("#maintenance_item_").val();
@@ -356,6 +389,8 @@
             var _qty_ = $("#_qty_").val();
             var _price = $("#_price").val();
             var _price_ = $("#_price_").val();
+            var _discount_item = $("#_discount_item").val();
+            var _discount_item_ = $("#_discount_item_").val();
             var _amount = $("#_amount").val();
             var _amount_ = $("#_amount_").val();
             var newRow = `
@@ -385,6 +420,10 @@
                        <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}">
                     </td>
                      <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly value="${_discount_item}">
+                       <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly value="${_discount_item_}">
+                    </td>
+                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
                         <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}">
                     </td>
@@ -402,6 +441,8 @@
             $("#_qty_").val('');
             $("#_price").val('');
             $("#_price_").val('');
+            $("#_discount_item").val('');
+            $("#_discount_item_").val('');
             $("#_amount").val('');
             $("#_amount_").val('');
             $("#_desc_vendor").val('');
@@ -442,8 +483,9 @@
         function calculateAmount() {
             const qty = parseFloat($("#_qty").val()) || 0;
             const price = parseFloat($("#_price").val()) || 0;
+            const discount_item = parseFloat($("#_discount_item").val()) || 0;
 
-            const amount = qty * price;
+            const amount = (qty * price) - discount_item;
 
             $("#_amount").val(amount);
             $("#_amount_").val(numbro(amount).format({
@@ -454,10 +496,17 @@
 
         function calculateTotal() {
             let total = 0;
+            let discount = 0;
 
             $('input[name="amount[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0;
             });
+
+            $('input[name="discount_item[]"]').each(function() {
+                discount += parseFloat($(this).val()) || 0;
+            });
+
+            total -= discount;
 
             let tax = 0;
             let grandTotal = 0;
@@ -469,6 +518,12 @@
 
             $("#total").val(total || '');
             $("#total_").val(total ? numbro(total).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : '');
+
+            $("#discount").val(discount || '');
+            $("#discount_").val(discount ? numbro(discount).format({
                 thousandSeparated: true,
                 mantissa: 0
             }) : '');

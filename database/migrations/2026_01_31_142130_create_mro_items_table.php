@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('mro_items', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token');
+            $table->string('type', 30)->nullable();
             $table->string('part_number', 30)->nullable();
             $table->string('name')->nullable();
             $table->timestamps();

@@ -8,7 +8,13 @@
                  <form enctype="multipart/form-data" onsubmit="disableButton()">
                      @csrf
                      <input type="hidden" name="request_token" id="request_token">
-
+                     <div class="col-md-12 mb-2">
+                         <label for="type" class="form-label">Type</label>
+                         <select class="form-select" id="type" name="type">
+                             <option value="Good">Good</option>
+                             <option value="Service">Service</option>
+                         </select>
+                     </div>
                      <div class="col-md-12 mb-2">
                          <label for="part_number" class="form-label">Part Number</label>
                          <input type="text" class="form-control" id="part_number" name="part_number">
