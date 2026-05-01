@@ -32,7 +32,6 @@
                             <label for="date" class="form-label">Date</label>
                             <input type="text" class="form-control datepicker" id="date" name="date">
                         </div>
-
                         <div class="col">
                             <label for="urgency" class="form-label">Urgency</label>
                             <select class="form-select select-select" id="urgency" name="urgency">
@@ -40,6 +39,14 @@
                                 <option value="P3">P3</option>
                                 <option value="P2">P2</option>
                                 <option value="P1">P1</option>
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="job" class="form-label">Job</label>
+                            <select class="form-select select-select" id="job" name="job">
+                                @foreach ($job as $d => $value)
+                                    <option value="{{ $value }}">{{ $value }}</option>
+                                @endforeach
                             </select>
                         </div>
                     </div>

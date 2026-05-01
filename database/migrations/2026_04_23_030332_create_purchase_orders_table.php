@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('input_method', 20)->nullable();
             $table->string('department', 30)->nullable();
             $table->text('vendor_offer_path')->nullable();
+            $table->text('price_compare_path')->nullable();
             $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
             $table->string('cancel_notes')->nullable();
             $table->timestamps();

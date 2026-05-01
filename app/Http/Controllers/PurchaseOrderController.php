@@ -103,13 +103,14 @@ class PurchaseOrderController extends Controller
         }
         $uom = config('uom');
         $system_setting = config('system_setting');
+        $job = config('job');
         $breadcrum = [
             'module' => 'Procurement',
             'route-module' => null,
             'sub-module' => 'Purchase Order',
             'route-sub-module' => 'purchaseorder.index',
         ];
-        return view('purchase_order.index', compact('breadcrum', 'uom', 'system_setting'));
+        return view('purchase_order.index', compact('breadcrum', 'uom', 'system_setting', 'job'));
     }
 
     /**
