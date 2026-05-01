@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('part_number')->nullable();
             $table->string('desc_vendor')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
             $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
             $table->foreign('mro_item_id')->references('id')->on('mro_items')->onDelete('cascade');

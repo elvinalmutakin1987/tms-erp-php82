@@ -118,7 +118,7 @@
                     success: function(response) {
                         $('#modal-header').text('Edit Role');
                         $('#name').val(response.data.name);
-                        $("#request_token").val(response.data.request_token);
+                        // $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');

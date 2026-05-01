@@ -7,7 +7,7 @@
             <div class="modal-body">
                 <form action="" onsubmit="disableButton()">
                     @csrf
-                    <input type="hidden" name="request_token" id="request_token">
+                    {{-- <input type="hidden" name="request_token" id="request_token"> --}}
 
                     <div class="col-md-12 mb-2">
                         <label for="name" class="form-label">Role Name</label>

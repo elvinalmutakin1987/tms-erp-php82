@@ -16,12 +16,15 @@ return new class extends Migration
             $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('location_id')->nullable();
             $table->string('type', 30)->nullable(); // ini isinya Client / Vendor
+            $table->string('taxable', 30)->nullable(); // PKP / Non PKP
             $table->string('name', 100)->nullable();
             $table->string('pic', 100)->nullable();
             $table->text('address')->nullable();
             $table->string('email', 100)->nullable();
             $table->string('phone', 30)->nullable();
             $table->integer('top')->nullable(); //Term of Payment
+            $table->string('bank', 50)->nullable();
+            $table->string('bank_account', 50)->nullable();
             $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
             $table->timestamps();
         });

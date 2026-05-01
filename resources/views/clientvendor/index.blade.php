@@ -183,6 +183,9 @@
                         if (type == 'Client') {
                             $('#divLocation').show();
                         }
+                        $('#bank').val(response.data.bank).trigger('change');
+                        $('#bank_account').val(response.data.bank_account);
+                        $('#taxable').val(response.data.taxable).trigger('change');
                     },
                     error: function() {
                         alert('Error fetching data');

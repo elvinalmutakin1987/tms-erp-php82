@@ -97,6 +97,7 @@
 
     <script>
         const saveButton = document.getElementById('saveButton');
+
         var userId = '';
         var roleId = '';
         $(document).ready(function() {

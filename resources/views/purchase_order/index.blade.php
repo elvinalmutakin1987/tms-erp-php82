@@ -654,32 +654,30 @@
         });
 
         function gen_select2() {
-            function gen_select2() {
-                $('.select-select')
-                    .not('#purchase_requisition_id, #client_vendor_id')
-                    .each(function() {
-                        const $el = $(this);
+            $('.select-select')
+                .not('#purchase_requisition_id, #client_vendor_id', '#urgency')
+                .each(function() {
+                    const $el = $(this);
 
-                        if ($el.hasClass('select2-hidden-accessible')) {
-                            $el.select2('destroy');
+                    if ($el.hasClass('select2-hidden-accessible')) {
+                        $el.select2('destroy');
+                    }
+
+                    $el.select2({
+                        theme: "bootstrap-5",
+                        dropdownParent: $('#formModal'),
+                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                            'style'),
+                        selectOnClose: false,
+                        minimumResultsForSearch: 0,
+                    }).on('select2:close', function() {
+                        $(this).blur();
+
+                        if (document.activeElement) {
+                            document.activeElement.blur();
                         }
-
-                        $el.select2({
-                            theme: "bootstrap-5",
-                            dropdownParent: $('#formModal'),
-                            width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                                'style'),
-                            selectOnClose: false,
-                            minimumResultsForSearch: 0,
-                        }).on('select2:close', function() {
-                            $(this).blur();
-
-                            if (document.activeElement) {
-                                document.activeElement.blur();
-                            }
-                        });
                     });
-            }
+                });
         }
 
         function disableButton() {

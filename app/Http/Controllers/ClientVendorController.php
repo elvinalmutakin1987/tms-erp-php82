@@ -42,13 +42,14 @@ class ClientVendorController extends Controller
                 })
                 ->make();
         }
+        $bank = config('bank');
         $breadcrum = [
             'module' => 'Master Data',
             'route-module' => null,
             'sub-module' => 'Client Vendor',
             'route-sub-module' => 'clientvendor.index',
         ];
-        return view('clientvendor.index', compact('breadcrum'));
+        return view('clientvendor.index', compact('breadcrum', 'bank'));
     }
 
     /**

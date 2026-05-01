@@ -159,12 +159,15 @@ class PurchaseOrderController extends Controller
             $purchase_order = Purchase_order::firstOrCreate($data);
             if ($type == 'Equipment') {
                 if ($request->has('maintenance_item_id')) {
+                    $mro_item = Mro_item::find($request->mro_item_id);
+                    $type = $mro_item?->type ?? 'Good';
                     foreach ($request->maintenance_item_id as $i => $item) {
                         $purchase_order->purchase_order_detail()->create(
                             [
                                 'request_token' => $purchase_order->request_token,
                                 'maintenance_item_id' => $item,
                                 'mro_item_id' => $request->mro_item_id[$i],
+                                'type' => $type,
                                 'desc_vendor' => $request->desc_vendor[$i],
                                 'uom' => $request->uom[$i],
                                 'qty' => $request->qty[$i],

@@ -195,7 +195,7 @@
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
 
-        $('.select-select, #maintenance_item_, #mro_item_').each(function() {
+        $('.select-select, #maintenance_item_, #mro_item_, #urgency').each(function() {
             const $el = $(this);
 
             let config = {

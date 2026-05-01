@@ -46,7 +46,6 @@
                          <label for="sign_path" class="form-label">Sign</label>
                          <input class="form-control" type="file" id="sign_path" name="sign_path">
                      </div>
-
                      <div class="col-md-12 mb-1">
                          <button type="button" class="btn btn-danger" id="deleteSignButton">Delete Sign</button>
                      </div>

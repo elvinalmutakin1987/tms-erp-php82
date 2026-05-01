@@ -17,10 +17,7 @@
                              @endforeach
                          </select>
                      </div>
-                     {{-- <div class="col-md-12 mb-2">
-                         <label for="name" class="form-label">Name</label>
-                         <input type="text" class="form-control" id="name" name="name">
-                     </div> --}}
+
                      <div class="col-md-12 mb-2">
                          <label for="approvable_model" class="form-label">Model</label>
                          <select class="form-select select-select" id="approvable_model" name="approvable_model">
@@ -49,6 +46,7 @@
                                      </td>
                                      <td class="p-1 align-middle">
                                          <select class="form-select select-select" id="slc_action" name="slc_action">
+                                             <option value="Requested">Requested</option>
                                              <option value="Known">Known</option>
                                              <option value="Checked">Checked</option>
                                              <option value="Approved">Approved</option>

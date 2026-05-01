@@ -10,8 +10,8 @@
                      <input type="hidden" name="request_token" id="request_token">
                      <div class="col-md-12 mb-2">
                          <label for="type" class="form-label">Type</label>
-                         <select class="form-select" id="type" name="type">
-                             <option value="Good">Good</option>
+                         <select class="form-select select-select" id="type" name="type">
+                             <option value="Good" selected>Good</option>
                              <option value="Service">Service</option>
                          </select>
                      </div>
@@ -25,8 +25,8 @@
                      </div>
                      <div class="col-md-12 mb-2">
                          <label for="unit_id" class="form-label">Unit</label>
-                         <select class="form-select" id="unit_id" name="unit_id[]" data-placeholder="Choose unit"
-                             multiple>
+                         <select class="form-select select-select" id="unit_id" name="unit_id[]"
+                             data-placeholder="Choose unit" multiple>
                          </select>
                      </div>
                  </form>

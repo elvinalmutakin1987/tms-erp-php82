@@ -180,7 +180,7 @@
                 <input type="hidden" id="discount" name="discount" readonly
                     value="{{ $purchase_requisition?->discount ?? '' }}">
                 <input type="text" class="form-control" id="discount_" name="discount_" readonly
-                    value="{{ $purchase_requisition ? Number::format($purchase_requisition->discount, precision: 0) : '' }}"
+                    value="{{ $purchase_requisition?->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>

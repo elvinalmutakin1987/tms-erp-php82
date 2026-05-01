@@ -39,6 +39,26 @@
                         <label for="top" class="form-label">Term Of Payment</label>
                         <input type="number" class="form-control" id="top" name="top" placeholder="Day">
                     </div>
+                    <div class="col-md-12 mb-2">
+                        <label for="bank" class="form-label">Bank</label>
+                        <select class="form-select select-select" id="bank" name="bank">
+                            <option value="" selected disabled></option>
+                            @foreach ($bank as $d => $value)
+                                <option value="{{ $value }}">{{ $value }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-12 mb-2">
+                        <label for="bank_account" class="form-label">Bank Account</label>
+                        <input type="text" class="form-control" id="bank_account" name="bank_account">
+                    </div>
+                    <div class="col-md-12 mb-2" id="divLocation">
+                        <label for="taxable" class="form-label">Taxable</label>
+                        <select class="form-select select-select" id="taxable" name="taxable">
+                            <option value="PKP">PKP</option>
+                            <option value="Non PKP">Non PKP</option>
+                        </select>
+                    </div>
                 </form>
 
             </div>

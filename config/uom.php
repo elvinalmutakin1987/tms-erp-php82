@@ -20,5 +20,7 @@ return [
     "KALENG",
     "LEMBAR",
     "PASANG",
-    "SAK"
+    "SAK",
+    "DAY",
+    "AA"
 ];

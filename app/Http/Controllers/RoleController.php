@@ -68,7 +68,7 @@ class RoleController extends Controller
                 'name' => 'required|unique:roles,name',
             ]);
             $data = array_merge($request->except('_token', '_method'));
-            $role = Role::firstOrCreate($data);
+            $role = Role::create($data);
             $permission = array();
             $permissionIds = $request->permission_id;
             foreach ($permissionIds as $permissionId) {

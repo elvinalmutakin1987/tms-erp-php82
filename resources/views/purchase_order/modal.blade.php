@@ -19,7 +19,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <label for="client_vendor_id" class="form-label">Vendor</label>
-                            <select class="form-select" id="client_vendor_id" name="client_vendor_id">
+                            <select class="form-select select-select" id="client_vendor_id" name="client_vendor_id">
                             </select>
                         </div>
                         <div class="col">
@@ -47,6 +47,12 @@
                         <div class="col">
                             <label for="notes" class="form-label">Notes</label>
                             <textarea class="form-control" id="notes" name="notes" rows="2" required></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="sign_path" class="form-label">Offering Vendor</label>
+                            <input class="form-control" type="file" id="sign_path" name="sign_path">
                         </div>
                     </div>
                     <div class="row mb-2">

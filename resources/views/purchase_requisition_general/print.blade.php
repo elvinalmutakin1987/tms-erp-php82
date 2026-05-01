@@ -357,7 +357,7 @@
 
     <thead>
         <tr>
-            <th colspan="6" class="doc-header-wrapper">
+            <th colspan="7" class="doc-header-wrapper">
                 <table class="doc-header-table">
                     <tr>
                         <td class="logo-cell">

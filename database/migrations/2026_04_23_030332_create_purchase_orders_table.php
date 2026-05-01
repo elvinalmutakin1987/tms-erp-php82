@@ -19,10 +19,12 @@ return new class extends Migration
             $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->string('number', 30)->nullable();
             $table->string('order_no', 30)->nullable();
+            $table->string('tax_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //General / equipment
             $table->date('date')->nullable();
             $table->date('due_date')->nullable();
             $table->text('notes')->nullable();
+            $table->text('job')->nullable();
             $table->text('status')->nullable(); //Status nya > Open, Close
             $table->decimal('total', 16, 2)->nullable();
             $table->decimal('discount', 16, 2)->nullable();
@@ -39,6 +41,7 @@ return new class extends Migration
             $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
             $table->string('cancel_notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');

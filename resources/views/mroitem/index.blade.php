@@ -319,7 +319,7 @@
         });
 
         function gen_select2() {
-            $('#unit_id').each(function() {
+            $('.select-select').each(function() {
                 const $el = $(this);
                 $el.select2({
                         theme: "bootstrap-5",
