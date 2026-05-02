@@ -27,4 +27,9 @@ class Client_vendor extends Model
     {
         return $this->hasMany(Maintenance::class);
     }
+
+    public function request_quotation(): HasMany
+    {
+        return $this->hasMany(Request_quotation::class);
+    }
 }

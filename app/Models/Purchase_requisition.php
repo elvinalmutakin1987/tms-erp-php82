@@ -46,4 +46,9 @@ class Purchase_requisition extends Model implements Auditable
     {
         return $this->belongsTo(User::class)->withDefault(['username' => null]);
     }
+
+    public function request_quotation(): HasMany
+    {
+        return $this->hasMany(Request_quotation::class);
+    }
 }

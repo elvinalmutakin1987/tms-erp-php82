@@ -26,6 +26,7 @@ use App\Http\Controllers\ProformaInvoiceController;
 use App\Http\Controllers\PurchaseOrderController;
 use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\PurchaseRequisitionGeneralController;
+use App\Http\Controllers\RequestQuotationController;
 use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
 use Illuminate\Support\Facades\Storage;
@@ -603,4 +604,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaseorder-get-client-vendor', [PurchaseOrderController::class, 'get_client_vendor'])
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.get_client_vendor');
+
+    /**
+     * Routenya Request Quotation
+     */
+    Route::resource('requestquotation', RequestQuotationController::class)
+        ->parameters(['requestquotation' => 'request_quotation'])
+        ->middleware('role:superadmin|request_quotation')
+        ->names('requestquotation');
 });
