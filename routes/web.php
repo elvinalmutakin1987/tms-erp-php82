@@ -612,4 +612,20 @@ Route::middleware(['auth'])->group(function () {
         ->parameters(['requestquotation' => 'request_quotation'])
         ->middleware('role:superadmin|request_quotation')
         ->names('requestquotation');
+
+    Route::get('requestquotation-get-purchase-requisition/{purchase_requisition}', [RequestQuotationController::class, 'get_purchase_requisition'])
+        ->middleware('role:superadmin|request_quotation')
+        ->name('requestquotation.get_purchase_requisition');
+
+    Route::get('requestquotation-get-detail/{purchase_requisition}', [RequestQuotationController::class, 'get_detail'])
+        ->middleware('role:superadmin|request_quotation')
+        ->name('requestquotation.get_detail');
+
+    Route::get('requestquotation-get-client-vendor', [RequestQuotationController::class, 'get_client_vendor'])
+        ->middleware('role:superadmin|request_quotation')
+        ->name('requestquotation.get_client_vendor');
+
+    Route::put('requestquotation-get-detail/{purchase_requisition}', [RequestQuotationController::class, 'quotation'])
+        ->middleware('role:superadmin|request_quotation')
+        ->name('requestquotation.quotation');
 });

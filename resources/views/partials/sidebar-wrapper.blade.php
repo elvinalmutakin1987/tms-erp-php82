@@ -136,7 +136,7 @@
              </li>
          @endif
 
-         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_order'))
+         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasAnyPermission(['request_quotation', 'purchase_order']))
              <li>
                  <a href="javascript:;" class="has-arrow">
                      <div class="parent-icon"><i class="bx bx-dollar-circle"></i>
@@ -144,9 +144,20 @@
                      <div class="menu-title">Procurement</div>
                  </a>
                  <ul>
-                     <li> <a href="{{ route('purchaseorder.index') }}"><i class='bx bx-radio-circle'></i>Purchase
-                             Order</a>
-                     </li>
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('request_quotation'))
+                         <li>
+                             <a href="{{ route('requestquotation.index') }}">
+                                 <i class='bx bx-radio-circle'></i>Request Quotation</a>
+                             </a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_order'))
+                         <li>
+                             <a href="{{ route('purchaseorder.index') }}">
+                                 <i class='bx bx-radio-circle'></i>Purchase
+                                 Order</a>
+                         </li>
+                     @endif
                  </ul>
              </li>
          @endif

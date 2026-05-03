@@ -15,8 +15,12 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->unsignedBigInteger('client_vendor_id')->nullable();
-            $table->text('price_compare_path')->nullable();
+            $table->unsignedBigInteger('user_id')->nullable();
+            $table->uuid('request_token');
+            $table->text('real_name')->nullable();
+            $table->text('quotation_path')->nullable();
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
         });

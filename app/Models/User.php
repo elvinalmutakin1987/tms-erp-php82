@@ -75,4 +75,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Purchase_requisition::class);
     }
+
+    public function request_quotation(): HasMany
+    {
+        return $this->hasMany(Request_quotation::class);
+    }
 }

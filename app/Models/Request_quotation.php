@@ -23,4 +23,9 @@ class Request_quotation extends Model implements Auditable
     {
         return $this->belongsTo(Client_vendor::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }
