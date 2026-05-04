@@ -241,8 +241,9 @@ class UserController extends Controller
     {
         DB::beginTransaction();
         try {
-            if (Storage::exists('storage/' . $user->sign_path)) {
-                Storage::delete('storage/' . $user->sign_path);
+            $filePath = $user->sign_path;
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
             }
             $user->sign_path = null;
             $user->save();

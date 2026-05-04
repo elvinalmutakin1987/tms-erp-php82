@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client_vendor;
+use App\Models\Purchase_order;
 use App\Models\Purchase_requisition;
 use App\Models\Request_quotation;
 use Illuminate\Http\Request;
@@ -16,7 +17,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class RequestQuotationController extends Controller
 {
@@ -54,13 +55,6 @@ class RequestQuotationController extends Controller
                 ->addColumn('quotation_file', function ($item) {
                     $request_quotation = Request_quotation::where('purchase_requisition_id', $item->id);
                     $html = '<table style="width: 100%">';
-                    // $html .= '
-                    // <tr>
-                    //     <th><b>Vendor</b></th>
-                    //     <th><b>File</b></th>
-                    //     <th><b>Action</b></th>
-                    // </tr>
-                    // ';
                     if ($request_quotation->count() > 0) {
                         foreach ($request_quotation->get() as $key => $value) {
                             $html .= '<tr>';
@@ -68,12 +62,12 @@ class RequestQuotationController extends Controller
                             $html .= $value->client_vendor->name;
                             $html .= '</td>';
                             $html .= '<td>';
-                            $html .= '<a href="' . Storage::url($value->quotation_path) . '" target="_blank">' . $value->real_name . '</a>';
+                            $html .= '<a href="' . route('requestquotation.export_pdf', $value->id) . '" target="_blank">' . $value->real_name . '</a>';
                             $html .= '</td>';
                             $html .= '<td>';
                             $html .= '<div class="d-flex gap-1 text-end">';
-                            $html .= '<a class="btn btn-sm btn-success" href="#" onclick="delete_(\'' . $item->id . '\')"><i class="bx bx-plus me-0"></i> Create PO</a>';
-                            $html .= '<a class="btn btn-sm btn-danger" href="#" onclick="delete_(\'' . $item->id . '\')"><i class="bx bx-trash me-0"></i></a>';
+                            $html .= '<a class="btn btn-sm btn-success" href="#" onclick="create_(\'' . $value->id . '\')"><i class="bx bx-plus me-0"></i> Create PO</a>';
+                            $html .= '<a class="btn btn-sm btn-danger" href="#" onclick="delete_(\'' . $value->id . '\')"><i class="bx bx-trash me-0"></i></a>';
                             $html .= '</div>';
                             $html .= '</td>';
                             $html .= '</tr>';
@@ -150,6 +144,10 @@ class RequestQuotationController extends Controller
     {
         DB::beginTransaction();
         try {
+            $filePath = $request_quotation->quotation_path;
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
             $request_quotation->delete();
             DB::commit();
             return response()->json([
@@ -274,59 +272,98 @@ class RequestQuotationController extends Controller
      * export pdf
      */
 
-    public function export_pdf(Request $request, Purchase_requisition $purchase_requisition)
+    public function export_pdf(Request $request, Request_quotation $request_quotation)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
-        $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
-        $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $pdf = Pdf::loadView('purchase_requisition.print', [
-            'purchase_requisition' => $purchase_requisition,
-            'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
-            'approval_flow' => $approval_flow,
-            'approval_step' => $approval_step,
-            'approval_process' => $approval_process,
-            'approval_status' => $approval_status
-        ])->setPaper('a4', 'portrait');
-
-        // WAJIB: render dulu
-        $dompdf = $pdf->getDomPDF();
-        $dompdf->render();
-
-        // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
-        $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
-
-        // Tulis nomor halaman ke semua halaman
-        $canvas->page_text(
-            255, // X (geser kiri/kanan kalau perlu)
-            58,  // Y (geser atas/bawah kalau perlu)
-            "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
-            10,
-            [0, 0, 0]
-        );
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
-        if (in_array($purchase_requisition->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
-            $size = 48;
-            $text = "Status : " . $purchase_requisition->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
-            $text = $purchase_requisition->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+        try {
+            $path = public_path('storage/' . $request_quotation->quotation_path);
+            if (!file_exists($path)) {
+                abort(404, 'File not found.');
+            }
+            $mimeType = mime_content_type($path);
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $fileName = basename($path);
+            if ($mimeType === 'application/pdf' || $extension === 'pdf') {
+                return response()->file($path, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $request_quotation->quotation_path . '"',
+                ]);
+            }
+            return response()->download($path, $request_quotation->real_name, [
+                'Content-Type' => $mimeType ?: 'application/octet-stream',
+            ]);
+        } catch (HttpException $e) {
+            throw $e;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()
+                ->route('requestquotation.index')
+                ->with('error', 'Failed to open file.');
         }
+    }
 
-        $safeFilename = Str::of($purchase_requisition->requisition_no)
-            ->replace(['/', '\\'], '-')   // ganti slash
-            ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
+    /**
+     * Buat PO dari Request Quotation
+     */
+
+    public function create_purchase_order(Request $request, Request_quotation $request_quotation)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase_requisition_id = $request_quotation->purchase_requisition_id;
+            $client_vendor_id = $request_quotation->client_vendor_id;
+            $request_token = (string) Str::uuid();
+
+            $purchase_requisition = Purchase_requisition::with('purchase_requisition_detail')
+                ->findOrFail($purchase_requisition_id);
+
+            $purchase_order = Purchase_order::create([
+                'purchase_requisition_id' => $purchase_requisition_id,
+                'client_vendor_id' => $client_vendor_id,
+                'request_token' => $request_token,
+                'user_id' => Auth::id(),
+                'date'  => Carbon::now(),
+                'status' => 'Approval',
+                'total' => $purchase_requisition->total,
+                'discount' => $purchase_requisition->discount,
+                'tax' => $purchase_requisition->tax,
+                'grand_total' => $purchase_requisition->grand_total,
+                'department' => $purchase_requisition->department,
+                'urgency' => $purchase_requisition->urgency,
+                'notes' => $purchase_requisition->notes,
+            ]);
+            $purchase_order_details = $purchase_requisition->purchase_requisition_detail
+                ->map(function ($purchase_requisition_detail) use ($request_token) {
+                    return [
+                        'request_token' => $request_token,
+                        'maintenance_item_id' => $purchase_requisition_detail->maintenance_item_id,
+                        'mro_item_id' => $purchase_requisition_detail->mro_item_id,
+                        'description' => $purchase_requisition_detail->description,
+                        'type' => $purchase_requisition_detail->type,
+                        'uom' => $purchase_requisition_detail->uom,
+                        'qty' => $purchase_requisition_detail->qty,
+                        'price' => $purchase_requisition_detail->price,
+                        'discount_item' => $purchase_requisition_detail->discount_item,
+                        'tax' => $purchase_requisition_detail->tax,
+                        'amount' => $purchase_requisition_detail->amount,
+                        'part_number' => $purchase_requisition_detail->part_number,
+                        'desc_vendor' => $purchase_requisition_detail->desc_vendor,
+                    ];
+                })
+                ->toArray();
+            $purchase_order->purchase_order_detail()->createMany($purchase_order_details);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

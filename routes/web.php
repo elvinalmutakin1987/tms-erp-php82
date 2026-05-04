@@ -628,4 +628,12 @@ Route::middleware(['auth'])->group(function () {
     Route::put('requestquotation-get-detail/{purchase_requisition}', [RequestQuotationController::class, 'quotation'])
         ->middleware('role:superadmin|request_quotation')
         ->name('requestquotation.quotation');
+
+    Route::get('requestquotation-export-pdf/{request_quotation}', [RequestQuotationController::class, 'export_pdf'])
+        ->middleware('role:superadmin|request_quotation')
+        ->name('requestquotation.export_pdf');
+
+    Route::get('requestquotation-create-purchase-order/{request_quotation}', [RequestQuotationController::class, 'create_purchase_order'])
+        ->middleware('role:superadmin|request_quotation')
+        ->name('requestquotation.create_purchase_order');
 });

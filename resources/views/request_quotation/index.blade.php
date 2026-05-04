@@ -375,6 +375,12 @@
                 }
             });
         }
+
+        function create_(id) {
+            let url = '{{ route('requestquotation.quotation', ':_id') }}';
+            url = url.replace(':_id', id);
+            window.location.href = url;
+        }
     </script>
     <!--app JS-->
 @endsection
