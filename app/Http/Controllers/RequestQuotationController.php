@@ -28,7 +28,23 @@ class RequestQuotationController extends Controller
     {
         if (request()->ajax()) {
             $purchase_requisition = Purchase_requisition::query();
-            $purchase_requisition = $purchase_requisition->whereIn('status', ['Approved', 'Received'])->get();;
+            if (request()->department != 'All') {
+                $purchase_requisition = $purchase_requisition->where('department', request()->department);
+            }
+            if (request()->status != 'All') {
+                if (request()->status == 'Open') {
+                    $purchase_requisition = $purchase_requisition
+                        ->whereIn('status', ['Approved', 'Received'])
+                        ->whereDoesntHave('purchase_order');
+                } else {
+                    $purchase_requisition = $purchase_requisition
+                        ->whereIn('status', ['Approved', 'Received'])
+                        ->whereHas('purchase_order', function ($query) {
+                            $query->whereNotNull('purchase_requisition_id');
+                        });
+                }
+            }
+            $purchase_requisition = $purchase_requisition->orderBy('created_at', 'desc')->get();
             return DataTables::of($purchase_requisition)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -41,12 +57,15 @@ class RequestQuotationController extends Controller
                                <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
-                                </li>
-                                <li>
+                                </li>';
+                    $purchase_order = Purchase_order::where('purchase_requisition_id', $item->id)->get();
+                    if ($purchase_order->count() == 0) {
+                        $button .= '<li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Upload Quotation</a>
-                                </li>
-                            </ul>
+                                </li>';
+                    }
+                    $button .= '</ul>
                         </div>
                     </div>
                     ';
@@ -56,26 +75,42 @@ class RequestQuotationController extends Controller
                     $request_quotation = Request_quotation::where('purchase_requisition_id', $item->id);
                     $html = '<table style="width: 100%">';
                     if ($request_quotation->count() > 0) {
+                        $purchase_order = Purchase_order::where('purchase_requisition_id', $item->id)->get();
                         foreach ($request_quotation->get() as $key => $value) {
                             $html .= '<tr>';
-                            $html .= '<td>';
-                            $html .= $value->client_vendor->name;
+                            $html .= '<td style="width: 45%">';
+                            $check_po = Purchase_order::where('purchase_requisition_id', $item->id)
+                                ->where('client_vendor_id', $value->client_vendor_id)
+                                ->first();
+
+                            $html .= '<div class="d-flex align-items-center gap-2">';
+                            $html .= '<span>' . $value->client_vendor->name . '</span>';
+                            if ($check_po) {
+                                $html .= '
+                                    <div class="d-flex align-items-center text-success">
+                                        <i class="bx bx-radio-circle-marked bx-burst bx-rotate-90 align-middle font-18 me-1"></i>
+                                        <span>Selected</span>
+                                    </div>
+                                ';
+                            }
+                            $html .= '</div>';
                             $html .= '</td>';
                             $html .= '<td>';
                             $html .= '<a href="' . route('requestquotation.export_pdf', $value->id) . '" target="_blank">' . $value->real_name . '</a>';
                             $html .= '</td>';
-                            $html .= '<td>';
-                            $html .= '<div class="d-flex gap-1 text-end">';
-                            $html .= '<a class="btn btn-sm btn-success" href="#" onclick="create_(\'' . $value->id . '\')"><i class="bx bx-plus me-0"></i> Create PO</a>';
-                            $html .= '<a class="btn btn-sm btn-danger" href="#" onclick="delete_(\'' . $value->id . '\')"><i class="bx bx-trash me-0"></i></a>';
-                            $html .= '</div>';
+                            $html .= '<td style="width: 15%">';
+                            if ($purchase_order->count() == 0) {
+                                $html .= '<div class="d-flex gap-1 text-end">';
+                                $html .= '<a class="btn btn-sm btn-success" href="#" onclick="create_(\'' . $value->id . '\')"><i class="bx bx-plus me-0"></i> Create PO</a>';
+                                $html .= '<a class="btn btn-sm btn-danger" href="#" onclick="delete_(\'' . $value->id . '\')"><i class="bx bx-trash me-0"></i></a>';
+                                $html .= '</div>';
+                            }
                             $html .= '</td>';
                             $html .= '</tr>';
                         }
                     } else {
                         $html .= '<tr><td class="text-center">No quotation file</td></tr>';
                     }
-
                     $html .= '</table>';
                     return $html;
                 })
@@ -84,13 +119,14 @@ class RequestQuotationController extends Controller
         }
         $uom = config('uom');
         $system_setting = config('system_setting');
+        $department = config('department');
         $breadcrum = [
             'module' => 'Purchase Order',
             'route-module' => null,
-            'sub-module' => 'Request Quoation',
+            'sub-module' => 'Request Quotation',
             'route-sub-module' => 'requestquotation.index',
         ];
-        return view('request_quotation.index', compact('breadcrum', 'uom', 'system_setting'));
+        return view('request_quotation.index', compact('breadcrum', 'uom', 'system_setting', 'department'));
     }
 
     /**
@@ -322,7 +358,7 @@ class RequestQuotationController extends Controller
                 'request_token' => $request_token,
                 'user_id' => Auth::id(),
                 'date'  => Carbon::now(),
-                'status' => 'Approval',
+                'status' => 'Approved',
                 'total' => $purchase_requisition->total,
                 'discount' => $purchase_requisition->discount,
                 'tax' => $purchase_requisition->tax,
@@ -331,6 +367,7 @@ class RequestQuotationController extends Controller
                 'urgency' => $purchase_requisition->urgency,
                 'notes' => $purchase_requisition->notes,
             ]);
+
             $purchase_order_details = $purchase_requisition->purchase_requisition_detail
                 ->map(function ($purchase_requisition_detail) use ($request_token) {
                     return [
@@ -351,6 +388,7 @@ class RequestQuotationController extends Controller
                 })
                 ->toArray();
             $purchase_order->purchase_order_detail()->createMany($purchase_order_details);
+
             DB::commit();
             return response()->json([
                 'success' => true,

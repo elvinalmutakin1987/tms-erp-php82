@@ -633,7 +633,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|request_quotation')
         ->name('requestquotation.export_pdf');
 
-    Route::get('requestquotation-create-purchase-order/{request_quotation}', [RequestQuotationController::class, 'create_purchase_order'])
+    Route::post('requestquotation-create-purchase-order/{request_quotation}', [RequestQuotationController::class, 'create_purchase_order'])
         ->middleware('role:superadmin|request_quotation')
         ->name('requestquotation.create_purchase_order');
 });

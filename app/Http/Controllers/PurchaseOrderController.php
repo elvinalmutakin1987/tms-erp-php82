@@ -571,4 +571,22 @@ class PurchaseOrderController extends Controller
             return response()->json($result);
         }
     }
+
+    /**
+     * ngambil detail purchase requisition
+     */
+    public function get_detail(Request $request, $po_id)
+    {
+        try {
+            $purchase_order = Purchase_order::find($po_id);
+            $purchase_order_detail = $purchase_order->purchase_order_detail;
+            $view = 'purchase_order.detail';
+            return response()->view($view, compact('purchase_order', 'purchase_order_detail'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
 }

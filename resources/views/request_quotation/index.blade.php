@@ -19,12 +19,39 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-2">
+                                    <select class="form-select select-top" id="depart" name="depart">
+                                        <option value="All">All Department</option>
+                                        @foreach ($department as $key => $value)
+                                            <option value="{{ $value }}">{{ $value }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <select class="form-select select-top" id="_status" name="_status">
+                                        <option value="All">All Status</option>
+                                        <option value="Open" selected>Open</option>
+                                        <option value="Created">Created</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
                             <table id="table-data" class="table" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Requisition Number</th>
-                                        <th width="60%">Quotation File</th>
+                                        <th width="15%">Requisition Number</th>
+                                        <th width="15%">Department</th>
+                                        <th>Quotation File</th>
                                         <th width="20">Action</th>
                                     </tr>
                                 </thead>
@@ -80,10 +107,7 @@
                     url: ajax,
                     data: function(d) {
                         d.status = $('#_status').val();
-                        d.unit_id = $('#unit').val();
-                        d.date_start = $('#date_start').val();
-                        d.date_end = $('#date_end').val();
-                        d.urgency = $('#_urgency').val();
+                        d.department = $('#depart').val();
                     }
                 },
                 "columns": [{
@@ -102,12 +126,17 @@
                         searchable: true,
                     },
                     {
+                        data: 'department',
+                        name: 'department',
+                        orderable: false,
+                        searchable: false,
+                    },
+                    {
                         data: 'quotation_file',
                         name: 'quotation_file',
                         orderable: false,
                         searchable: false,
                     },
-
                     {
                         data: 'action',
                         name: 'action',
@@ -377,9 +406,48 @@
         }
 
         function create_(id) {
-            let url = '{{ route('requestquotation.quotation', ':_id') }}';
-            url = url.replace(':_id', id);
-            window.location.href = url;
+            Swal.fire({
+                title: 'Are you sure to create Purchase Order?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, Create it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('requestquotation.create_purchase_order', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Created!",
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#table-data').DataTable().ajax.reload(null, false);
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
         }
     </script>
     <!--app JS-->

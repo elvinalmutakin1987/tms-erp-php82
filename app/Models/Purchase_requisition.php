@@ -51,4 +51,9 @@ class Purchase_requisition extends Model implements Auditable
     {
         return $this->hasMany(Request_quotation::class);
     }
+
+    public function purchase_order(): HasMany
+    {
+        return $this->hasMany(Purchase_order::class);
+    }
 }
