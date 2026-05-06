@@ -33,6 +33,9 @@
                 <td width="30%">Date <br>
                     <b>{{ $purchase_requisition->date }}</b>
                 </td>
+                <td width="30%">Job <br>
+                    <b>{{ $purchase_requisition->job }}</b>
+                </td>
             </tr>
         </table>
     </div>

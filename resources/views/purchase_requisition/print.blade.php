@@ -408,6 +408,11 @@
                                                 <td class="val">
                                                     {{ $purchase_requisition->maintenance->maintenance_no ?? '-' }}</td>
                                             </tr>
+                                            <tr>
+                                                <td class="label">Job</td>
+                                                <td class="sep">:</td>
+                                                <td class="val">{{ $purchase_requisition->job ?? '-' }}</td>
+                                            </tr>
                                         </table>
                                     </td>
                                 </tr>

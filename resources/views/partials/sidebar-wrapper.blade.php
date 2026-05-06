@@ -1,12 +1,3 @@
- @php
-     use App\Models\Purchase_requisition;
-     use App\Models\Request_quotation;
-
-     $request_quotation_total = Purchase_requisition::whereIn('status', ['Approved', 'Received'])
-         ->whereDoesntHave('purchase_order')
-         ->count();
- @endphp
-
  <!--sidebar wrapper -->
  <div class="sidebar-wrapper" data-simplebar="true">
      <div class="sidebar-header">
@@ -157,11 +148,6 @@
                          <li>
                              <a href="{{ route('requestquotation.index') }}">
                                  <i class='bx bx-radio-circle'></i>Request Quotation
-                                 @if ($request_quotation_total > 0)
-                                     &nbsp;
-                                     <span class="badge bg-danger">{{ $request_quotation_total }}</span>
-                                 @endif
-                             </a>
                              </a>
                          </li>
                      @endif

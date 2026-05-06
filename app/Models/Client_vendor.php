@@ -32,4 +32,9 @@ class Client_vendor extends Model
     {
         return $this->hasMany(Request_quotation::class);
     }
+
+    public function purchase_order(): HasMany
+    {
+        return $this->hasMany(Purchase_order::class);
+    }
 }

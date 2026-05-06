@@ -49,7 +49,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th width="15%">Requisition Number</th>
+                                        <th width="20%">Requisition Number</th>
                                         <th width="15%">Department</th>
                                         <th>Quotation File</th>
                                         <th width="20">Action</th>

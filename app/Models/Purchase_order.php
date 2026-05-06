@@ -89,4 +89,9 @@ class Purchase_order extends Model implements Auditable
     {
         return $this->belongsTo(Purchase_requisition::class)->withDefault(['requisition_no' => null]);
     }
+
+    public function client_vendor(): BelongsTo
+    {
+        return $this->belongsTo(Client_vendor::class)->withDefault(['name' => null]);
+    }
 }

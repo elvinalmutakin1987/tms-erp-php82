@@ -39,6 +39,14 @@
                                 <option value="P1">P1</option>
                             </select>
                         </div>
+                        <div class="col">
+                            <label for="job" class="form-label">Job</label>
+                            <select class="form-select select-select" id="job" name="job">
+                                @foreach ($job as $d => $value)
+                                    <option value="{{ $value }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col">
@@ -81,13 +89,14 @@
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="discount" name="discount" readonly>
-                                            <input type="text" class="form-control" id="discount_" name="discount_"
-                                                readonly style="text-align: right;">
+                                            <input type="text" class="form-control" id="discount_"
+                                                name="discount_" readonly style="text-align: right;">
                                         </td>
                                         <td scope="col" class="p-1 align-middle"></td>
                                     </tr>
                                     <tr>
-                                        <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Tax</b>
+                                        <td scope="col" colspan="6" class="text-end p-1 align-middle">
+                                            <b>Tax</b>
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
                                             <input type="hidden" id="tax" name="tax" readonly>

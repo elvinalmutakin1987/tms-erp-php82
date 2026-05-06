@@ -374,6 +374,7 @@
                             <div class="docno-label">Document No.</div>
                             <div class="docno">{{ $purchase_requisition->requisition_no }}</div>
                         </td>
+
                     </tr>
                     <tr>
                         <td colspan="3" class="doc-info-cell">
@@ -391,6 +392,11 @@
                                                 <td class="label">Date</td>
                                                 <td class="sep">:</td>
                                                 <td class="val">{{ $purchase_requisition->date ?? '-' }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="label">Job</td>
+                                                <td class="sep">:</td>
+                                                <td class="val">{{ $purchase_requisition->job ?? '-' }}</td>
                                             </tr>
                                         </table>
                                     </td>

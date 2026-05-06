@@ -14,11 +14,11 @@
     }
 
     body {
-        font-family: "DejaVu Sans", "DejaVu Sans Mono", "DejaVu",
-            "Helvetica", "Arial", sans-serif;
+        font-family: "Times New Roman", Times, serif;
         margin: 0;
         padding: 0;
-        font-size: 9.5pt;
+        /* font-size: 9.5pt; */
+        font-size: 12pt;
         color: #000;
     }
 
@@ -54,23 +54,55 @@
         border-collapse: collapse;
         border-spacing: 0;
         table-layout: fixed;
-        border: 1px solid #000;
+        border: none !important;
     }
 
     .doc-header-table td {
-        border: 1px solid #000;
+        border: 0px solid #000;
         padding: 8px 10px;
         vertical-align: middle;
         line-height: 1.2;
     }
 
+    .doc-header-vendor {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: fixed;
+        border: none !important;
+    }
+
+    .doc-header-vendor-td {
+        border: none !important;
+        vertical-align: middle;
+        border-spacing: 0;
+        font-weight: 700;
+        font-size: 12pt;
+        padding-top: 0
+    }
+
+    .doc-header-detail {
+        width: 100%;
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: fixed;
+        border: none !important;
+    }
+
+    .doc-header-detail td {
+        border: none !important;
+        padding: 0px;
+        line-height: 1.2;
+    }
+
+
     .logo-cell {
-        width: 18%;
+        width: 20%;
         text-align: center;
     }
 
     .title-cell {
-        text-align: center;
+        text-align: left;
     }
 
     .meta-cell {
@@ -85,10 +117,17 @@
         line-height: 1.1;
     }
 
+    .doc-time {
+        font-size: 11pt;
+        font-weight: 30;
+        letter-spacing: .6px;
+        line-height: 1.1;
+    }
+
     .doc-subtitle {
         margin-top: 2px;
         font-size: 8.5pt;
-        letter-spacing: .2px;
+        letter-spacing: .05px;
     }
 
     .docno-label {
@@ -355,203 +394,235 @@
 @endphp
 
 <table class="table-p2h">
-    <colgroup>
-        <col class="col-no" style="width:5px;">
-        <col class="col-desc-vendor" style="width:30%;">
-        <col class="col-uom" style="width:12%;">
-        <col class="col-qty" style="width:12%;">
-        <col class="col-price" style="width:15%;">
-        <col class="col-amount" style="width:15%;">
-    </colgroup>
-
     <thead>
         <tr>
-            <th colspan="7" class="doc-header-wrapper">
+            <th class="doc-header-wrapper">
                 <table class="doc-header-table">
                     <tr>
                         <td class="logo-cell">
                             <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                style="max-width:95px;height:auto;margin:0 auto;">
+                                style="max-width:120px;height:auto;margin:0 auto;">
                         </td>
 
                         <td class="title-cell">
-                            <div class="doc-title">Purchase Requisition</div>
-                            <div class="doc-subtitle">Equipment Dept.</div>
-                        </td>
-
-                        <td class="meta-cell">
-                            <div class="docno-label">Document No.</div>
-                            <div class="docno">{{ $purchase_requisition->requisition_no }}</div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="doc-info-cell">
-                            <table class="doc-info-table">
-                                <tr>
-                                    <td width="30%">
-                                        <table class="info-inner">
-                                            <tr>
-                                                <td class="label" style="width: 15%">Unit</td>
-                                                <td class="sep">:</td>
-                                                <td class="val">{{ $purchase_requisition->unit->vehicle_no ?? '-' }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="label">Date</td>
-                                                <td class="sep">:</td>
-                                                <td class="val">{{ $purchase_requisition->date ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="label">Maintenance No.</td>
-                                                <td class="sep">:</td>
-                                                <td class="val">
-                                                    {{ $purchase_requisition->maintenance->maintenance_no ?? '-' }}</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
+                            <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
+                            <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
+                            <div class="doc-subtitle">Sangatta - Kutai Timur</div>
+                            <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
                         </td>
                     </tr>
                 </table>
             </th>
         </tr>
-
-        <tr class="checklist-head">
-            <th class="col-no">#</th>
-            <th class="col-maintenance-item">Maintenance Item</th>
-            <th class="col-mro-item">MRO Item</th>
-            <th class="col-uom">Uom</th>
-            <th class="col-qty">Qty</th>
-            <th class="col-price">Price</th>
-            <th class="col-discount">Discount</th>
-            <th class="col-amount">Amount</th>
+        <tr>
+            <th class="doc-header-wrapper">
+                <div class="doc-title" style="padding-top: 15px">PURCHASE ORDER</div>
+            </th>
         </tr>
     </thead>
+</table>
+<table class="table-p2h" style="border: 1px double #000; border-collapse: separate; border-spacing: 1; width: 100%;">
     <tbody>
-        @foreach ($purchase_requisition_detail as $d)
-            <tr>
-                <td class="p-1 align-middle">
-                    {{ $loop->iteration }}
-                </td>
-                <td class="p-1 align-middle">
-                    {{ $d->maintenance_item->name }}
-                </td>
-                <td class="p-1 align-middle">
-                    {{ $d->mro_item->name }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: center">
-                    {{ $d->uom }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: center">
-                    {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
-                </td>
-            </tr>
-        @endforeach
-    </tbody>
-    <tfoot>
         <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Total</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
-            </td>
-        </tr>
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Discount</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
-            </td>
-        </tr>
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Tax</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
-            </td>
-        </tr>
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="7"><b>Grand Total</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
-            </td>
-        </tr>
-    </tfoot>
-    <thead>
-        <tr>
-            <td colspan="8" class="p-1">
-                Notes : <br>
-                @if ($purchase_requisition->notes != '')
-                    {!! $purchase_requisition->notes !!}
-                @endif
-                <br>
-            </td>
-        </tr>
-    </thead>
-    <thead>
-        <tr>
-            <td colspan="8" class="p-1">
-                <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
+            <td style="padding: 8px;">
+                <table class="doc-header-vendor" style="padding-bottom: 10px">
                     <tr>
-                        <td style="border: none; text-align: center">
-                            Created By
-                            <br>
-                        </td>
-                        @if ($approval_step)
-                            @foreach ($approval_step as $d)
-                                <td style="border: none; text-align: center">
-                                    {{ $d->action }} By
-                                    <br>
-                                </td>
-                            @endforeach
-                        @endif
+                        <td style="width: 50%" class="doc-header-vendor-td"> Vendor</td>
+                        <td style="width: 50%" class="doc-header-vendor-td"></td>
                     </tr>
                     <tr>
-                        <td style="border: none; text-align: center">
-                            @if ($purchase_requisition->user->sign_path)
-                                <img src="{{ public_path('storage/' . $purchase_requisition->user->sign_path) }}"
-                                    alt="Logo" style="max-width:100px;height:auto;margin:0 auto;">
-                            @endif
-                            <br>
-                            {{ $purchase_requisition->user->name }}
+                        <td style="width: 50%">
+                            <table class="doc-header-detail">
+                                <tr>
+                                    <td style="width: 30%">Name</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->client_vendor->name }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Address</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->client_vendor->address }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Phone</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->client_vendor->phone }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Email</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->client_vendor->email }}</td>
+                                </tr>
+                            </table>
                         </td>
-                        @if ($approval_step)
-                            @foreach ($approval_step as $d)
-                                <td style="border: none; text-align: center">
-                                    @php
-                                        $approval_status = $approval_status
-                                            ->where('approval_flow_id', $approval_flow->id)
-                                            ->where('approvable_id', $purchase_requisition->id)
-                                            ->where('step', $d->order)
-                                            ->first();
-                                    @endphp
-                                    @if ($approval_status->status == 'Open')
-                                        <b>Approval Process</b>
-                                    @elseif($approval_status->status == 'Rejected')
-                                        <b>Rejected</b>
-                                    @else
-                                        @if ($d->user->sign_path)
-                                            <img src="{{ public_path('storage/' . $d->user->sign_path) }}"
-                                                alt="Logo" style="max-width:100px;height:auto;margin:0 auto;">
-                                        @endif
-                                    @endif
-                                    <br>
-                                    {{ $d->user->name }}
-                                </td>
-                            @endforeach
-                        @endif
+                        <td style="width: 50%">
+                            <table class="doc-header-detail">
+                                <tr>
+                                    <td style="width: 30%">PO. No</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->order_no }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Date</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ \Carbon\Carbon::parse($purchase_order->date)->locale('id')->translatedFormat('d F Y') }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Reff</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->purchase_requisition->unit->vehicle_no ? 'EST-' . $purchase_order->purchase_requisition->unit->vehicle_no : '' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Currency</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>IDR</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Fleet No.</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->purchase_requisition->unit->fleet_no ?? '' }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 30%">Job</td>
+                                    <td style="width: 5%; text-align: center">:</td>
+                                    <td>{{ $purchase_order->job ?? '' }}</td>
+                                </tr>
+                            </table>
+                        </td>
                     </tr>
+                </table>
+                <table class="table-p2h">
+                    <thead>
+                        <tr>
+                            <th
+                                style="width:5%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Item
+                            </th>
+                            <th
+                                style="width: 10%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Qty
+                            </th>
+                            <th
+                                style="width: 10%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Unit
+                            </th>
+                            <th
+                                style="width: 30%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Description
+                            </th>
+                            <th
+                                style="width: 15%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Price IDR
+                            </th>
+                            <th
+                                style="width: 15%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Discount (%)
+                            </th>
+                            <th
+                                style="width: 15%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                Total IDR
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($purchase_order_detail as $d)
+                            <tr>
+                                <td style="width: 5%; text-align: center; border: 1px solid #000;">
+                                    {{ $loop->iteration }}</td>
+                                <td style="width: 10%; text-align: center; border: 1px solid #000;">
+                                    {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}</td>
+                                <td style="width: 10%; text-align: center; border: 1px solid #000;">
+                                    {{ $d->uom }}</td>
+                                <td style="width: 30%; border: 1px solid #000;">{{ $d->description }}
+                                </td>
+                                <td style="width: 15%; text-align: right; border: 1px solid #000;">
+                                    {{ $d->price ? Number::format($d->price, precision: 0) : '' }}</td>
+                                <td style="width: 15%; text-align: right; border: 1px solid #000;">
+                                    {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}
+                                </td>
+                                <td style="width: 15%; text-align: right; border: 1px solid #000;">
+                                    {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="5" rowspan='3' style="text-align: left; border: 1px solid #000;">
+                                {!! nl2br(e($purchase_order->notes)) !!}
+                            </td>
+                            <td style="text-align: left; border: 1px solid #000;">
+                                <b>Sub Total</b>
+                            </td>
+                            <td style="text-align: right; border: 1px solid #000;">
+                                {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left; border: 1px solid #000;">
+                                <b>VAT ({{ $system_setting['tax'] ?? 10 }}%)</b>
+                            </td>
+                            <td style="text-align: right; border: 1px solid #000;">
+                                {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left; border: 1px solid #000;">
+                                <b>Grand Total</b>
+                            </td>
+                            <td style="text-align: right; border: 1px solid #000;">
+                                {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : '' }}
+                            </td>
+                        </tr>
+                    </tfoot>
                 </table>
             </td>
         </tr>
-    </thead>
+    </tbody>
+</table>
+<table>
+    <tfoot>
+        <tr>
+            <td style="border: none;">
+                <div>Sangatta,
+                    {{ \Carbon\Carbon::parse(date('Y-m-d'))->locale('id')->translatedFormat('d F Y') }}
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="border: none; text-align: center">
+                Approved By,
+                <br>
+                <br>
+                <br>
+                <br>
+                {{ $purchase_order->client_vendor->name }}
+            </td>
+            <td style="border: none;text-align: center">
+                Prepared By,
+                <br>
+                <br>
+                <br>
+                <br>
+                {{ $purchase_order->user->username }}
+            </td>
+            @if ($approval_step)
+                @foreach ($approval_step as $d)
+                    <td style="border: none; text-align: center">
+                        {{ $d->action }} By
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                        {{ $approval_step->user->username }}
+                    </td>
+                @endforeach
+            @endif
+        </tr>
+    </tfoot>
 </table>
 
 

@@ -246,6 +246,7 @@
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
                         $("#department").val(response.data.department).trigger('change');
+                        $("#job").val(response.data.job).trigger('change');
                         $("#total").val(response.data.total);
                         $("#total_").val(numbro(response.data.total).format({
                             thousandSeparated: true,
@@ -576,6 +577,8 @@
             $("#discount_").val('');
             $("#grand_total").val('');
             $("#grand_total_").val('');
+            $("#department").val('').trigger('change');
+            $("#job").val('').trigger('change');
         });
 
         $('#formReceive').on('hidden.bs.modal', function() {

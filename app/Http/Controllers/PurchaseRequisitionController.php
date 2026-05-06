@@ -124,13 +124,14 @@ class PurchaseRequisitionController extends Controller
         }
         $uom = config('uom');
         $system_setting = config('system_setting');
+        $job = config('job');
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
             'sub-module' => 'Purchase Requisition',
             'route-sub-module' => 'purchaserequisition.index',
         ];
-        return view('purchase_requisition.index', compact('breadcrum', 'uom', 'system_setting'));
+        return view('purchase_requisition.index', compact('breadcrum', 'uom', 'system_setting', 'job'));
     }
 
     /**
@@ -164,7 +165,8 @@ class PurchaseRequisitionController extends Controller
                     'grand_total',
                     'status',
                     'urgency',
-                    'discount'
+                    'discount',
+                    'job'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -274,7 +276,8 @@ class PurchaseRequisitionController extends Controller
                     'grand_total',
                     'status',
                     'urgency',
-                    'discount'
+                    'discount',
+                    'job'
                 ]),
                 [
                     'input_method' => 'Web',
@@ -495,13 +498,15 @@ class PurchaseRequisitionController extends Controller
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $system_setting = config('system_setting');
         $pdf = Pdf::loadView('purchase_requisition.print', [
             'purchase_requisition' => $purchase_requisition,
             'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
             'approval_flow' => $approval_flow,
             'approval_step' => $approval_step,
             'approval_process' => $approval_process,
-            'approval_status' => $approval_status
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting
         ])->setPaper('a4', 'portrait');
 
         // WAJIB: render dulu
@@ -556,13 +561,15 @@ class PurchaseRequisitionController extends Controller
         $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $system_setting = config('system_setting');
         $pdf = Pdf::loadView('purchase_requisition.print', [
             'purchase_requisition' => $purchase_requisition,
             'purchase_requisition_detail' => $purchase_requisition->purchase_requisition_detail,
             'approval_flow' => $approval_flow,
             'approval_step' => $approval_step,
             'approval_process' => $approval_process,
-            'approval_status' => $approval_status
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting
         ])->setPaper('a4', 'portrait');
 
         // WAJIB: render dulu

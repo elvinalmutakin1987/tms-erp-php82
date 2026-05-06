@@ -19,6 +19,7 @@ return new class extends Migration
             $table->uuid('request_token');
             $table->text('real_name')->nullable();
             $table->text('quotation_path')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');

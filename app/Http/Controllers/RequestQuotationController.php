@@ -78,7 +78,7 @@ class RequestQuotationController extends Controller
                         $purchase_order = Purchase_order::where('purchase_requisition_id', $item->id)->get();
                         foreach ($request_quotation->get() as $key => $value) {
                             $html .= '<tr>';
-                            $html .= '<td style="width: 45%">';
+                            $html .= '<td style="width: 30%">';
                             $check_po = Purchase_order::where('purchase_requisition_id', $item->id)
                                 ->where('client_vendor_id', $value->client_vendor_id)
                                 ->first();
@@ -98,7 +98,7 @@ class RequestQuotationController extends Controller
                             $html .= '<td>';
                             $html .= '<a href="' . route('requestquotation.export_pdf', $value->id) . '" target="_blank">' . $value->real_name . '</a>';
                             $html .= '</td>';
-                            $html .= '<td style="width: 15%">';
+                            $html .= '<td style="width: 30%">';
                             if ($purchase_order->count() == 0) {
                                 $html .= '<div class="d-flex gap-1 text-end">';
                                 $html .= '<a class="btn btn-sm btn-success" href="#" onclick="create_(\'' . $value->id . '\')"><i class="bx bx-plus me-0"></i> Create PO</a>';
@@ -285,7 +285,8 @@ class RequestQuotationController extends Controller
                     'request_token' => $request->request_token,
                     'user_id' => Auth::user()->id,
                     'real_name' => $realname,
-                    'quotation_path' => $directory . '/' . $filename
+                    'quotation_path' => $directory . '/' . $filename,
+                    'notes' => $request->notes
                 ]);
             }
             DB::commit();
@@ -348,26 +349,25 @@ class RequestQuotationController extends Controller
             $purchase_requisition_id = $request_quotation->purchase_requisition_id;
             $client_vendor_id = $request_quotation->client_vendor_id;
             $request_token = (string) Str::uuid();
-
             $purchase_requisition = Purchase_requisition::with('purchase_requisition_detail')
                 ->findOrFail($purchase_requisition_id);
-
             $purchase_order = Purchase_order::create([
                 'purchase_requisition_id' => $purchase_requisition_id,
                 'client_vendor_id' => $client_vendor_id,
                 'request_token' => $request_token,
                 'user_id' => Auth::id(),
                 'date'  => Carbon::now(),
-                'status' => 'Approved',
+                'status' => 'Approval',
                 'total' => $purchase_requisition->total,
                 'discount' => $purchase_requisition->discount,
                 'tax' => $purchase_requisition->tax,
                 'grand_total' => $purchase_requisition->grand_total,
                 'department' => $purchase_requisition->department,
                 'urgency' => $purchase_requisition->urgency,
-                'notes' => $purchase_requisition->notes,
+                'type' => $purchase_requisition->type,
+                'job' => $purchase_requisition->job ?? '',
+                'notes' => $request_quotation->notes
             ]);
-
             $purchase_order_details = $purchase_requisition->purchase_requisition_detail
                 ->map(function ($purchase_requisition_detail) use ($request_token) {
                     return [
@@ -388,7 +388,21 @@ class RequestQuotationController extends Controller
                 })
                 ->toArray();
             $purchase_order->purchase_order_detail()->createMany($purchase_order_details);
-
+            /* Buat check ada approvalnya gak
+             * Kalo ada statusnya jadi Approval.
+             * Nanti kalo approval beres baru jadi Open
+             */
+            $model = 'App\Models\Purchase_order';
+            $department = $purchase_requisition->department;
+            if (checkHasApproval($model, $department)) {
+                $purchase_order->status = 'Approval';
+                $purchase_order->save();
+                $approval_flow_id = getApprovalFlowId($model, $department);
+                createApprovalProcess($approval_flow_id, $purchase_order->id);
+            } else {
+                $purchase_order->status = 'Approved';
+                $purchase_order->save();
+            }
             DB::commit();
             return response()->json([
                 'success' => true,

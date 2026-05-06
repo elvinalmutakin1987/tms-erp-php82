@@ -9,7 +9,7 @@
                 <td width="30%">Number <br>
                     <b>{{ $purchase_requisition->requisition_no }}</b>
                 </td>
-                <td colspan="2">Status <br>
+                <td colspan="3">Status <br>
                     @if ($purchase_requisition->status == 'Draft')
                         <span class="badge bg-secondary"
                             style="font-size: 13px">{{ $purchase_requisition->status }}</span>
@@ -35,6 +35,9 @@
                 </td>
                 <td width="30%">Maintenance No. <br>
                     <b> {{ $purchase_requisition->maintenance->maintenance_no }}</b>
+                </td>
+                <td width="30%">Job <br>
+                    <b>{{ $purchase_requisition->job }}</b>
                 </td>
             </tr>
         </table>

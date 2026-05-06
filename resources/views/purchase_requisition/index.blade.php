@@ -277,6 +277,7 @@
                         $("#urgency").val(response.data.urgency).trigger(
                             'change');
                         $("#request_token").val(response.data.request_token);
+                        $("#job").val(response.data.job).trigger('change');
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -626,6 +627,7 @@
             $("#grand_total").val('');
             $("#grand_total_").val('');
             enableButton();
+            $("#job").val().trigger('change');
         });
 
         $('#formReceive').on('hidden.bs.modal', function() {

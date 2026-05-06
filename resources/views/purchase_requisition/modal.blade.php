@@ -42,6 +42,14 @@
                                 <option value="P1">P1</option>
                             </select>
                         </div>
+                        <div class="col">
+                            <label for="job" class="form-label">Job</label>
+                            <select class="form-select select-select" id="job" name="job">
+                                @foreach ($job as $d => $value)
+                                    <option value="{{ $value }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="row mb-2">
                         <div class="col">
