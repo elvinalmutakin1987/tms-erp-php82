@@ -362,51 +362,6 @@
             });
 
             gen_select2();
-
-            $('#client_vendor_id').select2({
-                theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: '100%',
-                selectOnClose: false,
-                ajax: {
-                    url: '{{ route('purchaseorder.get_client_vendor') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
-                }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    const $search = $('.select2-container--open .select2-search__field');
-                    $search.trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            }).on('select2:select', function(e) {
-                let url = '{{ route('purchaseorder.get_client_vendor_by_id', ':_id') }}';
-                url = url.replace(':_id', $(this).val());
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        window.poState.taxable = response.data.taxable;
-                    },
-                    error: function(xhr, status, error) {
-                        console.log(error);
-                    }
-                });
-            });
-
-
         });
 
         function delete_(id) {
@@ -598,7 +553,6 @@
                     '{{ route('purchaseorder.get_table_edit', ':_id') }}'.replace(':_id',
                         orderId) :
                     '{{ route('purchaseorder.get_table_add') }}';
-
                 $.ajax({
                     url: url,
                     data: {
@@ -607,6 +561,13 @@
                     type: 'GET',
                     success: function(response) {
                         $("#div-table").html(response.html);
+
+                        setTimeout(function() {
+                            if (typeof window.initPurchaseOrderItemTable ===
+                                'function') {
+                                window.initPurchaseOrderItemTable();
+                            }
+                        }, 0);
 
                         const titleText = isEdit ? 'Edit Order' : 'Add Order';
                         const number = isEdit ? response.order_no : response
@@ -709,42 +670,6 @@
             monitoringSaveButton.disabled = false;
         }
 
-        $('#purchase_requisition_id').each(function() {
-            const $el = $(this);
-            $el.select2({
-                theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                    'style'),
-                selectOnClose: false,
-                minimumResultsForSearch: 0,
-            }).on('change', function() {
-                $("#div-table").html(`
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="visually">Loading...</span>
-                    `);
-                const isEdit = orderId != '';
-                const url = isEdit && requisitionId == $(this).val() ?
-                    '{{ route('purchaseorder.get_table_edit', ':_id') }}'.replace(':_id',
-                        orderId) :
-                    '{{ route('purchaseorder.get_table_add') }}';
-                requisitionId = $(this).val();
-                $.ajax({
-                    url: url,
-                    data: {
-                        purchase_requisition_id: $(this).val()
-                    },
-                    type: 'GET',
-                    success: function(response) {
-                        $("#div-table").html(response.html);
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
-            });
-        });
-
         function delete_file(id) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -789,6 +714,175 @@
                 }
             });
         }
+
+        function initItemTableAfterAjax() {
+            if (typeof window.initPurchaseOrderItemTable === 'function') {
+                window.initPurchaseOrderItemTable();
+            }
+        }
+
+        function loadItemTable() {
+            $("#div-table").html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually">Loading...</span>
+            `);
+
+            const isEdit = orderId != '';
+
+            // const url = isEdit && requisitionId ?
+            //     '{{ route('purchaseorder.get_table_edit', ':_id') }}'.replace(':_id', orderId) :
+            //     '{{ route('purchaseorder.get_table_add') }}';
+
+            const url = '{{ route('purchaseorder.get_table_add') }}';
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: {
+                    purchase_requisition_id: requisitionId,
+                    client_vendor_id: $('#client_vendor_id').val(),
+                },
+                success: function(response) {
+                    $("#div-table").html(response.html);
+
+                    setTimeout(function() {
+                        initItemTableAfterAjax();
+
+                        initClientVendorSelect2(false);
+                    }, 0);
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error load item table:', error);
+                }
+            });
+        }
+
+        function initPurchaseRequisitionSelect2() {
+            const $requisition = $('#purchase_requisition_id');
+
+            if (!$requisition.length) {
+                return;
+            }
+
+            if ($requisition.hasClass('select2-hidden-accessible')) {
+                $requisition.select2('destroy');
+            }
+
+            $requisition.off('.purchaseRequisition');
+
+            $requisition.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $requisition.data('width') ?
+                    $requisition.data('width') : ($requisition.hasClass('w-100') ? '100%' : 'style'),
+                selectOnClose: false,
+                minimumResultsForSearch: 0,
+            });
+
+            $requisition.on('change.purchaseRequisition', function() {
+                requisitionId = $(this).val();
+                loadItemTable();
+            });
+        }
+
+        function initClientVendorSelect2(triggerTaxable = true) {
+            const $vendor = $('#client_vendor_id');
+
+            if (!$vendor.length) {
+                return;
+            }
+
+            const selectedValue = $vendor.val();
+
+            if ($vendor.hasClass('select2-hidden-accessible')) {
+                $vendor.select2('destroy');
+            }
+
+            $vendor.off('.clientVendor');
+
+            $vendor.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: '100%',
+                selectOnClose: false,
+                minimumResultsForSearch: 0,
+                ajax: {
+                    url: '{{ route('purchaseorder.get_client_vendor') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results || data
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            if (selectedValue) {
+                $vendor.val(selectedValue);
+            }
+
+            $vendor.on('select2:open.clientVendor', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field');
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $vendor.on('change.clientVendor', function() {
+                const vendorId = $(this).val();
+
+                if (!vendorId) {
+                    window.poState.taxable = null;
+                    initItemTableAfterAjax();
+                    return;
+                }
+
+                let url = '{{ route('purchaseorder.get_client_vendor_by_id', ':_id') }}';
+                url = url.replace(':_id', vendorId);
+
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        window.poState.taxable = response.data.taxable;
+                        $("#text-tax").text(
+                            `Tax (${window.poState.taxable})`);
+                        initItemTableAfterAjax();
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error get vendor taxable:', error);
+                    }
+                });
+            });
+
+            if (triggerTaxable && selectedValue) {
+                $vendor.trigger('change');
+            }
+        }
+
+        initPurchaseRequisitionSelect2();
+        initClientVendorSelect2(false);
+
+        $('#formModal').off('shown.bs.modal.select2PO').on('shown.bs.modal.select2PO', function() {
+            initPurchaseRequisitionSelect2();
+            initClientVendorSelect2(false);
+        });
     </script>
     <!--app JS-->
 @endsection

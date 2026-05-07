@@ -162,7 +162,8 @@
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Tax</b>
+            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b id='text-tax'>Tax
+                    ({{ $purchase_order->client_vendor->taxable }})</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
@@ -461,8 +462,12 @@
             $("#mro_item_").val('').trigger('change');
             $("#_uom").val('').trigger('change');
             tbody.append(newRow);
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function renumberRows() {
@@ -487,8 +492,12 @@
             }
 
             $(this).remove();
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function calculateAmount() {
@@ -558,5 +567,13 @@
                 mantissa: 0
             }) : 0);
         }
+
+        window.initPurchaseOrderItemTable = function() {
+            renumberRows();
+            calculateTotal();
+
+        };
+
+        window.initPurchaseOrderItemTable();
     })();
 </script>

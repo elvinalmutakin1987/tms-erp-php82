@@ -163,7 +163,8 @@
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Tax</b>
+            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b id='text-tax'>Tax
+                    ({{ $taxable }})</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
@@ -252,7 +253,7 @@
             $el.select2(config).on('select2:open', function() {
                 setTimeout(function() {
                     const $search = $('.select2-container--open .select2-search__field');
-                    $search.trigger('focus');
+                    // $search.trigger('focus');
                     $('.select2-container--open').css('z-index', 1056);
                 }, 0);
             });
@@ -461,8 +462,12 @@
             $("#mro_item_").val('').trigger('change');
             $("#_uom").val('').trigger('change');
             tbody.append(newRow);
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function renumberRows() {
@@ -487,8 +492,12 @@
             }
 
             $(this).remove();
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function calculateAmount() {
@@ -558,5 +567,12 @@
                 mantissa: 0
             }) : 0);
         }
+
+        window.initPurchaseOrderItemTable = function() {
+            renumberRows();
+            calculateTotal();
+        };
+
+        window.initPurchaseOrderItemTable();
     })();
 </script>

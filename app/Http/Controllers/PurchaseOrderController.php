@@ -211,17 +211,6 @@ class PurchaseOrderController extends Controller
                 }
             }
 
-            // if ($request->vendor_offer_path) {
-            //     $file = $request->file('vendor_offer_path');
-            //     $realname = $file->getClientOriginalName();
-            //     $extension = $file->getClientOriginalExtension();
-            //     $directory = "vendor_offer_path";
-            //     $filename = Str::random(24) . "." . $extension;
-            //     $file->storeAs($directory, $filename);
-            //     $purchase_order->vendor_offer_path = $directory . '/' . $filename;
-            //     $purchase_order->save();
-            // }
-
             if ($request->has('vendor_over_path')) {
                 $file = $request->file('vendor_offer_path');
                 $realname = $file->getClientOriginalName();
@@ -397,16 +386,6 @@ class PurchaseOrderController extends Controller
                 }
             }
 
-            // if ($request->vendor_offer_path) {
-            //     $file = $request->file('vendor_offer_path');
-            //     $realname = $file->getClientOriginalName();
-            //     $extension = $file->getClientOriginalExtension();
-            //     $directory = "vendor_offer_path";
-            //     $filename = Str::random(24) . "." . $extension;
-            //     $file->storeAs($directory, $filename);
-            //     $purchase_order->vendor_offer_path = $directory . '/' . $filename;
-            //     $purchase_order->save();
-            // }
             if ($request->has('vendor_over_path')) {
                 $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->first();
                 $filePath = $request_quotation->quotation_path;
@@ -518,6 +497,8 @@ class PurchaseOrderController extends Controller
     {
         try {
             $type = 'General';
+            $client_vendor = Client_vendor::find($request->client_vendor_id);
+            $taxable = $client_vendor?->taxable ?? 'PKP';
             $purchase_requisition_id = $request?->purchase_requisition_id ?? 'Direct PO';
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             if ($purchase_requisition) {
@@ -565,7 +546,7 @@ class PurchaseOrderController extends Controller
                     }
                 })
                 ->preview();
-            $html = view($view, compact('uom', 'system_setting', 'purchase_requisition', 'purchase_requisition_id'))->render();
+            $html = view($view, compact('uom', 'system_setting', 'purchase_requisition', 'purchase_requisition_id', 'taxable'))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -703,7 +684,7 @@ class PurchaseOrderController extends Controller
         try {
             $purchase_order = Purchase_order::find($po_id);
             $purchase_order_detail = $purchase_order->purchase_order_detail;
-            $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->first();
+            $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->get();
             $view = 'purchase_order.detail';
             return response()->view($view, compact('purchase_order', 'purchase_order_detail', 'request_quotation'), 200);
         } catch (\Throwable $th) {

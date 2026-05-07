@@ -173,7 +173,8 @@
         </tr>
         <tr>
             <td scope="col" colspan="8" class="text-end p-1 align-middle">
-                <b>Tax</b>
+                <b id='text-tax'>Tax
+                    ({{ $purchase_order->client_vendor->taxable }})</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
@@ -202,8 +203,11 @@
 
 <script>
     (() => {
-        window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
         const tax_ = {{ $system_setting['tax'] }};
+        const modalEl = document.querySelector('#formModal');
+        const modalBody = document.querySelector('#formModal .modal-body');
+
+        window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
 
         function initSelect2($scope = $(document)) {
             $scope.find('.select-select').each(function() {
@@ -509,8 +513,12 @@
             $('#_description').val('');
             $('#_desc_vendor').val('');
 
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function renumberRows() {
@@ -533,8 +541,12 @@
         $('#tableItem').on('click', '.delete-row', function() {
             $(this).closest('tr').remove();
 
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function calculateAmount() {
@@ -605,7 +617,12 @@
             }) : 0);
         }
 
-        renumberRows();
-        calculateTotal();
+        window.initPurchaseOrderItemTable = function() {
+            renumberRows();
+            calculateTotal();
+
+        };
+
+        window.initPurchaseOrderItemTable();
     })();
 </script>

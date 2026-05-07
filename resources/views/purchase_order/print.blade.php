@@ -536,7 +536,8 @@
                                     {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}</td>
                                 <td style="width: 10%; text-align: center; border: 1px solid #000;">
                                     {{ $d->uom }}</td>
-                                <td style="width: 30%; border: 1px solid #000;">{{ $d->description }}
+                                <td style="width: 30%; border: 1px solid #000;">
+                                    {{ $d->description ?? $d->mro_item->name }}
                                 </td>
                                 <td style="width: 15%; text-align: right; border: 1px solid #000;">
                                     {{ $d->price ? Number::format($d->price, precision: 0) : '' }}</td>

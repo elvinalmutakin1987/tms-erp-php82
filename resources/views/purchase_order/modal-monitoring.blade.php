@@ -14,7 +14,7 @@
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-3">
-                    <button type="button" class="btn btn-warning monitorignButton" id="monitoringSaveButton"
+                    <button type="button" class="btn btn-warning monitorignSaveButton" id="monitoringSaveButton"
                         name="status" value="Received">Save</button>
                     <button type="button" class="btn btn-light" id="cancelReceiveButton">Cancel</button>
                 </div>

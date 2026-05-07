@@ -188,7 +188,7 @@
 
         <tr>
             <td scope="col" colspan="8" class="text-end p-1 align-middle">
-                <b>Tax</b>
+                <b id='text-tax'>Tax ({{ $taxable }})</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
@@ -526,8 +526,12 @@
             $('#_description').val('');
             $('#_desc_vendor').val('');
 
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function renumberRows() {
@@ -550,8 +554,12 @@
         $('#tableItem').on('click', '.delete-row', function() {
             $(this).closest('tr').remove();
 
-            renumberRows();
-            calculateTotal();
+            window.initPurchaseOrderItemTable = function() {
+                renumberRows();
+                calculateTotal();
+            };
+
+            window.initPurchaseOrderItemTable();
         });
 
         function calculateAmount() {
@@ -625,7 +633,12 @@
                 }) : 0);
         }
 
-        renumberRows();
-        calculateTotal();
+        window.initPurchaseOrderItemTable = function() {
+            renumberRows();
+            calculateTotal();
+
+        };
+
+        window.initPurchaseOrderItemTable();
     })();
 </script>

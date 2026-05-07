@@ -1,9 +1,9 @@
 <style>
-    #formModal .modal-body {
+    /* #formModal .modal-body {
         overflow-y: auto !important;
         max-height: calc(100vh - 160px);
         scroll-behavior: auto;
-    }
+    } */
 </style>
 
 <!-- search modal -->
