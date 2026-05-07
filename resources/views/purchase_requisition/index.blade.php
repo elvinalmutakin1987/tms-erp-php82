@@ -117,6 +117,10 @@
         var requisitionId = '';
         var maintenanceId = '';
         var unitId = '';
+        window.poState = {
+            taxable: "PKP"
+        };
+        var taxable_state = true;
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -254,23 +258,28 @@
                             'change');
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
-                        $("#total").val(response.data.total);
-                        $("#total_").val(numbro(response.data.total).format({
+                        $("#total").val(response.data.total ?? 0);
+                        $("#total_").val(numbro(response.data.total ?? 0).format({
                             thousandSeparated: true,
                             mantissa: 0
                         }));
-                        $("#discount").val(response.data.discount);
-                        $("#discount_").val(numbro(response.data.discount).format({
+                        $("#discount").val(response.data.discount ?? 0);
+                        $("#discount_").val(numbro(response.data.discount ?? 0).format({
                             thousandSeparated: true,
                             mantissa: 0
                         }));
-                        $("#tax").val(response.data.tax);
-                        $("#tax_").val(numbro(response.data.tax).format({
+                        $("#tax").val(response.data.tax ?? 0);
+                        $("#tax_").val(numbro(response.data.tax ?? 0).format({
                             thousandSeparated: true,
                             mantissa: 0
                         }));
-                        $("#grand_total").val(response.data.grand_total);
-                        $("#grand_total_").val(numbro(response.data.grand_total).format({
+                        if ($("#tax").val() != 0) {
+                            taxable_state = true;
+                        } else {
+                            taxable_state = false;
+                        }
+                        $("#grand_total").val(response.data.grand_total ?? 0);
+                        $("#grand_total_").val(numbro(response.data.grand_total ?? 0).format({
                             thousandSeparated: true,
                             mantissa: 0
                         }));
@@ -584,6 +593,14 @@
                             .requisition_prev_no;
 
                         $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
+
+                        if (isEdit) {
+                            if (taxable_state == true) {
+                                $('#check_tax').prop('checked', true);
+                            } else {
+                                $('#check_tax').prop('checked', false);
+                            }
+                        }
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
@@ -627,7 +644,7 @@
             $("#grand_total").val('');
             $("#grand_total_").val('');
             enableButton();
-            $("#job").val().trigger('change');
+            // $("#job").val().trigger('change');
         });
 
         $('#formReceive').on('hidden.bs.modal', function() {
@@ -679,6 +696,18 @@
             receiveSaveButton1.disabled = false;
             receiveSaveButton2.disabled = false;
         }
+
+        $(document).on('change', '#check_tax', function() {
+            window.poState = window.poState || {};
+            let isChecked = $(this).is(':checked');
+            if (isChecked) {
+                window.poState.taxable = 'PKP';
+            } else {
+                window.poState.taxable = 'Non PKP';
+            }
+            console.log('Taxable:', window.poState.taxable);
+            $(document).trigger('po:taxableChanged');
+        });
     </script>
     <!--app JS-->
 @endsection

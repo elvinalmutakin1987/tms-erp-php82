@@ -96,6 +96,8 @@
                                     </tr>
                                     <tr>
                                         <td scope="col" colspan="6" class="text-end p-1 align-middle">
+                                            <input class="form-check-input" type="checkbox" value=""
+                                                id="check_tax" name="check_tax" checked> &nbsp;
                                             <b>Tax</b>
                                         </td>
                                         <td scope="col" class="p-1 align-middle">
@@ -103,7 +105,8 @@
                                             <input type="text" class="form-control" id="tax_" name="tax_"
                                                 readonly style="text-align: right;">
                                         </td>
-                                        <td scope="col" class="p-1 align-middle"></td>
+                                        <td scope="col" class="p-1 align-middle">
+                                        </td>
                                     </tr>
                                     <tr>
                                         <td scope="col" colspan="6" class="text-end p-1 align-middle"><b>Grand

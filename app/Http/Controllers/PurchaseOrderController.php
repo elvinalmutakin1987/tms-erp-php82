@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\DB;
 use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
 use Barryvdh\DomPDF\Facade\Pdf;
+// use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
+use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
@@ -442,9 +444,44 @@ class PurchaseOrderController extends Controller
             }
             $uom = config('uom');
             $system_setting = config('system_setting');
-            $order_prev_no = Generator::make()
+            // $order_prev_no = Generator::make()
+            //     ->type('po')
+            //     ->formatter($presenter)
+            //     ->preview();
+            $kodeDokumen = 'TMS-SGT';
+            $order_prev_no = running_number()
                 ->type('po')
-                ->formatter($presenter)
+                ->formatter(new class($kodeDokumen) implements Presenter {
+                    public function __construct(
+                        private string $kodeDokumen
+                    ) {}
+                    public function format(string $type, int $number): string
+                    {
+                        $bulanRomawi = [
+                            1  => 'I',
+                            2  => 'II',
+                            3  => 'III',
+                            4  => 'IV',
+                            5  => 'V',
+                            6  => 'VI',
+                            7  => 'VII',
+                            8  => 'VIII',
+                            9  => 'IX',
+                            10 => 'X',
+                            11 => 'XI',
+                            12 => 'XII',
+                        ];
+                        $bulan = $bulanRomawi[(int) date('n')];
+                        $tahun = date('Y');
+                        return sprintf(
+                            '%03d/%s/%s/%s',
+                            $number,
+                            $this->kodeDokumen,
+                            $bulan,
+                            $tahun
+                        );
+                    }
+                })
                 ->preview();
             $html = view($view, compact('uom', 'system_setting', 'purchase_requisition', 'purchase_requisition_id'))->render();
             return response()->json([
@@ -721,5 +758,23 @@ class PurchaseOrderController extends Controller
             ->replace(['/', '\\'], '-')   // ganti 
             ->toString();
         return $pdf->stream("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * ngambil detail purchase requisition
+     */
+    public function get_client_vendor_by_id(Request $request, Client_vendor $client_vendor)
+    {
+        try {
+            return response()->json([
+                'success' => true,
+                'data' => $client_vendor,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

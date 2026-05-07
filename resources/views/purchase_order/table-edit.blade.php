@@ -142,9 +142,9 @@
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="total" name="total" readonly
-                    value="{{ $purchase_order?->total ?? '' }}">
+                    value="{{ $purchase_order?->total ?? 0 }}">
                 <input type="text" class="form-control" id="total_" name="total_" readonly
-                    value="{{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}"
+                    value="{{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
@@ -154,9 +154,9 @@
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="discount" name="discount" readonly
-                    value="{{ $purchase_order?->discount ?? '' }}">
+                    value="{{ $purchase_order?->discount ?? 0 }}">
                 <input type="text" class="form-control" id="discount_" name="discount_" readonly
-                    value="{{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : '' }}"
+                    value="{{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
@@ -166,9 +166,9 @@
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
-                    value="{{ $purchase_order?->tax ?? '' }}">
+                    value="{{ $purchase_order?->tax ?? 0 }}">
                 <input type="text" class="form-control" id="tax_" name="tax_" readonly
-                    value="{{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}"
+                    value="{{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
@@ -178,9 +178,9 @@
                     Total</b></td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="grand_total" name="grand_total" readonly
-                    value="{{ $purchase_order?->grand_total ?? '' }}">
+                    value="{{ $purchase_order?->grand_total ?? 0 }}">
                 <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
-                    value="{{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total) : '' }}"
+                    value="{{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total) : 0 }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
@@ -190,6 +190,7 @@
 
 <script>
     (() => {
+        window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
         const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
@@ -497,6 +498,12 @@
 
             const amount = (qty * price) - discount_item;
 
+            $("#_discount_item").val(discount_item);
+            $("#_discount_item_").val(numbro(discount_item).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
+
             $("#_amount").val(amount);
             $("#_amount_").val(numbro(amount).format({
                 thousandSeparated: true,
@@ -520,33 +527,36 @@
             let grandTotal = 0;
 
             if (total > 0) {
-                tax = tax_ / 100 * total;
+                // tax = tax_ / 100 * total;
+                if (window.poState.taxable == 'PKP') {
+                    tax = tax_ / 100 * total;
+                }
                 grandTotal = total + tax;
             }
 
-            $("#total").val(total || '');
+            $("#total").val(total || 0);
             $("#total_").val(total ? numbro(total).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#discount").val(discount || '');
+            $("#discount").val(discount || 0);
             $("#discount_").val(discount ? numbro(discount).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#tax").val(tax || '');
+            $("#tax").val(tax || 0);
             $("#tax_").val(tax ? numbro(tax).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#grand_total").val(grandTotal || '');
+            $("#grand_total").val(grandTotal || 0);
             $("#grand_total_").val(grandTotal ? numbro(grandTotal).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
         }
     })();
 </script>

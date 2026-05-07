@@ -24,7 +24,8 @@ class VendorSeeder extends Seeder
             "pic" => "-",
             "address" => "-",
             "email" => "-",
-            "top" => 30
+            "top" => 30,
+            "taxable" => "PKP"
         ];
         DB::table('client_vendors')->insert($data);
     }

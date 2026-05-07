@@ -290,6 +290,12 @@
 
             const amount = (qty * price) - discount_item;
 
+            $("#_discount_item").val(discount_item);
+            $("#_discount_item_").val(numbro(discount_item).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
+
             $("#_amount").val(amount);
             $("#_amount_").val(numbro(amount).format({
                 thousandSeparated: true,
@@ -313,33 +319,44 @@
             let grandTotal = 0;
 
             if (total > 0) {
-                tax = tax_ / 100 * total;
+                // tax = tax_ / 100 * total;
+                if (window.poState.taxable == 'PKP') {
+                    tax = tax_ / 100 * total;
+                }
                 grandTotal = total + tax;
             }
 
-            $("#total").val(total || '');
+            $("#total").val(total || 0);
             $("#total_").val(total ? numbro(total).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#discount").val(discount || '');
+            $("#discount").val(discount || 0);
             $("#discount_").val(discount ? numbro(discount).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#tax").val(tax || '');
+            $("#tax").val(tax || 0);
             $("#tax_").val(tax ? numbro(tax).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#grand_total").val(grandTotal || '');
+            $("#grand_total").val(grandTotal || 0);
             $("#grand_total_").val(grandTotal ? numbro(grandTotal).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
         }
+
+        $(document)
+            .off('po:taxableChanged.tableItem')
+            .on('po:taxableChanged.tableItem', function() {
+                calculateTotal();
+            });
+
+        calculateTotal();
     })();
 </script>

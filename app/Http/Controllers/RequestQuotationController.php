@@ -388,6 +388,7 @@ class RequestQuotationController extends Controller
                 })
                 ->toArray();
             $purchase_order->purchase_order_detail()->createMany($purchase_order_details);
+
             /* Buat check ada approvalnya gak
              * Kalo ada statusnya jadi Approval.
              * Nanti kalo approval beres baru jadi Open

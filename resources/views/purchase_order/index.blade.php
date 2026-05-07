@@ -110,7 +110,9 @@
 
         var orderId = '';
         var requisitionId = '';
-
+        window.poState = {
+            taxable: null
+        };
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -387,6 +389,19 @@
                     $search.trigger('focus');
                     $('.select2-container--open').css('z-index', 1056);
                 }, 0);
+            }).on('select2:select', function(e) {
+                let url = '{{ route('purchaseorder.get_client_vendor_by_id', ':_id') }}';
+                url = url.replace(':_id', $(this).val());
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        window.poState.taxable = response.data.taxable;
+                    },
+                    error: function(xhr, status, error) {
+                        console.log(error);
+                    }
+                });
             });
 
 
@@ -635,6 +650,7 @@
             $("#grand_total").val('');
             $("#grand_total_").val('');
             enableButton();
+            window.poState.taxable = null;
         });
 
         $('#formMonitoring').on('hidden.bs.modal', function() {
@@ -672,7 +688,6 @@
                         minimumResultsForSearch: 0,
                     }).on('select2:close', function() {
                         $(this).blur();
-
                         if (document.activeElement) {
                             document.activeElement.blur();
                         }

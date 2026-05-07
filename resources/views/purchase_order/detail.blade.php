@@ -61,15 +61,15 @@
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $d->description }}</td>
                             <td>{{ $d->uom }}</td>
-                            <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
+                            <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}
                             </td>
                             <td style="text-align: right">
-                                {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
+                                {{ $d->price ? Number::format($d->price, precision: 0) : 0 }}
                             </td>
                             <td style="text-align: right">
-                                {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}</td>
+                                {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : 0 }}</td>
                             <td style="text-align: right">
-                                {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
+                                {{ $d->amount ? Number::format($d->amount, precision: 0) : 0 }}
                             </td>
                         </tr>
                     @endforeach
@@ -78,25 +78,25 @@
                     <tr>
                         <td style="text-align:right" colspan="6"><b>Total</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
+                            {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="6"><b>Discount</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : '' }}
+                            {{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="6"><b>Tax</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}
+                            {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="6"><b>Grand Total</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : '' }}
+                            {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : 0 }}
                         </td>
                     </tr>
                 </tfoot>
@@ -122,15 +122,15 @@
                             <td>{{ $d->maintenance_item->name }}</td>
                             <td>{{ $d->mro_item->name }}</td>
                             <td>{{ $d->uom }}</td>
-                            <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
+                            <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}
                             </td>
                             <td style="text-align: right">
-                                {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
+                                {{ $d->price ? Number::format($d->price, precision: 0) : 0 }}
                             </td>
                             <td style="text-align: right">
-                                {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}</td>
+                                {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : 0 }}</td>
                             <td style="text-align: right">
-                                {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
+                                {{ $d->amount ? Number::format($d->amount, precision: 0) : 0 }}
                             </td>
                         </tr>
                     @endforeach
@@ -139,25 +139,25 @@
                     <tr>
                         <td style="text-align:right" colspan="7"><b>Total</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
+                            {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="7"><b>Discount</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : '' }}
+                            {{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="7"><b>Tax</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}
+                            {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="7"><b>Grand Total</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : '' }}
+                            {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : 0 }}
                         </td>
                     </tr>
                 </tfoot>

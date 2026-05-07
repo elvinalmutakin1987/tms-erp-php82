@@ -71,28 +71,28 @@
         </td>
         <td class="p-1 align-middle">
             <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
-                value="{{ $d->qty }}">
+                value="{{ $d->qty ?? 0 }}">
             <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
+                value="{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}">
         </td>
         <td class="p-1 align-middle">
             <input type="hidden" class="form-control" id="price" name="price[]" readonly
-                value="{{ $d->price }}">
+                value="{{ $d->price ?? 0 }}">
             <input type="text" class="form-control" id="__price" name="__price[]" readonly
-                value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}" style="text-align: right;">
+                value="{{ $d->price ? Number::format($d->price, precision: 0) : 0 }}" style="text-align: right;">
         </td>
         <td class="p-1 align-middle">
             <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly
-                value="{{ $d->discount_item }}">
+                value="{{ $d->discount_item ?? 0 }}">
             <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly
-                value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}"
+                value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : 0 }}"
                 style="text-align: right;">
         </td>
         <td class="p-1 align-middle">
             <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
-                value="{{ $d->amount }}">
+                value="{{ $d->amount ?? 0 }}">
             <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
-                value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}" style="text-align: right;">
+                value="{{ $d->amount ? Number::format($d->amount, precision: 0) : 0 }}" style="text-align: right;">
         </td>
         <td class="text-center p-1 align-middle">
             <div class="row row-cols-auto g-3">
@@ -408,6 +408,11 @@
             const discount_item = parseFloat($("#_discount_item").val()) || 0;
 
             const amount = (qty * price) - discount_item;
+            $("#_discount_item").val(discount_item);
+            $("#_discount_item_").val(numbro(discount_item).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
 
             $("#_amount").val(amount);
             $("#_amount_").val(numbro(amount).format({
@@ -432,33 +437,42 @@
             let grandTotal = 0;
 
             if (total > 0) {
-                tax = tax_ / 100 * total;
+                // tax = tax_ / 100 * total;
+                if (window.poState.taxable == 'PKP') {
+                    tax = tax_ / 100 * total;
+                }
                 grandTotal = total + tax;
             }
 
-            $("#total").val(total || '');
+            $("#total").val(total || 0);
             $("#total_").val(total ? numbro(total).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#discount").val(discount || '');
+            $("#discount").val(discount || 0);
             $("#discount_").val(discount ? numbro(discount).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#tax").val(tax || '');
+            $("#tax").val(tax || 0);
             $("#tax_").val(tax ? numbro(tax).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
 
-            $("#grand_total").val(grandTotal || '');
+            $("#grand_total").val(grandTotal || 0);
             $("#grand_total_").val(grandTotal ? numbro(grandTotal).format({
                 thousandSeparated: true,
                 mantissa: 0
-            }) : '');
+            }) : 0);
         }
+
+        $(document)
+            .off('po:taxableChanged.tableItem')
+            .on('po:taxableChanged.tableItem', function() {
+                calculateTotal();
+            });
     })();
 </script>

@@ -605,6 +605,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.get_client_vendor');
 
+    Route::get('purchaseorder-get-client-vendor-by-id/{client_vendor}', [PurchaseOrderController::class, 'get_client_vendor_by_id'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.get_client_vendor_by_id');
+
     /**
      * Routenya Request Quotation
      */
