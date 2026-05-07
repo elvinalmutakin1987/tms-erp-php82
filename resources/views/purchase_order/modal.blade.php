@@ -63,8 +63,13 @@
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <label for="sign_path" class="form-label">Offering Vendor</label>
-                            <input class="form-control" type="file" id="sign_path" name="sign_path">
+                            <label for="vendor_offer_path" class="form-label">Offering Vendor</label>
+                            <input class="form-control" type="file" id="vendor_offer_path" name="vendor_offer_path">
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col" id="div-file">
+
                         </div>
                     </div>
                 </form>

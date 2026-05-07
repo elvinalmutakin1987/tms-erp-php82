@@ -165,3 +165,29 @@
         @endif
     </div>
 </div>
+<div class="row mb-2">
+    <div class="col">
+        @php
+            $html = '<table style="width: 100%">';
+            if ($request_quotation->count() > 0) {
+                foreach ($request_quotation->get() as $key => $value) {
+                    $html .= '<tr>';
+                    $html .= '<td>';
+                    $html .=
+                        '<a href="' .
+                        route('purchaseorder.export_file', $value->id) .
+                        '" target="_blank">' .
+                        $value->real_name .
+                        '</a>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            } else {
+                $html .= '<tr><td class="text-center">No quotation file</td></tr>';
+            }
+            $html .= '</table>';
+
+            echo $html;
+        @endphp
+    </div>
+</div>

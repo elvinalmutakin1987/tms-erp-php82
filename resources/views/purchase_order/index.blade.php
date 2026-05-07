@@ -275,6 +275,8 @@
 
                         $("#request_token").val(response.data.request_token);
 
+                        $("#div-file").html(response.html);
+
                         requisitionId = response.data.purchase_requisition_id;
                     },
                     error: function() {
@@ -742,6 +744,51 @@
                 });
             });
         });
+
+        function delete_file(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, Delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('purchaseorder.destroy_file', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#div-file').html("");
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
     <!--app JS-->
 @endsection

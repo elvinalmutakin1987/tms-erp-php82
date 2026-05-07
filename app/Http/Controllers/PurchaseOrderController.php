@@ -11,6 +11,7 @@ use App\Models\Maintenance_item;
 use App\Models\Mro_item;
 use App\Models\Purchase_order;
 use App\Models\Purchase_requisition;
+use App\Models\Request_quotation;
 use App\Models\Unit;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
@@ -24,6 +25,8 @@ use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class PurchaseOrderController extends Controller
 {
@@ -137,6 +140,7 @@ class PurchaseOrderController extends Controller
             $request->validate([
                 'date' => 'required',
                 'client_vendor_id' => 'required',
+                'vendor_offer_path' => 'file|mimes:pdf,doc,docx|max:2048',
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             $type = $purchase_requisition?->type ?? 'General';
@@ -207,6 +211,35 @@ class PurchaseOrderController extends Controller
                 }
             }
 
+            // if ($request->vendor_offer_path) {
+            //     $file = $request->file('vendor_offer_path');
+            //     $realname = $file->getClientOriginalName();
+            //     $extension = $file->getClientOriginalExtension();
+            //     $directory = "vendor_offer_path";
+            //     $filename = Str::random(24) . "." . $extension;
+            //     $file->storeAs($directory, $filename);
+            //     $purchase_order->vendor_offer_path = $directory . '/' . $filename;
+            //     $purchase_order->save();
+            // }
+
+            if ($request->has('vendor_over_path')) {
+                $file = $request->file('vendor_offer_path');
+                $realname = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $directory = "quotation_path";
+                $filename = Str::random(24) . "." . $extension;
+                $file->storeAs($directory, $filename);
+                Request_quotation::firstOrCreate([
+                    'purchase_requisition_id' => $request->purchase_requisition_id ?? null,
+                    'client_vendor_id' => $request->client_vendor_id,
+                    'request_token' => $request->request_token,
+                    'user_id' => Auth::user()->id,
+                    'real_name' => $realname,
+                    'quotation_path' => $directory . '/' . $filename,
+                    'notes' => $request->notes
+                ]);
+            }
+
             /**
              * Buat check ada approvalnya gak
              * Kalo ada statusnya jadi Approval.
@@ -250,12 +283,30 @@ class PurchaseOrderController extends Controller
     {
         $purchase_order_detail = $purchase_order->purchase_order_detail;
         $vendor = Client_vendor::find($purchase_order->client_vendor_id);
+        $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token);
+        $html = '<table style="width: 100%">';
+        if ($request_quotation->count() > 0) {
+            foreach ($request_quotation->get() as $key => $value) {
+                $html .= '<tr>';
+                $html .= '<td style="width:5%">';
+                $html .= '<a class="btn btn-sm btn-danger" href="#" onclick="delete_file(\'' . $value->id . '\')"><i class="bx bx-trash me-0"></i></a>';
+                $html .= '</td>';
+                $html .= '<td>';
+                $html .= '<a href="' . route('purchaseorder.export_file', $value->id) . '" target="_blank">' . $value->real_name . '</a>';
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+        } else {
+            $html .= '<tr><td class="text-center">No quotation file</td></tr>';
+        }
+        $html .= '</table>';
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $purchase_order,
             'purchase_order_detail' => $purchase_order_detail,
-            'vendor' => $vendor
+            'vendor' => $vendor,
+            'html' => $html
         ], 200);
     }
 
@@ -344,6 +395,41 @@ class PurchaseOrderController extends Controller
                         );
                     }
                 }
+            }
+
+            // if ($request->vendor_offer_path) {
+            //     $file = $request->file('vendor_offer_path');
+            //     $realname = $file->getClientOriginalName();
+            //     $extension = $file->getClientOriginalExtension();
+            //     $directory = "vendor_offer_path";
+            //     $filename = Str::random(24) . "." . $extension;
+            //     $file->storeAs($directory, $filename);
+            //     $purchase_order->vendor_offer_path = $directory . '/' . $filename;
+            //     $purchase_order->save();
+            // }
+            if ($request->has('vendor_over_path')) {
+                $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->first();
+                $filePath = $request_quotation->quotation_path;
+                if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+                $request_quotation->delete();
+
+                $file = $request->file('vendor_offer_path');
+                $realname = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $directory = "quotation_path";
+                $filename = Str::random(24) . "." . $extension;
+                $file->storeAs($directory, $filename);
+                Request_quotation::firstOrCreate([
+                    'purchase_requisition_id' => $request->purchase_requisition_id ?? null,
+                    'client_vendor_id' => $request->client_vendor_id,
+                    'request_token' => $purchase_order->request_token,
+                    'user_id' => Auth::user()->id,
+                    'real_name' => $realname,
+                    'quotation_path' => $directory . '/' . $filename,
+                    'notes' => $request->notes
+                ]);
             }
 
             /**
@@ -444,10 +530,6 @@ class PurchaseOrderController extends Controller
             }
             $uom = config('uom');
             $system_setting = config('system_setting');
-            // $order_prev_no = Generator::make()
-            //     ->type('po')
-            //     ->formatter($presenter)
-            //     ->preview();
             $kodeDokumen = 'TMS-SGT';
             $order_prev_no = running_number()
                 ->type('po')
@@ -621,8 +703,9 @@ class PurchaseOrderController extends Controller
         try {
             $purchase_order = Purchase_order::find($po_id);
             $purchase_order_detail = $purchase_order->purchase_order_detail;
+            $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->first();
             $view = 'purchase_order.detail';
-            return response()->view($view, compact('purchase_order', 'purchase_order_detail'), 200);
+            return response()->view($view, compact('purchase_order', 'purchase_order_detail', 'request_quotation'), 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
@@ -771,6 +854,66 @@ class PurchaseOrderController extends Controller
                 'data' => $client_vendor,
             ], 200);
         } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * export file
+     */
+
+    public function export_file(Request $request, Request_quotation $request_quotation)
+    {
+        try {
+            $path = public_path('storage/' . $request_quotation->quotation_path);
+            if (!file_exists($path)) {
+                abort(404, 'File not found.');
+            }
+            $mimeType = mime_content_type($path);
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $fileName = basename($path);
+            if ($mimeType === 'application/pdf' || $extension === 'pdf') {
+                return response()->file($path, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $request_quotation->quotation_path . '"',
+                ]);
+            }
+            return response()->download($path, $request_quotation->real_name, [
+                'Content-Type' => $mimeType ?: 'application/octet-stream',
+            ]);
+        } catch (HttpException $e) {
+            throw $e;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()
+                ->route('purchaseorder.index')
+                ->with('error', 'Failed to open file.');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy_file(Request_quotation $request_quotation)
+    {
+        DB::beginTransaction();
+        try {
+            $filePath = $request_quotation->quotation_path;
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $request_quotation->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $th->getMessage()

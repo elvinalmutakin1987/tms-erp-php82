@@ -609,6 +609,14 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.get_client_vendor_by_id');
 
+    Route::get('purchaseorder-export-file/{request_quotation}', [PurchaseOrderController::class, 'export_file'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.export_file');
+
+    Route::delete('purchaseorder-destroy-file/{request_quotation}', [PurchaseOrderController::class, 'destroy_file'])
+        ->middleware('role:superadmin|purchase_order')
+        ->name('purchaseorder.destroy_file');
+
     /**
      * Routenya Request Quotation
      */
