@@ -88,7 +88,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align:right" colspan="6"><b>Tax</b></td>
+                        <td style="text-align:right" colspan="6"><b>Tax
+                                ({{ $purchase_order->client_vendor->taxable }})</b></td>
                         <td style="text-align:right">
                             {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}
                         </td>
@@ -149,7 +150,8 @@
                         </td>
                     </tr>
                     <tr>
-                        <td style="text-align:right" colspan="7"><b>Tax</b></td>
+                        <td style="text-align:right" colspan="7"><b>Tax
+                                ({{ $purchase_order->client_vendor->taxable }})</b></td>
                         <td style="text-align:right">
                             {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}
                         </td>

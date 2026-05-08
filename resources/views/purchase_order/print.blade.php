@@ -536,9 +536,15 @@
                                     {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}</td>
                                 <td style="width: 10%; text-align: center; border: 1px solid #000;">
                                     {{ $d->uom }}</td>
-                                <td style="width: 30%; border: 1px solid #000;">
-                                    {{ $d->description ?? $d->mro_item->name }}
-                                </td>
+                                @if ($purchase_order->type == 'General')
+                                    <td style="width: 30%; border: 1px solid #000;">
+                                        {{ $d->desc_vendor ?? $d->description }}
+                                    </td>
+                                @else
+                                    <td style="width: 30%; border: 1px solid #000;">
+                                        {{ $d->desc_vendor ?? $d->mro_item->name }}
+                                    </td>
+                                @endif
                                 <td style="width: 15%; text-align: right; border: 1px solid #000;">
                                     {{ $d->price ? Number::format($d->price, precision: 0) : '' }}</td>
                                 <td style="width: 15%; text-align: right; border: 1px solid #000;">
@@ -562,14 +568,16 @@
                                 {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
                             </td>
                         </tr>
-                        <tr>
-                            <td style="text-align: left; border: 1px solid #000;">
-                                <b>VAT ({{ $system_setting['tax'] ?? 10 }}%)</b>
-                            </td>
-                            <td style="text-align: right; border: 1px solid #000;">
-                                {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}
-                            </td>
-                        </tr>
+                        @if ($purchase_order->client_vendor->taxable == 'PKP')
+                            <tr>
+                                <td style="text-align: left; border: 1px solid #000;">
+                                    <b>VAT ({{ $system_setting['tax'] ?? 10 }}%)</b>
+                                </td>
+                                <td style="text-align: right; border: 1px solid #000;">
+                                    {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}
+                                </td>
+                            </tr>
+                        @endif
                         <tr>
                             <td style="text-align: left; border: 1px solid #000;">
                                 <b>Grand Total</b>

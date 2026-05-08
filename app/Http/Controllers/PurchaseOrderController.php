@@ -27,6 +27,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PurchaseOrderController extends Controller
 {
@@ -700,11 +701,72 @@ class PurchaseOrderController extends Controller
      */
     public function print(Request $request, Purchase_order $purchase_order)
     {
+        // $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')->first();
+        // $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        // $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        // $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        // $system_setting = config('system_setting');
+        // $pdf = Pdf::loadView('purchase_order.print', [
+        //     'purchase_order' => $purchase_order,
+        //     'purchase_order_detail' => $purchase_order->purchase_order_detail,
+        //     'approval_flow' => $approval_flow,
+        //     'approval_step' => $approval_step,
+        //     'approval_process' => $approval_process,
+        //     'approval_status' => $approval_status,
+        //     'system_setting' => $system_setting
+        // ])->setPaper('a4', 'portrait');
+
+        // // WAJIB: render dulu
+        // $dompdf = $pdf->getDomPDF();
+        // $dompdf->render();
+
+        // // Ambil canvas + font
+        // $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        // $fontMetrics = $dompdf->getFontMetrics();
+        // $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // $width  = $canvas->get_width();
+        // $height = $canvas->get_height();
+
+        // // Tulis nomor halaman ke semua halaman
+        // $canvas->page_text(
+        //     $width - 120,          // X: posisi kanan footer
+        //     $height - 35,          // Y: posisi footer bawah
+        //     "Page {PAGE_NUM} of {PAGE_COUNT}",
+        //     $font,
+        //     10,
+        //     [0, 0, 0]
+        // );
+
+        // /**
+        //  * Buat check statusnya, kalo draft, open, approval, cancel
+        //  * nanti ada watermarknya
+        //  */
+        // $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
+        // if (in_array($purchase_order->status, $status, true)) {
+        //     $w = $canvas->get_width();
+        //     $h = $canvas->get_height();
+        //     $font = $fontMetrics->getFont('Helvetica', 'bold');
+        //     $size = 48;
+        //     $text = "Status : " . $purchase_order->status;
+        //     $x = ($w / 2) - 100;
+        //     $y = $h / 2 - 350;
+        //     $text = $purchase_order->status;
+        //     $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+        // }
+
+        // $safeFilename = Str::of($purchase_order->order_no)
+        //     ->replace(['/', '\\'], '-')   // ganti 
+        //     ->toString();
+        // return $pdf->stream("report-{$safeFilename}.pdf");
+
         $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+
         $system_setting = config('system_setting');
+
         $pdf = Pdf::loadView('purchase_order.print', [
             'purchase_order' => $purchase_order,
             'purchase_order_detail' => $purchase_order->purchase_order_detail,
@@ -720,43 +782,82 @@ class PurchaseOrderController extends Controller
         $dompdf->render();
 
         // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $canvas = $dompdf->getCanvas();
         $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
 
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        // Tulis nomor halaman ke semua halaman
+        // ===============================
+        // QR CODE LANGSUNG TANPA SIMPAN FILE
+        // ===============================
+
+        $qrText = 'PO ini telah disetujui secara digital';
+
+        $qrImage = QrCode::format('png')
+            ->size(150)
+            ->margin(1)
+            ->generate($qrText);
+
+        $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+        // Posisi QR Code di atas page number
+        $qrSize = 55;
+        $qrX = $width - 120;
+        $qrY = $height - 100;
+
+        $canvas->image(
+            $qrBase64,
+            $qrX,
+            $qrY,
+            $qrSize,
+            $qrSize
+        );
+
+        // ===============================
+        // PAGE NUMBER
+        // ===============================
         $canvas->page_text(
-            $width - 120,          // X: posisi kanan footer
-            $height - 35,          // Y: posisi footer bawah
+            $width - 120,
+            $height - 35,
             "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
+            $fontNormal,
             10,
             [0, 0, 0]
         );
 
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
+        // ===============================
+        // WATERMARK STATUS
+        // ===============================
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
+
         if (in_array($purchase_order->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
             $size = 48;
-            $text = "Status : " . $purchase_order->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
             $text = $purchase_order->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
         }
 
+        // ===============================
+        // SAFE FILENAME
+        // ===============================
         $safeFilename = Str::of($purchase_order->order_no)
-            ->replace(['/', '\\'], '-')   // ganti 
+            ->replace(['/', '\\'], '-')
             ->toString();
+
         return $pdf->stream("report-{$safeFilename}.pdf");
     }
 
