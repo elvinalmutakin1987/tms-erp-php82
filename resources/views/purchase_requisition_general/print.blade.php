@@ -457,12 +457,14 @@
                 {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
             </td>
         </tr>
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Tax</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
-            </td>
-        </tr>
+        @if ($purchase_requisition->tax != 0)
+            <tr>
+                <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Tax</b></td>
+                <td class="p-1 align-middle" style="text-align: right">
+                    {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
+                </td>
+            </tr>
+        @endif
         <tr>
             <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Grand Total</b></td>
             <td class="p-1 align-middle" style="text-align: right">

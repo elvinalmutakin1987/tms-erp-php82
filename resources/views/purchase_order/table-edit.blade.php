@@ -196,68 +196,72 @@
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
 
-        $('.select-select, #maintenance_item_, #mro_item_').each(function() {
-            const $el = $(this);
+        $('#tableItem .select-select')
+            .not('#client_vendor_id, #purchase_requisition_id, #urgency, #job')
+            .each(function() {
+                const $el = $(this);
 
-            let config = {
-                theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                    'style'),
-                selectOnClose: false,
-                minimumResultsForSearch: 0
-            };
-
-            if ($el.attr('id') === 'maintenance_item_') {
-                // config.allowClear = true;
-                config.ajax = {
-                    url: '{{ route('purchaseorder.get_maintenance_item') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
+                let config = {
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style'),
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0
                 };
-            }
 
-            if ($el.attr('id') === 'mro_item_') {
-                // config.allowClear = true;
-                config.ajax = {
-                    url: '{{ route('purchaseorder.get_mro_item') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
-                };
-            }
+                if ($el.attr('id') === 'maintenance_item_') {
+                    config.ajax = {
+                        url: '{{ route('purchaseorder.get_maintenance_item') }}',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                term: params.term || '',
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.results || data
+                            };
+                        },
+                        cache: true
+                    };
+                }
 
-            $el.select2(config).on('select2:open', function() {
-                setTimeout(function() {
-                    const $search = $('.select2-container--open .select2-search__field');
-                    $search.trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
+                if ($el.attr('id') === 'mro_item_') {
+                    config.ajax = {
+                        url: '{{ route('purchaseorder.get_mro_item') }}',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function(params) {
+                            return {
+                                term: params.term || '',
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function(data) {
+                            return {
+                                results: data.results || data
+                            };
+                        },
+                        cache: true
+                    };
+                }
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.select2(config).on('select2:open', function() {
+                    setTimeout(function() {
+                        const $search = $('.select2-container--open .select2-search__field');
+                        $search.trigger('focus');
+                        $('.select2-container--open').css('z-index', 1056);
+                    }, 0);
+                });
             });
-        });
 
         const $qty = $('#_qty_');
         const $price = $('#_price_');

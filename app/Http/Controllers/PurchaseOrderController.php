@@ -171,21 +171,21 @@ class PurchaseOrderController extends Controller
             $purchase_order = Purchase_order::firstOrCreate($data);
             if ($type == 'Equipment') {
                 if ($request->has('maintenance_item_id')) {
-                    $mro_item = Mro_item::find($request->mro_item_id);
-                    $type = $mro_item?->type ?? 'Good';
                     foreach ($request->maintenance_item_id as $i => $item) {
+                        $mro_item = Mro_item::find($request->mro_item_id[$i]);
+                        $type_ = $mro_item?->type ?? 'Good';
                         $purchase_order->purchase_order_detail()->create(
                             [
                                 'request_token' => $purchase_order->request_token,
                                 'maintenance_item_id' => $item,
                                 'mro_item_id' => $request->mro_item_id[$i],
-                                'type' => $type,
+                                'type' => $type_,
                                 'desc_vendor' => $request->desc_vendor[$i],
                                 'uom' => $request->uom[$i],
                                 'qty' => $request->qty[$i],
                                 'price' => $request->price[$i],
                                 'discount_item' => $request->discount_item[$i],
-                                'tax' => $system_setting['tax'],
+                                // 'tax' => $system_setting['tax'],
                                 'amount' => $request->amount[$i],
                             ]
                         );
@@ -204,7 +204,7 @@ class PurchaseOrderController extends Controller
                                 'qty' => $request->qty[$i],
                                 'price' => $request->price[$i],
                                 'discount_item' => $request->discount_item[$i],
-                                'tax' => $system_setting['tax'],
+                                // 'tax' => $system_setting['tax'],
                                 'amount' => $request->amount[$i]
                             ]
                         );
@@ -701,65 +701,6 @@ class PurchaseOrderController extends Controller
      */
     public function print(Request $request, Purchase_order $purchase_order)
     {
-        // $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')->first();
-        // $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
-        // $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
-        // $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
-        // $system_setting = config('system_setting');
-        // $pdf = Pdf::loadView('purchase_order.print', [
-        //     'purchase_order' => $purchase_order,
-        //     'purchase_order_detail' => $purchase_order->purchase_order_detail,
-        //     'approval_flow' => $approval_flow,
-        //     'approval_step' => $approval_step,
-        //     'approval_process' => $approval_process,
-        //     'approval_status' => $approval_status,
-        //     'system_setting' => $system_setting
-        // ])->setPaper('a4', 'portrait');
-
-        // // WAJIB: render dulu
-        // $dompdf = $pdf->getDomPDF();
-        // $dompdf->render();
-
-        // // Ambil canvas + font
-        // $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
-        // $fontMetrics = $dompdf->getFontMetrics();
-        // $font = $fontMetrics->getFont('Helvetica', 'normal');
-
-        // $width  = $canvas->get_width();
-        // $height = $canvas->get_height();
-
-        // // Tulis nomor halaman ke semua halaman
-        // $canvas->page_text(
-        //     $width - 120,          // X: posisi kanan footer
-        //     $height - 35,          // Y: posisi footer bawah
-        //     "Page {PAGE_NUM} of {PAGE_COUNT}",
-        //     $font,
-        //     10,
-        //     [0, 0, 0]
-        // );
-
-        // /**
-        //  * Buat check statusnya, kalo draft, open, approval, cancel
-        //  * nanti ada watermarknya
-        //  */
-        // $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
-        // if (in_array($purchase_order->status, $status, true)) {
-        //     $w = $canvas->get_width();
-        //     $h = $canvas->get_height();
-        //     $font = $fontMetrics->getFont('Helvetica', 'bold');
-        //     $size = 48;
-        //     $text = "Status : " . $purchase_order->status;
-        //     $x = ($w / 2) - 100;
-        //     $y = $h / 2 - 350;
-        //     $text = $purchase_order->status;
-        //     $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
-        // }
-
-        // $safeFilename = Str::of($purchase_order->order_no)
-        //     ->replace(['/', '\\'], '-')   // ganti 
-        //     ->toString();
-        // return $pdf->stream("report-{$safeFilename}.pdf");
-
         $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
@@ -777,11 +718,9 @@ class PurchaseOrderController extends Controller
             'system_setting' => $system_setting
         ])->setPaper('a4', 'portrait');
 
-        // WAJIB: render dulu
         $dompdf = $pdf->getDomPDF();
         $dompdf->render();
 
-        // Ambil canvas + font
         $canvas = $dompdf->getCanvas();
         $fontMetrics = $dompdf->getFontMetrics();
 
@@ -791,35 +730,34 @@ class PurchaseOrderController extends Controller
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        // ===============================
-        // QR CODE LANGSUNG TANPA SIMPAN FILE
-        // ===============================
+        if (in_array($purchase_order->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+            $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+                'Nomor PO : ' . $purchase_order->order_no . "\n" .
+                'Tanggal : ' . Carbon::parse($purchase_order->date)->format('d-m-Y') . "\n" .
+                'Vendor : ' . optional($purchase_order->client_vendor)->name . "\n" .
+                'Total : ' . Number::format($purchase_order->grand_total, 0) . "\n" .
+                'Telah disetujui secara digital.';
 
-        $qrText = 'PO ini telah disetujui secara digital';
+            $qrImage = QrCode::format('png')
+                ->size(150)
+                ->margin(1)
+                ->generate($qrText);
 
-        $qrImage = QrCode::format('png')
-            ->size(150)
-            ->margin(1)
-            ->generate($qrText);
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
 
-        $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+            // Posisi QR Code di atas page number
+            $qrSize = 55;
+            $qrX = $width - 120;
+            $qrY = $height - 100;
 
-        // Posisi QR Code di atas page number
-        $qrSize = 55;
-        $qrX = $width - 120;
-        $qrY = $height - 100;
-
-        $canvas->image(
-            $qrBase64,
-            $qrX,
-            $qrY,
-            $qrSize,
-            $qrSize
-        );
-
-        // ===============================
-        // PAGE NUMBER
-        // ===============================
+            $canvas->image(
+                $qrBase64,
+                $qrX,
+                $qrY,
+                $qrSize,
+                $qrSize
+            );
+        }
         $canvas->page_text(
             $width - 120,
             $height - 35,
@@ -828,12 +766,7 @@ class PurchaseOrderController extends Controller
             10,
             [0, 0, 0]
         );
-
-        // ===============================
-        // WATERMARK STATUS
-        // ===============================
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
-
         if (in_array($purchase_order->status, $status, true)) {
             $size = 48;
             $text = $purchase_order->status;
@@ -850,10 +783,6 @@ class PurchaseOrderController extends Controller
                 [0.6, 0.6, 0.6]
             );
         }
-
-        // ===============================
-        // SAFE FILENAME
-        // ===============================
         $safeFilename = Str::of($purchase_order->order_no)
             ->replace(['/', '\\'], '-')
             ->toString();
@@ -871,57 +800,88 @@ class PurchaseOrderController extends Controller
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+
+        $system_setting = config('system_setting');
+
         $pdf = Pdf::loadView('purchase_order.print', [
             'purchase_order' => $purchase_order,
             'purchase_order_detail' => $purchase_order->purchase_order_detail,
             'approval_flow' => $approval_flow,
             'approval_step' => $approval_step,
             'approval_process' => $approval_process,
-            'approval_status' => $approval_status
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting
         ])->setPaper('a4', 'portrait');
 
-        // WAJIB: render dulu
         $dompdf = $pdf->getDomPDF();
         $dompdf->render();
 
-        // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $canvas = $dompdf->getCanvas();
         $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
 
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        // Tulis nomor halaman ke semua halaman
+        if (in_array($purchase_order->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+            $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+                'Nomor PO : ' . $purchase_order->order_no . "\n" .
+                'Tanggal : ' . Carbon::parse($purchase_order->date)->format('d-m-Y') . "\n" .
+                'Vendor : ' . optional($purchase_order->client_vendor)->name . "\n" .
+                'Total : ' . Number::format($purchase_order->grand_total, 0) . "\n" .
+                'Telah disetujui secara digital.';
+
+            $qrImage = QrCode::format('png')
+                ->size(150)
+                ->margin(1)
+                ->generate($qrText);
+
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+            // Posisi QR Code di atas page number
+            $qrSize = 55;
+            $qrX = $width - 120;
+            $qrY = $height - 100;
+
+            $canvas->image(
+                $qrBase64,
+                $qrX,
+                $qrY,
+                $qrSize,
+                $qrSize
+            );
+        }
         $canvas->page_text(
-            $width - 120,          // X: posisi kanan footer
-            $height - 35,          // Y: posisi footer bawah
+            $width - 120,
+            $height - 35,
             "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
+            $fontNormal,
             10,
             [0, 0, 0]
         );
-
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
         if (in_array($purchase_order->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
             $size = 48;
-            $text = "Status : " . $purchase_order->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
             $text = $purchase_order->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
-        }
 
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
         $safeFilename = Str::of($purchase_order->order_no)
-            ->replace(['/', '\\'], '-')   // ganti 
+            ->replace(['/', '\\'], '-')
             ->toString();
+
         return $pdf->stream("report-{$safeFilename}.pdf");
     }
 
@@ -993,6 +953,30 @@ class PurchaseOrderController extends Controller
                 'success' => true,
                 'title' => 'Deleted!',
                 'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Request to done
+     */
+    public function request_to_done(Request $request, Purchase_order $purchase_order)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase_order->status = 'Done';
+            $purchase_order->save();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Success!',
+                'message' => 'Status updated to Done'
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();

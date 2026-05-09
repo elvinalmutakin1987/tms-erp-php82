@@ -201,7 +201,7 @@
     </tfoot>
 </table>
 
-<script>
+{{-- <script>
     (() => {
         const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
@@ -621,6 +621,457 @@
             renumberRows();
             calculateTotal();
 
+        };
+
+        window.initPurchaseOrderItemTable();
+    })();
+</script> --}}
+
+<script>
+    (() => {
+        const tax_ = {{ $system_setting['tax'] }};
+        const $table = $('#tableItem');
+
+        window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
+
+        function initGenPOSelect2($scope) {
+            const $targetScope = $scope && $scope.length ? $scope : $table;
+
+            $targetScope.find('select.select-select').each(function() {
+                const $el = $(this);
+
+                // Safety guard: jangan pernah init ulang select utama modal dari partial table ini
+                if (!$el.closest('#tableItem').length) {
+                    return;
+                }
+
+                if ($el.is('#client_vendor_id, #purchase_requisition_id, #urgency, #job')) {
+                    return;
+                }
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.off('.genPOSelect2');
+
+                $el.select2({
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ?
+                        $el.data('width') : ($el.hasClass('w-100') ? '100%' : 'style'),
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0,
+                });
+
+                $el.on('select2:open.genPOSelect2', function() {
+                    setTimeout(function() {
+                        const $search = $(
+                            '.select2-container--open .select2-search__field');
+
+                        if ($search.length) {
+                            $search.trigger('focus');
+                        }
+
+                        $('.select2-container--open').css('z-index', 1056);
+                    }, 0);
+                });
+
+                $el.on('select2:close.genPOSelect2', function() {
+                    $(this).blur();
+
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                });
+            });
+        }
+
+        function escapeAttr(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        initGenPOSelect2($table);
+
+        const $qty = $('#_qty_');
+        const $price = $('#_price_');
+        const $discount_item = $('#_discount_item_');
+
+        let isFmt = false;
+        let userDecSep = null;
+
+        function sanitize(s) {
+            return (s ?? '').toString().replace(/[^0-9.,]/g, '');
+        }
+
+        function groupThousands(digits, sep) {
+            digits = digits.replace(/^0+(?=\d)/, '');
+
+            if (digits === '') {
+                digits = '0';
+            }
+
+            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+        }
+
+        function countDigitsLeft(str, pos) {
+            return (str.slice(0, pos).match(/\d/g) || []).length;
+        }
+
+        function caretByDigits(str, digitCount) {
+            let c = 0;
+
+            for (let i = 0; i < str.length; i++) {
+                if (/\d/.test(str[i])) {
+                    c++;
+                }
+
+                if (c >= digitCount) {
+                    return i + 1;
+                }
+            }
+
+            return str.length;
+        }
+
+        function textKeyDown(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) {
+                return;
+            }
+
+            const okNav = [
+                'Backspace',
+                'Delete',
+                'ArrowLeft',
+                'ArrowRight',
+                'Home',
+                'End',
+                'Tab',
+                'Enter'
+            ];
+
+            if (okNav.includes(e.key)) {
+                return;
+            }
+
+            if (/^[0-9.,]$/.test(e.key)) {
+                return;
+            }
+
+            e.preventDefault();
+        }
+
+        function textInput(key, e) {
+            if (isFmt) {
+                return;
+            }
+
+            isFmt = true;
+
+            const el = e.target;
+            const raw = el.value || '';
+            const caretRaw = typeof el.selectionStart === 'number' ?
+                el.selectionStart :
+                raw.length;
+
+            const oe = e.originalEvent || e;
+            const inserted = oe && typeof oe.data === 'string' ?
+                oe.data :
+                '';
+
+            const prevDecSep = userDecSep;
+            const justTypedSep = inserted === '.' || inserted === ',';
+
+            const san = sanitize(raw);
+            const leftSan = sanitize(raw.slice(0, caretRaw));
+            const caretSan = leftSan.length;
+
+            if (userDecSep && !san.includes(userDecSep)) {
+                userDecSep = null;
+            }
+
+            const justSetDecSep = !prevDecSep && justTypedSep;
+
+            if (justSetDecSep) {
+                userDecSep = inserted;
+            }
+
+            const digitsLeft = countDigitsLeft(san, caretSan);
+
+            let intDigits = '';
+            let fracDigits = '';
+            let keepDec = false;
+
+            if (userDecSep && san.includes(userDecSep)) {
+                const pos = san.indexOf(userDecSep);
+
+                keepDec = true;
+                intDigits = san.slice(0, pos).replace(/[.,]/g, '');
+                fracDigits = san.slice(pos + 1).replace(/[.,]/g, '');
+
+                if (intDigits === '') {
+                    intDigits = '0';
+                }
+            } else {
+                intDigits = san.replace(/[.,]/g, '');
+            }
+
+            const thousandsSep = userDecSep ?
+                (userDecSep === ',' ? '.' : ',') :
+                ',';
+
+            const formattedInt = groupThousands(intDigits, thousandsSep);
+            const formatted = keepDec ?
+                formattedInt + userDecSep + fracDigits :
+                formattedInt;
+
+            el.value = formatted;
+
+            if (typeof el.setSelectionRange === 'function') {
+                if (justSetDecSep && keepDec) {
+                    const decPosNew = formatted.indexOf(userDecSep);
+                    const newCaret = decPosNew + 1;
+
+                    el.setSelectionRange(newCaret, newCaret);
+                } else {
+                    const newCaret = caretByDigits(formatted, digitsLeft);
+
+                    el.setSelectionRange(newCaret, newCaret);
+                }
+            }
+
+            isFmt = false;
+
+            $('#' + key).val(numbro.unformat(el.value));
+        }
+
+        $qty.off('.genPOInput').on('keydown.genPOInput', function(e) {
+            textKeyDown(e);
+        });
+
+        $qty.on('input.genPOInput', function(e) {
+            textInput('_qty', e);
+            calculateAmount();
+        });
+
+        $price.off('.genPOInput').on('keydown.genPOInput', function(e) {
+            textKeyDown(e);
+        });
+
+        $price.on('input.genPOInput', function(e) {
+            textInput('_price', e);
+            calculateAmount();
+        });
+
+        $discount_item.off('.genPOInput').on('keydown.genPOInput', function(e) {
+            textKeyDown(e);
+        });
+
+        $discount_item.on('input.genPOInput', function(e) {
+            textInput('_discount_item', e);
+            calculateAmount();
+        });
+
+        $('#addItemButton').off('click.genPOAdd').on('click.genPOAdd', function() {
+            const tbody = $('#tableItem > tbody');
+
+            const type = $('#_type').val();
+            const description = $('#_description').val();
+            const desc_vendor = $('#_desc_vendor').val();
+            const uom = $('#_uom').val();
+
+            const _qty = $('#_qty').val();
+            const _qty_ = $('#_qty_').val();
+
+            const _price = $('#_price').val();
+            const _price_ = $('#_price_').val();
+
+            const _discount_item = $('#_discount_item').val();
+            const _discount_item_ = $('#_discount_item_').val();
+
+            const _amount = $('#_amount').val();
+            const _amount_ = $('#_amount_').val();
+
+            const newRow = `
+                <tr>
+                    <td class="p-1 align-middle row-number">
+                        #
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <select class="form-select select-select detail-type" name="type[]">
+                            <option value="Good" ${type == 'Good' ? 'selected' : ''}>Good</option>
+                            <option value="Service" ${type == 'Service' ? 'selected' : ''}>Service</option>
+                        </select>
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control order" name="order[]">
+                        <input type="text" class="form-control" name="description[]" readonly value="${escapeAttr(description)}">
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" name="desc_vendor[]" value="${escapeAttr(desc_vendor)}">
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" name="uom[]" readonly value="${escapeAttr(uom)}">
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="qty[]" readonly value="${escapeAttr(_qty)}">
+                        <input type="text" class="form-control" name="__qty[]" readonly value="${escapeAttr(_qty_)}" style="text-align: right;">
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="price[]" readonly value="${escapeAttr(_price)}">
+                        <input type="text" class="form-control" name="__price[]" readonly value="${escapeAttr(_price_)}" style="text-align: right;">
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="discount_item[]" readonly value="${escapeAttr(_discount_item)}">
+                        <input type="text" class="form-control" name="__discount_item[]" readonly value="${escapeAttr(_discount_item_)}" style="text-align: right;">
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="amount[]" readonly value="${escapeAttr(_amount)}">
+                        <input type="text" class="form-control" name="__amount[]" readonly value="${escapeAttr(_amount_)}" style="text-align: right;">
+                    </td>
+
+                    <td class="text-center p-1 align-middle">
+                        <div class="row row-cols-auto g-3">
+                            <div class="col">
+                                <button type="button"
+                                    class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row"></button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            `;
+
+            const $newRow = $(newRow);
+
+            tbody.append($newRow);
+
+            initGenPOSelect2($newRow);
+
+            $('#_qty').val('');
+            $('#_qty_').val('');
+
+            $('#_price').val('');
+            $('#_price_').val('');
+
+            $('#_discount_item').val('');
+            $('#_discount_item_').val('');
+
+            $('#_amount').val('');
+            $('#_amount_').val('');
+
+            $('#_description').val('');
+            $('#_desc_vendor').val('');
+
+            window.initPurchaseOrderItemTable();
+        });
+
+        function renumberRows() {
+            let no = 1;
+
+            $('#tableItem > tbody > tr').each(function() {
+                if ($(this).hasClass('fixed-row')) {
+                    $(this).find('.row-number').text('');
+                    $(this).find('.order').val('');
+                    return;
+                }
+
+                $(this).find('.row-number').text(no);
+                $(this).find('.order').val(no);
+
+                no++;
+            });
+        }
+
+        $('#tableItem').off('click.genPODelete', '.delete-row').on('click.genPODelete', '.delete-row', function() {
+            $(this).closest('tr').remove();
+
+            window.initPurchaseOrderItemTable();
+        });
+
+        function calculateAmount() {
+            const qty = parseFloat($('#_qty').val()) || 0;
+            const price = parseFloat($('#_price').val()) || 0;
+            const discount_item = parseFloat($('#_discount_item').val()) || 0;
+
+            const amount = (qty * price) - discount_item;
+
+            $('#_discount_item').val(discount_item);
+            $('#_discount_item_').val(numbro(discount_item).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
+
+            $('#_amount').val(amount);
+            $('#_amount_').val(numbro(amount).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }));
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            let discount = 0;
+
+            $('input[name="amount[]"]').each(function() {
+                total += parseFloat($(this).val()) || 0;
+            });
+
+            $('input[name="discount_item[]"]').each(function() {
+                discount += parseFloat($(this).val()) || 0;
+            });
+
+            let tax = 0;
+            let grandTotal = 0;
+
+            if (total > 0) {
+                if (window.poState.taxable == 'PKP') {
+                    tax = tax_ / 100 * total;
+                }
+
+                grandTotal = total + tax;
+            }
+
+            $('#total').val(total || 0);
+            $('#total_').val(total ? numbro(total).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : 0);
+
+            $('#discount').val(discount || 0);
+            $('#discount_').val(discount ? numbro(discount).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : 0);
+
+            $('#tax').val(tax || 0);
+            $('#tax_').val(tax ? numbro(tax).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : 0);
+
+            $('#grand_total').val(grandTotal || 0);
+            $('#grand_total_').val(grandTotal ? numbro(grandTotal).format({
+                thousandSeparated: true,
+                mantissa: 0
+            }) : 0);
+        }
+
+        window.initPurchaseOrderItemTable = function() {
+            renumberRows();
+            calculateTotal();
         };
 
         window.initPurchaseOrderItemTable();

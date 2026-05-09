@@ -249,23 +249,30 @@
                             .val(response.data.purchase_requisition_id)
                             .trigger('change.select2');
 
+
                         const vendorId = response.data.client_vendor_id;
-                        const vendorText = response.vendor.name;
+                        const vendorText = response.vendor ? response.vendor.name :
+                            `Vendor #${vendorId}`;
 
                         const $vendor = $("#client_vendor_id");
 
-                        if (vendorId && vendorText) {
+                        initClientVendorSelect2(false);
+
+                        if (vendorId) {
                             const optionExists = $vendor.find('option').filter(function() {
                                 return String(this.value) === String(vendorId);
                             }).length > 0;
 
-                            if (optionExists) {
-                                $vendor.val(vendorId).trigger('change');
-                            } else {
+                            if (!optionExists) {
                                 const newOption = new Option(vendorText, vendorId, true, true);
-                                $vendor.append(newOption).trigger('change');
+                                $vendor.append(newOption);
                             }
+
+                            $vendor.val(vendorId).trigger('change.select2');
+
+                            loadClientVendorTaxable(vendorId);
                         }
+
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
 
@@ -634,7 +641,7 @@
 
         function gen_select2() {
             $('.select-select')
-                .not('#purchase_requisition_id, #client_vendor_id', '#urgency')
+                .not('#purchase_requisition_id, #client_vendor_id, #urgency')
                 .each(function() {
                     const $el = $(this);
 
@@ -757,6 +764,33 @@
             });
         }
 
+        function loadClientVendorTaxable(vendorId) {
+            if (!vendorId) {
+                window.poState.taxable = null;
+                $("#text-tax").text("Tax");
+                initItemTableAfterAjax();
+                return;
+            }
+
+            let url = '{{ route('purchaseorder.get_client_vendor_by_id', ':_id') }}';
+            url = url.replace(':_id', vendorId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    window.poState.taxable = response.data.taxable;
+
+                    $("#text-tax").text(`Tax (${window.poState.taxable})`);
+
+                    initItemTableAfterAjax();
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error get vendor taxable:', error);
+                }
+            });
+        }
+
         function initPurchaseRequisitionSelect2() {
             const $requisition = $('#purchase_requisition_id');
 
@@ -826,13 +860,14 @@
             });
 
             if (selectedValue) {
-                $vendor.val(selectedValue);
+                $vendor.val(selectedValue).trigger('change.select2');
             }
 
             $vendor.on('select2:open.clientVendor', function() {
                 setTimeout(function() {
                     const search = document.querySelector(
-                        '.select2-container--open .select2-search__field');
+                        '.select2-container--open .select2-search__field'
+                    );
 
                     if (search) {
                         search.focus({
@@ -846,36 +881,13 @@
 
             $vendor.on('change.clientVendor', function() {
                 const vendorId = $(this).val();
-
-                if (!vendorId) {
-                    window.poState.taxable = null;
-                    initItemTableAfterAjax();
-                    return;
-                }
-
-                let url = '{{ route('purchaseorder.get_client_vendor_by_id', ':_id') }}';
-                url = url.replace(':_id', vendorId);
-
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        window.poState.taxable = response.data.taxable;
-                        $("#text-tax").text(
-                            `Tax (${window.poState.taxable})`);
-                        initItemTableAfterAjax();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error get vendor taxable:', error);
-                    }
-                });
+                loadClientVendorTaxable(vendorId);
             });
 
             if (triggerTaxable && selectedValue) {
-                $vendor.trigger('change');
+                loadClientVendorTaxable(selectedValue);
             }
         }
-
         initPurchaseRequisitionSelect2();
         initClientVendorSelect2(false);
 

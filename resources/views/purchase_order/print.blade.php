@@ -557,18 +557,20 @@
                         @endforeach
                     </tbody>
                     <tfoot>
-                        <tr>
-                            <td colspan="5" rowspan='3' style="text-align: left; border: 1px solid #000;">
-                                {!! nl2br(e($purchase_order->notes)) !!}
-                            </td>
-                            <td style="text-align: left; border: 1px solid #000;">
-                                <b>Sub Total</b>
-                            </td>
-                            <td style="text-align: right; border: 1px solid #000;">
-                                {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
-                            </td>
-                        </tr>
+
                         @if ($purchase_order->client_vendor->taxable == 'PKP')
+                            <tr>
+                                <td colspan="5" rowspan='3' style="text-align: left; border: 1px solid #000;">
+                                    Notes: <br>
+                                    {!! nl2br(e($purchase_order->notes)) !!}
+                                </td>
+                                <td style="text-align: left; border: 1px solid #000;">
+                                    <b>Sub Total</b>
+                                </td>
+                                <td style="text-align: right; border: 1px solid #000;">
+                                    {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
+                                </td>
+                            </tr>
                             <tr>
                                 <td style="text-align: left; border: 1px solid #000;">
                                     <b>VAT ({{ $system_setting['tax'] ?? 10 }}%)</b>
@@ -577,15 +579,29 @@
                                     {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : '' }}
                                 </td>
                             </tr>
+                            <tr>
+                                <td style="text-align: left; border: 1px solid #000;">
+                                    <b>Grand Total</b>
+                                </td>
+                                <td style="text-align: right; border: 1px solid #000;">
+                                    {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : '' }}
+                                </td>
+                            </tr>
+                        @else
+                            <tr>
+                                <td colspan="5" style="text-align: left; border: 1px solid #000;">
+                                    Notes: <br>
+                                    {!! nl2br(e($purchase_order->notes)) !!}
+                                </td>
+                                <td style="text-align: left; border: 1px solid #000;">
+                                    <b>Grand Total</b>
+                                </td>
+                                <td style="text-align: right; border: 1px solid #000;">
+                                    {{ $purchase_order->total ? Number::format($purchase_order->grand_total, precision: 0) : '' }}
+                                </td>
+                            </tr>
                         @endif
-                        <tr>
-                            <td style="text-align: left; border: 1px solid #000;">
-                                <b>Grand Total</b>
-                            </td>
-                            <td style="text-align: right; border: 1px solid #000;">
-                                {{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : '' }}
-                            </td>
-                        </tr>
+
                     </tfoot>
                 </table>
             </td>
