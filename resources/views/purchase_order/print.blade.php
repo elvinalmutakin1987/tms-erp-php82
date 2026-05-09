@@ -482,7 +482,7 @@
                                 <tr>
                                     <td style="width: 30%">Fleet No.</td>
                                     <td style="width: 5%; text-align: center">:</td>
-                                    <td>{{ $purchase_order->purchase_requisition->unit->fleet_no ?? '' }}
+                                    <td>{{ $purchase_order->purchase_requisition->unit->vehicle_no ?? '' }}
                                     </td>
                                 </tr>
                                 <tr>
@@ -519,7 +519,7 @@
                             </th>
                             <th
                                 style="width: 15%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">
-                                Discount (%)
+                                Discount
                             </th>
                             <th
                                 style="width: 15%; text-align: center; border: 1px solid #000; background-color: #d9ecff;">

@@ -617,9 +617,9 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.destroy_file');
 
-    Route::put('purchaseorder-request-to-done', [PurchaseOrderController::class, 'request_to_done'])
+    Route::put('purchaseorder-close', [PurchaseOrderController::class, 'close'])
         ->middleware('role:superadmin|purchase_order')
-        ->name('purchaseorder.request_to_done');
+        ->name('purchaseorder.close');
 
     /**
      * Routenya Request Quotation

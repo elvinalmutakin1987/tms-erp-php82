@@ -416,6 +416,51 @@
             });
         }
 
+        function close_(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, Close it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('purchaseorder.close', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Closed!",
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#table-data').DataTable().ajax.reload(null, false);
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
         $('.saveButton').on('click', function() {
             disableButton();
             const status = $(this).val();
@@ -633,15 +678,17 @@
 
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
         });
 
         $('#cancelMonitoringButton').on('click', function() {
             $('#formMonitoring').modal('hide');
+            $('#divReceive').html("");
         });
 
         function gen_select2() {
             $('.select-select')
-                .not('#purchase_requisition_id, #client_vendor_id, #urgency')
+                .not('#purchase_requisition_id, #client_vendor_id')
                 .each(function() {
                     const $el = $(this);
 

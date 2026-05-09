@@ -95,6 +95,15 @@ class PurchaseOrderController extends Controller
                         endif;
                     endif;
 
+                    $purchase_requisition = Purchase_requisition::find($item->purchase_requisition_id);
+                    if ($purchase_requisition) {
+                        if ($purchase_requisition->status == 'Done'):
+                            $button .= '<li>
+                                    <a class="dropdown-item" href="#" onclick="close_(\'' . $item->id . '\')">Close</a>
+                                </li>';
+                        endif;
+                    }
+
                     $button .= '</ul>
                         </div>
                     </div>
@@ -212,7 +221,7 @@ class PurchaseOrderController extends Controller
                 }
             }
 
-            if ($request->has('vendor_over_path')) {
+            if ($request->has('vendor_offer_path')) {
                 $file = $request->file('vendor_offer_path');
                 $realname = $file->getClientOriginalName();
                 $extension = $file->getClientOriginalExtension();
@@ -387,13 +396,15 @@ class PurchaseOrderController extends Controller
                 }
             }
 
-            if ($request->has('vendor_over_path')) {
+            if ($request->has('vendor_offer_path')) {
                 $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->first();
-                $filePath = $request_quotation->quotation_path;
-                if ($filePath && Storage::disk('public')->exists($filePath)) {
-                    Storage::disk('public')->delete($filePath);
+                if ($request_quotation) {
+                    $filePath = $request_quotation->quotation_path;
+                    if ($filePath && Storage::disk('public')->exists($filePath)) {
+                        Storage::disk('public')->delete($filePath);
+                    }
+                    $request_quotation->delete();
                 }
-                $request_quotation->delete();
 
                 $file = $request->file('vendor_offer_path');
                 $realname = $file->getClientOriginalName();

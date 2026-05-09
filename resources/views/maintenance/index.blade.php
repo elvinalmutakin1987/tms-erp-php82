@@ -707,6 +707,7 @@
 
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
         });
 
         $('#cancelCostButton').on('click', function() {

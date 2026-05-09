@@ -608,6 +608,7 @@
 
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
         });
 
         $('#cancelReceiveButton').on('click', function() {

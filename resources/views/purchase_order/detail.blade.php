@@ -22,14 +22,26 @@
                         <span class="badge bg-success" style="font-size: 13px">{{ $purchase_order->status }}</span>
                     @endif
                 </td>
+                <td width="30%">Requisition No. <br>
+                    <b>
+                        @if ($purchase_order->purchase_requisition_id)
+                            {{ $purchase_order->purchase_requisition->requisition_no }} -
+                            {{ $purchase_order->purchase_requisition->department }} -
+                            {{ $purchase_order->user->username }}
+                        @else
+                            Direct PO
+                        @endif
+                    </b>
+                </td>
             </tr>
             <tr>
                 <td width="30%">Date <br>
                     <b>{{ $purchase_order->date }}</b>
                 </td>
-                <td width="30%">Requisition No. <br>
-                    <b> {{ $purchase_order->purchase_requisition->requisition_no }}</b>
+                <td width="30%">Vendor <br>
+                    <b>{{ $purchase_order->client_vendor->name ?? '' }}</b>
                 </td>
+                <td></td>
             </tr>
         </table>
     </div>
@@ -172,7 +184,7 @@
         @php
             $html = '<table style="width: 100%">';
             if ($request_quotation->count() > 0) {
-                foreach ($request_quotation->get() as $key => $value) {
+                foreach ($request_quotation as $key => $value) {
                     $html .= '<tr>';
                     $html .= '<td>';
                     $html .=
@@ -188,7 +200,6 @@
                 $html .= '<tr><td class="text-center">No quotation file</td></tr>';
             }
             $html .= '</table>';
-
             echo $html;
         @endphp
     </div>

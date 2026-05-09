@@ -455,6 +455,7 @@
 
         $('#cancelDetailButton').on('click', function() {
             $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
         });
 
         function gen_select2() {
