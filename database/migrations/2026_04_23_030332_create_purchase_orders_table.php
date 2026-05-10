@@ -41,6 +41,10 @@ return new class extends Migration
             $table->text('price_compare_path')->nullable();
             $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
             $table->string('cancel_notes')->nullable();
+            $table->string('payment_status', 20)->nullable(); //Waiting Invoice, Unpaid, Partially Paid, Paid
+            $table->date('invoice_date')->nullable();
+            $table->date('invoice_due_date')->nullable();
+            $table->string('invoice_no')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

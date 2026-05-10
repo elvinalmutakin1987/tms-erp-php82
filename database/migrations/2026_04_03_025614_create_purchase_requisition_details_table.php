@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('received_by', 30)->nullable();
             $table->string('received_note')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
             $table->foreign('mro_item_id')->references('id')->on('mro_items')->onDelete('cascade');

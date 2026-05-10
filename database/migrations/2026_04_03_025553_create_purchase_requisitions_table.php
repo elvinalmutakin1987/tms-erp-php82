@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('cancel_notes')->nullable();
             $table->text('job')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
             $table->foreign('maintenance_id')->references('id')->on('maintenances')->onDelete('cascade');

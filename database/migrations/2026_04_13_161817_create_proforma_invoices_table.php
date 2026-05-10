@@ -43,6 +43,7 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
             $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
             $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->text('quotation_path')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');

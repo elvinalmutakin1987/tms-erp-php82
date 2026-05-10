@@ -94,4 +94,9 @@ class Purchase_order extends Model implements Auditable
     {
         return $this->belongsTo(Client_vendor::class)->withDefault(['name' => null]);
     }
+
+    public function purchase_order_payment(): HasMany
+    {
+        return $this->hasMany(Purchase_order_payment::class);
+    }
 }

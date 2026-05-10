@@ -24,6 +24,7 @@ use App\Http\Controllers\MroItemController;
 use App\Http\Controllers\P2hController;
 use App\Http\Controllers\ProformaInvoiceController;
 use App\Http\Controllers\PurchaseOrderController;
+use App\Http\Controllers\PurchaseOrderPaymentController;
 use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\PurchaseRequisitionGeneralController;
 use App\Http\Controllers\RequestQuotationController;
@@ -652,4 +653,20 @@ Route::middleware(['auth'])->group(function () {
     Route::post('requestquotation-create-purchase-order/{request_quotation}', [RequestQuotationController::class, 'create_purchase_order'])
         ->middleware('role:superadmin|request_quotation')
         ->name('requestquotation.create_purchase_order');
+
+    /**
+     * Routenya Purchase Order Payment
+     */
+    Route::resource('purchaseorderpayment', PurchaseOrderPaymentController::class)
+        ->parameters(['purchaseorderpayment' => 'purchase_order_payment'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->names('purchaseorderpayment');
+
+    Route::get('purchaseorderpayment-get-client-vendor', [PurchaseOrderPaymentController::class, 'get_client_vendor'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.get_client_vendor');
+
+    Route::get('purchaseorderpayment-get-purchase-order', [PurchaseOrderPaymentController::class, 'get_purchase_order'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.get_purchase_order');
 });

@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\DB;
 use CleaniqueCoders\RunningNumber\Generator;
 use Illuminate\Support\Number;
 use Barryvdh\DomPDF\Facade\Pdf;
-// use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Illuminate\Support\Facades\Auth;
@@ -661,7 +660,7 @@ class PurchaseOrderController extends Controller
     }
 
     /**
-     * Ngambil data maintenance item
+     * Ngambil data vendor
      */
     public function get_client_vendor(Request $request)
     {

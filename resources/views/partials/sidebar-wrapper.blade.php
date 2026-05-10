@@ -139,7 +139,7 @@
          @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasAnyPermission(['request_quotation', 'purchase_order']))
              <li>
                  <a href="javascript:;" class="has-arrow">
-                     <div class="parent-icon"><i class="bx bx-dollar-circle"></i>
+                     <div class="parent-icon"><i class="bx bx-cart"></i>
                      </div>
                      <div class="menu-title">Procurement</div>
                  </a>
@@ -161,23 +161,64 @@
                  </ul>
              </li>
          @endif
-         <li>
-             <a href="javascript:;" class="has-arrow">
-                 <div class="parent-icon"><i class="bx bx-cart"></i>
-                 </div>
-                 <div class="menu-title">Finance</div>
-             </a>
-             <ul>
-                 <li> <a href="app-emailbox.html"><i class='bx bx-radio-circle'></i>CIC</a>
-                 </li>
-                 <li> <a href="app-emailbox.html"><i class='bx bx-radio-circle'></i>Invoice</a>
-                 </li>
-                 <li> <a href="app-emailbox.html"><i class='bx bx-radio-circle'></i>PO Payment</a>
-                 </li>
-                 <li> <a href="app-emailbox.html"><i class='bx bx-radio-circle'></i>Invoice Payment</a>
-                 </li>
-             </ul>
-         </li>
+         @if (Auth::user()->hasRole('superadmin') ||
+                 Auth::user()->hasAnyPermission(['invoice_receipt', 'purchase_order_payment']))
+             <li>
+             <li>
+                 <a href="javascript:;" class="has-arrow">
+                     <div class="parent-icon"><i class="bx bx-dollar-circle"></i>
+                     </div>
+                     <div class="menu-title">Finance</div>
+                 </a>
+                 <ul>
+                     <li>
+                         <a class="has-arrow" href="javascript:;"><i class='bx bx-radio-circle'></i>Purchase</a>
+                         <ul>
+                             @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_order_payment'))
+                                 <li>
+                                     <a href="auth-basic-signin.html"><i class='bx bx-radio-circle'></i>
+                                         Invoice Receipt
+                                     </a>
+                                 </li>
+                             @endif
+                             @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_order_payment'))
+                                 <li>
+                                     <a href="{{ route('purchaseorderpayment.index') }}"><i
+                                             class='bx bx-radio-circle'></i>
+                                         PO Payment
+                                     </a>
+                                 </li>
+                             @endif
+                         </ul>
+                     </li>
+                     <li>
+                         <a class="has-arrow" href="javascript:;"><i class='bx bx-radio-circle'></i>Sales</a>
+                         <ul>
+                             <li>
+                                 <a href="auth-basic-signin.html"><i class='bx bx-radio-circle'></i>
+                                     CIC
+                                 </a>
+                             </li>
+                             <li>
+                                 <a href="auth-basic-signin.html"><i class='bx bx-radio-circle'></i>
+                                     Proforma Invoice
+                                 </a>
+                             </li>
+                             <li>
+                                 <a href="auth-basic-signin.html"><i class='bx bx-radio-circle'></i>
+                                     Invoice
+                                 </a>
+                             </li>
+                             <li>
+                                 <a href="auth-basic-signin.html"><i class='bx bx-radio-circle'></i>
+                                     Invoice Payment
+                                 </a>
+                             </li>
+                         </ul>
+                     </li>
+                 </ul>
+             </li>
+         @endif
          <li>
              <a href="javascript:;" class="has-arrow">
                  <div class="parent-icon"><i class="bx bx-coin-stack"></i>

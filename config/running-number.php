@@ -116,6 +116,8 @@ return [
             'serv' => ResetPeriod::YEARLY->value,
             'main' => ResetPeriod::YEARLY->value,
             'insp' => ResetPeriod::YEARLY->value,
+            'po-payment' => ResetPeriod::YEARLY->value,
+            'inv-payment' => ResetPeriod::YEARLY->value,
         ],
     ],
 
