@@ -44,7 +44,8 @@ return new class extends Migration
             $table->string('payment_status', 20)->nullable(); //Waiting Invoice, Unpaid, Partially Paid, Paid
             $table->date('invoice_date')->nullable();
             $table->date('invoice_due_date')->nullable();
-            $table->string('invoice_no')->nullable();
+            $table->string('invoice_no', 30)->nullable();
+            $table->string('invoice_notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

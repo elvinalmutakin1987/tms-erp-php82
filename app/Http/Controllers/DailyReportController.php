@@ -81,8 +81,7 @@ class DailyReportController extends Controller
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
-                    $unit = Unit::find($item->unit_id);
-                    return $unit->vehicle_no;
+                    return $item->unit?->vehicle_no ?? '';
                 })
                 ->addColumn('total_km_duration', function ($item) {
                     if ($item->type != 'LCT') {

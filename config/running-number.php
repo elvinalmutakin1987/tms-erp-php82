@@ -39,7 +39,9 @@ return [
         'main', //Untuk penomoran maintenance
         'insp', //Untuk penomoran maintenance
         'pr', //Untuk penomoran maintenance
-        'pi', //Untuk penomoran proforma invoice
+        'pi', //Untuk penomoran proforma invoice,
+        'po-payment', //Untuk penomoran purchase order payment
+        'inv-payment', //Untuk penomoran invoice payment
     ],
 
     'model' => RunningNumber::class,

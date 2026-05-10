@@ -49,7 +49,7 @@ class PurchaseOrderController extends Controller
             if (request()->urgency != 'All') {
                 $purchase_order = $purchase_order->where('urgency', request()->urgency);
             }
-            $purchase_order = $purchase_order->orderBy('date', 'desc')->get();
+            $purchase_order = $purchase_order->orderBy('id', 'desc')->get();
             return DataTables::of($purchase_order)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -94,14 +94,21 @@ class PurchaseOrderController extends Controller
                         endif;
                     endif;
 
-                    $purchase_requisition = Purchase_requisition::find($item->purchase_requisition_id);
-                    if ($purchase_requisition) {
-                        if ($purchase_requisition->status == 'Done'):
+
+                    if ($item->purchase_requisition->purchase_requisition_id) {
+                        if ($item->purchase_requisition->status == 'Done') {
                             $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="close_(\'' . $item->id . '\')">Close</a>
                                 </li>';
-                        endif;
+                        }
+                    } else {
+                        if ($item->status == 'Approved') {
+                            $button .= '<li>
+                                    <a class="dropdown-item" href="#" onclick="close_(\'' . $item->id . '\')">Close</a>
+                                </li>';
+                        }
                     }
+
 
                     $button .= '</ul>
                         </div>
@@ -111,11 +118,9 @@ class PurchaseOrderController extends Controller
                     return $button;
                 })
                 ->addColumn('requisition_no', function ($item) {
-                    $purchase_requisition = Purchase_requisition::find($item->purchase_requisition_id);
-                    return $purchase_requisition?->requisition_no ?? '';
+                    return $item->purchase_requisition?->requisition_no ?? '';
                 })->addColumn('vendor', function ($item) {
-                    $vendor = Client_vendor::find($item->client_vendor_id);
-                    return $vendor?->name ?? '';
+                    return $item->client_vendor?->name ?? '';
                 })
                 ->make();
         }
@@ -776,7 +781,7 @@ class PurchaseOrderController extends Controller
             10,
             [0, 0, 0]
         );
-        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($purchase_order->status, $status, true)) {
             $size = 48;
             $text = $purchase_order->status;
@@ -871,7 +876,7 @@ class PurchaseOrderController extends Controller
             10,
             [0, 0, 0]
         );
-        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($purchase_order->status, $status, true)) {
             $size = 48;
             $text = $purchase_order->status;
@@ -981,6 +986,32 @@ class PurchaseOrderController extends Controller
         DB::beginTransaction();
         try {
             $purchase_order->status = 'Done';
+            $purchase_order->payment_status = 'Waiting Invoice';
+            $purchase_order->save();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Success!',
+                'message' => 'Status updated to Done'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Request to done
+     */
+    public function close(Request $request, Purchase_order $purchase_order)
+    {
+        DB::beginTransaction();
+        try {
+            $purchase_order->status = 'Done';
+            $purchase_order->payment_status = 'Waiting Invoice';
             $purchase_order->save();
             DB::commit();
             return response()->json([

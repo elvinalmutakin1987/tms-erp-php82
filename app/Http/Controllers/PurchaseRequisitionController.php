@@ -47,7 +47,7 @@ class PurchaseRequisitionController extends Controller
                 $purchase_requisition = $purchase_requisition->where('urgency', request()->urgency);
             }
             $purchase_requisition = $purchase_requisition->where('type', 'Equipment');
-            $purchase_requisition = $purchase_requisition->orderBy('date', 'desc')->get();
+            $purchase_requisition = $purchase_requisition->orderBy('id', 'desc')->get();
             return DataTables::of($purchase_requisition)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -113,12 +113,10 @@ class PurchaseRequisitionController extends Controller
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
-                    $unit = Unit::find($item->unit_id);
-                    return $unit->vehicle_no;
+                    return $item->unit?->vehicle_no ?? '';
                 })
                 ->addColumn('maintenance_no', function ($item) {
-                    $maintenance = Maintenance::find($item->maintenance_id);
-                    return $maintenance->maintenance_no ?? '';
+                    return $item->maintenance?->maintenance_no ?? '';
                 })
                 ->make();
         }
@@ -532,7 +530,7 @@ class PurchaseRequisitionController extends Controller
          * Buat check statusnya, kalo draft, open, approval, cancel
          * nanti ada watermarknya
          */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($purchase_requisition->status, $status, true)) {
             $w = $canvas->get_width();
             $h = $canvas->get_height();
@@ -594,7 +592,7 @@ class PurchaseRequisitionController extends Controller
          * Buat check statusnya, kalo draft, open, approval, cancel
          * nanti ada watermarknya
          */
-        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received', 'Done'];
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($purchase_requisition->status, $status, true)) {
             $w = $canvas->get_width();
             $h = $canvas->get_height();

@@ -95,7 +95,9 @@ class PurchaseOrderPaymentController extends Controller
                     return $button;
                 })
                 ->addColumn('vendor', function ($item) {
-                    return $item->client_vendor ? $item->client_vendor->name : '-';
+                    return $item->purchase_order->client_vendor ? $item->purchase_order->client_vendor->name : '';
+                })->addColumn('order_no', function ($item) {
+                    return $item->purchase_order ? $item->purchase_order->order_no : '';
                 })
                 ->make();
         }
@@ -125,8 +127,8 @@ class PurchaseOrderPaymentController extends Controller
         try {
             $request->validate([
                 'date' => 'required',
-                'client_vendor_id' => 'required',
-                'vendor_offer_path' => 'file|mimes:pdf,doc,docx|max:2048',
+                'total' => 'required',
+                'payment_path' => 'file|mimes:pdf,doc,docx,jpeg,jpg,png|max:2048',
             ]);
             $data = array_merge(
                 $request->only([
@@ -136,7 +138,8 @@ class PurchaseOrderPaymentController extends Controller
                     'total',
                     'bank',
                     'bank_account',
-                    'type'
+                    'type',
+                    'status'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -262,12 +265,199 @@ class PurchaseOrderPaymentController extends Controller
      */
     public function get_purchase_order(Request $request)
     {
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $purchase_order = Purchase_order::selectRaw("id, order_no as text, 
+            (select name from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as vendor,
+            invoice_date,
+            (select top from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as top,
+            grand_total,
+            (
+                select COALESCE(SUM(COALESCE(total, 0)), 0) from purchase_order_payments where purchase_order_payments.purchase_order_id = purchase_orders.id
+            ) as payment_total,
+            (
+                COALESCE(grand_total, 0) -
+                (
+                    SELECT COALESCE(SUM(COALESCE(total, 0)), 0)
+                    FROM purchase_order_payments
+                    WHERE purchase_order_payments.purchase_order_id = purchase_orders.id
+                )
+            ) AS balance,
+            client_vendor_id")
+                ->where('status', 'Done')
+                ->where('order_no', 'like', '%' . $term . '%')
+                ->orderBy('order_no')->simplePaginate(10);
+            $total_count = count($purchase_order);
+            $morePages = true;
+            $pagination_obj = json_encode($purchase_order);
+            if (empty($purchase_order->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $purchase_order->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
+        }
+    }
+
+    /**
+     * Ngambil prev nomornya
+     */
+    public function get_prev_no(Request $request)
+    {
         try {
-            $purchase_order = Purchase_order::whereIn('status', ['Done'])->get();
+            $presenter = new DatePrefixPresenter('Y/m', '/');
+            $payment_prev_no = Generator::make()
+                ->type('po-payment')
+                ->formatter($presenter)
+                ->preview();
             return response()->json([
                 'success' => true,
-                'data' => $purchase_order
+                'payment_prev_no' => $payment_prev_no
             ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Purchase_order_payment $purchase_order_payment)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order_payment')->first();
+        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $system_setting = config('system_setting');
+        $pdf = Pdf::loadView('purchase_order_payment.print', [
+            'purchase_order_payment' => $purchase_order_payment,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+
+        /**
+         * Buat check statusnya, kalo draft, open, approval, cancel
+         * nanti ada watermarknya
+         */
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
+        if (in_array($purchase_order_payment->status, $status, true)) {
+            $w = $canvas->get_width();
+            $h = $canvas->get_height();
+            $font = $fontMetrics->getFont('Helvetica', 'bold');
+            $size = 48;
+            $text = "Status : " . $purchase_order_payment->status;
+            $x = ($w / 2) - 100;
+            $y = $h / 2 - 350;
+            $text = $purchase_order_payment->status;
+            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+        }
+
+        $safeFilename = Str::of($purchase_order_payment->payment_no)
+            ->replace(['/', '\\'], '-')   // ganti 
+            ->toString();
+        return $pdf->stream("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Purchase_order_payment $purchase_order_payment)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order_payment')->first();
+        $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $system_setting = config('system_setting');
+        $pdf = Pdf::loadView('purchase_order_payment.print', [
+            'purchase_order_payment' => $purchase_order_payment,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting
+        ])->setPaper('a4', 'portrait');
+
+        // WAJIB: render dulu
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        // Ambil canvas + font
+        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+        $font = $fontMetrics->getFont('Helvetica', 'normal');
+
+        // Tulis nomor halaman ke semua halaman
+        $canvas->page_text(
+            255, // X (geser kiri/kanan kalau perlu)
+            58,  // Y (geser atas/bawah kalau perlu)
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $font,
+            10,
+            [0, 0, 0]
+        );
+        /**
+         * Buat check statusnya, kalo draft, open, approval, cancel
+         * nanti ada watermarknya
+         */
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
+        if (in_array($purchase_order_payment->status, $status, true)) {
+            $w = $canvas->get_width();
+            $h = $canvas->get_height();
+            $font = $fontMetrics->getFont('Helvetica', 'bold');
+            $size = 48;
+            $text = "Status : " . $purchase_order_payment->status;
+            $x = ($w / 2) - 100;
+            $y = $h / 2 - 350;
+            $text = $purchase_order_payment->status;
+            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
+        }
+
+        $safeFilename = Str::of($purchase_order_payment->payment_no)
+            ->replace(['/', '\\'], '-')   // ganti slash
+            ->toString();
+        return $pdf->download("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * ngambil detail purchase requisition
+     */
+    public function get_detail(Request $request, $po_id)
+    {
+        try {
+            $purchase_order_payment = Purchase_order_payment::find($po_id);
+            $view = 'purchase_order_payment.detail';
+            return response()->view($view, compact('purchase_order_payment'), 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,

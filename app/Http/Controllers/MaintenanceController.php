@@ -32,9 +32,7 @@ class MaintenanceController extends Controller
             if (request()->status != 'All') {
                 $maintenance = $maintenance->where('status', request()->status);
             }
-            // if (request()->client_vendor_id != 'All') {
-            //     $maintenance = $maintenance->where('client_vendor_id', request()->client_vendor_id);
-            // }
+
             if (request()->type != 'All') {
                 $maintenance = $maintenance->where('type', request()->type);
             }
@@ -108,8 +106,7 @@ class MaintenanceController extends Controller
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
-                    $unit = Unit::find($item->unit_id);
-                    return $unit->vehicle_no;
+                    return $item->unit?->vehicle_no ?? '';
                 })
                 ->addColumn('main_type', function ($item) {
                     $type = "";
@@ -287,16 +284,11 @@ class MaintenanceController extends Controller
             $maintenance->maintenance_detail()->delete();
             if ($request->maintenance_item_id) {
                 foreach ($request->maintenance_item_id as $key => $item) {
-                    $maintenance->maintenance_detail()->create(
-                        [
-                            'maintenance_item_id' => $item,
-                        ],
-                        [
-                            'request_token' => $maintenance->request_token,
-                            'maintenance_item_id' => $request->maintenance_item_id[$key],
-                            'action' => $request->action[$key]
-                        ]
-                    );
+                    $maintenance->maintenance_detail()->create([
+                        'maintenance_item_id' => $item,
+                        'request_token' => $maintenance->request_token,
+                        'action' => $request->action[$key]
+                    ]);
                 }
             }
             DB::commit();

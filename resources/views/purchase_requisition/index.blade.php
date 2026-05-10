@@ -43,11 +43,12 @@
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select select-top" id="_urgency" name="_urgency">
-                                        <option value="All">All Urgency</option>
-                                        <option value="P4">P4</option>
-                                        <option value="P3">P3</option>
-                                        <option value="P2">P2</option>
-                                        <option value="P1">P1</option>
+                                        <option value="All">All Abbreviation</option>
+                                        <option value="P5">LP</option>
+                                        <option value="P4">MP</option>
+                                        <option value="P3">HP</option>
+                                        <option value="P2">U</option>
+                                        <option value="P1">TU</option>
                                     </select>
                                 </div>
                                 <div class="col-2">
@@ -76,7 +77,7 @@
                                         <th>Maintenance Number</th>
                                         <th>Date</th>
                                         <th>Unit</th>
-                                        <th>Urgency </th>
+                                        <th>Abbreviation </th>
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -187,18 +188,17 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (data == "P4") {
-                                return '<span class="badge bg-success" style="font-size: 13px">' +
-                                    data + '</span>';
+                            if (data == "P5") {
+                                return '<span class="badge bg-success" style="font-size: 13px">LP</span>';
+                            } else if (data == "P4") {
+                                return '<span class="badge bg-info" style="font-size: 13px">MP</span>';
                             } else if (data == 'P3') {
-                                return '<span class="badge bg-primary" style="font-size: 13px">' +
-                                    data + '</span>';
+                                return '<span class="badge bg-primary" style="font-size: 13px">HP</span>';
                             } else if (data == 'P2') {
-                                return '<span class="badge bg-warning" style="font-size: 13px">' +
-                                    data + '</span>';
+                                return '<span class="badge bg-warning" style="font-size: 13px">U</span>';
                             } else {
-                                return '<span class="badge bg-danger" style="font-size: 13px">' +
-                                    data + '</span>';
+                                return '<span class="badge bg-danger" style="font-size: 13px">TU</span>';
+                                data + '</span>';
                             }
                         }
                     },

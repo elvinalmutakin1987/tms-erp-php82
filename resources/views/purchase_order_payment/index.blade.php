@@ -26,7 +26,7 @@
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
                                 <div class="col-4">
-                                    <select class="form-select select-top" id="vendor" name="vendor">
+                                    <select class="form-select w-100" id="vendor" name="vendor">
                                         <option value="All">All Vendor</option>
                                     </select>
                                 </div>
@@ -64,7 +64,7 @@
                                         <th>Purchase Order Number</th>
                                         <th>Vendor</th>
                                         <th>Date</th>
-                                        <th>Amount</th>
+                                        <th>Total</th>
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -93,6 +93,7 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
 
     <script>
         const saveButton1 = document.getElementById('saveButton1');
@@ -137,14 +138,14 @@
                         targets: '_all'
                     },
                     {
-                        data: 'requisition_no',
-                        name: 'requisition_no',
+                        data: 'payment_no',
+                        name: 'payment_no',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'maintenance_no',
-                        name: 'maintenance_no',
+                        data: 'order_no',
+                        name: 'order_no',
                         orderable: true,
                         searchable: true,
                     },
@@ -161,12 +162,18 @@
                         searchable: true,
                     },
                     {
-                        data: 'unit',
-                        name: 'unit',
+                        data: 'total',
+                        name: 'total',
                         orderable: true,
                         searchable: true,
+                        className: 'text-end',
+                        render: function(data, type, row) {
+                            return numbro(data ?? 0).format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            });
+                        }
                     },
-
                     {
                         data: 'status',
                         name: 'status',
@@ -207,51 +214,26 @@
             });
 
             $(document).on('click', '.editButton', function() {
-                requisitionId = $(this).data('id');
+                paymentId = $(this).data('id');
                 $('#modal-header').text('Edit Payment');
-                $('#id').val(requisitionId);
+                $('#id').val(paymentId);
                 let url = '{{ route('purchaseorderpayment.show', ':_id') }}';
-                url = url.replace(':_id', requisitionId);
+                url = url.replace(':_id', paymentId);
                 $.ajax({
                     url: url,
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit Requisition');
-                        $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#maintenance_id").val(response.data.maintenance_id).trigger(
-                            'change');
-                        $("#date").val(response.data.date);
-                        $("#notes").val(response.data.notes);
-                        $("#total").val(response.data.total ?? 0);
-                        $("#total_").val(numbro(response.data.total ?? 0).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        $("#discount").val(response.data.discount ?? 0);
-                        $("#discount_").val(numbro(response.data.discount ?? 0).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        $("#tax").val(response.data.tax ?? 0);
-                        $("#tax_").val(numbro(response.data.tax ?? 0).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        if ($("#tax").val() != 0) {
-                            taxable_state = true;
-                        } else {
-                            taxable_state = false;
+                        $('#modal-header').text('Edit Payment');
+
+                        const poId = response.data.purchase_order_id;
+
+                        initPurchaseOrderSelect2();
+
+                        if (poId) {
+                            setPurchaseOrderSelectedByAjax(poId);
                         }
-                        $("#grand_total").val(response.data.grand_total ?? 0);
-                        $("#grand_total_").val(numbro(response.data.grand_total ?? 0).format({
-                            thousandSeparated: true,
-                            mantissa: 0
-                        }));
-                        $("#urgency").val(response.data.urgency).trigger(
-                            'change');
-                        $("#request_token").val(response.data.request_token);
-                        $("#job").val(response.data.job).trigger('change');
+
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -297,11 +279,14 @@
                 theme: "bootstrap-5",
                 width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
                     'w-100') ? '100%' : 'style'),
+                placeholder: 'All Vendor',
+                allowClear: true,
                 selectOnClose: false,
                 minimumResultsForSearch: 0,
                 ajax: {
                     url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
                     dataType: 'json',
+                    delay: 250,
                     data: function(params) {
                         return {
                             term: params.term || '',
@@ -315,11 +300,8 @@
                     },
                     cache: true
                 }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
             });
 
             gen_select2();
@@ -441,6 +423,40 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
+
+            setTimeout(function() {
+                const isEdit = paymentId != '';
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('purchaseorderpayment.get_prev_no') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            const titleText = 'Add Payment';
+                            $('#modal-header').html(titleText + ' -&nbsp;<b>' +
+                                response.payment_prev_no +
+                                '</b>');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
+            }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
@@ -450,7 +466,6 @@
             enableButton();
             $("#request_token").val("");
             $('#tableItem tbody').empty();
-            enableButton();
         });
 
         $('#cancelButton').on('click', function() {
@@ -479,6 +494,68 @@
                     }
                 });
             });
+
+            $('#purchase_order_id').select2({
+                theme: "bootstrap-5",
+                width: $('#purchase_order_id').data('width') ? $('#purchase_order_id').data('width') : ($(
+                    '#purchase_order_id').hasClass(
+                    'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results || data
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            }).on('select2:select', function(e) {
+                const selectedData = e.params.data;
+                $('#vendor_name').val(selectedData.vendor);
+                $('#client_vendor_id').val(selectedData.client_vendor_id);
+                var inv_date = selectedData.invoice_date ?
+                    dayjs(selectedData.invoice_date) :
+                    dayjs();
+
+                // TOP: kalau null/kosong, dianggap 0 hari
+                var topDays = selectedData.top ?
+                    parseInt(selectedData.top) :
+                    0;
+
+                if (isNaN(topDays)) {
+                    topDays = 0;
+                }
+
+                // due_date = invoice_date + top hari
+                var due_date = inv_date.add(topDays, 'day');
+
+                // isi input
+                $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
+                $('#due_date').val(due_date.format('YYYY-MM-DD'));
+                $('#grand_total').val(numbro(selectedData.grand_total).format({
+                    thousandSeparated: true,
+                    mantissa: 0
+                }));
+                $('#balance').val(numbro(selectedData.balance).format({
+                    thousandSeparated: true,
+                    mantissa: 0
+                }));
+            });
         }
 
         function disableButton() {
@@ -489,6 +566,208 @@
         function enableButton() {
             saveButton1.disabled = false;
             saveButton2.disabled = false;
+        }
+
+        const $total = $('#total_');
+
+        let isFmt = false;
+        let userDecSep = null;
+
+        function sanitize(s) {
+            return (s ?? '').toString().replace(/[^0-9.,]/g, '');
+        }
+
+        function groupThousands(digits, sep) {
+            digits = digits.replace(/^0+(?=\d)/, '');
+            if (digits === '') digits = '0';
+            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+        }
+
+        function countDigitsLeft(str, pos) {
+            return (str.slice(0, pos).match(/\d/g) || []).length;
+        }
+
+        function caretByDigits(str, digitCount) {
+            let c = 0;
+            for (let i = 0; i < str.length; i++) {
+                if (/\d/.test(str[i])) c++;
+                if (c >= digitCount) return i + 1;
+            }
+            return str.length;
+        }
+
+        function textKeyDown(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            const okNav = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter'];
+            if (okNav.includes(e.key)) return;
+
+            if (/^[0-9.,]$/.test(e.key)) return;
+
+            e.preventDefault();
+        }
+
+        function textInput(key, e) {
+            if (isFmt) return;
+            isFmt = true;
+
+            const el = e.target;
+            const raw = el.value || '';
+            const caretRaw = (typeof el.selectionStart === 'number') ? el.selectionStart : raw.length;
+
+            const oe = e.originalEvent || e;
+            const inserted = (oe && typeof oe.data === 'string') ? oe.data : '';
+
+            const prevDecSep = userDecSep;
+            const justTypedSep = (inserted === '.' || inserted === ',');
+
+            const san = sanitize(raw);
+            const leftSan = sanitize(raw.slice(0, caretRaw));
+            const caretSan = leftSan.length;
+
+            if (userDecSep && !san.includes(userDecSep)) userDecSep = null;
+
+            const justSetDecSep = (!prevDecSep && justTypedSep);
+            if (justSetDecSep) userDecSep = inserted;
+
+            const digitsLeft = countDigitsLeft(san, caretSan);
+
+            let intDigits = '';
+            let fracDigits = '';
+            let keepDec = false;
+
+            if (userDecSep && san.includes(userDecSep)) {
+                const pos = san.indexOf(userDecSep);
+                keepDec = true;
+                intDigits = san.slice(0, pos).replace(/[.,]/g, '');
+                fracDigits = san.slice(pos + 1).replace(/[.,]/g, '');
+                if (intDigits === '') intDigits = '0';
+            } else {
+                intDigits = san.replace(/[.,]/g, '');
+            }
+
+            const thousandsSep = userDecSep ? (userDecSep === ',' ? '.' : ',') : ',';
+
+            const formattedInt = groupThousands(intDigits, thousandsSep);
+            const formatted = keepDec ? (formattedInt + userDecSep + fracDigits) : formattedInt;
+
+            el.value = formatted;
+
+            if (typeof el.setSelectionRange === 'function') {
+                if (justSetDecSep && keepDec) {
+                    const decPosNew = formatted.indexOf(userDecSep);
+                    const newCaret = decPosNew + 1;
+                    el.setSelectionRange(newCaret, newCaret);
+                } else {
+                    const newCaret = caretByDigits(formatted, digitsLeft);
+                    el.setSelectionRange(newCaret, newCaret);
+                }
+            }
+
+            isFmt = false;
+
+            $("#" + key).val(numbro.unformat(el.value));
+        }
+
+        $total.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $total.on('input', function(e) {
+            textInput("total", e);
+            checkTotalNotExceedBalance(e);
+        });
+
+        function cleanNumber(value) {
+            if (value === null || value === undefined || value === '') {
+                return 0;
+            }
+
+            return parseFloat(
+                value.toString()
+                .replace(/[^0-9.-]/g, '')
+            ) || 0;
+        }
+
+        function checkTotalNotExceedBalance(e) {
+            const el = e.target;
+
+            const totalValue = Number(numbro.unformat($('#total').val())) || 0;
+            const balanceValue = Number(numbro.unformat($('#balance').val())) || 0;
+
+            if (totalValue > balanceValue) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Payment Exceeds Balance',
+                    text: 'Please enter an amount less than or equal to the balance.',
+                    confirmButtonText: 'OK'
+                });
+
+                // kembalikan tampilan input total_ ke sejumlah balance
+                el.value = numbro(balanceValue).format({
+                    thousandSeparated: true
+                });
+
+                // kembalikan value asli total ke balance juga
+                $('#total').val(balanceValue);
+            }
+        }
+
+        function setPurchaseOrderSelectedByAjax(poId) {
+            if (!poId) {
+                return;
+            }
+
+            const $purchase_order = $('#purchase_order_id');
+
+            $.ajax({
+                url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    id: poId
+                },
+                success: function(response) {
+                    let selectedData = null;
+
+                    if (response.data) {
+                        selectedData = response.data;
+                    } else if (response.results && response.results.length > 0) {
+                        selectedData = response.results[0];
+                    } else if (Array.isArray(response) && response.length > 0) {
+                        selectedData = response[0];
+                    }
+
+                    if (!selectedData) {
+                        console.warn('Purchase Order tidak ditemukan dari AJAX Select2:', poId);
+                        return;
+                    }
+
+                    const selectedId = selectedData.id;
+                    const selectedText = selectedData.text;
+
+                    const optionExists = $purchase_order.find('option').filter(function() {
+                        return String(this.value) === String(selectedId);
+                    }).length > 0;
+
+                    if (!optionExists) {
+                        const newOption = new Option(selectedText, selectedId, true, true);
+                        $purchase_order.append(newOption);
+                    }
+
+                    $purchase_order.val(selectedId).trigger('change.select2');
+
+                    $purchase_order.trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: selectedData
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error get selected purchase order:', error);
+                }
+            });
         }
     </script>
     <!--app JS-->

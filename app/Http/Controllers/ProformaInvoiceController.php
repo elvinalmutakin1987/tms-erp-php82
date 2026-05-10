@@ -91,8 +91,7 @@ class ProformaInvoiceController extends Controller
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
-                    $unit = Unit::find($item->unit_id);
-                    return $unit->vehicle_no;
+                    return $item->unit?->vehicle_no ?? '';
                 })
                 ->make();
         }

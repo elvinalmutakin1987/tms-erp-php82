@@ -36,10 +36,11 @@
                         <div class="col">
                             <label for="urgency" class="form-label">Urgency</label>
                             <select class="form-select select-select" id="urgency" name="urgency">
-                                <option value="P4">P4</option>
-                                <option value="P3">P3</option>
-                                <option value="P2">P2</option>
-                                <option value="P1">P1</option>
+                                <option value="P5">LP</option>
+                                <option value="P4">MP</option>
+                                <option value="P3">HP</option>
+                                <option value="P2">U</option>
+                                <option value="P1">TU</option>
                             </select>
                         </div>
                         <div class="col">

@@ -618,7 +618,7 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.destroy_file');
 
-    Route::put('purchaseorder-close', [PurchaseOrderController::class, 'close'])
+    Route::put('purchaseorder-close/{purchase_order}', [PurchaseOrderController::class, 'close'])
         ->middleware('role:superadmin|purchase_order')
         ->name('purchaseorder.close');
 
@@ -669,4 +669,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaseorderpayment-get-purchase-order', [PurchaseOrderPaymentController::class, 'get_purchase_order'])
         ->middleware('role:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.get_purchase_order');
+
+    Route::get('purchaseorderpayment-get-prev-no', [PurchaseOrderPaymentController::class, 'get_prev_no'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.get_prev_no');
+
+    Route::get('purchaseorderpayment-print/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'print'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.print');
+
+    Route::get('purchaseorderpayment-export-pdf/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'export_pdf'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.export_pdf');
+
+    Route::get('purchaseorderpayment-get-detail/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'get_detail'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.get_detail');
 });

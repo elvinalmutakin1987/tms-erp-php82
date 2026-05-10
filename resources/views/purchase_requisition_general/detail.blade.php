@@ -37,6 +37,7 @@
                     <b>{{ $purchase_requisition->job }}</b>
                 </td>
             </tr>
+
         </table>
     </div>
 </div>
