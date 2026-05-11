@@ -712,63 +712,6 @@
                 $('#total').val(balanceValue);
             }
         }
-
-        function setPurchaseOrderSelectedByAjax(poId) {
-            if (!poId) {
-                return;
-            }
-
-            const $purchase_order = $('#purchase_order_id');
-
-            $.ajax({
-                url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
-                type: 'GET',
-                dataType: 'json',
-                data: {
-                    id: poId
-                },
-                success: function(response) {
-                    let selectedData = null;
-
-                    if (response.data) {
-                        selectedData = response.data;
-                    } else if (response.results && response.results.length > 0) {
-                        selectedData = response.results[0];
-                    } else if (Array.isArray(response) && response.length > 0) {
-                        selectedData = response[0];
-                    }
-
-                    if (!selectedData) {
-                        console.warn('Purchase Order tidak ditemukan dari AJAX Select2:', poId);
-                        return;
-                    }
-
-                    const selectedId = selectedData.id;
-                    const selectedText = selectedData.text;
-
-                    const optionExists = $purchase_order.find('option').filter(function() {
-                        return String(this.value) === String(selectedId);
-                    }).length > 0;
-
-                    if (!optionExists) {
-                        const newOption = new Option(selectedText, selectedId, true, true);
-                        $purchase_order.append(newOption);
-                    }
-
-                    $purchase_order.val(selectedId).trigger('change.select2');
-
-                    $purchase_order.trigger({
-                        type: 'select2:select',
-                        params: {
-                            data: selectedData
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error get selected purchase order:', error);
-                }
-            });
-        }
     </script>
     <!--app JS-->
 @endsection

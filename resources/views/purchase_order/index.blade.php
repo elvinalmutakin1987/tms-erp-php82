@@ -322,23 +322,23 @@
                 });
             });
 
-            $(document).on('click', '.monitoringButton', function() {
-                requisitionId = $(this).data('id');
-                $('#modal-receive-header').text('Monitoring Order');
-                $('#id').val(orderId);
-                let url = '{{ route('purchaseorder.get_monitoring', ':_id') }}';
-                url = url.replace(':_id', orderId);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#divMonitoring').html(response);
-                    },
-                    error: function() {
-                        alert('Error fetching data');
-                    }
-                });
-            });
+            // $(document).on('click', '.monitoringButton', function() {
+            //     requisitionId = $(this).data('id');
+            //     $('#modal-receive-header').text('Monitoring Order');
+            //     $('#id').val(orderId);
+            //     let url = '{{ route('purchaseorder.get_monitoring', ':_id') }}';
+            //     url = url.replace(':_id', orderId);
+            //     $.ajax({
+            //         url: url,
+            //         type: 'GET',
+            //         success: function(response) {
+            //             $('#divMonitoring').html(response);
+            //         },
+            //         error: function() {
+            //             alert('Error fetching data');
+            //         }
+            //     });
+            // });
 
             $(".datepicker").flatpickr();
 
@@ -358,29 +358,29 @@
                 $('#table-data').DataTable().draw();
             });
 
-            $.ajax({
-                url: '{{ route('purchaseorder.get_purchase_requisition') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#purchase_requisition_id').empty();
-                    $('#purchase_requisition_id').append(
-                        '<option value="">Direct PO</option>');
-                    $.each(response.data, function(index, purchase_requisition) {
-                        $('#purchase_requisition_id').append('<option value="' +
-                            purchase_requisition.id +
-                            '">' +
-                            purchase_requisition.requisition_no +
-                            '</option>');
-                    });
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
+            // $.ajax({
+            //     url: '{{ route('purchaseorder.get_purchase_requisition') }}',
+            //     type: 'GET',
+            //     success: function(response) {
+            //         $('#purchase_requisition_id').empty();
+            //         $('#purchase_requisition_id').append(
+            //             '<option value="">Direct PO</option>');
+            //         $.each(response.data, function(index, purchase_requisition) {
+            //             $('#purchase_requisition_id').append('<option value="' +
+            //                 purchase_requisition.id +
+            //                 '">' +
+            //                 purchase_requisition.requisition_no +
+            //                 '</option>');
+            //         });
+            //     },
+            //     error: function(xhr, status, error) {
+            //         Swal.fire({
+            //             icon: "error",
+            //             title: "Oops...",
+            //             text: error,
+            //         });
+            //     }
+            // });
 
             gen_select2();
         });
@@ -849,28 +849,99 @@
         }
 
         function initPurchaseRequisitionSelect2() {
-            const $requisition = $('#purchase_requisition_id');
+            // const $requisition = $('#purchase_requisition_id');
 
-            if (!$requisition.length) {
+            // if (!$requisition.length) {
+            //     return;
+            // }
+
+            // if ($requisition.hasClass('select2-hidden-accessible')) {
+            //     $requisition.select2('destroy');
+            // }
+
+            // $requisition.off('.purchaseRequisition');
+
+            // $requisition.select2({
+            //     theme: "bootstrap-5",
+            //     dropdownParent: $('#formModal'),
+            //     width: $requisition.data('width') ?
+            //         $requisition.data('width') : ($requisition.hasClass('w-100') ? '100%' : 'style'),
+            //     selectOnClose: false,
+            //     minimumResultsForSearch: 0,
+            // });
+
+            // $requisition.on('change.purchaseRequisition', function() {
+            //     requisitionId = $(this).val();
+            //     loadItemTable();
+            // });
+
+            const $purchase_requisition = $('#purchase_requisition_id');
+
+            if (!$purchase_requisition.length) {
                 return;
             }
 
-            if ($requisition.hasClass('select2-hidden-accessible')) {
-                $requisition.select2('destroy');
+            const selectedValue = $purchase_requisition.val();
+
+            if ($purchase_requisition.hasClass('select2-hidden-accessible')) {
+                $purchase_requisition.select2('destroy');
             }
 
-            $requisition.off('.purchaseRequisition');
+            $purchase_requisition.off('.clientVendor');
 
-            $requisition.select2({
+            $purchase_requisition.select2({
                 theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: $requisition.data('width') ?
-                    $requisition.data('width') : ($requisition.hasClass('w-100') ? '100%' : 'style'),
+                width: $('#purchase_requisition_id').data('width') ? $('#purchase_requisition_id').data('width') : (
+                    $(
+                        '#purchase_requisition_id').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: 'Direct PO',
+                allowClear: true,
                 selectOnClose: false,
-                minimumResultsForSearch: 0,
+                ajax: {
+                    url: '{{ route('purchaseorder.get_purchase_requisition') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results || data
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
             });
 
-            $requisition.on('change.purchaseRequisition', function() {
+            if (selectedValue) {
+                $purchase_requisition.val(selectedValue).trigger('change.select2');
+            }
+
+            $purchase_requisition.on('select2:open.purchaseRequisition', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $purchase_requisition.on('change.purchaseRequisition', function() {
                 requisitionId = $(this).val();
                 loadItemTable();
             });
@@ -893,14 +964,16 @@
 
             $vendor.select2({
                 theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: '100%',
+                width: $('#client_venodr_id').data('width') ? $('#client_venodr_id').data('width') : (
+                    $(
+                        '#client_venodr_id').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
                 selectOnClose: false,
-                minimumResultsForSearch: 0,
                 ajax: {
                     url: '{{ route('purchaseorder.get_client_vendor') }}',
                     dataType: 'json',
-                    delay: 250,
                     data: function(params) {
                         return {
                             term: params.term || '',
@@ -914,6 +987,11 @@
                     },
                     cache: true
                 }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
             });
 
             if (selectedValue) {

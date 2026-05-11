@@ -492,17 +492,38 @@ class PurchaseOrderController extends Controller
      */
     public function get_purchase_requisition(Request $request)
     {
-        try {
-            $purchase_requisition = Purchase_requisition::whereIn('status', ['Approved', 'Received'])->get();
-            return response()->json([
-                'success' => true,
-                'data' => $purchase_requisition
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        // try {
+        //     $purchase_requisition = Purchase_requisition::whereIn('status', ['Approved', 'Received'])->get();
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $purchase_requisition
+        //     ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $th->getMessage()
+        //     ], 400);
+        // }
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $purchase_requisition = Purchase_requisition::selectRaw("id, requisition_no as text")
+                ->whereIn('status', ['Approved', 'Received'])
+                ->where('requisition_no', 'like', '%' . $term . '%')
+                ->orderBy('id', 'asc')->simplePaginate(10);
+            $total_count = count($purchase_requisition);
+            $morePages = true;
+            $pagination_obj = json_encode($purchase_requisition);
+            if (empty($purchase_requisition->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $purchase_requisition->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 
