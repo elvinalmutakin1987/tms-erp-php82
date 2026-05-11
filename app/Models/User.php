@@ -80,4 +80,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Request_quotation::class);
     }
+
+    public function purchase_order_payment(): HasMany
+    {
+        return $this->hasMany(Purchase_order_payment::class);
+    }
 }

@@ -34,4 +34,9 @@ class Purchase_order_payment extends Model implements Auditable
     {
         return $this->belongsTo(Purchase_order::class);
     }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

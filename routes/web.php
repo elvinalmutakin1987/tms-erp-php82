@@ -685,4 +685,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('purchaseorderpayment-get-detail/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'get_detail'])
         ->middleware('role:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.get_detail');
+
+    Route::get('purchaseorderpayment-export-file/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'export_file'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.export_file');
+
+
+    Route::delete('purchaseorderpayment-destroy-file/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'destroy_file'])
+        ->middleware('role:superadmin|purchase_order_payment')
+        ->name('purchaseorderpayment.destroy_file');
 });

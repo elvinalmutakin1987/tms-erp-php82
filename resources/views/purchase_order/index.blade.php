@@ -259,14 +259,12 @@
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Requisition');
 
-                        $("#purchase_requisition_id")
-                            .val(response.data.purchase_requisition_id)
-                            .trigger('change.select2');
-
-
+                        /*
+                         * Select vendor
+                         * */
                         const vendorId = response.data.client_vendor_id;
                         const vendorText = response.vendor ? response.vendor.name :
-                            `Vendor #${vendorId}`;
+                            ``;
 
                         const $vendor = $("#client_vendor_id");
 
@@ -286,6 +284,36 @@
 
                             loadClientVendorTaxable(vendorId);
                         }
+                        /* End */
+
+                        /*
+                         * Select purchase requisition
+                         */
+                        const prId = response.data.purchase_requisition_id;
+                        const prText = response.purchase_requisition ? response
+                            .purchase_requisition.requisition_no :
+                            null;
+
+                        const $purchase_requisition = $("#purchase_requisition_id");
+
+                        initPurchaseRequisitionSelect2();
+
+                        if (prId) {
+                            const optionExists = $purchase_requisition.find('option').filter(
+                                function() {
+                                    return String(this.value) === String(
+                                        purchase_requisition);
+                                }).length > 0;
+
+                            if (!optionExists) {
+                                const newOption = new Option(prText, prId, true, true);
+                                $purchase_requisition.append(newOption);
+                            }
+
+                            $purchase_requisition.val(prId).trigger('change.select2');
+                        }
+
+                        /* End */
 
                         $("#date").val(response.data.date);
                         $("#notes").val(response.data.notes);
@@ -671,14 +699,21 @@
             enableButton();
             $("#request_token").val("");
             $('#div-table').html("");
-            $("#purchase_requisition_id").val('').trigger('change');
+            $("#purchase_requisition_id")
+                .val(null)
+                .empty()
+                .trigger('change');
+
+            $("#client_vendor_id")
+                .val(null)
+                .empty()
+                .trigger('change');
             $("#total").val('');
             $("#total_").val('');
             $("#tax").val('');
             $("#tax_").val('');
             $("#grand_total").val('');
             $("#grand_total_").val('');
-            enableButton();
             window.poState.taxable = null;
         });
 
@@ -849,32 +884,6 @@
         }
 
         function initPurchaseRequisitionSelect2() {
-            // const $requisition = $('#purchase_requisition_id');
-
-            // if (!$requisition.length) {
-            //     return;
-            // }
-
-            // if ($requisition.hasClass('select2-hidden-accessible')) {
-            //     $requisition.select2('destroy');
-            // }
-
-            // $requisition.off('.purchaseRequisition');
-
-            // $requisition.select2({
-            //     theme: "bootstrap-5",
-            //     dropdownParent: $('#formModal'),
-            //     width: $requisition.data('width') ?
-            //         $requisition.data('width') : ($requisition.hasClass('w-100') ? '100%' : 'style'),
-            //     selectOnClose: false,
-            //     minimumResultsForSearch: 0,
-            // });
-
-            // $requisition.on('change.purchaseRequisition', function() {
-            //     requisitionId = $(this).val();
-            //     loadItemTable();
-            // });
-
             const $purchase_requisition = $('#purchase_requisition_id');
 
             if (!$purchase_requisition.length) {
@@ -887,7 +896,7 @@
                 $purchase_requisition.select2('destroy');
             }
 
-            $purchase_requisition.off('.clientVendor');
+            $purchase_requisition.off('.purchaseOrder');
 
             $purchase_requisition.select2({
                 theme: "bootstrap-5",
@@ -1023,6 +1032,7 @@
                 loadClientVendorTaxable(selectedValue);
             }
         }
+
         initPurchaseRequisitionSelect2();
         initClientVendorSelect2(false);
 

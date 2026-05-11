@@ -285,6 +285,7 @@ class PurchaseOrderController extends Controller
     public function show(Purchase_order $purchase_order)
     {
         $purchase_order_detail = $purchase_order->purchase_order_detail;
+        $purchase_requisition = $purchase_order->purchase_requisition;
         $vendor = Client_vendor::find($purchase_order->client_vendor_id);
         $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token);
         $html = '<table style="width: 100%">';
@@ -309,6 +310,7 @@ class PurchaseOrderController extends Controller
             'data' => $purchase_order,
             'purchase_order_detail' => $purchase_order_detail,
             'vendor' => $vendor,
+            'purchase_requisition' => $purchase_requisition,
             'html' => $html
         ], 200);
     }

@@ -225,15 +225,84 @@
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Payment');
-
+                        /*
+                         * Select purchase requisition
+                         */
                         const poId = response.data.purchase_order_id;
+                        const poText = response.purchase_order ? response
+                            .purchase_order.order_no :
+                            null;
 
-                        initPurchaseOrderSelect2();
+                        const $purchase_order = $("#purchase_order_id");
+
+                        initPurchaseRequisitionSelect2();
 
                         if (poId) {
-                            setPurchaseOrderSelectedByAjax(poId);
+                            const optionExists = $purchase_order.find('option').filter(
+                                function() {
+                                    return String(this.value) === String($purchase_order);
+                                }).length > 0;
+
+                            if (!optionExists) {
+                                const newOption = new Option(poText, poId, true, true);
+                                $purchase_order.append(newOption);
+                            }
+
+                            $purchase_order.val(poId).trigger('change.select2');
+                        }
+                        /* End */
+
+                        var inv_date = response.purchase_order.invoice_date ?
+                            dayjs(response.purchase_order.invoice_date) :
+                            dayjs();
+
+                        var due_date = response.purchase_order.due_date ?
+                            dayjs(response.purchase_order.due_date) :
+                            dayjs();
+
+                        var date = response.data.date ?
+                            dayjs(response.data.date) :
+                            dayjs();
+
+                        var topDays = response.client_vendor.top ?
+                            parseInt(response.client_vendor.top) :
+                            0;
+
+                        if (isNaN(topDays)) {
+                            topDays = 0;
                         }
 
+                        var due_date = inv_date.add(topDays, 'day');
+
+                        $('#vendor_name').val(response.client_vendor.name);
+                        $('#bank').val(response.data.bank).trigger('change');
+                        $('#bank_account').val(response.data.bank_account);
+                        $('#bank_sender').val(response.data.bank_sender + ' - ' + response.data
+                            .bank_account_sender).trigger('change');
+                        $('#client_vendor_id').val(response.data.client_vendor_id);
+                        $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
+                        $('#due_date').val(due_date.format('YYYY-MM-DD'));
+                        $('#date').val(date.format('YYYY-MM-DD'));
+                        $('#grand_total').val(numbro(response.purchase_order.grand_total)
+                            .format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            }));
+                        $('#grand_total_').val(response.purchase_order.grand_total);
+                        $('#balance').val(numbro(response.purchase_order.balance).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
+                        $('#balance_').val(response.purchase_order.balance);
+                        $('#total_').val(numbro(response.data.total)
+                            .format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            }));
+                        $('#total').val(response.data.total);
+                        $('#notes').val(response.data.notes);
+                        $("#div-file").html(response.html);
+                        $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -463,13 +532,38 @@
             paymentId = '';
             orderId = '';
             vendorId = '';
-            enableButton();
             $("#request_token").val("");
-            $('#tableItem tbody').empty();
+            $('#vendor_name').val("");
+            $('#client_vendor_id').val("");
+            $('#invoice_date').val("");
+            $('#due_date').val("");
+            $('#date').val("");
+            $('#grand_total').val("");
+            $('#grand_total_').val("");
+            $('#balance').val("");
+            $('#balance_').val("");
+            $('#total').val("");
+            $('#total_').val("");
+            $('#notes').val("");
+            $("#bank")
+                .val(null)
+                .trigger('change');
+            $('#bank_account').val("");
+            $("#bank_sender")
+                .val(null)
+                .trigger('change');
+            $("#purchase_order_id")
+                .val(null)
+                .empty()
+                .trigger('change');
+            $("#div-file").html("");
+            enableButton();
         });
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
+            paymentId = '';
+            orderId = '';
         });
 
         $('#cancelDetailButton').on('click', function() {
@@ -478,84 +572,29 @@
         });
 
         function gen_select2() {
-            $('.select-select').each(function() {
-                const $el = $(this);
-                $el.select2({
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0,
-                }).on('select2:close', function() {
-                    $(this).blur();
-                    if (document.activeElement) {
-                        document.activeElement.blur();
+            $('.select-select')
+                .not('#purchase_order_id')
+                .each(function() {
+                    const $el = $(this);
+
+                    if ($el.hasClass('select2-hidden-accessible')) {
+                        $el.select2('destroy');
                     }
+
+                    $el.select2({
+                        theme: "bootstrap-5",
+                        dropdownParent: $('#formModal'),
+                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                            'style'),
+                        selectOnClose: false,
+                        minimumResultsForSearch: 0,
+                    }).on('select2:close', function() {
+                        $(this).blur();
+                        if (document.activeElement) {
+                            document.activeElement.blur();
+                        }
+                    });
                 });
-            });
-
-            $('#purchase_order_id').select2({
-                theme: "bootstrap-5",
-                width: $('#purchase_order_id').data('width') ? $('#purchase_order_id').data('width') : ($(
-                    '#purchase_order_id').hasClass(
-                    'w-100') ? '100%' : 'style'),
-                placeholder: '',
-                allowClear: true,
-                selectOnClose: false,
-                ajax: {
-                    url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
-                }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            }).on('select2:select', function(e) {
-                const selectedData = e.params.data;
-                $('#vendor_name').val(selectedData.vendor);
-                $('#client_vendor_id').val(selectedData.client_vendor_id);
-                var inv_date = selectedData.invoice_date ?
-                    dayjs(selectedData.invoice_date) :
-                    dayjs();
-
-                // TOP: kalau null/kosong, dianggap 0 hari
-                var topDays = selectedData.top ?
-                    parseInt(selectedData.top) :
-                    0;
-
-                if (isNaN(topDays)) {
-                    topDays = 0;
-                }
-
-                // due_date = invoice_date + top hari
-                var due_date = inv_date.add(topDays, 'day');
-
-                // isi input
-                $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
-                $('#due_date').val(due_date.format('YYYY-MM-DD'));
-                $('#grand_total').val(numbro(selectedData.grand_total).format({
-                    thousandSeparated: true,
-                    mantissa: 0
-                }));
-                $('#balance').val(numbro(selectedData.balance).format({
-                    thousandSeparated: true,
-                    mantissa: 0
-                }));
-            });
         }
 
         function disableButton() {
@@ -566,6 +605,51 @@
         function enableButton() {
             saveButton1.disabled = false;
             saveButton2.disabled = false;
+        }
+
+        function delete_file(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, Delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('purchaseorderpayment.destroy_file', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#div-file').html("");
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
         }
 
         const $total = $('#total_');
@@ -712,6 +796,108 @@
                 $('#total').val(balanceValue);
             }
         }
+
+        function initPurchaseRequisitionSelect2() {
+            const $purchase_order = $('#purchase_order_id');
+
+            if (!$purchase_order.length) {
+                return;
+            }
+
+            const selectedValue = $purchase_order.val();
+
+            if ($purchase_order.hasClass('select2-hidden-accessible')) {
+                $purchase_order.select2('destroy');
+            }
+
+            $purchase_order.off('.purchaseOrder');
+
+            $purchase_order.select2({
+                theme: "bootstrap-5",
+                width: $('#purchase_order_id').data('width') ? $('#purchase_order_id').data('width') : (
+                    $('#purchase_order_id').hasClass('w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results || data
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            }).on('select2:select', function(e) {
+                const selectedData = e.params.data;
+                $('#vendor_name').val(selectedData.vendor);
+                $('#bank').val(selectedData.bank).trigger('change');
+                $('#bank_account').val(selectedData.bank_account);
+                $('#client_vendor_id').val(selectedData.client_vendor_id);
+                var inv_date = selectedData.invoice_date ?
+                    dayjs(selectedData.invoice_date) :
+                    dayjs();
+
+                var topDays = selectedData.top ?
+                    parseInt(selectedData.top) :
+                    0;
+
+                if (isNaN(topDays)) {
+                    topDays = 0;
+                }
+
+                var due_date = inv_date.add(topDays, 'day');
+
+                $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
+                $('#due_date').val(due_date.format('YYYY-MM-DD'));
+                $('#grand_total').val(numbro(selectedData.grand_total).format({
+                    thousandSeparated: true,
+                    mantissa: 0
+                }));
+                $('#balance').val(numbro(selectedData.balance).format({
+                    thousandSeparated: true,
+                    mantissa: 0
+                }));
+            });
+
+            if (selectedValue) {
+                $purchase_order.val(selectedValue).trigger('change.select2');
+            }
+
+            $purchase_order.on('select2:open.purchaseOrder', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $purchase_order.on('change.purchaseOrder', function() {
+                orderId = $(this).val();
+            });
+        }
+
+        initPurchaseRequisitionSelect2();
     </script>
     <!--app JS-->
 @endsection

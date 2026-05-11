@@ -17,8 +17,10 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('client_vendor_id')->nullable();
             $table->unsignedBigInteger('purchase_order_id')->nullable();
-            $table->string('bank', 50)->nullable();
+            $table->string('bank')->nullable();
             $table->string('bank_account', 50)->nullable();
+            $table->string('bank_sender')->nullable();
+            $table->string('bank_account_sender', 50)->nullable();
             $table->string('payment_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //Down Payment, Balance Payment
             $table->date('date')->nullable();
@@ -29,6 +31,7 @@ return new class extends Migration
             $table->timestamp('sync_at')->nullable();
             $table->string('input_method', 20)->nullable();
             $table->text('payment_path')->nullable();
+            $table->text('real_name')->nullable();
             $table->string('cancel_notes')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->unsignedBigInteger('checked_by')->nullable();

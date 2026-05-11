@@ -32,17 +32,25 @@ class PurchaseOrderPaymentController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $purchase_order_payment = Purchase_order_payment::query();
+            $purchase_order_payment = Purchase_order_payment::query()
+                ->with('purchase_order');
             if (request()->status != 'All') {
-                $purchase_order_payment = $purchase_order_payment->where('status', request()->status);
+                $purchase_order_payment->where('status', request()->status);
+            }
+            if (request()->vendor != 'All') {
+                $purchase_order_payment->whereHas('purchase_order', function ($query) {
+                    $query->where('client_vendor_id', request()->vendor);
+                });
             }
             if (request()->date_start != '') {
-                $purchase_order_payment = $purchase_order_payment->where('date', '>=', request()->date_start);
+                $purchase_order_payment->where('date', '>=', request()->date_start);
             }
             if (request()->date_end != '') {
-                $purchase_order_payment = $purchase_order_payment->where('date', '<=', request()->date_end);
+                $purchase_order_payment->where('date', '<=', request()->date_end);
             }
-            $purchase_order_payment = $purchase_order_payment->orderBy('date', 'desc')->get();
+            $purchase_order_payment = $purchase_order_payment
+                ->orderBy('date', 'desc')
+                ->get();
             return DataTables::of($purchase_order_payment)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -56,7 +64,7 @@ class PurchaseOrderPaymentController extends Controller
                                     <a class="dropdown-item exportPdfButton" href="' . route('purchaseorderpayment.export_pdf', $item->id) . '">Export PDF</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item printButton" href="' . route('purchaseorder.print', $item->id) . '" target="_blank">Print</a>
+                                    <a class="dropdown-item printButton" href="' . route('purchaseorderpayment.print', $item->id) . '" target="_blank">Print</a>
                                 </li>
                                 <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
@@ -101,13 +109,15 @@ class PurchaseOrderPaymentController extends Controller
                 })
                 ->make();
         }
+        $bank = config('bank');
+        $bank_tms = config('bank_tms');
         $breadcrum = [
             'module' => 'Finance',
             'route-module' => null,
             'sub-module' => 'PO Payment',
             'route-sub-module' => 'purchaseorderpayment.index',
         ];
-        return view('purchase_order_payment.index', compact('breadcrum'));
+        return view('purchase_order_payment.index', compact('breadcrum', 'bank', 'bank_tms'));
     }
 
     /**
@@ -130,6 +140,7 @@ class PurchaseOrderPaymentController extends Controller
                 'total' => 'required',
                 'payment_path' => 'file|mimes:pdf,doc,docx,jpeg,jpg,png|max:2048',
             ]);
+            $bankSender = explode('-', $request->bank_sender);
             $data = array_merge(
                 $request->only([
                     'purchase_order_id',
@@ -139,12 +150,16 @@ class PurchaseOrderPaymentController extends Controller
                     'bank',
                     'bank_account',
                     'type',
-                    'status'
+                    'status',
+                    'bank',
+                    'bank_account'
                 ]),
                 [
                     'request_token' => $request->request_token,
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
+                    'bank_sender' => trim($bankSender[0] ?? null),
+                    'bank_account_sender' => trim($bankSender[1] ?? null),
                 ]
             );
             $purchase_order_payment = Purchase_order_payment::firstOrCreate($data);
@@ -155,6 +170,7 @@ class PurchaseOrderPaymentController extends Controller
                 $directory = "payment_path";
                 $filename = Str::random(24) . "." . $extension;
                 $file->storeAs($directory, $filename);
+                $purchase_order_payment->real_name = $realname;
                 $purchase_order_payment->payment_path = $directory . '/' . $filename;
                 $purchase_order_payment->save();
             }
@@ -175,7 +191,7 @@ class PurchaseOrderPaymentController extends Controller
                 }
             } else {
                 if ($request->status == 'Open') {
-                    $purchase_order_payment->status = 'Approved';
+                    $purchase_order_payment->status = 'Done';
                     $purchase_order_payment->save();
                 }
             }
@@ -201,10 +217,46 @@ class PurchaseOrderPaymentController extends Controller
      */
     public function show(Purchase_order_payment $purchase_order_payment)
     {
+        $purchase_order = $purchase_order_payment->purchase_order()
+            ->select('purchase_orders.*')
+            ->selectRaw('
+                (
+                    SELECT COALESCE(SUM(COALESCE(total, 0)), 0)
+                    FROM purchase_order_payments
+                    WHERE purchase_order_payments.purchase_order_id = purchase_orders.id
+                ) AS payment_total,
+                (
+                    COALESCE(purchase_orders.grand_total, 0) -
+                    (
+                        SELECT COALESCE(SUM(COALESCE(total, 0)), 0)
+                        FROM purchase_order_payments
+                        WHERE purchase_order_payments.purchase_order_id = purchase_orders.id
+                    )
+                ) AS balance
+            ')
+            ->first();
+        $client_vendor = $purchase_order->client_vendor;
+        $html = '<table style="width: 100%">';
+        if ($purchase_order_payment->payment_path) {
+            $html .= '<tr>';
+            $html .= '<td style="width:5%">';
+            $html .= '<a class="btn btn-sm btn-danger" href="#" onclick="delete_file(\'' . $purchase_order_payment->id . '\')"><i class="bx bx-trash me-0"></i></a>';
+            $html .= '</td>';
+            $html .= '<td>';
+            $html .= '<a href="' . route('purchaseorderpayment.export_file', $purchase_order_payment->id) . '" target="_blank">' . $purchase_order_payment->real_name . '</a>';
+            $html .= '</td>';
+            $html .= '</tr>';
+        } else {
+            $html .= '<tr><td class="text-center">No attachment file</td></tr>';
+        }
+        $html .= '</table>';
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $purchase_order_payment,
+            'purchase_order' => $purchase_order,
+            'client_vendor' => $client_vendor,
+            'html' => $html
         ], 200);
     }
 
@@ -221,7 +273,89 @@ class PurchaseOrderPaymentController extends Controller
      */
     public function update(Request $request, Purchase_order_payment $purchase_order_payment)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'date' => 'required',
+                'total' => 'required',
+                'payment_path' => 'file|mimes:pdf,doc,docx,jpeg,jpg,png|max:2048',
+            ]);
+            $bankSender = explode('-', $request->bank_sender);
+            $data = array_merge(
+                $request->only([
+                    'purchase_order_id',
+                    'date',
+                    'notes',
+                    'total',
+                    'bank',
+                    'bank_account',
+                    'type',
+                    'status',
+                    'bank',
+                    'bank_account'
+                ]),
+                [
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web',
+                    'user_id' => Auth::user()->id,
+                    'bank_sender' => trim($bankSender[0] ?? null),
+                    'bank_account_sender' => trim($bankSender[1] ?? null),
+                ]
+            );
+            $purchase_order_payment->update($data);
+            if ($request->has('payment_path')) {
+                $filePath = $purchase_order_payment->payment_path;
+                if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+                $purchase_order_payment->payment_path = null;
+                $purchase_order_payment->real_name = null;
+                $file = $request->file('payment_path');
+                $realname = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $directory = "payment_path";
+                $filename = Str::random(24) . "." . $extension;
+                $file->storeAs($directory, $filename);
+                $purchase_order_payment->real_name = $realname;
+                $purchase_order_payment->payment_path = $directory . '/' . $filename;
+                $purchase_order_payment->save();
+            }
+
+            /**
+             * Buat check ada approvalnya gak
+             * Kalo ada statusnya jadi Approval.
+             * Nanti kalo approval beres baru jadi Open
+             */
+            $model = 'App\Models\Purchase_order_payment';
+            $department = 'Finanace';
+            if (checkHasApproval($model, $department)) {
+                if ($request->status == 'Open') {
+                    $purchase_order_payment->status = 'Approval';
+                    $purchase_order_payment->save();
+                    $approval_flow_id = getApprovalFlowId($model, $department);
+                    createApprovalProcess($approval_flow_id, $purchase_order_payment->id);
+                }
+            } else {
+                if ($request->status == 'Open') {
+                    $purchase_order_payment->status = 'Done';
+                    $purchase_order_payment->save();
+                }
+            }
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -269,6 +403,8 @@ class PurchaseOrderPaymentController extends Controller
             $term = trim($request->term);
             $purchase_order = Purchase_order::selectRaw("id, order_no as text, 
             (select name from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as vendor,
+            (select bank from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as bank,
+            (select bank_account from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as bank_account,
             invoice_date,
             (select top from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as top,
             grand_total,
@@ -459,6 +595,68 @@ class PurchaseOrderPaymentController extends Controller
             $view = 'purchase_order_payment.detail';
             return response()->view($view, compact('purchase_order_payment'), 200);
         } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * export file
+     */
+
+    public function export_file(Request $request, Purchase_order_payment $purchase_order_payment)
+    {
+        try {
+            $path = public_path('storage/' . $purchase_order_payment->payment_path);
+            if (!file_exists($path)) {
+                abort(404, 'File not found.');
+            }
+            $mimeType = mime_content_type($path);
+            $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            $fileName = basename($path);
+            if ($mimeType === 'application/pdf' || $extension === 'pdf') {
+                return response()->file($path, [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename="' . $purchase_order_payment->payment_path . '"',
+                ]);
+            }
+            return response()->download($path, $purchase_order_payment->real_name, [
+                'Content-Type' => $mimeType ?: 'application/octet-stream',
+            ]);
+        } catch (HttpException $e) {
+            throw $e;
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()
+                ->route('purchaseorder.index')
+                ->with('error', 'Failed to open file.');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy_file(Purchase_order_payment $purchase_order_payment)
+    {
+        DB::beginTransaction();
+        try {
+            $filePath = $purchase_order_payment->payment_path;
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $purchase_order_payment->payment_path = null;
+            $purchase_order_payment->real_name = null;
+            $purchase_order_payment->save();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'success' => false,
                 'message' => $th->getMessage()

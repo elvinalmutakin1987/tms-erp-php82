@@ -1,3 +1,11 @@
+<style>
+    #formModal .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(100vh - 160px);
+        scroll-behavior: auto;
+    }
+</style>
+
 <!-- search modal -->
 <div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
@@ -52,12 +60,42 @@
                                 <input type="text" class="form-control" id="total_" name="total_">
                             </div>
                             <div class="col-md-12 mb-2">
+                                <label for="bank" class="form-label">Bank</label>
+                                <select class="form-select select-select" id="bank" name="bank">
+                                    <option value="" selected disabled></option>
+                                    @foreach ($bank as $d => $value)
+                                        <option value="{{ $value }}">{{ $value }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="bank_account" class="form-label">Account</label>
+                                <input type="text" class="form-control" id="bank_account" name="bank_account">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="bank_sender" class="form-label">Transfer With</label>
+                                <select class="form-select select-select" id="bank_sender" name="bank_sender">
+                                    <option value="" selected disabled></option>
+                                    @foreach ($bank_tms as $d => $value)
+                                        <option value="{{ $value['bank'] }} - {{ $value['account'] }}">
+                                            {{ $value['bank'] }} - {{ $value['account'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-12 mb-2">
                                 <label for="notes" class="form-label">Notes</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
                             </div>
                             <div class="col-md-12 mb-2">
                                 <label for="payment_path" class="form-label">Attachment</label>
                                 <input class="form-control" type="file" id="payment_path" name="payment_path">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <div class="col" id="div-file">
+
+                                </div>
                             </div>
                         </div>
                     </div>
