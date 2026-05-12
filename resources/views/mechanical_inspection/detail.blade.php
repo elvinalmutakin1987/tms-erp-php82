@@ -9,19 +9,19 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%">Number :<br>
                     <b>{{ $mechanical_inspection->inspection_no }}</b>
                 </td>
                 <td colspan="2"></td>
             </tr>
             <tr>
-                <td width="30%">Unit <br>
+                <td width="30%">Unit :<br>
                     <b>{{ $mechanical_inspection->unit->vehicle_no }}</b>
                 </td>
-                <td width="30%">Date <br>
+                <td width="30%">Date :<br>
                     <b>{{ $mechanical_inspection->date }}</b>
                 </td>
-                <td width="30%">Inspector <br>
+                <td width="30%">Inspector :<br>
                     <b> {{ $mechanical_inspection->inspector }}</b>
                 </td>
             </tr>

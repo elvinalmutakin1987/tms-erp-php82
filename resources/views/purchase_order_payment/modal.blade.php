@@ -83,7 +83,10 @@
                                     @endforeach
                                 </select>
                             </div>
-
+                            <div class="col-md-12 mb-2">
+                                <label for="ref_no" class="form-label">Ref No.</label>
+                                <input type="text" class="form-control" id="ref_no" name="ref_no">
+                            </div>
                             <div class="col-md-12 mb-2">
                                 <label for="notes" class="form-label">Notes</label>
                                 <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>

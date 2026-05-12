@@ -279,6 +279,7 @@
                         $('#bank_account').val(response.data.bank_account);
                         $('#bank_sender').val(response.data.bank_sender + ' - ' + response.data
                             .bank_account_sender).trigger('change');
+                        $('#ref_no').val(response.data.ref_no);
                         $('#client_vendor_id').val(response.data.client_vendor_id);
                         $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
                         $('#due_date').val(due_date.format('YYYY-MM-DD'));
@@ -311,8 +312,8 @@
             });
 
             $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail Requisition');
-                let url = '{{ route('purchaserequisition.get_detail', ':_id') }}';
+                $('#modal-detail-header').text('Detail Payment');
+                let url = '{{ route('purchaseorderpayment.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -536,6 +537,7 @@
             $('#vendor_name').val("");
             $('#client_vendor_id').val("");
             $('#invoice_date').val("");
+            $('#ref_no').val("");
             $('#due_date').val("");
             $('#date').val("");
             $('#grand_total').val("");

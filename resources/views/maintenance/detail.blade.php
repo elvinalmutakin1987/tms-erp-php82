@@ -5,41 +5,41 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%">Number :<br>
                     <b>{{ $maintenance->maintenance_no }}</b>
                 </td>
                 <td colspan="2"></td>
             </tr>
             <tr>
-                <td width="30%">Unit <br>
+                <td width="30%">Unit :<br>
                     <b>{{ $maintenance->unit->vehicle_no }}</b>
                 </td>
-                <td width="30%">Date <br>
+                <td width="30%">Date :<br>
                     <b>{{ $maintenance->date }}</b>
                 </td>
-                <td width="30%">Vendor <br>
+                <td width="30%">Vendor :<br>
                     <b> {{ $maintenance->client_vendor->name }}</b>
                 </td>
             </tr>
             <tr>
-                <td width="30%">Mechanic <br>
+                <td width="30%">Mechanic :<br>
                     <b>{{ $maintenance->mechanic }}</b>
                 </td>
-                <td width="30%">Hour Meter <br>
+                <td width="30%">Hour Meter :<br>
                     <b>{{ Number::format($maintenance->hour_meter ?? 0, precision: 0) }}</b>
                 </td>
-                <td width="30%">KM/HM <br>
+                <td width="30%">KM/HM :<br>
                     <b> {{ Number::format($maintenance->km_hm ?? 0, precision: 0) }}</b>
                 </td>
             </tr>
             <tr>
-                <td width="30%">Start <br>
+                <td width="30%">Start :<br>
                     <b>{{ \Carbon\Carbon::parse($maintenance->start)->format('H:i') }}</b>
                 </td>
-                <td width="30%">Finish <br>
+                <td width="30%">Finish :<br>
                     <b>{{ \Carbon\Carbon::parse($maintenance->finish)->format('H:i') }}</b>
                 </td>
-                <td width="30%">Work Duration <br>
+                <td width="30%">Work Duration :<br>
                     <b> {{ \Carbon\Carbon::parse($maintenance->work_duration)->format('H:i') }}</b>
                 </td>
             </tr>

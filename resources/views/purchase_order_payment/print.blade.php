@@ -438,6 +438,17 @@
                     </tr>
                     <tr>
                         <td style="border: none; width: 25%">
+                            Ref No.
+                        </td>
+                        <td style="border:none; width: 5%">
+                            :
+                        </td>
+                        <td style="border: none;">
+                            {{ $purchase_order_payment->ref_no }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="border: none; width: 25%">
                             Total
                         </td>
                         <td style="border:none; width: 5%">
@@ -447,21 +458,23 @@
                             {{ $purchase_order_payment->total ? Number::format($purchase_order_payment->total, precision: 0) : '' }}
                         </td>
                     </tr>
+                    <tr>
+                        <td style="border: none; width: 25%">
+                            Notes
+                        </td>
+                        <td style="border:none; width: 5%">
+                            :
+                        </td>
+                        <td style="border: none;">
+                            @if ($purchase_order_payment->notes != '')
+                                {!! $purchase_order_payment->notes !!}
+                            @endif
+                        </td>
+                    </tr>
                 </table>
             </td>
         </tr>
     </tbody>
-    <thead>
-        <tr>
-            <td colspan="8" class="p-1">
-                Notes : <br>
-                @if ($purchase_order_payment->notes != '')
-                    {!! $purchase_order_payment->notes !!}
-                @endif
-                <br>
-            </td>
-        </tr>
-    </thead>
     <thead>
         <tr>
             <td colspan="8" class="p-1">

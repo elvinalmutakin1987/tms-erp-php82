@@ -88,7 +88,7 @@ class PurchaseOrderPaymentController extends Controller
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
                     if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaseorder.delete')):
+                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaseorderpayment.delete')):
                             $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
@@ -152,7 +152,8 @@ class PurchaseOrderPaymentController extends Controller
                     'type',
                     'status',
                     'bank',
-                    'bank_account'
+                    'bank_account',
+                    'ref_no'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -219,11 +220,12 @@ class PurchaseOrderPaymentController extends Controller
     {
         $purchase_order = $purchase_order_payment->purchase_order()
             ->select('purchase_orders.*')
-            ->selectRaw('
+            ->selectRaw("
                 (
                     SELECT COALESCE(SUM(COALESCE(total, 0)), 0)
                     FROM purchase_order_payments
                     WHERE purchase_order_payments.purchase_order_id = purchase_orders.id
+                    and purchase_order_payments.status = 'Done'
                 ) AS payment_total,
                 (
                     COALESCE(purchase_orders.grand_total, 0) -
@@ -231,9 +233,10 @@ class PurchaseOrderPaymentController extends Controller
                         SELECT COALESCE(SUM(COALESCE(total, 0)), 0)
                         FROM purchase_order_payments
                         WHERE purchase_order_payments.purchase_order_id = purchase_orders.id
+                        and purchase_order_payments.status = 'Done'
                     )
                 ) AS balance
-            ')
+            ")
             ->first();
         $client_vendor = $purchase_order->client_vendor;
         $html = '<table style="width: 100%">';
@@ -292,7 +295,8 @@ class PurchaseOrderPaymentController extends Controller
                     'type',
                     'status',
                     'bank',
-                    'bank_account'
+                    'bank_account',
+                    'ref_no'
                 ]),
                 [
                     'request_token' => $request->request_token,
@@ -409,14 +413,20 @@ class PurchaseOrderPaymentController extends Controller
             (select top from client_vendors where client_vendors.id = purchase_orders.client_vendor_id) as top,
             grand_total,
             (
-                select COALESCE(SUM(COALESCE(total, 0)), 0) from purchase_order_payments where purchase_order_payments.purchase_order_id = purchase_orders.id
+                select 
+                    COALESCE(SUM(COALESCE(total, 0)), 0) 
+                from purchase_order_payments 
+                where purchase_order_payments.purchase_order_id = purchase_orders.id
+                and purchase_order_payments.status = 'Done'
             ) as payment_total,
             (
                 COALESCE(grand_total, 0) -
                 (
-                    SELECT COALESCE(SUM(COALESCE(total, 0)), 0)
+                    SELECT 
+                        COALESCE(SUM(COALESCE(total, 0)), 0)
                     FROM purchase_order_payments
                     WHERE purchase_order_payments.purchase_order_id = purchase_orders.id
+                    and purchase_order_payments.status = 'Done'
                 )
             ) AS balance,
             client_vendor_id")
@@ -588,10 +598,10 @@ class PurchaseOrderPaymentController extends Controller
     /**
      * ngambil detail purchase requisition
      */
-    public function get_detail(Request $request, $po_id)
+    public function get_detail(Request $request, $payment_id)
     {
         try {
-            $purchase_order_payment = Purchase_order_payment::find($po_id);
+            $purchase_order_payment = Purchase_order_payment::find($payment_id);
             $view = 'purchase_order_payment.detail';
             return response()->view($view, compact('purchase_order_payment'), 200);
         } catch (\Throwable $th) {

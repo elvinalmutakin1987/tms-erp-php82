@@ -6,19 +6,19 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%">Number :<br>
                     <b>{{ $daily_report->report_no }}</b>
                 </td>
                 <td colspan="2"></td>
             </tr>
             <tr>
-                <td width="30%">Unit <br>
+                <td width="30%">Unit :<br>
                     <b>{{ $daily_report->unit->vehicle_no }}</b>
                 </td>
-                <td width="30%">Date <br>
+                <td width="30%">Date :<br>
                     <b>{{ $daily_report->date }}</b>
                 </td>
-                <td width="30%">Shift <br>
+                <td width="30%">Shift :<br>
                     <b> {{ $daily_report->shift }}</b>
                 </td>
             </tr>

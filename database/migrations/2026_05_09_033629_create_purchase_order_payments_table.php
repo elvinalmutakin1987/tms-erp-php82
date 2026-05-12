@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('bank_account_sender', 50)->nullable();
             $table->string('payment_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //Down Payment, Balance Payment
+            $table->string('ref_no', 30)->nullable();
             $table->date('date')->nullable();
             $table->text('notes')->nullable();
             $table->text('status')->nullable();

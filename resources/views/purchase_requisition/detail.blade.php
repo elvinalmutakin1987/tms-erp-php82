@@ -6,10 +6,10 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%">Number :<br>
                     <b>{{ $purchase_requisition->requisition_no }}</b>
                 </td>
-                <td colspan="3">Status <br>
+                <td colspan="3">Status :<br>
                     @if ($purchase_requisition->status == 'Draft')
                         <span class="badge bg-secondary"
                             style="font-size: 13px">{{ $purchase_requisition->status }}</span>
@@ -27,16 +27,16 @@
                 </td>
             </tr>
             <tr>
-                <td width="30%">Unit <br>
+                <td width="30%">Unit :<br>
                     <b>{{ $purchase_requisition->unit->vehicle_no }}</b>
                 </td>
-                <td width="30%">Date <br>
+                <td width="30%">Date :<br>
                     <b>{{ $purchase_requisition->date }}</b>
                 </td>
-                <td width="30%">Maintenance No. <br>
+                <td width="30%">Maintenance No. :<br>
                     <b> {{ $purchase_requisition->maintenance->maintenance_no }}</b>
                 </td>
-                <td width="30%">Job <br>
+                <td width="30%">Job :<br>
                     <b>{{ $purchase_requisition->job }}</b>
                 </td>
             </tr>

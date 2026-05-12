@@ -37,6 +37,7 @@ return new class extends Migration
             $table->string('urgency', 3)->nullable(); //P1, P2, P3, P4
             $table->string('cancel_notes')->nullable();
             $table->text('job')->nullable();
+            $table->date('close_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
