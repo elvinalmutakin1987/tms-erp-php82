@@ -350,24 +350,6 @@
                 });
             });
 
-            // $(document).on('click', '.monitoringButton', function() {
-            //     requisitionId = $(this).data('id');
-            //     $('#modal-receive-header').text('Monitoring Order');
-            //     $('#id').val(orderId);
-            //     let url = '{{ route('purchaseorder.get_monitoring', ':_id') }}';
-            //     url = url.replace(':_id', orderId);
-            //     $.ajax({
-            //         url: url,
-            //         type: 'GET',
-            //         success: function(response) {
-            //             $('#divMonitoring').html(response);
-            //         },
-            //         error: function() {
-            //             alert('Error fetching data');
-            //         }
-            //     });
-            // });
-
             $(".datepicker").flatpickr();
 
             $(".select-top").select2({
@@ -385,30 +367,6 @@
             $("#date_end").on('change', function() {
                 $('#table-data').DataTable().draw();
             });
-
-            // $.ajax({
-            //     url: '{{ route('purchaseorder.get_purchase_requisition') }}',
-            //     type: 'GET',
-            //     success: function(response) {
-            //         $('#purchase_requisition_id').empty();
-            //         $('#purchase_requisition_id').append(
-            //             '<option value="">Direct PO</option>');
-            //         $.each(response.data, function(index, purchase_requisition) {
-            //             $('#purchase_requisition_id').append('<option value="' +
-            //                 purchase_requisition.id +
-            //                 '">' +
-            //                 purchase_requisition.requisition_no +
-            //                 '</option>');
-            //         });
-            //     },
-            //     error: function(xhr, status, error) {
-            //         Swal.fire({
-            //             icon: "error",
-            //             title: "Oops...",
-            //             text: error,
-            //         });
-            //     }
-            // });
 
             gen_select2();
         });

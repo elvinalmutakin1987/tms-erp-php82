@@ -24,8 +24,8 @@
 
             <td class="p-1 align-middle">
                 <select class="form-select select-select" id="_type" name="_type">
-                    <option value="Good">Good</option>
-                    <option value="Service">Service</option>
+                    <option value="Goods">Goods</option>
+                    <option value="Services">Services</option>
                 </select>
             </td>
 
@@ -85,8 +85,8 @@
                     </td>
                     <td class="p-1 align-middle">
                         <select class="form-select select-select detail-type" name="type[]">
-                            <option value="Good" {{ $d->type == 'Good' ? 'selected' : '' }}>Good</option>
-                            <option value="Service" {{ $d->type == 'Service' ? 'selected' : '' }}>Service</option>
+                            <option value="Goods" {{ $d->type == 'Goods' ? 'selected' : '' }}>Goods</option>
+                            <option value="Services" {{ $d->type == 'Services' ? 'selected' : '' }}>Services</option>
                         </select>
                     </td>
                     <td class="p-1 align-middle">
@@ -479,8 +479,8 @@
 
                     <td class="p-1 align-middle">
                         <select class="form-select select-select detail-type" name="type[]">
-                            <option value="Good" ${type == 'Good' ? 'selected' : ''}>Good</option>
-                            <option value="Service" ${type == 'Service' ? 'selected' : ''}>Service</option>
+                            <option value="Goods" ${type == 'Goods' ? 'selected' : ''}>Goods</option>
+                            <option value="Services" ${type == 'Services' ? 'selected' : ''}>Services</option>
                         </select>
                     </td>
 

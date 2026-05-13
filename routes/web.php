@@ -17,6 +17,7 @@ use App\Http\Controllers\ClientVendorController;
 use App\Http\Controllers\ContractController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\DailyReportController;
+use App\Http\Controllers\InvoiceReceiptController;
 use App\Http\Controllers\MaintenanceController;
 use App\Http\Controllers\MaintenanceItemController;
 use App\Http\Controllers\MechanicalInspectionController;
@@ -694,4 +695,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('purchaseorderpayment-destroy-file/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'destroy_file'])
         ->middleware('role:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.destroy_file');
+
+    /**
+     * Routenya Invoice Receipt
+     */
+    Route::resource('invoicereceipt', InvoiceReceiptController::class)
+        ->parameters(['invoicereceipt' => 'purchase_order'])
+        ->middleware('role:superadmin|invoice_receipt')
+        ->names('invoicereceipt');
 });

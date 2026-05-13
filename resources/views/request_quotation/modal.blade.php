@@ -18,7 +18,7 @@
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <label for="quotation_path" class="form-label">Quotation</label>
+                            <label for="quotation_path" class="form-label">Attachment</label>
                             <input class="form-control" type="file" id="quotation_path" name="quotation_path">
                         </div>
                     </div>

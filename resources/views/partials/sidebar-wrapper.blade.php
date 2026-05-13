@@ -176,7 +176,7 @@
                          <ul>
                              @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchase_order_payment'))
                                  <li>
-                                     <a href="auth-basic-signin.html"><i class='bx bx-radio-circle'></i>
+                                     <a href="{{ route('invoicereceipt.index') }}"><i class='bx bx-radio-circle'></i>
                                          Invoice Receipt
                                      </a>
                                  </li>

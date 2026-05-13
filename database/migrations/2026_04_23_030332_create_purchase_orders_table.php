@@ -46,6 +46,7 @@ return new class extends Migration
             $table->date('invoice_due_date')->nullable();
             $table->string('invoice_no', 30)->nullable();
             $table->string('invoice_notes')->nullable();
+            $table->text('invoice_path')->nullable();
             $table->date('close_date')->nullable();
             $table->date('paid_date')->nullable();
             $table->timestamps();

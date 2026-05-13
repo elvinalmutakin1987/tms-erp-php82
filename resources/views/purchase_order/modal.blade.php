@@ -64,7 +64,7 @@
                     </div>
                     <div class="row mb-2">
                         <div class="col">
-                            <label for="vendor_offer_path" class="form-label">Offering Vendor</label>
+                            <label for="vendor_offer_path" class="form-label">Attachment</label>
                             <input class="form-control" type="file" id="vendor_offer_path" name="vendor_offer_path">
                         </div>
                     </div>

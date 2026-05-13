@@ -431,6 +431,7 @@ class PurchaseOrderPaymentController extends Controller
             ) AS balance,
             client_vendor_id")
                 ->where('status', 'Done')
+                ->whereIn('payment_status', ['Unpaid', 'Partially Paid'])
                 ->where('order_no', 'like', '%' . $term . '%')
                 ->orderBy('order_no')->simplePaginate(10);
             $total_count = count($purchase_order);
