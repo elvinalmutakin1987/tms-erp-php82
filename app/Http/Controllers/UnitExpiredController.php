@@ -62,21 +62,9 @@ class UnitExpiredController extends Controller
                 ->addColumn('action', function ($item) {
                     $button = '
                     <div class="col">
-                        <a type="button" class="btn btn-sm btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                data-id="' . $item->id . '">Edit</a>
-                    </div>
-                    ';
-                    $button = '
-                    <div class="col">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">Action</button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                data-id="' . $item->id . '">Edit</a>
-                                </li>
-                            </ul>
-                        </div>
+                         <a type="button" href="" class="btn btn-sm btn-primary editButton" 
+                             href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                                    data-id="' . $item->id . '">Edit</a>
                     </div>
                     ';
                     return $button;

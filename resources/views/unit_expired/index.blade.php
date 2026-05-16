@@ -21,10 +21,6 @@
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Unit"><i
-                                            class='bx bxs-plus-square'></i>New</a>
-
                                     <a href="{{ route('unitexpired.export') }}" class="btn btn-success mb-3 mb-lg-0"
                                         data-title="Export Unit" target="_blank" i="btnExport"><i
                                             class='bx bxs-share'></i>Export to
@@ -133,172 +129,6 @@
         var unitmodelId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
-            // var table = $('#table-data').DataTable({
-            //     scrollCollapse: true,
-            //     responsive: false,
-            //     scrollX: true,
-            //     "lengthMenu": [
-            //         [10, 25, 50, 100, -1],
-            //         [10, 25, 50, 100, "All"]
-            //     ],
-            //     "paging": true,
-            //     "lengthChange": true,
-            //     "searching": true,
-            //     "ordering": true,
-            //     "info": true,
-            //     "autoWidth": false,
-            //     "processing": true,
-            //     "serverSide": true,
-            //     "ajax": {
-            //         url: ajax,
-            //         data: function(d) {
-            //             d.typeUnit = $('#typeUnit').val();
-            //             d.location = $('#location').val();
-            //             d.from = $('#from').val();
-            //             d.to = $('#to').val();
-            //         }
-            //     },
-            //     "columns": [{
-            //             data: 'DT_RowIndex',
-            //             name: 'DT_RowIndex',
-            //             orderable: false,
-            //             searchable: false,
-            //             width: '10px',
-            //             className: 'dt-center',
-            //             targets: '_all'
-            //         },
-            //         {
-            //             data: 'type',
-            //             name: 'type',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'location',
-            //             name: 'location',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'vehicle_no',
-            //             name: 'vehicle_no',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'chassis_no',
-            //             name: 'chassis_no',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'registration_no',
-            //             name: 'registration_no',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'code_access',
-            //             name: 'code_access',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'plr_no',
-            //             name: 'plr_no',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'banlaw_no',
-            //             name: 'banlaw_no',
-            //             orderable: true,
-            //             searchable: true,
-            //         },
-            //         {
-            //             data: 'exp_crane',
-            //             name: 'exp_crane',
-            //             orderable: true,
-            //             searchable: true,
-            //             render: function(data, type, row) {
-            //                 if (data) {
-            //                     return dayjs(data).format('DD MMMM YYYY')
-            //                 }
-            //                 return "";
-            //             }
-            //         },
-            //         {
-            //             data: 'exp_fuel_issue',
-            //             name: 'exp_fuel_issue',
-            //             orderable: true,
-            //             searchable: true,
-            //             render: function(data, type, row) {
-            //                 if (data) {
-            //                     return dayjs(data).format('DD MMMM YYYY')
-            //                 }
-            //                 return "";
-            //             }
-            //         },
-            //         {
-            //             data: 'exp_tbst',
-            //             name: 'exp_tbst',
-            //             orderable: true,
-            //             searchable: true,
-            //             render: function(data, type, row) {
-            //                 if (data) {
-            //                     return dayjs(data).format('DD MMMM YYYY')
-            //                 }
-            //                 return "";
-            //             }
-            //         },
-            //         {
-            //             data: 'exp_stnk',
-            //             name: 'exp_stnk',
-            //             orderable: true,
-            //             searchable: true,
-            //             render: function(data, type, row) {
-            //                 if (data) {
-            //                     return dayjs(data).format('DD MMMM YYYY')
-            //                 }
-            //                 return "";
-            //             }
-            //         },
-            //         {
-            //             data: 'exp_tax',
-            //             name: 'exp_tax',
-            //             orderable: true,
-            //             searchable: true,
-            //             render: function(data, type, row) {
-            //                 if (data) {
-            //                     return dayjs(data).format('DD MMMM YYYY')
-            //                 }
-            //                 return "";
-            //             }
-            //         },
-            //         {
-            //             data: 'exp_comm',
-            //             name: 'exp_comm',
-            //             orderable: true,
-            //             searchable: true,
-            //             render: function(data, type, row) {
-            //                 if (data) {
-            //                     return dayjs(data).format('DD MMMM YYYY')
-            //                 }
-            //                 return "";
-            //             }
-            //         },
-            //         {
-            //             data: 'action',
-            //             name: 'action',
-            //             orderable: false,
-            //             searchable: false,
-            //             width: '100px',
-            //             className: 'text-center',
-            //             targets: '_all'
-            //         }
-            //     ],
-            // });
-
             var table = $('#table-data').DataTable({
                 scrollCollapse: true,
                 responsive: false,
@@ -324,19 +154,6 @@
                         const targetDate = dayjs(dateString);
                         const now = dayjs();
                         const diffInDays = targetDate.diff(now, 'day');
-
-                        // if (diffInDays <= 30) return {
-                        //     bg: '#ff0000',
-                        //     text: 'white'
-                        // };
-                        // if (diffInDays <= 45) return {
-                        //     bg: '#ffff00',
-                        //     text: 'black'
-                        // };
-                        // if (diffInDays <= 60) return {
-                        //     bg: '#00ff00',
-                        //     text: 'black'
-                        // };
 
                         if (diffInDays <= 30) {
                             return {
@@ -375,68 +192,83 @@
                 "columns": [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
-                        className: 'dt-center'
+                        className: 'dt-center',
                     },
                     {
                         data: 'type',
-                        name: 'type'
+                        name: 'type',
+                        width: '150px',
                     },
                     {
                         data: 'location',
-                        name: 'location'
+                        name: 'location',
+                        width: '150px',
                     },
                     {
                         data: 'vehicle_no',
-                        name: 'vehicle_no'
+                        name: 'vehicle_no',
+                        width: '150px',
                     },
                     {
                         data: 'chassis_no',
-                        name: 'chassis_no'
+                        name: 'chassis_no',
+                        width: '150px',
                     },
                     {
                         data: 'registration_no',
-                        name: 'registration_no'
+                        name: 'registration_no',
+                        width: '150px',
                     },
                     {
                         data: 'code_access',
-                        name: 'code_access'
+                        name: 'code_access',
+                        width: '150px',
                     },
                     {
                         data: 'plr_no',
-                        name: 'plr_no'
+                        name: 'plr_no',
+                        width: '150px',
                     },
                     {
                         data: 'banlaw_no',
-                        name: 'banlaw_no'
+                        name: 'banlaw_no',
+                        width: '150px',
                     },
                     {
                         data: 'exp_crane',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : ''
+                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
+                        width: '150px',
                     },
                     {
                         data: 'exp_fuel_issue',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : ''
+                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
+                        width: '150px',
                     },
                     {
                         data: 'exp_tbst',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : ''
+                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
+                        width: '150px',
                     },
                     {
                         data: 'exp_stnk',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : ''
+                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
+                        width: '150px',
                     },
                     {
                         data: 'exp_tax',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : ''
+                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
+                        width: '150px',
                     },
                     {
                         data: 'exp_comm',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : ''
+                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
+                        width: '150px',
                     },
                     {
                         data: 'action',
                         name: 'action',
-                        className: 'text-center'
+                        className: 'text-center',
+                        width: '75px',
                     }
                 ],
             });
@@ -533,6 +365,7 @@
                         title: "Oops...",
                         text: errorMessage,
                     });
+                    enableButton();
                 }
             });
         });

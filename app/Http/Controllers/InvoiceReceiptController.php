@@ -105,62 +105,28 @@ class InvoiceReceiptController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'inovice_no' => 'required',
+                'invoice_no' => 'required',
                 'invoice_date' => 'required',
             ]);
-            $type = $purchase_requisition?->type ?? 'General';
-            $department = $purchase_requisition?->department ?? 'Equipment';
-            $system_setting = config('system_setting');
-            $data = array_merge(
-                $request->only([
-                    'purchase_requisition_id',
-                    'date',
-                    'notes',
-                    'total',
-                    'tax',
-                    'grand_total',
-                    'status',
-                    'urgency',
-                    'client_vendor_id',
-                    'discount'
-                ]),
-                [
-                    'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'user_id' => Auth::user()->id,
-                    'type' => $type,
-                    'department' => $department
-                ]
-            );
             $lockPurchase_order = Purchase_order::where('id', $purchase_order->id)->lockForUpdate()->first();
-
-            if ($request->has('vendor_offer_path')) {
-                $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->first();
-                if ($request_quotation) {
-                    $filePath = $request_quotation->quotation_path;
-                    if ($filePath && Storage::disk('public')->exists($filePath)) {
-                        Storage::disk('public')->delete($filePath);
-                    }
-                    $request_quotation->delete();
-                }
-
-                $file = $request->file('vendor_offer_path');
+            $top = $lockPurchase_order->client_vendor->top;
+            $lockPurchase_order->invoice_no = $request->invoice_no;
+            $lockPurchase_order->invoice_date = $request->invoice_date;
+            $lockPurchase_order->payment_status = $request->status;
+            $lockPurchase_order->invoice_due_date = Carbon::parse($request->invoice_date)
+                ->addDays($top)
+                ->format('Y-m-d');
+            if ($request->has('invoice_path')) {
+                $file = $request->file('invoice_path');
                 $realname = $file->getClientOriginalName();
                 $extension = $file->getClientOriginalExtension();
-                $directory = "quotation_path";
+                $directory = "invoice_path";
                 $filename = Str::random(24) . "." . $extension;
                 $file->storeAs($directory, $filename);
-                Request_quotation::firstOrCreate([
-                    'purchase_requisition_id' => $request->purchase_requisition_id ?? null,
-                    'client_vendor_id' => $request->client_vendor_id,
-                    'request_token' => $purchase_order->request_token,
-                    'user_id' => Auth::user()->id,
-                    'real_name' => $realname,
-                    'quotation_path' => $directory . '/' . $filename,
-                    'notes' => $request->notes
-                ]);
+                $lockPurchase_order->invoice_path = $directory . '/' . $filename;
+                $lockPurchase_order->invoice_real_name = $realname;
             }
-
+            $lockPurchase_order->save();
             DB::commit();
             return response()->json([
                 'success' => true,

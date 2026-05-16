@@ -186,16 +186,13 @@
 
         $('.saveButton').on('click', function() {
             disableButton();
+            const status = $(this).val();
             const form = $('#formModal').find('form')[0];
             const formData = new FormData(form);
-
             formData.append('status', status);
-
             let type = 'POST';
-
             url = '{{ route('invoicereceipt.update', ':_id') }}'.replace(':_id', orderId);
             formData.append('_method', 'PUT');
-
             const submitForm = () => {
                 $.ajax({
                     url,
@@ -210,6 +207,7 @@
                             icon: 'success',
                             timer: 5000,
                             willClose: () => {
+                                $('#table-data').DataTable().ajax.reload(null, false);
                                 form.reset();
                                 orderId = '';
                                 $('#formModal').modal('hide');

@@ -85,4 +85,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Purchase_order_payment::class);
     }
+    public function purchase_order_invoice(): HasMany
+    {
+        return $this->hasMany(Purchase_order::class, 'user_invoice_id', 'id');
+    }
 }

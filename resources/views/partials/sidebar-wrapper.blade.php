@@ -219,37 +219,95 @@
                  </ul>
              </li>
          @endif
-         <li>
-             <a href="javascript:;" class="has-arrow">
-                 <div class="parent-icon"><i class="bx bx-coin-stack"></i>
-                 </div>
-                 <div class="menu-title">Master Data</div>
-             </a>
-             <ul>
-                 <li> <a href="{{ route('service.index') }}"><i class='bx bx-radio-circle'></i>Service</a>
-                 </li>
-                 <li> <a href="{{ route('contract.index') }}"><i class='bx bx-radio-circle'></i>Contract</a>
-                 </li>
-                 <li> <a href="{{ route('unit.index') }}"><i class='bx bx-radio-circle'></i>Unit</a>
-                 </li>
-                 <li> <a href="{{ route('unitmodel.index') }}"><i class='bx bx-radio-circle'></i>Unit Model</a>
-                 </li>
-                 <li> <a href="{{ route('unitbrand.index') }}"><i class='bx bx-radio-circle'></i>Unit Brand</a>
-                 </li>
-                 <li> <a href="{{ route('unitrate.index') }}"><i class='bx bx-radio-circle'></i>Unit Rate</a>
-                 </li>
-                 <li> <a href="{{ route('location.index') }}"><i class='bx bx-radio-circle'></i>Location</a>
-                 </li>
-                 <li> <a href="{{ route('maintenanceitem.index') }}"><i class='bx bx-radio-circle'></i>Maintenance
-                         Item</a>
-                 </li>
-                 <li> <a href="{{ route('mroitem.index') }}"><i class='bx bx-radio-circle'></i>MRO Item</a>
-                 </li>
-                 <li> <a href="{{ route('clientvendor.index') }}"><i class='bx bx-radio-circle'></i>Client & Vendor
-                     </a>
-                 </li>
-             </ul>
-         </li>
+         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasAnyPermission(['approval']))
+             <li>
+                 <a href="{{ route('approval.index') }}">
+                     <div class="parent-icon"><i class="bx bx-file"></i>
+                     </div>
+                     <div class="menu-title">Approval</div>
+                 </a>
+             </li>
+         @endif
+
+         @if (Auth::user()->hasRole('superadmin') ||
+                 Auth::user()->hasAnyPermission([
+                     'service',
+                     'contract',
+                     'unit',
+                     'unit_model',
+                     'unit_brand',
+                     'unit_rate',
+                     'location',
+                     'maintenance_item',
+                     'mro_item',
+                     'client_vendor',
+                 ]))
+             <li>
+                 <a href="javascript:;" class="has-arrow">
+                     <div class="parent-icon"><i class="bx bx-coin-stack"></i>
+                     </div>
+                     <div class="menu-title">Master Data</div>
+                 </a>
+                 <ul>
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('service'))
+                         <li>
+                             <a href="{{ route('service.index') }}"><i class='bx bx-radio-circle'></i>Service</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('contract'))
+                         <li>
+                             <a href="{{ route('contract.index') }}"><i class='bx bx-radio-circle'></i>Contract</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('unit'))
+                         <li>
+                             <a href="{{ route('unit.index') }}"><i class='bx bx-radio-circle'></i>Unit</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('unit_model'))
+                         <li>
+                             <a href="{{ route('unitmodel.index') }}"><i class='bx bx-radio-circle'></i>Unit
+                                 Model</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('unit_brand'))
+                         <li>
+                             <a href="{{ route('unitbrand.index') }}"><i class='bx bx-radio-circle'></i>Unit
+                                 Brand</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('unit_rate'))
+                         <li>
+                             <a href="{{ route('unitrate.index') }}"><i class='bx bx-radio-circle'></i>Unit Rate</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('location'))
+                         <li>
+                             <a href="{{ route('location.index') }}"><i class='bx bx-radio-circle'></i>Location</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance_item'))
+                         <li>
+                             <a href="{{ route('maintenanceitem.index') }}"><i
+                                     class='bx bx-radio-circle'></i>Maintenance
+                                 Item</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('mro_item'))
+                         <li>
+                             <a href="{{ route('mroitem.index') }}"><i class='bx bx-radio-circle'></i>MRO Item</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('client_vendor'))
+                         <li>
+                             <a href="{{ route('clientvendor.index') }}"><i class='bx bx-radio-circle'></i>Client &
+                                 Vendor
+                             </a>
+                         </li>
+                     @endif
+                 </ul>
+             </li>
+         @endif
          @if (Auth::user()->hasRole('superadmin'))
              <li>
                  <a href="javascript:;" class="has-arrow">

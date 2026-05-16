@@ -85,6 +85,14 @@ class Purchase_order extends Model implements Auditable
         return $this->belongsTo(User::class)->withDefault(['username' => null]);
     }
 
+    public function user_invoice(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_invoice_id', 'id')
+            ->withDefault([
+                'username' => null,
+            ]);
+    }
+
     public function purchase_requisition(): BelongsTo
     {
         return $this->belongsTo(Purchase_requisition::class)->withDefault(['requisition_no' => null]);

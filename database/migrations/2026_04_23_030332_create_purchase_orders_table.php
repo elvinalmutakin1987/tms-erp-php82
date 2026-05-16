@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('request_token')->unique();
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->unsignedBigInteger('user_invoice_id')->nullable();
             $table->unsignedBigInteger('client_vendor_id')->nullable();
             $table->unsignedBigInteger('purchase_requisition_id')->nullable();
             $table->string('number', 30)->nullable();
@@ -47,11 +48,14 @@ return new class extends Migration
             $table->string('invoice_no', 30)->nullable();
             $table->string('invoice_notes')->nullable();
             $table->text('invoice_path')->nullable();
+            $table->text('invoice_real_name')->nullable();
             $table->date('close_date')->nullable();
             $table->date('paid_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('user_invoice_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
             $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
             $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
         });

@@ -8,57 +8,45 @@
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
                     <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="code_access" class="form-label">Code Access</label>
                             <input type="text" class="form-control" id="code_access" name="code_access">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="plr_no" class="form-label">PLR Number</label>
                             <input type="text" class="form-control" id="plr_no" name="plr_no">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_crane" class="form-label">Exp. Crane</label>
                             <input type="text" class="form-control datepicker" id="exp_crane" name="exp_crane">
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_fuel_issue" class="form-label">Exp. Fuel Issue</label>
                             <input type="text" class="form-control datepicker" id="exp_fuel_issue"
                                 name="exp_fuel_issue">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_tbst" class="form-label">Exp. TBST</label>
                             <input type="text" class="form-control datepicker" id="exp_tbst" name="exp_tbst">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_pass_road_1" class="form-label">Exp. Pass Road 1</label>
                             <input type="text" class="form-control datepicker" id="exp_pass_road_1"
                                 name="exp_pass_road_1">
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_stnk" class="form-label">Exp. STNK</label>
                             <input type="text" class="form-control datepicker" id="exp_stnk" name="exp_stnk">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_tax" class="form-label">Exp. Tax</label>
                             <input type="text" class="form-control datepicker" id="exp_tax" name="exp_tax">
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-12 mb-2">
+                        <div class="col-md-4 mb-2">
                             <label for="exp_comm" class="form-label">Exp. Commissioning</label>
                             <input type="text" class="form-control datepicker" id="exp_comm" name="exp_comm">
                         </div>

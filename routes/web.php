@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ApprovalController;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\AuthController;
@@ -703,4 +704,11 @@ Route::middleware(['auth'])->group(function () {
         ->parameters(['invoicereceipt' => 'purchase_order'])
         ->middleware('role:superadmin|invoice_receipt')
         ->names('invoicereceipt');
+
+    /**
+     * Routenya Approval
+     */
+    Route::get('approval', [ApprovalController::class, 'index'])
+        ->middleware('role:superadmin|approval')
+        ->name('approval.index');
 });

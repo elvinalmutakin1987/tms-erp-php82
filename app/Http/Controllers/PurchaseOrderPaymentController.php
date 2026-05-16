@@ -343,6 +343,12 @@ class PurchaseOrderPaymentController extends Controller
                 if ($request->status == 'Open') {
                     $purchase_order_payment->status = 'Done';
                     $purchase_order_payment->save();
+
+                    /**
+                     * Buat check status bayarnya
+                     */
+                    $purchase_order = Purchase_order::find($request->purchase_order_id);
+                    $this->check_payment($purchase_order);
                 }
             }
 
@@ -673,5 +679,17 @@ class PurchaseOrderPaymentController extends Controller
                 'message' => $th->getMessage()
             ], 400);
         }
+    }
+
+    public function check_payment(Purchase_order $purchase_order)
+    {
+        $total_payment = Purchase_order_payment::where('purchase_order_id', $purchase_order->id)->sum('total');
+        $grand_total = $purchase_order->grand_total;
+        if ($total_payment >= $grand_total) {
+            $purchase_order->payment_status = 'Paid';
+        } else {
+            $purchase_order->payment_status = 'Partially Paid';
+        }
+        $purchase_order->save();
     }
 }
