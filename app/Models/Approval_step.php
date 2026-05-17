@@ -25,11 +25,11 @@ class Approval_step extends Model
 
     public function approval_status(): HasMany
     {
-        return $this->belongsTo(Approval_status::class);
+        return $this->hasMany(Approval_status::class);
     }
 
     public function approval_process(): HasMany
     {
-        return $this->belongsTo(Approval_process::class);
+        return $this->hasMany(Approval_process::class);
     }
 }
