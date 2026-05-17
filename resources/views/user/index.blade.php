@@ -175,7 +175,8 @@
                         $('#email').val(response.data.email);
                         $("#request_token").val(response.data.request_token);
                         roleId = response.role_id;
-                        if (response.data.sign_path != null) {
+                        if (response.data.sign_path !== null && response.data.sign_path !==
+                            "") {
                             var imageUrl = response.sign_path;
                             $('#divSignPath').html('<img src="' + imageUrl +
                                 '" alt="Signature Image" style="max-width: 100%; height: auto;"/>'

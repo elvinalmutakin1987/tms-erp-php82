@@ -219,47 +219,12 @@ class ProformaInvoiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Proforma_invoice $proforma_invoice)
-    {
-        DB::beginTransaction();
-        try {
-            $proforma_invoice->delete();
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'title' => 'Deleted!',
-                'message' => 'Data Deleted'
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
-    }
+    public function destroy(Proforma_invoice $proforma_invoice) {}
 
     /**
      * Hitung summary breakdown
      */
-    public function summary_breakdown(Request $request)
-    {
-        DB::beginTransaction();
-        try {
-            $html = view($view, compact('uom'))->render();
-            return response()->json([
-                'success' => true,
-                'html' => $html,
-                'requisition_prev_no' => $requisition_prev_no
-            ], 200);
-        } catch (\Throwable $th) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
-    }
+    public function summary_breakdown(Request $request) {}
 
     /**
      * Hitung summary transport
@@ -269,34 +234,5 @@ class ProformaInvoiceController extends Controller
     /**
      * Ngambil tabel add
      */
-    public function get_table_add(Request $request)
-    {
-        try {
-            $presenter = new DatePrefixPresenter('Y/m', '/');
-            $contract = Contract::find($request->contract_id);
-            if ($contract->service->name == 'Unit Rental') {
-                $view = "proforma_invoice.table-rental-add";
-            } else if ($contract->service->name == 'Ex-Pallet') {
-                $view = "proforma_invoice.table-pallet-add";
-            } else {
-                $view = "proforma_invoice.table-transport-add";
-            }
-            $unit = Unit::all();
-            $proforma_invoice_prev_no = Generator::make()
-                ->type('pi')
-                ->formatter($presenter)
-                ->preview();
-            $html = view($view, compact('proforma_invoice_prev_no', 'unit'))->render();
-            return response()->json([
-                'success' => true,
-                'html' => $html,
-                'proforma_invoice_prev_no' => $proforma_invoice_prev_no
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
-        }
-    }
+    public function get_table_add(Request $request) {}
 }

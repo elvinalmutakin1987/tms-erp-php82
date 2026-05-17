@@ -30,6 +30,7 @@ use App\Http\Controllers\PurchaseOrderPaymentController;
 use App\Http\Controllers\PurchaseRequisitionController;
 use App\Http\Controllers\PurchaseRequisitionGeneralController;
 use App\Http\Controllers\RequestQuotationController;
+use App\Http\Controllers\SummaryBreakdownController;
 use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
 use Illuminate\Support\Facades\Storage;
@@ -711,4 +712,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('approval', [ApprovalController::class, 'index'])
         ->middleware('role:superadmin|approval')
         ->name('approval.index');
+
+    /**
+     * Routenya summary breakdown
+     */
+    Route::get('summarybreakdown', [SummaryBreakdownController::class, 'index'])
+        ->middleware('role:superadmin|summary_breakdown')
+        ->name('summarybreakdown.index');
 });

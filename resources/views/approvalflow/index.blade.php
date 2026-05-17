@@ -141,9 +141,15 @@
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit User');
                         $('#request_token').val(response.data.request_token);
-                        $('#department').val(response.data.department).trigger('change');
+                        // $('#department').val(response.data.department).trigger(
+                        //     'select2:change');
+                        // $('#approvable_model').val(response.data.approvable_model).trigger(
+                        //     'select2:change');
+                        $('#department').val(response.data.department).trigger(
+                            'change');
                         $('#approvable_model').val(response.data.approvable_model).trigger(
                             'change');
+
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -294,8 +300,13 @@
                         type: 'GET',
                         success: function(response) {
                             setTimeout(function() {
-                                $('#tableStep tbody tr').not(':first').remove();
-                                tbody.append(response);
+                                const $tbody = $('#tableStep tbody');
+                                $tbody.find('tr').not(':first').remove();
+                                const $newRows = $(response);
+                                $tbody.append($newRows);
+                                // Ini bagian penting
+                                gen_select2($newRows);
+                                renumberRows();
                             }, 500);
                         },
                         error: function(xhr, status, error) {
@@ -327,6 +338,10 @@
             enableButton();
             $('#request_token').val("");
             $('#tableStep tbody tr').not(':first').remove();
+            // $('#department').val("").trigger(
+            //     'change');
+            // $('#approvable_model').val("").trigger(
+            //     'change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -335,64 +350,147 @@
             $('#formModal').modal('hide');
         });
 
-        function gen_select2() {
-            $('.select-select').each(function() {
+        // function gen_select2() {
+        //     $('.select-select').each(function() {
+        //         const $el = $(this);
+        //         $el.select2({
+        //                 theme: "bootstrap-5",
+        //                 dropdownParent: $(
+        //                     '#formModal'),
+        //                 width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+        //                     'style'),
+        //                 selectOnClose: false,
+        //                 minimumResultsForSearch: 0,
+        //             })
+        //             .on('select2:open', function() {
+        //                 setTimeout(function() {
+        //                     const $search = $('.select2-container--open .select2-search__field');
+        //                     $search.trigger('focus');
+        //                     $('.select2-container--open').css('z-index', 1056);
+        //                 }, 0);
+        //             });
+        //     });
+        // }
+
+        // $('#addStepButton').on('click', function() {
+        //     var tbody = $("#tableStep > tbody");
+        //     var user_id = $("#approver_id").val();
+        //     var user_name = $("#approver_id option:selected").text();
+        //     var order = $("#txt_order").val();
+        //     var action = $("#slc_action option:selected").text();
+        //     var newRow = `
+    //         <tr class="row-number">
+    //             <td class="p-1 align-middle row-number">
+    //                 #
+    //             </td>
+    //             <td class="p-1 align-middle">
+    //                <input type="text" class="form-control" id="username" name="username" readonly value="${user_name}">
+    //                <input type="hidden" class="form-control" id="user_id" name="user_id[]" value="${user_id}">
+    //             </td>
+    //             <td class="p-1 align-middle">
+    //                <select class="form-select select-select" id="action" name="action[]">
+    //                     <option value="Requested" ${ action == 'Requested' ? 'selected' : ''}>Requested</option>
+    //                     <option value="Known" ${ action == 'Known' ? 'selected' : ''}>Known</option>
+    //                     <option value="Checked" ${ action == 'Checked' ? 'selected' : ''}>Checked</option>
+    //                     <option value="Approved" ${ action == 'Approved' ? 'selected' : ''}>Approved</option>
+    //                 </select>                           
+    //             </td>
+    //             <td class="p-1 align-middle"> 
+    //                 <input type="number" class="form-control" id="order" name="order[]" value="${order}">
+    //             </td>
+    //             <td class="text-center p-1 align-middle">
+    //                 <div class="row row-cols-auto g-3">
+    //                     <div class="col">
+    //                         <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+    //                         id="removeStepButton"></button>
+    //                     </div>
+    //                 </div>
+    //             </td>
+    //         </tr>
+    //     `;
+        //     $("#txt_order").val('');
+        //     tbody.append(newRow);
+        //     gen_select2();
+
+        //     renumberRows();
+        // });
+
+        function gen_select2(scope = document) {
+            const $scope = $(scope);
+
+            const $selects = $scope.is('select.select-select') ?
+                $scope :
+                $scope.find('select.select-select');
+
+            $selects.each(function() {
                 const $el = $(this);
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    return;
+                }
+
                 $el.select2({
-                        theme: "bootstrap-5",
-                        dropdownParent: $(
-                            '#formModal'),
-                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                            'style'),
-                        selectOnClose: false,
-                        minimumResultsForSearch: 0,
-                    })
-                    .on('select2:open', function() {
-                        setTimeout(function() {
-                            const $search = $('.select2-container--open .select2-search__field');
-                            $search.trigger('focus');
-                            $('.select2-container--open').css('z-index', 1056);
-                        }, 0);
-                    });
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style'),
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0,
+                }).on('select2:open', function() {
+                    setTimeout(function() {
+                        const $search = $('.select2-container--open .select2-search__field');
+                        $search.trigger('focus');
+                        $('.select2-container--open').css('z-index', 1056);
+                    }, 0);
+                });
             });
         }
 
         $('#addStepButton').on('click', function() {
             var tbody = $("#tableStep > tbody");
+
             var user_id = $("#approver_id").val();
             var user_name = $("#approver_id option:selected").text();
             var order = $("#txt_order").val();
-            var action = $("#slc_action option:selected").text();
+            var action = $("#slc_action").val();
 
             var newRow = `
                 <tr class="row-number">
                     <td class="p-1 align-middle row-number">
                         #
                     </td>
+
                     <td class="p-1 align-middle">
-                       <input type="text" class="form-control" id="username" name="username" readonly value="${user_name}">
-                       <input type="hidden" class="form-control" id="user_id" name="user_id[]" value="${user_id}">
+                        <input type="text" class="form-control" name="username[]" readonly value="${user_name}">
+                        <input type="hidden" class="form-control" name="user_id[]" value="${user_id}">
                     </td>
+
                     <td class="p-1 align-middle">
-                       <input type="text" class="form-control" id="action" name="action[]" readonly value="${action}">
+                        <select class="form-select select-select step-action" name="action[]">
+                            <option value="Requested" ${action == 'Requested' ? 'selected' : ''}>Requested</option>
+                            <option value="Known" ${action == 'Known' ? 'selected' : ''}>Known</option>
+                            <option value="Checked" ${action == 'Checked' ? 'selected' : ''}>Checked</option>
+                            <option value="Approved" ${action == 'Approved' ? 'selected' : ''}>Approved</option>
+                        </select>
                     </td>
-                    <td class="p-1 align-middle"> 
-                        <input type="number" class="form-control" id="order" name="order[]" value="${order}">
+
+                    <td class="p-1 align-middle">
+                        <input type="number" class="form-control" name="order[]" value="${order}">
                     </td>
+
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
                             <div class="col">
-                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-                                                        id="removeStepButton"></button>
+                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row"></button>
                             </div>
                         </div>
                     </td>
                 </tr>
             `;
+            var $newRow = $(newRow);
             $("#txt_order").val('');
-            tbody.append(newRow);
-            gen_select2();
-
+            tbody.append($newRow);
+            gen_select2($newRow);
             renumberRows();
         });
 

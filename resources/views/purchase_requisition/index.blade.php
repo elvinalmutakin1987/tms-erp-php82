@@ -74,7 +74,7 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Requisition Number</th>
-                                        <th>Maintenance Number</th>
+                                        {{-- <th>Maintenance Number</th> --}}
                                         <th>Date</th>
                                         <th>Unit</th>
                                         <th>Abbreviation </th>
@@ -164,12 +164,12 @@
                         orderable: true,
                         searchable: true,
                     },
-                    {
-                        data: 'maintenance_no',
-                        name: 'maintenance_no',
-                        orderable: true,
-                        searchable: true,
-                    },
+                    // {
+                    //     data: 'maintenance_no',
+                    //     name: 'maintenance_no',
+                    //     orderable: true,
+                    //     searchable: true,
+                    // },
                     {
                         data: 'date',
                         name: 'date',
