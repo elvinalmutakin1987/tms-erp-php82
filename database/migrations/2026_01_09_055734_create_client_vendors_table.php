@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('client_vendors', function (Blueprint $table) {
             $table->id();
-            $table->uuid('request_token')->unique();
+            $table->uuid('request_token')->nullable();
             $table->unsignedBigInteger('location_id')->nullable();
             $table->string('type', 30)->nullable(); // ini isinya Client / Vendor
             $table->string('taxable', 30)->nullable(); // PKP / Non PKP

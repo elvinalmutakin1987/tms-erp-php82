@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->uuid('request_token')->unique();
+            $table->uuid('request_token')->nullable();
             $table->string('name', 100)->nullable();
             $table->timestamps();
         });

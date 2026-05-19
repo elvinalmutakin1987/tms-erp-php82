@@ -168,38 +168,31 @@ class MaintenanceController extends Controller
             $request->validate([
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
-                'client_vendor_id' => ['required', 'not_in:All'],
+                // 'client_vendor_id' => ['required', 'not_in:All'],
                 'hour_meter' => 'required',
                 'km_hm' => 'required',
                 'start' => 'required',
                 'finish' => 'required',
                 'work_duration' => 'required'
             ]);
-            $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    'maintenance_item_id',
-                    'mro_item_id',
-                    '_hour_meter',
-                    '_km_km',
-                    'notes',
-                    'action',
-                    'act',
-                    'main_item',
-                    'main_item_id'
-                ),
-                [
-                    'request_token' => $request->request_token,
-                    'input_method' => 'Web'
-                ]
-            );
+            $data = [
+                'unit_id' => $request->unit_id,
+                'date' => $request->date,
+                'client_vendor_id' => $request->client_vendor_id != '' && $request->client_vendor_id != 'All' ? $request->client_vendor_id : null,
+                'mechanic' => $request->mechanic,
+                'hour_meter' => $request->hour_meter,
+                'km_hm' => $request->km_hm,
+                'start' => $request->start,
+                'finish' => $request->finish,
+                'work_duration' => $request->work_duration,
+                'remarks' => $request->remarks,
+                'request_token' => $request->request_token,
+                'input_method' => 'Web',
+                'status' => $request->status
+            ];
             $maintenance = Maintenance::firstOrCreate($data);
             foreach ($request->maintenance_item_id as $key => $item) {
                 $maintenance->maintenance_detail()->create(
-                    [
-                        'maintenance_item_id' => $item,
-                    ],
                     [
                         'request_token' => $maintenance->request_token,
                         'maintenance_item_id' => $request->maintenance_item_id[$key],
@@ -255,40 +248,39 @@ class MaintenanceController extends Controller
             $request->validate([
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
-                'client_vendor_id' => ['required', 'not_in:All'],
+                // 'client_vendor_id' => ['required', 'not_in:All'],    
                 'hour_meter' => 'required',
                 'km_hm' => 'required',
                 'start' => 'required',
                 'finish' => 'required',
                 'work_duration' => 'required'
             ]);
-            $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    'maintenance_item_id',
-                    'mro_item_id',
-                    '_hour_meter',
-                    '_km_hm',
-                    'notes',
-                    'action',
-                    'act',
-                    'main_item',
-                    'main_item_id',
-                    'request_token'
-                ),
-                ['input_method' => 'Web']
-            );
+            $data = [
+                'unit_id' => $request->unit_id,
+                'date' => $request->date,
+                'client_vendor_id' => $request->client_vendor_id != '' && $request->client_vendor_id != 'All' ? $request->client_vendor_id : null,
+                'mechanic' => $request->mechanic,
+                'hour_meter' => $request->hour_meter,
+                'km_hm' => $request->km_hm,
+                'start' => $request->start,
+                'finish' => $request->finish,
+                'work_duration' => $request->work_duration,
+                'remarks' => $request->remarks,
+                'input_method' => 'Web',
+                'status' => $request->status
+            ];
             $lockMaintenance = Maintenance::where('id', $maintenance->id)->lockForUpdate()->first();
             $lockMaintenance->update($data);
             $maintenance->maintenance_detail()->delete();
             if ($request->maintenance_item_id) {
                 foreach ($request->maintenance_item_id as $key => $item) {
-                    $maintenance->maintenance_detail()->create([
-                        'maintenance_item_id' => $item,
-                        'request_token' => $maintenance->request_token,
-                        'action' => $request->action[$key]
-                    ]);
+                    $maintenance->maintenance_detail()->create(
+                        [
+                            'maintenance_item_id' => $item,
+                            'request_token' => $maintenance->request_token,
+                            'action' => $request->action[$key]
+                        ]
+                    );
                 }
             }
             DB::commit();

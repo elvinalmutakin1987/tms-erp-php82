@@ -111,7 +111,9 @@
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-        const saveButton = document.getElementById('saveButton');
+        const saveButton1 = document.getElementById('saveButton1');
+        const saveButton2 = document.getElementById('saveButton2');
+
         var maintenanceId = '';
         var unitId = '';
         var clientVendorId = '';
@@ -513,6 +515,7 @@
                         title: "Oops...",
                         text: errorMessage,
                     });
+                    enableButton();
                 }
             });
         });
@@ -572,12 +575,12 @@
                 },
                 error: function(xhr, status, error) {
                     const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-
                     Swal.fire({
                         icon: 'error',
                         title: 'Oops...',
                         text: errorMessage,
                     });
+                    enableButton();
                 }
             });
         }
@@ -655,12 +658,12 @@
             unitId = '';
             clientVendorId = '';
             typeId = '';
-            enableButton();
             $("#request_token").val('');
             $('#tableItem tbody tr').not(':first').remove();
             $("#unit_id").val('All').trigger('change');
             $("#client_vendor_id").val('All').trigger('change');
             $("#type").val(null).trigger('change');
+            enableButton();
         });
 
         $('#formCost').on('show.bs.modal', function() {
@@ -699,6 +702,7 @@
         $('#formCost').on('hidden.bs.modal', function() {
             maintenanceId = '';
             $("#request_token").val("");
+            $('#tableItem tbody tr').not(':first').remove();
         });
 
         $('#cancelButton').on('click', function() {
@@ -979,11 +983,13 @@
         document.getElementById('finish').addEventListener('change', hitungSelisihWaktu);
 
         function disableButton() {
-            saveButton.disabled = true;
+            saveButton1.disabled = true;
+            saveButton2.disabled = true;
         }
 
         function enableButton() {
-            saveButton.disabled = false;
+            saveButton1.disabled = false;
+            saveButton2.disabled = false;
         }
     </script>
     <!--app JS-->

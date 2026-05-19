@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('purchase_order_id')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
-            $table->uuid('request_token');
+            $table->uuid('request_token')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();

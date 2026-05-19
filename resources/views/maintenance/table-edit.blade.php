@@ -15,15 +15,10 @@
         <td class="text-center p-1 align-middle">
             <div class="row row-cols-auto g-3">
                 <div class="col">
-                    <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+                    <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row"
                         id="removeItemButton"></button>
                 </div>
             </div>
         </td>
     </tr>
 @endforeach
-
-
-<script>
-    gen_select2();
-</script>

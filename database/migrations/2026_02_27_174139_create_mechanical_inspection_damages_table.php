@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('mechanical_inspection_damages', function (Blueprint $table) {
             $table->id();
-            $table->uuid('request_token');
+            $table->uuid('request_token')->nullable();
             $table->unsignedBigInteger('mechanical_inspection_id')->nullable();
             $table->text('damage')->nullable();
             $table->text('notes')->nullable();
