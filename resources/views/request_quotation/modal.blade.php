@@ -8,7 +8,6 @@
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
-
                     <div class="row mb-2">
                         <div class="col">
                             <label for="client_vendor_id" class="form-label">Vendor</label>

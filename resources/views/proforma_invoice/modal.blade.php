@@ -16,7 +16,6 @@
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
-
                     <div class="row mb-2">
                         <div class="col">
                             <label for="contract_id" class="form-label">Contract</label>

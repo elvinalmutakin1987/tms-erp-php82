@@ -8,7 +8,6 @@
                  <form action="" onsubmit="disableButton()">
                      @csrf
                      <input type="hidden" name="request_token" id="request_token">
-
                      <div class="col-md-12 mb-2">
                          <label for="unit_brand_id" class="form-label">Brand</label>
                          <select class="form-select" id="unit_brand_id" name="unit_brand_id">

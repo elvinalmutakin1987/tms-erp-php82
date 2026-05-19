@@ -8,7 +8,6 @@
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
-
                     <div class="col-md-12 mb-2">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" class="form-control" id="name" name="name">
@@ -21,7 +20,7 @@
                     </div>
                     <div class="col-md-12 mb-2">
                         <label for="address" class="form-label">Address</label>
-                        <input type="text" class="form-control" id="address" name="address">
+                        <textarea class="form-control" id="address" name="address" rows="2" required></textarea>
                     </div>
                     <div class="col-md-12 mb-2">
                         <label for="email" class="form-label">Email</label>

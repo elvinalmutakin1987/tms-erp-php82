@@ -8,7 +8,6 @@
                 <form enctype="multipart/form-data" onsubmit="disableButton()">
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
-
                     <div class="col-md-12 mb-2">
                         <label for="invoice_no" class="form-label">Invoice No.</label>
                         <input type="text" class="form-control" id="invoice_no" name="invoice_no">

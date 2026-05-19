@@ -26,11 +26,17 @@ class ApprovalController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $client_vendor = Client_vendor::query();
-            if (request()->type != 'All') {
-                $client_vendor = $client_vendor->where('type', request()->type)->get();
+            $approval_step = Approval_step::where('user_id', Auth::user()->id)->pluck('id');
+            $approval_process = Approval_process::query();
+            if (request()->date_start != '') {
+                $approval_process = $approval_process->where('date', '>=', request()->date_start);
             }
-            return DataTables::of($client_vendor)
+            if (request()->date_end != '') {
+                $approval_process = $approval_process->where('date', '<=', request()->date_end);
+            }
+            $approval_process = $approval_process->whereIn('approval_step_id', $approval_step->id)
+                ->orderBy('id', 'desc')->get();
+            return DataTables::of($approval_process)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
                     $button = '
