@@ -16,20 +16,36 @@ class UnitbrandSeeder extends Seeder
     {
         $data = [
             [
-                "request_token" => (string) Str::uuid(),
+                "request_token" => (string) Str::uuid(), //1
                 "name" => "Toyota"
             ],
             [
-                "request_token" => (string) Str::uuid(),
-                "name" => "Daihatsu"
+                "request_token" => (string) Str::uuid(), //2
+                "name" => "Mitsubishi"
             ],
             [
-                "request_token" => (string) Str::uuid(),
-                "name" => "Mercedes"
+                "request_token" => (string) Str::uuid(), //3
+                "name" => "Mercedes Benz"
             ],
             [
-                "request_token" => (string) Str::uuid(),
-                "name" => "Carterpilar"
+                "request_token" => (string) Str::uuid(), //4
+                "name" => "Isuzu"
+            ],
+            [
+                "request_token" => (string) Str::uuid(), //5
+                "name" => "Scania"
+            ],
+            [
+                "request_token" => (string) Str::uuid(), //6
+                "name" => "Fuwa"
+            ],
+            [
+                "request_token" => (string) Str::uuid(), //7
+                "name" => "LCT Craft"
+            ],
+            [
+                "request_token" => (string) Str::uuid(), //8
+                "name" => "CAT"
             ],
         ];
         DB::table('unit_brands')->insert($data);

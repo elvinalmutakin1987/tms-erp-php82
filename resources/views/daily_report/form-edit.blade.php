@@ -20,9 +20,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="km_start" name="km_start"
-                    value="{{ $daily_report->km_start }}">
+                    value="{{ $daily_report?->km_start ?? 0 }}">
                 <input type="text" class="form-control" id="_km_start" name="_km_start"
-                    value="{{ $daily_report->km_start ? Number::format($daily_report->km_start, precision: 0) : '' }}">
+                    value="{{ $daily_report?->km_start ? Number::format($daily_report?->km_start ?? 0, precision: 0) : '' }}">
             </td>
         </tr>
         <tr>
@@ -32,9 +32,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="km_finish" name="km_finish"
-                    value="{{ $daily_report->km_finish }}">
+                    value="{{ $daily_report?->km_finish ?? 0 }}">
                 <input type="text" class="form-control" id="_km_finish" name="_km_finish"
-                    value="{{ $daily_report->km_finish ? Number::format($daily_report->km_finish, precision: 0) : '' }}">
+                    value="{{ $daily_report?->km_finish ? Number::format($daily_report?->km_finish ?? 0, precision: 0) : '' }}">
             </td>
         </tr>
         <tr>
@@ -44,9 +44,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="km_total" name="km_total"
-                    value="{{ $daily_report->km_total }}">
+                    value="{{ $daily_report?->km_total ?? 0 }}">
                 <input type="text" class="form-control" id="_km_total" name="_km_total"
-                    value="{{ $daily_report->km_total ? Number::format($daily_report->km_total, precision: 0) : '' }}"
+                    value="{{ $daily_report?->km_total ? Number::format($daily_report?->km_total ?? 0, precision: 0) : '' }}"
                     readonly>
             </td>
         </tr>
@@ -80,9 +80,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="load" name="load"
-                    value="{{ $daily_report->load }}">
+                    value="{{ $daily_report?->load ?? 0 }}">
                 <input type="text" class="form-control" id="_load" name="_load"
-                    value="{{ $daily_report->load ? Number::format($daily_report->load, precision: 0) : '' }}">
+                    value="{{ $daily_report?->load ? Number::format($daily_report?->load ?? 0, precision: 0) : '' }}">
             </td>
         </tr>
         <tr class="table-secondary">
@@ -96,7 +96,7 @@
             <td class="p-1 align-middle">
                 <select class="form-select select-select" id="refule_type" name="refule_type">
                     <option value="KPC" {{ $daily_report->refule_type == 'KPC' ? 'selected' : '' }}>KPC</option>
-                    <option value="POM Bensin" {{ $daily_report->refule_type == 'POM Bensin' ? 'selected' : '' }}>POM
+                    <option value="POM Bensin" {{ $daily_report?->refule_type == 'POM Bensin' ? 'selected' : '' }}>POM
                         Bensin
                     </option>
                 </select>
@@ -111,7 +111,7 @@
                 <input type="hidden" class="form-control" id="refule_liter" name="refule_liter"
                     value="{{ $daily_report->refule_liter }}">
                 <input type="text" class="form-control" id="_refule_liter" name="_refule_liter"
-                    value="{{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}">
+                    value="{{ $daily_report->refule_liter ? Number::format($daily_report?->refule_liter ?? 0, precision: 0) : '' }}">
             </td>
         </tr>
         <tr>
@@ -123,7 +123,7 @@
                 <input type="hidden" class="form-control" id="refule_km" name="refule_km"
                     value="{{ $daily_report->refule_km }}">
                 <input type="text" class="form-control" id="_refule_km" name="_refule_km"
-                    value="{{ $daily_report->refule_km ? Number::format($daily_report, precision: 0) : '' }}">
+                    value="{{ $daily_report->refule_km ? Number::format($daily_report?->refule_km ?? 0, precision: 0) : '' }}">
             </td>
         </tr>
         <tr class="table-secondary">

@@ -84,10 +84,21 @@ class DailyReportController extends Controller
                     return $item->unit?->vehicle_no ?? '';
                 })
                 ->addColumn('total_km_duration', function ($item) {
+                    // if ($item->type != 'LCT') {
+                    //     return $item->km_total;
+                    // }
+                    // $totalDuration = addTime($item->duration_trip_1, $item->duration_trip_2);
+                    // return $totalDuration;
                     if ($item->type != 'LCT') {
                         return $item->km_total;
                     }
+
+                    if (is_null($item->duration_trip_1) || is_null($item->duration_trip_2)) {
+                        return null;
+                    }
+
                     $totalDuration = addTime($item->duration_trip_1, $item->duration_trip_2);
+
                     return $totalDuration;
                 })
                 ->make();
@@ -117,7 +128,7 @@ class DailyReportController extends Controller
         DB::beginTransaction();
         try {
             $unit = Unit::find($request->unit_id);
-            $type = 'Vehicle';
+            $type = 'Non LCT';
             $duration_trip_1 = '00:00';
             $duration_trip_2 = '00:00';
             if ($unit && $unit->type == 'LCT') {
@@ -128,13 +139,27 @@ class DailyReportController extends Controller
                     'unit_id' => ['required', 'not_in:All'],
                     'date' => 'required',
                 ]);
-                $berthing_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_berthing_at);
-                $depart_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_departed_at);
-                $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
+                // $berthing_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_berthing_at);
+                // $depart_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_departed_at);
+                // $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
 
-                $berthing_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_berthing_at);
-                $depart_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_departed_at);
-                $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
+                // $berthing_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_berthing_at);
+                // $depart_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_departed_at);
+                // $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
+                $berthing_trip_1 = $request->trip_1_berthing_at;
+                $depart_trip_1 = $request->trip_1_departed_at;
+
+                $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
+                    ? countTime($depart_trip_1, $berthing_trip_1)
+                    : null;
+
+
+                $berthing_trip_2 = $request->trip_2_berthing_at;
+                $depart_trip_2 = $request->trip_2_departed_at;
+
+                $duration_trip_2 = $request->filled('trip_2_berthing_at') && $request->filled('trip_2_departed_at')
+                    ? countTime($depart_trip_2, $berthing_trip_2)
+                    : null;
             } else {
                 $request->validate([
                     'unit_id' => ['required', 'not_in:All'],
@@ -144,36 +169,70 @@ class DailyReportController extends Controller
                     'km_total' => 'required',
                 ]);
             }
-            $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    'detail_unit_id',
-                    'unit_name',
-                    'item',
-                    'uom_1',
-                    'value_1',
-                    'value_1__',
-                    'uom_2',
-                    'value_2',
-                    'value_2__',
-                    '_km_start',
-                    '_km_finish',
-                    '_km_total',
-                    '_load',
-                    '_refule_filter',
-                    '_refule_km',
-                    '_refule_liter'
-                ),
-                [
-                    'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'type' => $type,
-                    'duration_trip_1' => $duration_trip_1,
-                    'duration_trip_2' => $duration_trip_2,
-                    'remarks' => $request->remarks,
-                ]
-            );
+            // $data = array_merge(
+            //     $request->except(
+            //         '_token',
+            //         '_method',
+            //         'detail_unit_id',
+            //         'unit_name',
+            //         'item',
+            //         'uom_1',
+            //         'value_1',
+            //         'value_1__',
+            //         'uom_2',
+            //         'value_2',
+            //         'value_2__',
+            //         '_km_start',
+            //         '_km_finish',
+            //         '_km_total',
+            //         '_load',
+            //         '_refule_filter',
+            //         '_refule_km',
+            //         '_refule_liter'
+            //     ),
+            //     [
+            //         'request_token' => $request->request_token,
+            //         'input_method' => 'Web',
+            //         'type' => $type,
+            //         'duration_trip_1' => $duration_trip_1,
+            //         'duration_trip_2' => $duration_trip_2,
+            //         'remarks' => $request->remarks,
+            //     ]
+            // );
+            $data = [
+                'unit_id' => $request->unit_id,
+                'date' => $request->date,
+                'shift' => $request->shift,
+                'km_start' => $request->km_start,
+                'km_finish' => $request->km_finish,
+                'km_total' => $request->km_total,
+                'trip_1_location_id' => $request->trip_1_location_id,
+                'trip_1_arr_location_id' => $request->trip_1_arr_location_id,
+                'trip_1_loading_at' => $request->trip_1_loading_at,
+                'trip_1_complete_loading_at' => $request->trip_1_complete_loading_at,
+                'trip_1_departed_at' => $request->trip_1_departed_at,
+                'trip_1_arrived_at' => $request->trip_1_arrived_at,
+                'trip_1_berthing_at' => $request->trip_1_berthing_at,
+                'trip_2_location_id' => $request->trip_2_location_id,
+                'trip_2_arr_location_id' => $request->trip_2_arr_location_id,
+                'trip_2_loading_at' => $request->trip_2_loading_at,
+                'trip_2_complete_loading_at' => $request->trip_2_complete_loading_at,
+                'trip_2_departed_at' => $request->trip_2_departed_at,
+                'trip_2_arrived_at' => $request->trip_2_arrived_at,
+                'trip_2_berthing_at' => $request->trip_2_berthing_at,
+                'operator' => $request->operator,
+                'helper' => $request->helper,
+                'load' => $request->load,
+                'refule_km' => $request->refule_km,
+                'refule_liter' => $request->refule_liter,
+                'refule_type' => $request->refule_type,
+                'request_token' => $request->request_token,
+                'input_method' => 'Web',
+                'type' => $type,
+                'duration_trip_1' => $duration_trip_1,
+                'duration_trip_2' => $duration_trip_2,
+                'remarks' => $request->remarks,
+            ];
             $daily_report = Daily_report::firstOrCreate($data);
             if ($request->has('detail_unit_id')) {
                 foreach ($request->detail_unit_id as $key => $item) {
@@ -237,7 +296,7 @@ class DailyReportController extends Controller
         DB::beginTransaction();
         try {
             $unit = Unit::find($request->unit_id);
-            $type = 'Vehicle';
+            $type = 'Non LCT';
             $duration_trip_1 = '00:00';
             $duration_trip_2 = '00:00';
             if ($unit && $unit->type == 'LCT') {
@@ -248,13 +307,27 @@ class DailyReportController extends Controller
                     'unit_id' => ['required', 'not_in:All'],
                     'date' => 'required',
                 ]);
+                // $berthing_trip_1 = $request->trip_1_berthing_at;
+                // $depart_trip_1 = $request->trip_1_departed_at;
+                // $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
+
+                // $berthing_trip_2 = $request->trip_2_berthing_at;
+                // $depart_trip_2 = $request->trip_2_departed_at;
+                // $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
                 $berthing_trip_1 = $request->trip_1_berthing_at;
                 $depart_trip_1 = $request->trip_1_departed_at;
-                $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
+
+                $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
+                    ? countTime($depart_trip_1, $berthing_trip_1)
+                    : null;
+
 
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
-                $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
+
+                $duration_trip_2 = $request->filled('trip_2_berthing_at') && $request->filled('trip_2_departed_at')
+                    ? countTime($depart_trip_2, $berthing_trip_2)
+                    : null;
             } else {
                 $request->validate([
                     'unit_id' => ['required', 'not_in:All'],
@@ -264,35 +337,69 @@ class DailyReportController extends Controller
                     'km_total' => 'required',
                 ]);
             }
-            $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    'detail_unit_id',
-                    'unit_name',
-                    'item',
-                    'uom_1',
-                    'value_1',
-                    'value_1__',
-                    'uom_2',
-                    'value_2',
-                    'value_2__',
-                    '_km_start',
-                    '_km_finish',
-                    '_km_total',
-                    '_load',
-                    '_refule_filter',
-                    '_refule_km',
-                    '_refule_liter'
-                ),
-                [
-                    'input_method' => 'Web',
-                    'type' => $type,
-                    'duration_trip_1' => $duration_trip_1,
-                    'duration_trip_2' => $duration_trip_2,
-                    'remarks' => $request->remarks,
-                ]
-            );
+            // $data = array_merge(
+            //     $request->except(
+            //         '_token',
+            //         '_method',
+            //         'detail_unit_id',
+            //         'unit_name',
+            //         'item',
+            //         'uom_1',
+            //         'value_1',
+            //         'value_1__',
+            //         'uom_2',
+            //         'value_2',
+            //         'value_2__',
+            //         '_km_start',
+            //         '_km_finish',
+            //         '_km_total',
+            //         '_load',
+            //         '_refule_filter',
+            //         '_refule_km',
+            //         '_refule_liter'
+            //     ),
+            //     [
+            //         'input_method' => 'Web',
+            //         'type' => $type,
+            //         'duration_trip_1' => $duration_trip_1,
+            //         'duration_trip_2' => $duration_trip_2,
+            //         'remarks' => $request->remarks,
+            //     ]
+            // );
+            $data = [
+                'unit_id' => $request->unit_id,
+                'date' => $request->date,
+                'shift' => $request->shift,
+                'km_start' => $request->km_start,
+                'km_finish' => $request->km_finish,
+                'km_total' => $request->km_total,
+                'trip_1_location_id' => $request->trip_1_location_id,
+                'trip_1_arr_location_id' => $request->trip_1_arr_location_id,
+                'trip_1_loading_at' => $request->trip_1_loading_at,
+                'trip_1_complete_loading_at' => $request->trip_1_complete_loading_at,
+                'trip_1_departed_at' => $request->trip_1_departed_at,
+                'trip_1_arrived_at' => $request->trip_1_arrived_at,
+                'trip_1_berthing_at' => $request->trip_1_berthing_at,
+                'trip_2_location_id' => $request->trip_2_location_id,
+                'trip_2_arr_location_id' => $request->trip_2_arr_location_id,
+                'trip_2_loading_at' => $request->trip_2_loading_at,
+                'trip_2_complete_loading_at' => $request->trip_2_complete_loading_at,
+                'trip_2_departed_at' => $request->trip_2_departed_at,
+                'trip_2_arrived_at' => $request->trip_2_arrived_at,
+                'trip_2_berthing_at' => $request->trip_2_berthing_at,
+                'operator' => $request->operator,
+                'helper' => $request->helper,
+                'load' => $request->load,
+                'refule_km' => $request->refule_km,
+                'refule_liter' => $request->refule_liter,
+                'refule_type' => $request->refule_type,
+                'request_token' => $request->request_token,
+                'input_method' => 'Web',
+                'type' => $type,
+                'duration_trip_1' => $duration_trip_1,
+                'duration_trip_2' => $duration_trip_2,
+                'remarks' => $request->remarks,
+            ];
             $lockDaily_report = Daily_report::where('id', $daily_report->id)->lockForUpdate()->first();
             $lockDaily_report->update($data);
             $daily_report->daily_report_detail()->delete();

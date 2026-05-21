@@ -15,14 +15,16 @@ class UnitSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            "request_token" => (string) Str::uuid(),
-            "location_id" => 1,
-            "company_id" => null,
-            "unit_brand_id" => 1,
-            "unit_model_id" => 1,
-            "vehicle_no" => "TMS01",
-            "registration_no" => "KT1123RR",
-            "type" => "Vehicle"
+            [
+                "request_token" => (string) Str::uuid(),
+                "location_id" => 1,
+                "company_id" => null,
+                "unit_brand_id" => 1,
+                "unit_model_id" => 1,
+                "vehicle_no" => "TMS17",
+                "registration_no" => "B 1370 URR",
+                "type" => "Light Vehicle"
+            ],
         ];
         DB::table('units')->insert($data);
     }

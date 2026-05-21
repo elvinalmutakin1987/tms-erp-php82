@@ -34,7 +34,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <table id="table-data" class="table" style="width:100%">
+                            <table id="table-data" class="table table-striped" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>

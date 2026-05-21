@@ -28,6 +28,11 @@ class LocationSeeder extends Seeder
             [
                 "request_token" => (string) Str::uuid(),
                 "loc_type" => "Project Location",
+                "name" => "Sangatta"
+            ],
+            [
+                "request_token" => (string) Str::uuid(),
+                "loc_type" => "Project Location",
                 "name" => "Tanjung Bara"
             ],
             [

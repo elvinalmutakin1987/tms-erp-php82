@@ -1,21 +1,21 @@
 <?php
 
 return [
-    'Excavator',
-    'Hauler',
-    'Dozer',
-    'Compactor',
-    'Light',
-    'Vehicle',
-    'Water Truck',
-    'Manhaul',
-    'Lighting Plant',
+    'Light Vehicle',
     'Light Truck',
     'Crane Truck',
     'Prime Truck',
     'Fuel Truck',
+    'Light Gas',
+    'LCT',
+    'Excavator',
+    'Hauler',
+    'Dozer',
+    'Compactor',
+    'Vehicle',
+    'Water Truck',
+    'Manhaul',
+    'Lighting Plant',
     'Flat Deck Crane Truck',
     'Flat Deck Crane',
-    'Light Gas',
-    'LCT'
 ];

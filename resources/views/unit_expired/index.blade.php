@@ -58,15 +58,17 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body ">
-                            <table id="table-data" class="table table-bordered">
+                            <table id="table-data" class="table table-striped table-bordered">
                                 <thead class="table-light">
                                     <tr>
                                         <th>No</th>
-                                        <th>Type</th>
-                                        <th>Location</th>
                                         <th>Vehicle No.</th>
-                                        <th>Chasis No.</th>
                                         <th>Plat No.</th>
+                                        <th>Type</th>
+                                        <th>Brand</th>
+                                        <th>Model</th>
+                                        <th>Location</th>
+                                        <th>Chasis No.</th>
                                         <th>Access Code</th>
                                         <th>PLR No.</th>
                                         <th>Banlaw No.</th>
@@ -133,6 +135,7 @@
                 scrollCollapse: true,
                 responsive: false,
                 scrollX: true,
+                "pageLength": -1,
                 "lengthMenu": [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, "All"]
@@ -176,7 +179,7 @@
                     const dateFields = ['exp_crane', 'exp_fuel_issue', 'exp_tbst', 'exp_stnk',
                         'exp_tax', 'exp_comm'
                     ];
-                    const startColIndex = 9;
+                    const startColIndex = 11;
 
                     dateFields.forEach((field, i) => {
                         const res = getBgColor(data[field]);
@@ -195,8 +198,28 @@
                         className: 'dt-center',
                     },
                     {
+                        data: 'vehicle_no',
+                        name: 'vehicle_no',
+                        width: '150px',
+                    },
+                    {
+                        data: 'registration_no',
+                        name: 'registration_no',
+                        width: '150px',
+                    },
+                    {
                         data: 'type',
                         name: 'type',
+                        width: '150px',
+                    },
+                    {
+                        data: 'brand',
+                        name: 'brand',
+                        width: '150px',
+                    },
+                    {
+                        data: 'model',
+                        name: 'model',
                         width: '150px',
                     },
                     {
@@ -205,18 +228,8 @@
                         width: '150px',
                     },
                     {
-                        data: 'vehicle_no',
-                        name: 'vehicle_no',
-                        width: '150px',
-                    },
-                    {
                         data: 'chassis_no',
                         name: 'chassis_no',
-                        width: '150px',
-                    },
-                    {
-                        data: 'registration_no',
-                        name: 'registration_no',
                         width: '150px',
                     },
                     {
@@ -286,6 +299,7 @@
                         $('#modal-header').text('Edit Unit ' + response.data.vehicle_no);
                         $("#code_access").val(response.data.code_access);
                         $("#plr_no").val(response.data.plr_no);
+                        $("#banlaw_no").val(response.data.banlaw_no);
                         $("#exp_crane").val(response.data.exp_crane);
                         $("#exp_fuel_issue").val(response.data.exp_fuel_issue);
                         $("#exp_tbst").val(response.data.exp_tbst);

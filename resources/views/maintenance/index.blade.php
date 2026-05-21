@@ -69,7 +69,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <table id="table-data" class="table" style="width:100%">
+                            <table id="table-data" class="table table-striped table-bordered" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
@@ -545,14 +545,11 @@
         function submitCost(status) {
             const formData = new FormData($('#formCost').find('form')[0]);
             let url = '{{ route('maintenance.cost.store') }}';
-
             formData.append('status', status);
-
             if (maintenanceId !== '') {
                 url = '{{ route('maintenance.cost.update', ':_id') }}'.replace(':_id', maintenanceId);
                 formData.append('_method', 'PUT');
             }
-
             $.ajax({
                 url: url,
                 type: 'POST',
@@ -609,25 +606,19 @@
                     url: url,
                     type: 'GET',
                     success: function(response) {
-
                         const titleText = isEdit ? 'Edit Maintenance' : 'Add Maintenance';
                         const number = isEdit ? response.maintenance_no : response
                             .maintenance_prev_no;
-
                         $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
-
                         if (!isEdit) {
                             $('#tableItem tbody tr').not(':first').remove();
                             return;
                         }
-
                         // $("#tableItem > tbody").html(response.html);
                         const $tbody = $("#tableItem > tbody");
                         const $newRows = $('<tbody>').html(response.html).find('tr');
-
                         $tbody.find('tr:not(:first)').remove();
                         $tbody.append($newRows);
-
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
@@ -670,6 +661,15 @@
             var button = $('#costButton');
             var title = button.data('title');
             $('#modal-cost-header').text(title);
+            var tbody = $("#tableItem > tbody");
+            tbody.append(`
+                    <tr>
+                        <td colspan="4">
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span class="visually">Loading...</span>
+                        </td>
+                    </tr>
+                    `);
             setTimeout(function() {
                 var data = {
                     'form': 'create'
@@ -748,7 +748,6 @@
             `;
             $('#act').val("Repair").trigger('change');
             tbody.append(newRow);
-
             renumberRows();
         });
 

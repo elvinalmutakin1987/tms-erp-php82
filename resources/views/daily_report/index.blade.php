@@ -48,7 +48,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <table id="table-data" class="table" style="width:100%">
+                            <table id="table-data" class="table table-striped table-bordered" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
@@ -358,6 +358,7 @@
                     });
                 },
                 error: function(xhr, status, error) {
+                    enableButton();
                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
                     Swal.fire({
                         icon: "error",

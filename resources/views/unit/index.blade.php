@@ -43,14 +43,15 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <table id="table-data" class="table" style="width:100%">
+                            <table id="table-data" class="table table-striped table-bordered" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
+                                        <th>Vehicle Number</th>
+                                        <th>Plate Number</th>
                                         <th>Type</th>
                                         <th>Brand</th>
                                         <th>Model</th>
-                                        <th>Plate Number</th>
                                         <th>Location</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -117,6 +118,18 @@
                         targets: '_all'
                     },
                     {
+                        data: 'vehicle_no',
+                        name: 'vehicle_no',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
+                        data: 'registration_no',
+                        name: 'registration_no',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
                         data: 'type',
                         name: 'type',
                         orderable: true,
@@ -131,12 +144,6 @@
                     {
                         data: 'model',
                         name: 'model',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'registration_no',
-                        name: 'registration_no',
                         orderable: true,
                         searchable: true,
                     },
@@ -180,6 +187,7 @@
                         $("#chassis_no").val(response.data.chassis_no);
                         $("#code_access").val(response.data.code_access);
                         $("#plr_no").val(response.data.plr_no);
+                        $("#banlaw_no").val(response.data.banlaw_no);
                         $("#exp_crane").val(response.data.exp_crane);
                         $("#exp_fuel_issue").val(response.data.exp_fuel_issue);
                         $("#exp_tbst").val(response.data.exp_tbst);
@@ -390,6 +398,27 @@
             locationId = '';
             unitbrandId = '';
             unitmodelId = '';
+            $("#type").val("").trigger('change');
+            $("#location_id").val("").trigger('change');
+            $("#unit_brand_id").val("").trigger('change');
+            $("#unit_model_id").val("").trigger('change');
+            $("#registration_no").val("");
+            $("#vehicle_no").val("");
+            $("#cetificate_no").val("");
+            $("#mechine_no").val("");
+            $("#chassis_no").val("");
+            $("#code_access").val("");
+            $("#plr_no").val("");
+            $("#banlaw_no").val("");
+            $("#exp_crane").val("");
+            $("#exp_fuel_issue").val("");
+            $("#exp_tbst").val("");
+            $("#exp_pass_road_1").val("");
+            $("#exp_stnk").val("");
+            $("#exp_tax").val("");
+            $("#exp_comm").val("");
+            $("#description").val("");
+            $("#request_token").val("");
             enableButton();
             $("#request_token").val("");
         });

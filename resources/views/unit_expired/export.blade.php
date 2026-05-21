@@ -35,7 +35,10 @@
     <!-- Header dengan Width asli Anda -->
     <tr>
         <td style="width: 30px; text-align:center; border: 1px solid #000000;"><b>No.</b></td>
+        <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Location</b></td>
         <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Type</b></td>
+        <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Brand</b></td>
+        <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Model</b></td>
         <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Nomor Lambung</b></td>
         <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Nomor Chassis</b></td>
         <td style="width: 150px; text-align:center; border: 1px solid #000000;"><b>Nomor Polisi</b></td>
@@ -53,10 +56,15 @@
     @foreach ($unit as $d)
         <tr>
             <td style="width: 30px; text-align:center; border: 1px solid #000000;">{{ $loop->iteration }}</td>
+            <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->location->name }}</td>
             <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->type }}</td>
+            <td style="width: 150px; text-align:center; border: 1px solid #000000;">
+                {{ $d->unit_model->unit_brand->name }}</td>
+            <td style="width: 150px; text-align:center; border: 1px solid #000000;">
+                {{ $d->unit_model->desc }}</td>
             <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->vehicle_no }}</td>
             <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->chassis_no }}</td>
-            <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->registeration_no }}</td>
+            <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->registration_no }}</td>
             <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->code_access }}</td>
             <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->plr_no }}</td>
             <td style="width: 150px; text-align:center; border: 1px solid #000000;">{{ $d->banlaw_no }}</td>

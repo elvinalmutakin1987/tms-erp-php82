@@ -1,6 +1,6 @@
 <!-- search modal -->
 <div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
         <div class="modal-content">
             <div class="modal-header" id="modal-header">
             </div>
@@ -9,7 +9,7 @@
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
                     <div class="row">
-                        <div class="col">
+                        <div class="col-md-3">
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="type" class="form-label">Type</label>
@@ -43,7 +43,6 @@
                                     </select>
                                 </div>
                             </div>
-
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="registration_no" class="form-label">Plate Number</label>
@@ -51,6 +50,8 @@
                                         name="registration_no" placeholder="KTxxxx">
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="vehicle_no" class="form-label">Vehicle Number</label>
@@ -84,7 +85,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col">
+                        <div class="col-md-3">
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="code_access" class="form-label">Code Access</label>
@@ -95,6 +96,12 @@
                                 <div class="col-md-12 mb-2">
                                     <label for="plr_no" class="form-label">PLR Number</label>
                                     <input type="text" class="form-control" id="plr_no" name="plr_no">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 mb-2">
+                                    <label for="banlaw_no" class="form-label">Banlaw Number</label>
+                                    <input type="text" class="form-control" id="banlaw_no" name="banlaw_no">
                                 </div>
                             </div>
                             <div class="row">
@@ -111,6 +118,8 @@
                                         name="exp_fuel_issue">
                                 </div>
                             </div>
+                        </div>
+                        <div class="col-md-3">
                             <div class="row">
                                 <div class="col-md-12 mb-2">
                                     <label for="exp_tbst" class="form-label">Exp. TBST</label>
@@ -149,7 +158,6 @@
                         </div>
                     </div>
                 </form>
-
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-1">

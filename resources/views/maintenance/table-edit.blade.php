@@ -1,7 +1,7 @@
 @foreach ($maintenance_detail as $d)
     <tr>
         <td class="p-1 align-middle row-number">
-            #
+            {{ $loop->iteration }}
         </td>
         <td class="p-1 align-middle">
             <input type="text" class="form-control" id="action" name="action[]" readonly value="{{ $d->action }}">

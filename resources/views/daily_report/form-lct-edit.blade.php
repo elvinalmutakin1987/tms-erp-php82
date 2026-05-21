@@ -20,6 +20,7 @@
             </td>
             <td class="p-1 align-middle">
                 <select class="form-select select-select" id="trip_1_location_id" name="trip_1_location_id">
+
                 </select>
             </td>
             <td class="p-1 align-middle">

@@ -17,11 +17,15 @@
                             <input type="text" class="form-control" id="plr_no" name="plr_no">
                         </div>
                         <div class="col-md-4 mb-2">
-                            <label for="exp_crane" class="form-label">Exp. Crane</label>
-                            <input type="text" class="form-control datepicker" id="exp_crane" name="exp_crane">
+                            <label for="banlaw_no" class="form-label">Banlaw Number</label>
+                            <input type="text" class="form-control" id="banlaw_no" name="banlaw_no">
                         </div>
                     </div>
                     <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label for="exp_crane" class="form-label">Exp. Crane</label>
+                            <input type="text" class="form-control datepicker" id="exp_crane" name="exp_crane">
+                        </div>
                         <div class="col-md-4 mb-2">
                             <label for="exp_fuel_issue" class="form-label">Exp. Fuel Issue</label>
                             <input type="text" class="form-control datepicker" id="exp_fuel_issue"
@@ -31,13 +35,13 @@
                             <label for="exp_tbst" class="form-label">Exp. TBST</label>
                             <input type="text" class="form-control datepicker" id="exp_tbst" name="exp_tbst">
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-4 mb-2">
                             <label for="exp_pass_road_1" class="form-label">Exp. Pass Road 1</label>
                             <input type="text" class="form-control datepicker" id="exp_pass_road_1"
                                 name="exp_pass_road_1">
                         </div>
-                    </div>
-                    <div class="row">
                         <div class="col-md-4 mb-2">
                             <label for="exp_stnk" class="form-label">Exp. STNK</label>
                             <input type="text" class="form-control datepicker" id="exp_stnk" name="exp_stnk">
@@ -46,6 +50,8 @@
                             <label for="exp_tax" class="form-label">Exp. Tax</label>
                             <input type="text" class="form-control datepicker" id="exp_tax" name="exp_tax">
                         </div>
+                    </div>
+                    <div class="row">
                         <div class="col-md-4 mb-2">
                             <label for="exp_comm" class="form-label">Exp. Commissioning</label>
                             <input type="text" class="form-control datepicker" id="exp_comm" name="exp_comm">

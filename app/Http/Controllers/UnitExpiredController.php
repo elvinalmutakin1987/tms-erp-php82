@@ -64,7 +64,7 @@ class UnitExpiredController extends Controller
                     <div class="col">
                          <a type="button" href="" class="btn btn-sm btn-primary editButton" 
                              href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
+                                    data-id="' . $item->id . '" style="width: 100%">Edit</a>
                     </div>
                     ';
                     return $button;
