@@ -106,8 +106,7 @@
                             :
                         </td>
                         <td class="p-1 align-middle">
-                            <b>
-                                {{ $daily_report->trip_1_berthing_at ? Carbon::parse($daily_report->trip_1_berthing_at)->format('H:i') : '' }}</b>
+                            {{ $daily_report->trip_1_berthing_at ? Carbon::parse($daily_report->trip_1_berthing_at)->format('H:i') : '' }}
                         </td>
                     </tr>
                     <tr>
@@ -118,7 +117,7 @@
                             :
                         </td>
                         <td class="p-1 align-middle">
-                            <b>{{ $daily_report->trip_1_departed_at ? Carbon::parse($daily_report->trip_1_departed_at)->format('H:i') : '' }}</b>
+                            {{ $daily_report->trip_1_departed_at ? Carbon::parse($daily_report->trip_1_departed_at)->format('H:i') : '' }}
                         </td>
 
                         <td class="p-1 align-middle" style="width: 15%">
@@ -227,7 +226,7 @@
                             :
                         </td>
                         <td class="p-1 align-middle">
-                            <b>{{ $daily_report->trip_2_berthing_at ? Carbon::parse($daily_report->trip_2_berthing_at)->format('H:i') : '' }}</b>
+                            {{ $daily_report->trip_2_berthing_at ? Carbon::parse($daily_report->trip_2_berthing_at)->format('H:i') : '' }}
                         </td>
                     </tr>
                     <tr>
@@ -238,7 +237,7 @@
                             :
                         </td>
                         <td class="p-1 align-middle">
-                            <b>{{ $daily_report->trip_2_departed_at ? Carbon::parse($daily_report->trip_2_departed_at)->format('H:i') : '' }}</b>
+                            {{ $daily_report->trip_2_departed_at ? Carbon::parse($daily_report->trip_2_departed_at)->format('H:i') : '' }}
                         </td>
 
                         <td class="p-1 align-middle" style="width: 15%">
@@ -272,7 +271,7 @@
 
                         </td>
                     </tr>
-                    <tr style='background-color: #FAF6F5'>
+                    <tr style='background-color: #FAF6F5; border-top: 3px double #000 !important;'>
                         <td class="p-1 align-middle" style="width: 15%">
                             <b>Duration Total</b>
                         </td>

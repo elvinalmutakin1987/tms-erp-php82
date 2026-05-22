@@ -302,13 +302,21 @@
                 });
             });
 
+            const modalEl = document.querySelector('#formModal');
+            const modalBody = document.querySelector('#formModal .modal-body');
             $(".datepicker").flatpickr();
             $(".timepicker").flatpickr({
+                // enableTime: true,
+                // noCalendar: true,
+                // dateFormat: "H:i",
+                // time_24hr: true,
+                // minuteIncrement: 1
                 enableTime: true,
                 noCalendar: true,
                 dateFormat: "H:i",
                 time_24hr: true,
-                minuteIncrement: 1
+                minuteIncrement: 1,
+                disableMobile: true,
             });
 
             $("#unit").select2({

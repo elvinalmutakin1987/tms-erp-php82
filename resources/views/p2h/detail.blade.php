@@ -9,36 +9,36 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%">Number :<br>
                     <b>{{ $p2h->p2h_no }}</b>
                 </td>
                 <td colspan="2"></td>
             </tr>
             <tr>
-                <td width="30%">Unit <br>
+                <td width="30%">Unit :<br>
                     <b>{{ $p2h->unit->vehicle_no }}</b>
                 </td>
-                <td width="30%">Driver <br>
+                <td width="30%">Driver :<br>
                     <b>{{ $p2h->driver }}</b>
                 </td>
-                <td width="30%">Shift <br>
+                <td width="30%">Shift :<br>
                     <b> {{ $p2h->shift }}</b>
                 </td>
             </tr>
             <tr>
-                <td width="30%">Date <br>
+                <td width="30%">Date :<br>
                     <b>{{ $p2h->date }}</b>
                 </td>
-                <td width="30%">KM Start <br>
+                <td width="30%">KM Start :<br>
                     <b>{{ Number::format($p2h->km_start, precision: 2) }}</b>
                 </td>
-                <td width="30%">KM Finish <br>
+                <td width="30%">KM Finish :<br>
                     <b> {{ Number::format($p2h->km_finish, precision: 2) }}</b>
                 </td>
             </tr>
             <tr>
                 <td style="vertical-align: top">
-                    Summary <br>
+                    Summary :<br>
                     <table>
                         <tr>
                             <td><span class="badge bg-success" style="font-size: 12px"> Good &#10003;</span>
@@ -55,7 +55,7 @@
                     <table>
                         <tr>
                             <td>
-                                Condition <br>
+                                Condition :<br>
                                 @php
                                     $span = '';
                                     $percentage = ($total_good / $total_item) * 100;

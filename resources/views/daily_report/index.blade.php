@@ -56,7 +56,8 @@
                                         <th>Date</th>
                                         <th>Unit</th>
                                         <th>Type</th>
-                                        <th>Total KM/Duration</th>
+                                        <th>Total KM</th>
+                                        <th>Duration</th>
                                         <th width="20">Action</th>
                                     </tr>
                                 </thead>
@@ -162,13 +163,24 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (row.type == "LCT") {
-                                return data;
-                            } else {
+                            if (row.type == "Non LCT") {
                                 return numbro(data).format({
                                     thousandSeparated: true
                                 });
                             }
+                            return "";
+                        }
+                    },
+                    {
+                        data: 'total_km_duration',
+                        name: 'total_km_duration',
+                        orderable: true,
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (row.type == "LCT") {
+                                return data;
+                            }
+                            return "";
                         }
                     },
                     {

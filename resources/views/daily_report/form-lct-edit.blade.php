@@ -38,14 +38,14 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_1_loading_at" name="trip_1_loading_at"
-                    value="{{ $daily_report->trip_1_loading_at }}">
+                    value="{{ $daily_report?->trip_1_loading_at ?? '' }}">
             </td>
             <td class="p-1 align-middle">
                 Arrived At
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_1_arrived_at" name="trip_1_arrived_at"
-                    value="{{ $daily_report->trip_1_arrived_at }}">
+                    value="{{ $daily_report?->trip_1_arrived_at ?? '' }}">
             </td>
         </tr>
         <tr>
@@ -55,14 +55,14 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_1_complete_loading_at"
-                    name="trip_1_complete_loading_at" value="{{ $daily_report->trip_1_complete_loading_at }}">
+                    name="trip_1_complete_loading_at" value="{{ $daily_report?->trip_1_complete_loading_at ?? '' }}">
             </td>
             <td class="p-1 align-middle">
                 Berthing At
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_1_berthing_at" name="trip_1_berthing_at"
-                    value="{{ $daily_report->trip_1_berthing_at }}">
+                    value="{{ $daily_report?->trip_1_berthing_at ?? '' }}">
             </td>
         </tr>
         <tr>
@@ -72,7 +72,7 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_1_departed_at" name="trip_1_departed_at"
-                    value="{{ $daily_report->trip_1_departed_at }}">
+                    value="{{ $daily_report?->trip_1_departed_at ?? '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -117,14 +117,14 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_2_loading_at" name="trip_2_loading_at"
-                    value="{{ $daily_report->trip_2_loading_at }}">
+                    value="{{ $daily_report?->trip_2_loading_at ?? '' }}">
             </td>
             <td class="p-1 align-middle">
                 Arrived At
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_2_arrived_at" name="trip_2_arrived_at"
-                    value="{{ $daily_report->trip_2_arrived_at }}">
+                    value="{{ $daily_report?->trip_2_arrived_at ?? '' }}">
             </td>
         </tr>
         <tr>
@@ -134,14 +134,14 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_2_complete_loading_at"
-                    name="trip_2_complete_loading_at" value="{{ $daily_report->trip_2_complete_loading_at }}">
+                    name="trip_2_complete_loading_at" value="{{ $daily_report?->trip_2_complete_loading_at ?? '' }}">
             </td>
             <td class="p-1 align-middle">
                 Berthing At
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_2_berthing_at"
-                    name="trip_2_berthing_at" value="{{ $daily_report->trip_2_berthing_at }}">
+                    name="trip_2_berthing_at" value="{{ $daily_report?->trip_2_berthing_at ?? '' }}">
             </td>
         </tr>
         <tr>
@@ -151,7 +151,7 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="text" class="form-control timepicker" id="trip_2_departed_at"
-                    name="trip_2_departed_at" value="{{ $daily_report->trip_2_departed_at }}">
+                    name="trip_2_departed_at" value="{{ $daily_report?->trip_2_departed_at ?? '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -174,7 +174,7 @@
                 Remarks
             </td>
             <td class="p-1 align-middle" colspan="3">
-                <textarea class="form-control" id="remarks" name="remarks" rows="5" required>{!! $daily_report->remarks !!}</textarea>
+                <textarea class="form-control" id="remarks" name="remarks" rows="5" required>{!! $daily_report?->remarks ?? '' !!}</textarea>
             </td>
         </tr>
     </tbody>
@@ -212,9 +212,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="refule_liter" name="refule_liter"
-                    value="{{ $daily_report->refule_liter }}">
+                    value="{{ $daily_report?->refule_liter ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_liter" name="_refule_liter"
-                    value="{{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}">
+                    value="{{ $daily_report?->refule_liter ? Number::format($daily_report?->refule_liter ?? 0, precision: 0) : '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -230,9 +230,9 @@
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="refule_km" name="refule_km"
-                    value="{{ $daily_report->refule_km }}">
+                    value="{{ $daily_report?->refule_km ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_km" name="_refule_km"
-                    value="{{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}">
+                    value="{{ $daily_report?->refule_km ? Number::format($daily_report?->refule_km ?? 0, precision: 0) : '' }}">
             </td>
             <td class="p-1 align-middle">
 

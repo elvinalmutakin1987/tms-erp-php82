@@ -34,7 +34,9 @@ class DailyReportController extends Controller
             if (request()->date_end != '') {
                 $daily_report = $daily_report->where('date', '<=', request()->date_end);
             }
-            $daily_report = $daily_report->orderBy('date', 'desc')->get();
+            $daily_report = $daily_report->orderBy('date', 'desc')
+                ->orderBy('id', 'desc')
+                ->get();
             return DataTables::of($daily_report)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
