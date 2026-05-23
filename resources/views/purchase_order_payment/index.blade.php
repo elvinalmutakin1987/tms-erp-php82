@@ -327,7 +327,9 @@
                 });
             });
 
-            $(".datepicker").flatpickr();
+            $(".datepicker").flatpickr({
+                allowInput: true
+            });
 
             $(".select-top").select2({
                 theme: "bootstrap-5",

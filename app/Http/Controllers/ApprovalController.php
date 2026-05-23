@@ -34,8 +34,9 @@ class ApprovalController extends Controller
             if (request()->date_end != '') {
                 $approval_process = $approval_process->where('date', '<=', request()->date_end);
             }
-            $approval_process = $approval_process->whereIn('approval_step_id', $approval_step->id)
-                ->orderBy('id', 'desc')->get();
+            // $approval_process = $approval_process->whereIn('approval_step_id', $approval_step->id);
+            $approval_process = $approval_process->orderBy('id', 'desc')
+                ->get();
             return DataTables::of($approval_process)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -61,7 +62,7 @@ class ApprovalController extends Controller
         $breadcrum = [
             'module' => 'Approval',
             'route-module' => null,
-            'sub-module' => 'Approval',
+            'sub-module' => '',
             'route-sub-module' => 'approval.index',
         ];
         return view('approval.index', compact('breadcrum'));

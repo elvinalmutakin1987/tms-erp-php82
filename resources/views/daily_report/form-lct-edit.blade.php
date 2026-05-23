@@ -459,6 +459,7 @@
                 time_24hr: true,
                 minuteIncrement: 1,
                 disableMobile: true,
+                allowInput: true
 
                 // tempel popup ke modal, bukan ke body scroll
                 appendTo: modalEl,

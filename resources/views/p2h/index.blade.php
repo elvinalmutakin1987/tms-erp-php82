@@ -253,7 +253,9 @@
                 });
             });
 
-            $(".datepicker").flatpickr();
+            $(".datepicker").flatpickr({
+                allowInput: true
+            });
 
             $("#unit").select2({
                 theme: "bootstrap-5",

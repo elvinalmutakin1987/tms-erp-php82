@@ -634,7 +634,7 @@ class MaintenanceController extends Controller
             10,
             [0, 0, 0]
         );
-        $safeFilename = Str::of($maintenance->maintenance_item)
+        $safeFilename = Str::of($maintenance->maintenance_no)
             ->replace(['/', '\\'], '-')   // ganti 
             ->toString();
         return $pdf->stream("report-{$safeFilename}.pdf");

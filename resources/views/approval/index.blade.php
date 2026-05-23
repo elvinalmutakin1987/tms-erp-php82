@@ -18,32 +18,6 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col">
-                                    <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Client"
-                                        data-type="Client"><i class='bx bxs-plus-square'></i>New Client </a>
-                                    <a href="javascript:;" id="openModalButton2" class="btn btn-secondary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Vendor"
-                                        data-type="Vendor"><i class='bx bxs-plus-square'></i>New Vendor </a>
-                                </div>
-                                <div class="col-2">
-                                    <select class="form-select" id="typeClientVendor" name="typeClientVendor">
-                                        <option value="All">All Type</option>
-                                        <option value="Client">Client</option>
-                                        <option value="Vendor">Vendor</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-body">
                             <table id="table-data" class="table" style="width:100%">
                                 <thead class="table-light">
                                     <tr>
@@ -69,7 +43,7 @@
     </div>
     <!--end page wrapper -->
 
-    @include('clientvendor.modal')
+    @include('approval.modal')
 @endsection
 
 @section('js')

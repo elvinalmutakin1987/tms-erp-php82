@@ -70,11 +70,13 @@ class RoleController extends Controller
             $data = array_merge($request->except('_token', '_method'));
             $role = Role::create($data);
             $permission = array();
-            $permissionIds = $request->permission_id;
-            foreach ($permissionIds as $permissionId) {
-                $permission = Permission::find($permissionId);
-                if ($permission) {
-                    $role->givePermissionTo($permission);
+            if ($request->has('permission_id')) {
+                $permissionIds = $request->permission_id;
+                foreach ($permissionIds as $permissionId) {
+                    $permission = Permission::find($permissionId);
+                    if ($permission) {
+                        $role->givePermissionTo($permission);
+                    }
                 }
             }
             DB::commit();
@@ -126,11 +128,13 @@ class RoleController extends Controller
             $role->update($data);
             $role->syncPermissions();
             $permission = array();
-            $permissionIds = $request->permission_id;
-            foreach ($permissionIds as $permissionId) {
-                $permission = Permission::find($permissionId);
-                if ($permission) {
-                    $role->givePermissionTo($permission);
+            if ($request->has('permission_id')) {
+                $permissionIds = $request->permission_id;
+                foreach ($permissionIds as $permissionId) {
+                    $permission = Permission::find($permissionId);
+                    if ($permission) {
+                        $role->givePermissionTo($permission);
+                    }
                 }
             }
             DB::commit();

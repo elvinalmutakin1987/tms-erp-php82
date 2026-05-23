@@ -33,7 +33,7 @@
                             </select>
                         </div> --}}
                         <div class="col">
-                            <label for="urgency" class="form-label">Urgency</label>
+                            <label for="urgency" class="form-label">Abbreviation</label>
                             <select class="form-select select-select" id="urgency" name="urgency">
                                 <option value="P5">LP</option>
                                 <option value="P4">MP</option>

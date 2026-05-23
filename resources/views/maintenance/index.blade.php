@@ -302,21 +302,15 @@
                 });
             });
 
-            const modalEl = document.querySelector('#formModal');
-            const modalBody = document.querySelector('#formModal .modal-body');
             $(".datepicker").flatpickr();
             $(".timepicker").flatpickr({
-                // enableTime: true,
-                // noCalendar: true,
-                // dateFormat: "H:i",
-                // time_24hr: true,
-                // minuteIncrement: 1
                 enableTime: true,
                 noCalendar: true,
                 dateFormat: "H:i",
                 time_24hr: true,
                 minuteIncrement: 1,
                 disableMobile: true,
+                allowInput: true
             });
 
             $("#unit").select2({
@@ -485,47 +479,70 @@
 
         $('.saveButton').on('click', function() {
             disableButton();
-            var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('maintenance.store') }}';
-            var type = 'POST';
+            const status = $(this).val();
+            const form = $('#formModal').find('form')[0];
+            const formData = new FormData(form);
+
             formData.append('type', $("#type").val());
-            formData.append('status', $(this).val());
-            if (maintenanceId != '') {
-                url = '{{ route('maintenance.update', ':_id') }}';
-                url = url.replace(':_id', maintenanceId);
+            formData.append('status', status);
+
+            let url = '{{ route('maintenance.store') }}';
+            let type = 'POST';
+
+            if (maintenanceId) {
+                url = '{{ route('maintenance.update', ':_id') }}'.replace(':_id', maintenanceId);
                 formData.append('_method', 'PUT');
             }
-            $.ajax({
-                url: url,
-                type: type,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: "success",
-                        timer: 5000,
-                        didOpen: () => {},
-                        willClose: () => {
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formModal form')[0].reset();
-                            maintenanceId = '';
-                            $('#formModal').modal('hide');
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage,
-                    });
-                    enableButton();
-                }
-            });
+
+            const submitForm = () => {
+                $.ajax({
+                    url,
+                    type,
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+                            willClose: () => {
+                                $('#table-data').DataTable().ajax.reload(null, false);
+                                form.reset();
+                                maintenanceId = '';
+                                $('#formModal').modal('hide');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON?.message || error;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage,
+                        });
+                        enableButton();
+                    }
+                });
+            };
+
+            if (status === 'Open') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, Save it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    // if (result.isConfirmed) submitForm();
+                    result.isConfirmed ? submitForm() : enableButton();
+                });
+            } else {
+                submitForm();
+            }
         });
 
         $(document).on('click', '.saveCostButton', function() {

@@ -206,6 +206,7 @@
                     });
                 },
                 error: function(xhr, status, error) {
+                    disableButton();
                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
                     Swal.fire({
                         icon: "error",
@@ -270,8 +271,8 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             roleId = '';
-            enableButton();
             $("#request_token").val("");
+            enableButton();
         });
 
         $('#cancelButton').on('click', function() {
