@@ -14,9 +14,18 @@ return new class extends Migration
         Schema::create('purchase_order_details', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('purchase_order_id')->nullable();
-            $table->unsignedBigInteger('maintenance_item_id')->nullable();
-            $table->unsignedBigInteger('mro_item_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('purchase_order_id')->nullable();
+            // $table->unsignedBigInteger('maintenance_item_id')->nullable();
+            // $table->unsignedBigInteger('mro_item_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('purchase_order_id')->nullable()->constrained('purchase_orders')->nullOnDelete();
+            $table->foreignId('maintenance_item_id')->nullable()->constrained('maintenance_items')->nullOnDelete();
+            $table->foreignId('mro_item_id')->nullable()->constrained('mro_items')->nullOnDelete();
             $table->text('description')->nullable();
             $table->string('type', 30)->nullable(); //Good, Service
             $table->string('uom', 30)->nullable();
@@ -29,9 +38,15 @@ return new class extends Migration
             $table->string('desc_vendor')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
-            $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
-            $table->foreign('mro_item_id')->references('id')->on('mro_items')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
+            // $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
+            // $table->foreign('mro_item_id')->references('id')->on('mro_items')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

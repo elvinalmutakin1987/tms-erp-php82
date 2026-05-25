@@ -14,11 +14,24 @@ return new class extends Migration
         Schema::create('service_items', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('service_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('service_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
             $table->string('item_no', 50)->nullable();
             $table->string('item_des')->nullable();
             $table->timestamps();
-            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

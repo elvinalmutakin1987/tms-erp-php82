@@ -14,8 +14,18 @@ return new class extends Migration
         Schema::create('p2hs', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->unsignedBigInteger('location_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            // $table->unsignedBigInteger('location_id')->nullable();
+            // $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('number', 30)->nullable();
             $table->string('p2h_no', 30)->nullable();
             $table->date('date')->nullable();
@@ -23,16 +33,21 @@ return new class extends Migration
             $table->string('shift', 20)->nullable();
             $table->decimal('km_start', 16, 2)->nullable();
             $table->decimal('km_finish', 16, 2)->nullable();
-            $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('status', 30)->nullable();
             $table->string('input_method', 20)->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            // $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
+            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

@@ -24,10 +24,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
-            UnitbrandSeeder::class,
+            // UnitbrandSeeder::class,
             LocationSeeder::class,
-            UnitmodelSeeder::class,
-            UnitSeeder::class,
+            // UnitmodelSeeder::class,
+            // UnitSeeder::class,
             MaintenanceItemSeeder::class,
             MroItemSeeder::class,
             ClientSeeder::class,

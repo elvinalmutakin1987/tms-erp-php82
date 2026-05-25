@@ -23,10 +23,7 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Type</th>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>PIC</th>
-                                        <th>Phone</th>
+                                        <th>Number</th>
                                         <th width="20">Action</th>
                                     </tr>
                                 </thead>
@@ -53,7 +50,6 @@
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script>
         const saveButton = document.getElementById('saveButton');
-
         var clientvendorId = '';
         var locationId = '';
         var type = '';
@@ -102,24 +98,6 @@
                         searchable: true,
                     },
                     {
-                        data: 'email',
-                        name: 'email',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'pic',
-                        name: 'pic',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
-                        data: 'phone',
-                        name: 'phone',
-                        orderable: true,
-                        searchable: true,
-                    },
-                    {
                         data: 'action',
                         name: 'action',
                         orderable: false,
@@ -144,22 +122,7 @@
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit ' + type);
-                        $('#name').val(response.data.name);
-                        $("#location_id").val(response.data.location_id).trigger('change');
-                        $('#address').val(response.data.address);
-                        $('#email').val(response.data.email);
-                        $('#pic').val(response.data.pic);
-                        $('#phone').val(response.data.phone);
-                        $('#top').val(response.data.top);
-                        // type = response.data.type;
-                        $('#type').val(type);
-                        $('#divLocation').hide();
-                        if (type == 'Client') {
-                            $('#divLocation').show();
-                        }
-                        $('#bank').val(response.data.bank).trigger('change');
-                        $('#bank_account').val(response.data.bank_account);
-                        $('#taxable').val(response.data.taxable).trigger('change');
+
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -167,61 +130,8 @@
                 });
             });
 
-            $("#typeClientVendor").select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                    'w-100') ? '100%' : 'style',
-            }).on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
-
             gen_select2();
         });
-
-        function delete_(id) {
-            Swal.fire({
-                title: 'Are you sure?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#5156be',
-                cancelButtonColor: '#fd625e',
-                confirmButtonText: 'Yes, Delete it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let url = '{{ route('clientvendor.destroy', ':_id') }}';
-                    url = url.replace(':_id', id);
-                    $.ajax({
-                        url: url,
-                        type: 'DELETE',
-                        data: {
-                            id: id,
-                            _token: '{{ csrf_token() }}'
-                        },
-                        success: function(response) {
-                            Swal.fire({
-                                title: "Deleted!",
-                                text: response.message,
-                                icon: "success",
-                                timer: 5000,
-                                didOpen: () => {},
-                                willClose: () => {
-                                    $('#table-data').DataTable().ajax.reload(null, false);
-                                }
-                            });
-                        },
-                        error: function(xhr, status, error) {
-                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: errorMessage,
-                            });
-                        }
-                    });
-                }
-            });
-        }
 
         $('#saveButton').on('click', function() {
             disableButton();
@@ -330,15 +240,6 @@
             type = 'Client';
             $('#type').val(type);
             $('#divLocation').show();
-        });
-
-        $('#openModalButton2').on('click', function() {
-            var button = $('#openModalButton2');
-            var title = button.data('title');
-            $('#modal-header').text(title);
-            type = 'Vendor';
-            $('#type').val(type);
-            $('#divLocation').hide();
         });
 
         $('#formModal').on('hidden.bs.modal', function() {

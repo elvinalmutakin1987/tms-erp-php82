@@ -14,8 +14,16 @@ return new class extends Migration
         Schema::create('contracts', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('client_vendor_id')->nullable();
-            $table->unsignedBigInteger('service_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('client_vendor_id')->nullable();
+            // $table->unsignedBigInteger('service_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
+            $table->foreignId('service_id')->nullable()->constrained('services')->nullOnDelete();
             $table->string('contract_no', 25)->nullable();
             $table->date('start_date')->nullable();
             $table->date('end_date')->nullable();
@@ -23,8 +31,14 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->string('status', 25)->nullable();
             $table->timestamps();
-            $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
-            $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
+            // $table->foreign('service_id')->references('id')->on('services')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

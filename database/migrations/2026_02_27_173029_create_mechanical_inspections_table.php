@@ -14,11 +14,19 @@ return new class extends Migration
         Schema::create('mechanical_inspections', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            // $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->date('date')->nullable();
             $table->string('number', 30)->nullable();
             $table->string('inspection_no', 30)->nullable();
-            $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
@@ -27,8 +35,14 @@ return new class extends Migration
             $table->string('status', 30)->nullable();
             $table->string('input_method', 20)->nullable();
             $table->timestamps();
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

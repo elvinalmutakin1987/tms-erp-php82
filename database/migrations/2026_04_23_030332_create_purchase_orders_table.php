@@ -14,10 +14,22 @@ return new class extends Migration
         Schema::create('purchase_orders', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('user_invoice_id')->nullable();
-            $table->unsignedBigInteger('client_vendor_id')->nullable();
-            $table->unsignedBigInteger('purchase_requisition_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('user_id')->nullable();
+            // $table->unsignedBigInteger('user_invoice_id')->nullable();
+            // $table->unsignedBigInteger('client_vendor_id')->nullable();
+            // $table->unsignedBigInteger('purchase_requisition_id')->nullable();
+            // $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('user_invoice_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
+            $table->foreignId('purchase_requisition_id')->nullable()->constrained('purchase_requisitions')->nullOnDelete();
+            $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('number', 30)->nullable();
             $table->string('order_no', 30)->nullable();
             $table->string('tax_no', 30)->nullable();
@@ -32,7 +44,6 @@ return new class extends Migration
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('pph_23', 16, 2)->nullable();
             $table->decimal('grand_total', 16, 2)->nullable();
-            $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
@@ -53,11 +64,17 @@ return new class extends Migration
             $table->date('paid_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('user_invoice_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
-            $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
-            $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('user_invoice_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
+            // $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
+            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

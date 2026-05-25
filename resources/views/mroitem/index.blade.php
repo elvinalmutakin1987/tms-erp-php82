@@ -39,8 +39,8 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Type</th>
-                                        <th>Part Number</th>
                                         <th>Name</th>
+                                        <th>Part Number</th>
                                         <th>Unit</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -104,14 +104,14 @@
                         searchable: true,
                     },
                     {
-                        data: 'part_number',
-                        name: 'part_number',
+                        data: 'name',
+                        name: 'name',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'name',
-                        name: 'name',
+                        data: 'part_number',
+                        name: 'part_number',
                         orderable: true,
                         searchable: true,
                     },

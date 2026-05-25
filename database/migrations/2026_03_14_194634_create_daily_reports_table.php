@@ -14,8 +14,18 @@ return new class extends Migration
         Schema::create('daily_reports', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->unsignedBigInteger('client_vendor_id')->nullable();
+
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            // $table->unsignedBigInteger('client_vendor_id')->nullable();
+            /**
+             * ----------------
+             */
+
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
             $table->string('number', 30)->nullable();
             $table->string('report_no', 30)->nullable();
             $table->string('type', 30)->nullable();
@@ -47,8 +57,18 @@ return new class extends Migration
             //-----------------------------------------------------------
             //Trip 1
             //-----------------------------------------------------------
-            $table->unsignedBigInteger('trip_1_location_id')->nullable();
-            $table->unsignedBigInteger('trip_1_arr_location_id')->nullable();
+
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('trip_1_location_id')->nullable();
+            // $table->unsignedBigInteger('trip_1_arr_location_id')->nullable();
+            /**
+             * ----------------
+             */
+
+            $table->foreignId('trip_1_location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->foreignId('trip_1_arr_location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->time('trip_1_loading_at')->nullable();
             $table->time('trip_1_complete_loading_at')->nullable();
             $table->time('trip_1_departed_at')->nullable();
@@ -57,8 +77,18 @@ return new class extends Migration
             //-----------------------------------------------------------
             //Trip 2
             //-----------------------------------------------------------
-            $table->unsignedBigInteger('trip_2_location_id')->nullable();
-            $table->unsignedBigInteger('trip_2_arr_location_id')->nullable();
+
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('trip_2_location_id')->nullable();
+            // $table->unsignedBigInteger('trip_2_arr_location_id')->nullable();
+            /**
+             * ----------------
+             */
+
+            $table->foreignId('trip_2_location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->foreignId('trip_2_arr_location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->time('trip_2_loading_at')->nullable();
             $table->time('trip_2_complete_loading_at')->nullable();
             $table->time('trip_2_departed_at')->nullable();
@@ -66,18 +96,33 @@ return new class extends Migration
             $table->time('trip_2_berthing_at')->nullable();
             //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Open, Close
-            $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * ----------------
+             */
+
+            $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
+
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            // $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
             //Trip
-            $table->foreign('trip_1_location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('trip_1_arr_location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('trip_2_location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('trip_2_arr_location_id')->references('id')->on('locations')->onDelete('cascade');
+            // $table->foreign('trip_1_location_id')->references('id')->on('locations')->onDelete('cascade');
+            // $table->foreign('trip_1_arr_location_id')->references('id')->on('locations')->onDelete('cascade');
+            // $table->foreign('trip_2_location_id')->references('id')->on('locations')->onDelete('cascade');
+            // $table->foreign('trip_2_arr_location_id')->references('id')->on('locations')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

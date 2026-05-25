@@ -27,16 +27,16 @@ class ApprovalController extends Controller
     {
         if (request()->ajax()) {
             $approval_step = Approval_step::where('user_id', Auth::user()->id)->pluck('id');
+            if ($approval_step->isEmpty()) {
+                return DataTables::of(collect([]))
+                    ->addIndexColumn()
+                    ->addColumn('action', function () {
+                        return '';
+                    })
+                    ->make(true);
+            }
             $approval_process = Approval_process::query();
-            if (request()->date_start != '') {
-                $approval_process = $approval_process->where('date', '>=', request()->date_start);
-            }
-            if (request()->date_end != '') {
-                $approval_process = $approval_process->where('date', '<=', request()->date_end);
-            }
-            // $approval_process = $approval_process->whereIn('approval_step_id', $approval_step->id);
-            $approval_process = $approval_process->orderBy('id', 'desc')
-                ->get();
+            $approval_process = $approval_process->orderBy('id', 'desc')->get();
             return DataTables::of($approval_process)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -46,15 +46,21 @@ class ApprovalController extends Controller
                             <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
                                 aria-expanded="false">Action</button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                data-id="' . $item->id . '" data-type="' . $item->type . '">Edit</a>
+                                <li>
+                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
+                                    data-id="' . $item->id . '">Detail</a>
                                 </li>
-                                <li><a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="approve_(\'' . $item->id . '\')">Approved</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="reject_(\'' . $item->id . '\')">Reject</a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                     ';
+
                     return $button;
                 })
                 ->make();

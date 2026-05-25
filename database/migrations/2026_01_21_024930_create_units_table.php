@@ -14,10 +14,20 @@ return new class extends Migration
         Schema::create('units', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('location_id')->nullable();
-            $table->unsignedBigInteger('company_id')->nullable();
-            $table->unsignedBigInteger('unit_brand_id')->nullable();
-            $table->unsignedBigInteger('unit_model_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('location_id')->nullable();
+            // $table->unsignedBigInteger('company_id')->nullable();
+            // $table->unsignedBigInteger('unit_brand_id')->nullable();
+            // $table->unsignedBigInteger('unit_model_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
+            $table->foreignId('company_id')->nullable()->constrained('companies')->nullOnDelete();
+            $table->foreignId('unit_brand_id')->nullable()->constrained('unit_brands')->nullOnDelete();
+            $table->foreignId('unit_model_id')->nullable()->constrained('unit_models')->nullOnDelete();
             $table->string('type', 50)->nullable(); // ini dibuatkan data dari array aja. ntar di form model dropdown
             //Excavator, Hauler, Dozer, Compactor, Light Vehicle, Water Truck, 
             //Manhaul, Lighting Plant, Light Truck, Crane Truck, Prime Truck, Fuel Truck, Light Gas, LCT
@@ -42,10 +52,16 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->string('status', 30)->nullable();
             $table->timestamps();
-            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
-            $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
-            $table->foreign('unit_brand_id')->references('id')->on('unit_brands')->onDelete('cascade');
-            $table->foreign('unit_model_id')->references('id')->on('unit_models')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
+            // $table->foreign('company_id')->references('id')->on('companies')->onDelete('cascade');
+            // $table->foreign('unit_brand_id')->references('id')->on('unit_brands')->onDelete('cascade');
+            // $table->foreign('unit_model_id')->references('id')->on('unit_models')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

@@ -14,9 +14,23 @@ return new class extends Migration
         Schema::create('proforma_invoices', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('client_vendor_id')->nullable();
-            $table->unsignedBigInteger('contract_id')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('client_vendor_id')->nullable();
+            // $table->unsignedBigInteger('contract_id')->nullable();
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            // $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
+            $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
+            /**
+             * ----------------
+             */
             $table->string('generate_no', 30)->nullable();
             $table->string('proforma_no', 30)->nullable();
             $table->date('date')->nullable();
@@ -38,15 +52,20 @@ return new class extends Migration
             $table->timestamp('custodian_approval_at')->nullable();
             //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
-            $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
-            $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
+            // $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
+            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            /*/ $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+             * ----------------
+             */
         });
     }
 

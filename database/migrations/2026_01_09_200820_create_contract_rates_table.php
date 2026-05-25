@@ -14,14 +14,28 @@ return new class extends Migration
         Schema::create('contract_rates', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('contract_id')->nullable();
-            $table->unsignedBigInteger('service_item_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('contract_id')->nullable();
+            // $table->unsignedBigInteger('service_item_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
+            $table->foreignId('service_item_id')->nullable()->constrained('service_items')->nullOnDelete();
             $table->string('item_no')->nullable();
             $table->string('service_item')->nullable();
             $table->decimal('rate', 16, 2)->nullable();
             $table->timestamps();
-            $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
-            $table->foreign('service_item_id')->references('id')->on('service_items')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
+            // $table->foreign('service_item_id')->references('id')->on('service_items')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

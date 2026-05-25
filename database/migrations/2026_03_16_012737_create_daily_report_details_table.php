@@ -14,16 +14,30 @@ return new class extends Migration
         Schema::create('daily_report_details', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('daily_report_id')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('daily_report_id')->nullable();
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('daily_report_id')->nullable()->constrained('daily_reports')->nullOnDelete();
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->string('item', 30)->nullable();
             $table->string('uom_1', 30)->nullable();
             $table->decimal('value_1', 16, 2)->nullable();
             $table->string('uom_2', 30)->nullable();
             $table->decimal('value_2', 16, 2)->nullable();
             $table->timestamps();
-            $table->foreign('daily_report_id')->references('id')->on('daily_reports')->onDelete('cascade');
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('daily_report_id')->references('id')->on('daily_reports')->onDelete('cascade');
+            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            /**
+             * 
+             */
         });
     }
 

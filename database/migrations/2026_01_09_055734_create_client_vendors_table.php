@@ -14,7 +14,14 @@ return new class extends Migration
         Schema::create('client_vendors', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('location_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('location_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->string('type', 30)->nullable(); // ini isinya Client / Vendor
             $table->string('taxable', 30)->nullable(); // PKP / Non PKP
             $table->string('name', 100)->nullable();
@@ -25,7 +32,13 @@ return new class extends Migration
             $table->integer('top')->nullable(); //Term of Payment
             $table->string('bank', 50)->nullable();
             $table->string('bank_account', 50)->nullable();
-            $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
+            /**
+             * ----------------
+             */
             $table->timestamps();
         });
     }

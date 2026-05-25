@@ -219,7 +219,7 @@
                  </ul>
              </li>
          @endif
-         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasAnyPermission(['approval']))
+         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo(['approval']))
              <li>
                  <a href="{{ route('approval.index') }}">
                      <div class="parent-icon"><i class="bx bx-file"></i>

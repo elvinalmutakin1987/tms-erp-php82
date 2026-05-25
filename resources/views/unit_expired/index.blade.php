@@ -135,14 +135,14 @@
                 scrollCollapse: true,
                 responsive: false,
                 scrollX: true,
-                "pageLength": -1,
-                "lengthMenu": [
+                pageLength: -1,
+                lengthMenu: [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, "All"]
                 ],
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
+                processing: true,
+                serverSide: true,
+                ajax: {
                     url: ajax,
                     data: function(d) {
                         d.typeUnit = $('#typeUnit').val();
@@ -151,9 +151,11 @@
                         d.to = $('#to').val();
                     }
                 },
-                "createdRow": function(row, data, dataIndex) {
-                    const getBgColor = (dateString) => {
+
+                createdRow: function(row, data, dataIndex) {
+                    const getBgColor = function(dateString) {
                         if (!dateString) return null;
+
                         const targetDate = dayjs(dateString);
                         const now = dayjs();
                         const diffInDays = targetDate.diff(now, 'day');
@@ -162,27 +164,36 @@
                             return {
                                 bg: '#ff0000',
                                 text: 'white'
-                            }; // Merah
-                        } else if (diffInDays <= 45) {
+                            };
+                        }
+
+                        if (diffInDays <= 45) {
                             return {
                                 bg: '#ffff00',
                                 text: 'black'
-                            }; // Kuning
-                        } else {
-                            return {
-                                bg: '#00ff00',
-                                text: 'black'
-                            }; // Hijau
+                            };
                         }
-                        return null;
+
+                        return {
+                            bg: '#00ff00',
+                            text: 'black'
+                        };
                     };
-                    const dateFields = ['exp_crane', 'exp_fuel_issue', 'exp_tbst', 'exp_stnk',
-                        'exp_tax', 'exp_comm'
+
+                    const dateFields = [
+                        'exp_crane',
+                        'exp_fuel_issue',
+                        'exp_tbst',
+                        'exp_stnk',
+                        'exp_tax',
+                        'exp_comm'
                     ];
+
                     const startColIndex = 11;
 
-                    dateFields.forEach((field, i) => {
+                    dateFields.forEach(function(field, i) {
                         const res = getBgColor(data[field]);
+
                         if (res) {
                             $('td', row).eq(startColIndex + i).css({
                                 'background-color': res.bg,
@@ -192,99 +203,116 @@
                         }
                     });
                 },
-                "columns": [{
+
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
-                        className: 'dt-center',
+                        className: 'dt-center'
                     },
                     {
                         data: 'vehicle_no',
                         name: 'vehicle_no',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'registration_no',
                         name: 'registration_no',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'type',
                         name: 'type',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'brand',
                         name: 'brand',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'model',
                         name: 'model',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'location',
                         name: 'location',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'chassis_no',
                         name: 'chassis_no',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'code_access',
                         name: 'code_access',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'plr_no',
                         name: 'plr_no',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'banlaw_no',
                         name: 'banlaw_no',
-                        width: '150px',
+                        width: '150px'
                     },
                     {
                         data: 'exp_crane',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
-                        width: '150px',
+                        width: '180px',
+                        render: renderExpiredDate
                     },
                     {
                         data: 'exp_fuel_issue',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
-                        width: '150px',
+                        width: '180px',
+                        render: renderExpiredDate
                     },
                     {
                         data: 'exp_tbst',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
-                        width: '150px',
+                        width: '180px',
+                        render: renderExpiredDate
                     },
                     {
                         data: 'exp_stnk',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
-                        width: '150px',
+                        width: '180px',
+                        render: renderExpiredDate
                     },
                     {
                         data: 'exp_tax',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
-                        width: '150px',
+                        width: '180px',
+                        render: renderExpiredDate
                     },
                     {
                         data: 'exp_comm',
-                        render: (d) => d ? dayjs(d).format('DD MMMM YYYY') : '',
-                        width: '150px',
+                        width: '180px',
+                        render: renderExpiredDate
                     },
                     {
                         data: 'action',
                         name: 'action',
                         className: 'text-center',
                         width: '75px',
+                        orderable: false,
+                        searchable: false
                     }
-                ],
+                ]
             });
+
+            function renderExpiredDate(data, type, row) {
+                if (!data) return '';
+
+                const targetDate = dayjs(data);
+                const now = dayjs();
+                const diffInDays = targetDate.diff(now, 'day');
+
+                // if (diffInDays <= 45) {
+                //     return targetDate.format('DD MMMM YYYY') + ' (' + diffInDays + ' days)';
+                // }
+
+                return targetDate.format('DD MMMM YYYY');
+            }
 
             $(document).on('click', '.editButton', function() {
                 unitId = $(this).data('id');

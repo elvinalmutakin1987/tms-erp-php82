@@ -14,9 +14,20 @@ return new class extends Migration
         Schema::create('purchase_requisitions', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('user_id')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
-            $table->unsignedBigInteger('maintenance_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('user_id')->nullable();
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            // $table->unsignedBigInteger('maintenance_id')->nullable();
+            // $table->unsignedBigInteger('checked_by')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('maintenance_id')->nullable()->constrained('maintenances')->nullOnDelete();
+            $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('number', 30)->nullable();
             $table->string('requisition_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //General / equipment
@@ -28,7 +39,6 @@ return new class extends Migration
             $table->decimal('discount', 16, 2)->nullable();
             $table->decimal('tax', 16, 2)->nullable();
             $table->decimal('grand_total', 16, 2)->nullable();
-            $table->unsignedBigInteger('checked_by')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
@@ -40,10 +50,16 @@ return new class extends Migration
             $table->date('close_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            $table->foreign('maintenance_id')->references('id')->on('maintenances')->onDelete('cascade');
-            $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
+            // $table->foreign('maintenance_id')->references('id')->on('maintenances')->onDelete('cascade');
+            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

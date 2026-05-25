@@ -14,11 +14,24 @@ return new class extends Migration
         Schema::create('contract_fmfs', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('contract_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('contract_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
             $table->string('year')->nullable();
             $table->decimal('value', 16, 2)->nullable();
             $table->timestamps();
-            $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
+            /**
+             * Ini yang lama
+             */
+            // $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
+            /**
+             * ----------------
+             */
         });
     }
 

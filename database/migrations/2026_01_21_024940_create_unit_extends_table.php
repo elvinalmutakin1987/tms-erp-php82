@@ -14,7 +14,14 @@ return new class extends Migration
         Schema::create('unit_extends', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            $table->unsignedBigInteger('unit_id')->nullable();
+            /**
+             * Ini yang lama
+             */
+            // $table->unsignedBigInteger('unit_id')->nullable();
+            /**
+             * ----------------
+             */
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->string('ext_type')->nullable(); //ngambil dari type unit
             $table->date('submit_date')->nullable();
             $table->date('done_date')->nullable();
