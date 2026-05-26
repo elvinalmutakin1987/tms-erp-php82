@@ -26,25 +26,34 @@
                      <div class="menu-title">Dashboard</div>
                  </a>
                  <ul>
-                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.equipment'))
-                         <li> <a href="{{ route('dashboard', ['t' => 'equipment']) }}"><i
-                                     class='bx bx-radio-circle'></i>Equipment</a>
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.operational'))
+                         <li> <a href="{{ route('dashboard', ['t' => 'operational']) }}"><i
+                                     class='bx bx-radio-circle'></i>Operational</a>
+                         </li>
+                     @endif
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.maintenance'))
+                         <li> <a href="{{ route('dashboard', ['t' => 'maintenance']) }}"><i
+                                     class='bx bx-radio-circle'></i>Repair & Maintenance</a>
                          </li>
                      @endif
                      @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.procurement'))
-                         <li> <a href="index2.html"><i class='bx bx-radio-circle'></i>Procurement</a>
+                         <li> <a href="{{ route('dashboard', ['t' => 'procurement']) }}"><i
+                                     class='bx bx-radio-circle'></i>Procurement</a>
                          </li>
                      @endif
                      @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.survey'))
-                         <li> <a href="index3.html"><i class='bx bx-radio-circle'></i>Survey</a>
+                         <li> <a href="{{ route('dashboard', ['t' => 'survey']) }}"><i
+                                     class='bx bx-radio-circle'></i>Survey</a>
                          </li>
                      @endif
                      @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.safety'))
-                         <li> <a href="index3.html"><i class='bx bx-radio-circle'></i>Safety</a>
+                         <li> <a href="{{ route('dashboard', ['t' => 'safety']) }}"><i
+                                     class='bx bx-radio-circle'></i>Safety</a>
                          </li>
                      @endif
                      @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dashboard.finance'))
-                         <li> <a href="index3.html"><i class='bx bx-radio-circle'></i>Finance</a>
+                         <li> <a href="{{ route('dashboard', ['t' => 'finance']) }}"><i
+                                     class='bx bx-radio-circle'></i>Finance</a>
                          </li>
                      @endif
                  </ul>

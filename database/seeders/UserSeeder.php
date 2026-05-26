@@ -23,6 +23,9 @@ class UserSeeder extends Seeder
         Role::create(['name' => 'superadmin']);
         Role::create(['name' => 'procurement_staff']);
         Role::create(['name' => 'procurement_manager']);
+        Role::create(['name' => 'equipment_staff']);
+        Role::create(['name' => 'operational_spv']);
+        Role::create(['name' => 'maintenance_spv']);
 
         /**
          * User
@@ -49,7 +52,8 @@ class UserSeeder extends Seeder
         // Permission::create(['name' => 'role.delete']);
 
         $permissions = [
-            'dashboard.equipment',
+            'dashboard.operational',
+            'dashboard.maintenance',
             'dashboard.procurement',
             'dashboard.survey',
             'dashboard.safety',
@@ -169,7 +173,22 @@ class UserSeeder extends Seeder
             [
                 'user_id' => 3,
                 'role_id' => 3,
-                'permissions' => ['approval'],
+                'permissions' => ['dashboard.procurement', 'approval'],
+            ],
+            [
+                'user_id' => 4,
+                'role_id' => 4,
+                'permissions' => ['p2h', 'mechanical_inspection', 'maintenance', 'purchase_requisition', 'proforma_invoice'],
+            ],
+            [
+                'user_id' => 5,
+                'role_id' => 5,
+                'permissions' => ['dashboard.operational', 'approval'],
+            ],
+            [
+                'user_id' => 6,
+                'role_id' => 6,
+                'permissions' => ['dashboard.maintenance', 'approval'],
             ],
         ];
 

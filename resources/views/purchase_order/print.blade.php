@@ -634,18 +634,6 @@
                 <br>
                 {{ $purchase_order->user->username }}
             </td>
-            {{-- @if ($approval_step)
-                @foreach ($approval_step as $d)
-                    <td style="border: none; text-align: center; padding: 10px">
-                        {{ $d->action }} By
-                        <br>
-                        <br>
-                        <br>
-                        <br>
-                        {{ $d->user->username }}
-                    </td>
-                @endforeach
-            @endif --}}
             @if ($approval_step)
                 @foreach ($approval_step as $d)
                     <td style="border: none; text-align: center">
