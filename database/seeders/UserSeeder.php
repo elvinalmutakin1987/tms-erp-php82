@@ -65,6 +65,8 @@ class UserSeeder extends Seeder
             'purchase_requisition',
             'proforma_invoice',
 
+            'progress_claim',
+
             'unit_expired',
             'purchase_requisition_general',
 

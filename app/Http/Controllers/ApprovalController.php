@@ -26,7 +26,8 @@ class ApprovalController extends Controller
     public function index()
     {
         if (request()->ajax()) {
-            $approval_step = Approval_step::where('user_id', Auth::user()->id)->pluck('id');
+            // $approval_step = Approval_step::where('user_id', Auth::user()->id)->pluck('id');
+            $approval_step = Approval_step::where('user_id', Auth::user()->id)->get();
             if ($approval_step->isEmpty()) {
                 return DataTables::of(collect([]))
                     ->addIndexColumn()
@@ -36,6 +37,7 @@ class ApprovalController extends Controller
                     ->make(true);
             }
             $approval_process = Approval_process::query();
+            $apporval_process = $approval_process->whereIn('approval_step_id', $approval_step->pluck('id'));
             $approval_process = $approval_process->orderBy('id', 'desc')->get();
             return DataTables::of($approval_process)
                 ->addIndexColumn()
@@ -60,8 +62,13 @@ class ApprovalController extends Controller
                         </div>
                     </div>
                     ';
-
                     return $button;
+                })
+                ->addColumn('number', function ($item) {
+                    return "";
+                })
+                ->addColumn('type', function ($item) {
+                    return "";
                 })
                 ->make();
         }

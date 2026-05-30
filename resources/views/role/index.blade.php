@@ -206,7 +206,7 @@
                     });
                 },
                 error: function(xhr, status, error) {
-                    disableButton();
+                    enableButton();
                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
                     Swal.fire({
                         icon: "error",

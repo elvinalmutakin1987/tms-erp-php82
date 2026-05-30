@@ -111,17 +111,19 @@
                  </ul>
              </li>
          @endif
-         <li>
-             <a href="javascript:;" class="has-arrow">
-                 <div class="parent-icon"><i class="bx bx-user-voice"></i>
-                 </div>
-                 <div class="menu-title">Survey</div>
-             </a>
-             <ul>
-                 <li> <a href="app-emailbox.html"><i class='bx bx-radio-circle'></i>Progress Claim</a>
-                 </li>
-             </ul>
-         </li>
+         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('progress_claim'))
+             <li>
+                 <a href="javascript:;" class="has-arrow">
+                     <div class="parent-icon"><i class="bx bx-user-voice"></i>
+                     </div>
+                     <div class="menu-title">Survey</div>
+                 </a>
+                 <ul>
+                     <li> <a href="app-emailbox.html"><i class='bx bx-radio-circle'></i>Progress Claim</a>
+                     </li>
+                 </ul>
+             </li>
+         @endif
          @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('unit_expired'))
              <li>
                  <a href="javascript:;" class="has-arrow">
@@ -228,7 +230,7 @@
                  </ul>
              </li>
          @endif
-         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo(['approval']))
+         @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('approval'))
              <li>
                  <a href="{{ route('approval.index') }}">
                      <div class="parent-icon"><i class="bx bx-file"></i>

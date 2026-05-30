@@ -67,7 +67,9 @@ class RoleController extends Controller
             $request->validate([
                 'name' => 'required|unique:roles,name',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = [
+                'name' => $request->name,
+            ];
             $role = Role::create($data);
             $permission = array();
             if ($request->has('permission_id')) {
@@ -124,7 +126,9 @@ class RoleController extends Controller
             $request->validate([
                 'name' => 'required|unique:roles,name,' . $role->id . ',id',
             ]);
-            $data = array_merge($request->except('_token', '_method', 'request_token'));
+            $data = [
+                'name' => $request->name,
+            ];
             $role->update($data);
             $role->syncPermissions();
             $permission = array();

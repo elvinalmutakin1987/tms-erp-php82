@@ -66,7 +66,9 @@ class PermissionController extends Controller
             $request->validate([
                 'name' => 'required|unique:permissions,name',
             ]);
-            $data = array_merge($request->except('_token', '_method'));
+            $data = [
+                'name' => $request->name,
+            ];
             Permission::firstOrCreate($data);
             DB::commit();
             return response()->json([
@@ -113,7 +115,9 @@ class PermissionController extends Controller
             $request->validate([
                 'name' => 'required|unique:permissions,name,' . $permission->id . ',id',
             ]);
-            $data = array_merge($request->except('_token', '_method', 'request_token'));
+            $data = [
+                'name' => $request->name,
+            ];
             $permission->update($data);
             $roles = Role::all();
             foreach ($roles as $role) {

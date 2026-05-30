@@ -52,47 +52,47 @@ Route::middleware(['auth'])->group(function () {
      * Routenya permission
      */
     Route::resource('permission', PermissionController::class)
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->names('permission');
 
     /**
      * Routenya role
      */
     Route::resource('role', RoleController::class)
-        ->middleware('role:superadmin|role')
+        ->middleware('role_or_permission:superadmin|role')
         ->names('role');
 
     Route::get('role-get-permission-all', [RoleController::class, 'get_permission_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('role.get_permission_all');
     /**
      * Routenya user
      */
     Route::resource('user', UserController::class)
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->names('user');
 
     Route::get('user-get-role-all', [UserController::class, 'get_role_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('user.get_role_all');
 
     Route::delete('user-delete-sign/{user}', [UserController::class, 'delete_sign'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('user.delete_sign');
 
     /**
      * Routenya approval flow
      */
     Route::resource('approval_flow', ApprovalFlowController::class)
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->names('approval_flow');
 
     Route::get('approval_flow-get-user-all', [ApprovalFlowController::class, 'get_user_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('approval_flow.get_user_all');
 
     Route::get('approval_flow-get-step-list', [ApprovalFlowController::class, 'get_step_list'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('approval_flow.get_step_list');
 
     /**
@@ -121,15 +121,15 @@ Route::middleware(['auth'])->group(function () {
         ->names('unit');
 
     Route::get('unit-get-location-all', [UnitController::class, 'get_location_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unit.get_location_all');
 
     Route::get('unit-get-brand-all', [UnitController::class, 'get_brand_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unit.get_brand_all');
 
     Route::get('unit-get-model-all', [UnitController::class, 'get_model_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unit.get_model_all');
 
 
@@ -150,7 +150,7 @@ Route::middleware(['auth'])->group(function () {
         ->names('unitmodel');
 
     Route::get('unitmodel-get-brand-all', [UnitModelController::class, 'get_brand_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unitmodel.get_brand_all');
 
     /**
@@ -162,7 +162,7 @@ Route::middleware(['auth'])->group(function () {
         ->names('clientvendor');
 
     Route::get('clientvendor-get-location-all', [ClientVendorController::class, 'get_location_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('clientvendor.get_location_all');
 
     /**
@@ -173,23 +173,23 @@ Route::middleware(['auth'])->group(function () {
         ->names('contract');
 
     Route::get('contract-get-client-all', [ContractController::class, 'get_client_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('contract.get_client_all');
 
     Route::get('contract-get-service-all', [ContractController::class, 'get_service_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('contract.get_service_all');
 
     Route::put('contract-update-status/{contract}', [ContractController::class, 'update_status'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('contract.update_status');
 
     Route::get('contract-get-service-item', [ContractController::class, 'get_service_item'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('contract.get_service_item');
 
     Route::get('contract-get-unit-all', [ContractController::class, 'get_unit_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('contract.get_unit_all');
 
 
@@ -203,15 +203,15 @@ Route::middleware(['auth'])->group(function () {
         ->names('unitrate');
 
     Route::get('unitrate-get-client-all', [UnitRateController::class, 'get_client_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unitrate.get_client_all');
 
     Route::get('unitrate-get-unit-all', [UnitRateController::class, 'get_unit_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unitrate.get_unit_all');
 
     Route::get('unitrate-get-contract', [UnitRateController::class, 'get_contract'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('unitrate.get_contract');
 
 
@@ -224,7 +224,7 @@ Route::middleware(['auth'])->group(function () {
         ->names('mroitem');
 
     Route::get('mroitem-get-unit-all', [MroItemController::class, 'get_unit_all'])
-        ->middleware('role:superadmin')
+        ->middleware('role_or_permission:superadmin')
         ->name('mroitem.get_unit_all');
 
 
@@ -236,11 +236,11 @@ Route::middleware(['auth'])->group(function () {
         ->names('p2h');
 
     Route::get('p2h-get-unit-all', [P2hController::class, 'get_unit_all'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.get_unit_all');
 
     Route::get('p2h-get-p2h-item', [P2hController::class, 'get_p2h_item'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.get_p2h_item');
 
     /**
@@ -253,23 +253,23 @@ Route::middleware(['auth'])->group(function () {
     //     ->name('p2h.load_table_add');
 
     Route::get('p2h-load-table-add', [P2hController::class, 'get_table_add'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.get_table_add');
 
     Route::get('p2h-load-table-edit/{p2h}', [P2hController::class, 'get_table_edit'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.get_table_edit');
 
     Route::get('p2h-get-detail/{p2h}', [P2hController::class, 'get_detail'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.get_detail');
 
     Route::get('p2h-print/{p2h}', [P2hController::class, 'print'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.print');
 
     Route::get('p2h-export-pdf/{p2h}', [P2hController::class, 'export_pdf'])
-        ->middleware('role:superadmin|p2h')
+        ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.export_pdf');
 
     /**
@@ -277,39 +277,39 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('mechanicalinspection', MechanicalInspectionController::class)
         ->parameters(['mechanicalinspection' => 'mechanical_inspection'])
-        ->middleware('role:superadmin|mechanical_inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->names('mechanicalinspection');
 
     Route::get('mechanicalinspection-get-unit-all', [MechanicalInspectionController::class, 'get_unit_all'])
-        ->middleware('role:superadmin|mechanical inspection')
+        ->middleware('role_or_permission:superadmin|mechanical inspection')
         ->name('mechanicalinspection.get_unit_all');
 
     Route::get('mechanicalinspection-print/{mechanical_inspection}', [MechanicalInspectionController::class, 'print'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.print');
 
     Route::get('mechanicalinspection-export-pdf/{mechanical_inspection}', [MechanicalInspectionController::class, 'export_pdf'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.export_pdf');
 
     Route::get('mechanicalinspection-load-table-add', [MechanicalInspectionController::class, 'get_table_add'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.get_table_add');
 
     Route::get('mechanicalinspection-load-table-edit/{mechanical_inspection}', [MechanicalInspectionController::class, 'get_table_edit'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.get_table_edit');
 
     Route::get('mechanicalinspection-get-detail/{mechanical_inspection}', [MechanicalInspectionController::class, 'get_detail'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.get_detail');
 
     Route::get('mechanicalinspection-print/{mechanical_inspection}', [MechanicalInspectionController::class, 'print'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.print');
 
     Route::get('mechanicalinspection-export-pdf/{mechanical_inspection}', [MechanicalInspectionController::class, 'export_pdf'])
-        ->middleware('role:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mecahincal inspection')
         ->name('mechanicalinspection.export_pdf');
 
 
@@ -325,51 +325,51 @@ Route::middleware(['auth'])->group(function () {
      * Routenya mechanical 
      */
     Route::resource('maintenance', MaintenanceController::class)
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->names('maintenance');
 
     Route::get('maintenance-get-unit-all', [MaintenanceController::class, 'get_unit_all'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_unit_all');
 
     Route::get('maintenance-get-vendor-all', [MaintenanceController::class, 'get_vendor_all'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_vendor_all');
 
     Route::get('maintenance-get-maintenance-item', [MaintenanceController::class, 'get_maintenance_item'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_maintenance_item');
 
     Route::get('maintenance-print/{maintenance}', [MaintenanceController::class, 'print'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.print');
 
     Route::get('maintenance-export-pdf/{maintenance}', [MaintenanceController::class, 'export_pdf'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.export_pdf');
 
     Route::get('maintenance-load-table-add', [MaintenanceController::class, 'get_table_add'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_table_add');
 
     Route::get('maintenance-load-table-edit/{maintenance}', [MaintenanceController::class, 'get_table_edit'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_table_edit');
 
     Route::get('maintenance-get-detail/{maintenance}', [MaintenanceController::class, 'get_detail'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_detail');
 
     Route::get('maintenance-print/{maintenance}', [MaintenanceController::class, 'print'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.print');
 
     Route::get('maintenance-export-pdf/{maintenance}', [MaintenanceController::class, 'export_pdf'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.export_pdf');
 
     Route::get('maintenance-get-maintenance-item-by-action', [MaintenanceController::class, 'get_maintenance_item_by_action'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.get_maintenance_item_by_action');
 
     Route::get('maintenance-get-maintenance-item-list', [MaintenanceController::class, 'get_maintenance_item_list'])
@@ -377,15 +377,15 @@ Route::middleware(['auth'])->group(function () {
         ->name('maintenance.get_maintenance_item_list');
 
     Route::get('maintenance/cost/{maintenance}', [MaintenanceController::class, 'cost'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.cost');
 
     Route::post('maintenance/cost', [MaintenanceController::class, 'cost_store'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.cost.store');
 
     Route::put('maintenance/cost/{maintenance}', [MaintenanceController::class, 'cost_update'])
-        ->middleware('role:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|maintenance')
         ->name('maintenance.cost.update');
 
     /**
@@ -393,35 +393,35 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('dailyreport', DailyReportController::class)
         ->parameters(['dailyreport' => 'daily_report'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->names('dailyreport');
 
     Route::get('dailyreport-get-unit-all', [DailyReportController::class, 'get_unit_all'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.get_unit_all');
 
     Route::get('dailyreport-print/{daily_report}', [DailyReportController::class, 'print'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.print');
 
     Route::get('dailyreport-export-pdf/{daily_report}', [DailyReportController::class, 'export_pdf'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.export_pdf');
 
     Route::get('dailyreport-load-form-add', [DailyReportController::class, 'get_form_add'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.get_form_add');
 
     Route::get('dailyreport-load-form-edit/{daily_report}', [DailyReportController::class, 'get_form_edit'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.get_form_edit');
 
     Route::get('dailyreport-get-detail/{daily_report}', [DailyReportController::class, 'get_detail'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.get_detail');
 
     Route::get('dailyreport-get-project-location', [DailyReportController::class, 'get_project_location'])
-        ->middleware('role:superadmin|daily_report')
+        ->middleware('role_or_permission:superadmin|daily_report')
         ->name('dailyreport.get_project_location');
 
 
@@ -430,55 +430,55 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('purchaserequisition', PurchaseRequisitionController::class)
         ->parameters(['purchaserequisition' => 'purchase_requisition'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->names('purchaserequisition');
 
     Route::get('purchaserequisition-print/{purchase_requisition}', [PurchaseRequisitionController::class, 'print'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.print');
 
     Route::get('purchaserequisition-export-pdf/{purchase_requisition}', [PurchaseRequisitionController::class, 'export_pdf'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.export_pdf');
 
     Route::get('purchaserequisition-get-detail/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_detail'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_detail');
 
     Route::get('purchaserequisition-get-unit-all', [PurchaseRequisitionController::class, 'get_unit_all'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_unit_all');
 
     Route::get('purchaserequisition-load-table-add', [PurchaseRequisitionController::class, 'get_table_add'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_table_add');
 
     Route::get('purchaserequisition-load-table-edit/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_table_edit'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_table_edit');
 
     Route::get('purchaserequisition-get-detail/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_detail'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_detail');
 
     Route::get('purchaserequisition-get-requisition-item', [PurchaseRequisitionController::class, 'get_requisition_item'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_requisition_item');
 
     Route::get('purchaserequisition-get-maintenance-item', [PurchaseRequisitionController::class, 'get_maintenance_item'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_maintenance_item');
 
     Route::get('purchaserequisition-get-mro-item', [PurchaseRequisitionController::class, 'get_mro_item'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_mro_item');
 
     Route::get('purchaserequisition-get-receive/{purchase_requisition}', [PurchaseRequisitionController::class, 'get_receive'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.get_receive');
 
     Route::put('purchaserequisition-receive/{purchase_requisition}', [PurchaseRequisitionController::class, 'receive'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisition.receive');
 
     /**
@@ -494,19 +494,19 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('proformainvoice', ProformaInvoiceController::class)
         ->parameters(['proformainvoice' => 'proforma_invoice'])
-        ->middleware('role:superadmin|proforma_invoice')
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->names('proformainvoice');
 
     Route::get('proformainvoice-get-unit-all', [ProformaInvoiceController::class, 'get_unit_all'])
-        ->middleware('role:superadmin|proforma_invoice')
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_unit_all');
 
     Route::get('proformainvoice-get-client-all', [ProformaInvoiceController::class, 'get_client_all'])
-        ->middleware('role:superadmin|proforma_invoice')
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_client_all');
 
     Route::get('proformainvoice-load-table-add', [ProformaInvoiceController::class, 'get_table_add'])
-        ->middleware('role:superadmin|proforma_invoice')
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_table_add');
 
     /**
@@ -514,11 +514,11 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('unitexpired', UnitExpiredController::class)
         ->parameters(['unitexpired' => 'unit'])
-        ->middleware('role:superadmin|unit_expired')
+        ->middleware('role_or_permission:superadmin|unit_expired')
         ->names('unitexpired');
 
     Route::get('unitexpired-export', [UnitExpiredController::class, 'export'])
-        ->middleware('role:superadmin|unit')
+        ->middleware('role_or_permission:superadmin|unit')
         ->name('unitexpired.export');
 
     /**
@@ -526,35 +526,35 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('purchaserequisitiongeneral', PurchaseRequisitionGeneralController::class)
         ->parameters(['purchaserequisitiongeneral' => 'purchase_requisition'])
-        ->middleware('role:superadmin|purchase_requisition_general')
+        ->middleware('role_or_permission:superadmin|purchase_requisition_general')
         ->names('purchaserequisitiongeneral');
 
     Route::get('purchaserequisitiongeneral-print/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'print'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.print');
 
     Route::get('purchaserequisitiongeneral-export-pdf/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'export_pdf'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.export_pdf');
 
     Route::get('purchaserequisitiongeneral-get-detail/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_detail'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.get_detail');
 
     Route::get('purchaserequisitiongeneral-load-table-add', [PurchaseRequisitionGeneralController::class, 'get_table_add'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.get_table_add');
 
     Route::get('purchaserequisitiongeneral-load-table-edit/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_table_edit'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.get_table_edit');
 
     Route::get('purchaserequisitiongeneral-get-receive/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'get_receive'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.get_receive');
 
     Route::put('purchaserequisitiongeneral-receive/{purchase_requisition}', [PurchaseRequisitionGeneralController::class, 'receive'])
-        ->middleware('role:superadmin|purchase_requisition')
+        ->middleware('role_or_permission:superadmin|purchase_requisition')
         ->name('purchaserequisitiongeneral.receive');
 
     /**
@@ -562,67 +562,67 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('purchaseorder', PurchaseOrderController::class)
         ->parameters(['purchaseorder' => 'purchase_order'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->names('purchaseorder');
 
     Route::get('purchaseorder-print/{purchase_order}', [PurchaseOrderController::class, 'print'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.print');
 
     Route::get('purchaseorder-export-pdf/{purchase_order}', [PurchaseOrderController::class, 'export_pdf'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.export_pdf');
 
     Route::get('purchaseorder-get-detail/{purchase_order}', [PurchaseOrderController::class, 'get_detail'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_detail');
 
     Route::get('purchaseorder-load-table-add', [PurchaseOrderController::class, 'get_table_add'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_table_add');
 
     Route::get('purchaseorder-load-table-edit/{purchase_order}', [PurchaseOrderController::class, 'get_table_edit'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_table_edit');
 
     Route::get('purchaseorder-get-monitoring/{purchase_order}', [PurchaseOrderController::class, 'get_monitoring'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_monitoring');
 
     Route::put('purchaseorder-moitoring/{purchase_order}', [PurchaseOrderController::class, 'monitoring'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.monitoring');
 
     Route::get('purchaseorder-get-purchase-requisition', [PurchaseOrderController::class, 'get_purchase_requisition'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_purchase_requisition');
 
     Route::get('purchaseorder-get-maintenance-item', [PurchaseOrderController::class, 'get_maintenance_item'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_maintenance_item');
 
     Route::get('purchaseorder-get-mro-item', [PurchaseOrderController::class, 'get_mro_item'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_mro_item');
 
     Route::get('purchaseorder-get-client-vendor', [PurchaseOrderController::class, 'get_client_vendor'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_client_vendor');
 
     Route::get('purchaseorder-get-client-vendor-by-id/{client_vendor}', [PurchaseOrderController::class, 'get_client_vendor_by_id'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.get_client_vendor_by_id');
 
     Route::get('purchaseorder-export-file/{request_quotation}', [PurchaseOrderController::class, 'export_file'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.export_file');
 
     Route::delete('purchaseorder-destroy-file/{request_quotation}', [PurchaseOrderController::class, 'destroy_file'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.destroy_file');
 
     Route::put('purchaseorder-close/{purchase_order}', [PurchaseOrderController::class, 'close'])
-        ->middleware('role:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|purchase_order')
         ->name('purchaseorder.close');
 
     /**
@@ -630,31 +630,31 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('requestquotation', RequestQuotationController::class)
         ->parameters(['requestquotation' => 'request_quotation'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->names('requestquotation');
 
     Route::get('requestquotation-get-purchase-requisition/{purchase_requisition}', [RequestQuotationController::class, 'get_purchase_requisition'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->name('requestquotation.get_purchase_requisition');
 
     Route::get('requestquotation-get-detail/{purchase_requisition}', [RequestQuotationController::class, 'get_detail'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->name('requestquotation.get_detail');
 
     Route::get('requestquotation-get-client-vendor', [RequestQuotationController::class, 'get_client_vendor'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->name('requestquotation.get_client_vendor');
 
     Route::put('requestquotation-get-detail/{purchase_requisition}', [RequestQuotationController::class, 'quotation'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->name('requestquotation.quotation');
 
     Route::get('requestquotation-export-pdf/{request_quotation}', [RequestQuotationController::class, 'export_pdf'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->name('requestquotation.export_pdf');
 
     Route::post('requestquotation-create-purchase-order/{request_quotation}', [RequestQuotationController::class, 'create_purchase_order'])
-        ->middleware('role:superadmin|request_quotation')
+        ->middleware('role_or_permission:superadmin|request_quotation')
         ->name('requestquotation.create_purchase_order');
 
     /**
@@ -662,40 +662,40 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('purchaseorderpayment', PurchaseOrderPaymentController::class)
         ->parameters(['purchaseorderpayment' => 'purchase_order_payment'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->names('purchaseorderpayment');
 
     Route::get('purchaseorderpayment-get-client-vendor', [PurchaseOrderPaymentController::class, 'get_client_vendor'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.get_client_vendor');
 
     Route::get('purchaseorderpayment-get-purchase-order', [PurchaseOrderPaymentController::class, 'get_purchase_order'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.get_purchase_order');
 
     Route::get('purchaseorderpayment-get-prev-no', [PurchaseOrderPaymentController::class, 'get_prev_no'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.get_prev_no');
 
     Route::get('purchaseorderpayment-print/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'print'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.print');
 
     Route::get('purchaseorderpayment-export-pdf/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'export_pdf'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.export_pdf');
 
     Route::get('purchaseorderpayment-get-detail/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'get_detail'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.get_detail');
 
     Route::get('purchaseorderpayment-export-file/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'export_file'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.export_file');
 
 
     Route::delete('purchaseorderpayment-destroy-file/{purchase_order_payment}', [PurchaseOrderPaymentController::class, 'destroy_file'])
-        ->middleware('role:superadmin|purchase_order_payment')
+        ->middleware('role_or_permission:superadmin|purchase_order_payment')
         ->name('purchaseorderpayment.destroy_file');
 
     /**
@@ -703,20 +703,20 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('invoicereceipt', InvoiceReceiptController::class)
         ->parameters(['invoicereceipt' => 'purchase_order'])
-        ->middleware('role:superadmin|invoice_receipt')
+        ->middleware('role_or_permission:superadmin|invoice_receipt')
         ->names('invoicereceipt');
 
     /**
      * Routenya Approval
      */
     Route::get('approval', [ApprovalController::class, 'index'])
-        ->middleware('role:superadmin|approval')
+        ->middleware('role_or_permission:superadmin|approval')
         ->name('approval.index');
 
     /**
      * Routenya summary breakdown
      */
     Route::get('summarybreakdown', [SummaryBreakdownController::class, 'index'])
-        ->middleware('role:superadmin|summary_breakdown')
+        ->middleware('role_or_permission:superadmin|summary_breakdown')
         ->name('summarybreakdown.index');
 });

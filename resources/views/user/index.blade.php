@@ -267,6 +267,7 @@
                     });
                 },
                 error: function(xhr, status, error) {
+                    enableButton();
                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
                     Swal.fire({
                         icon: "error",

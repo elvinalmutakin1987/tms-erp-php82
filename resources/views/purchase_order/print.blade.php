@@ -628,33 +628,53 @@
             </td>
             <td style="border: none;text-align: center; padding: 10px">
                 Prepared By,
-                <br>
-                <br>
-                <br>
-                <br>
+                @if ($purchase_order->user->sign_path)
+                    <img src="{{ public_path('storage/' . $purchase_order->user->sign_path) }}" alt="Logo"
+                        style="max-width:100px;height:auto;margin:0 auto;">
+                    <br>
+                @else
+                    <br>
+                    <br>
+                    <br>
+                    <br>
+                @endif
                 {{ $purchase_order->user->username }}
             </td>
             @if ($approval_step)
                 @foreach ($approval_step as $d)
-                    <td style="border: none; text-align: center">
+                    <td style="border: none;text-align: center; padding: 10px">
+                        {{ $d->action }} By,
                         @php
-                            $approval_status = $approval_status
-                                ->where('approval_flow_id', $approval_flow->id)
+                            $approval_status = Approval_status::where('approval_flow_id', $approval_flow->id)
                                 ->where('approvable_id', $purchase_order->id)
                                 ->where('step', $d->order)
                                 ->first();
                         @endphp
-                        @if ($approval_status->status == 'Open')
-                            <b>Approval Process</b>
-                        @elseif($approval_status->status == 'Rejected')
-                            <b>Rejected</b>
-                        @else
-                            @if ($d->user->sign_path)
-                                <img src="{{ public_path('storage/' . $d->user->sign_path) }}" alt="Logo"
-                                    style="max-width:100px;height:auto;margin:0 auto;">
+                        @if ($approval_status)
+                            @if ($approval_status->status == 'Open')
+                                <br>
+                                <br>
+                                <b>Approval</b>
+                                <br>
+                                <br>
+                            @elseif($approval_status->status == 'Rejected')
+                                <br>
+                                <br>
+                                <b>Rejected</b>
+                                <br>
+                                <br>
+                            @else
+                                @if ($d->user->sign_path)
+                                    <img src="{{ public_path('storage/' . $d->user->sign_path) }}" alt="Logo"
+                                        style="max-width:100px;height:auto;margin:0 auto;">
+                                @endif
                             @endif
+                        @else
+                            <br>
+                            <br>
+                            <br>
+                            <br>
                         @endif
-                        <br>
                         {{ $d->user->name }}
                     </td>
                 @endforeach

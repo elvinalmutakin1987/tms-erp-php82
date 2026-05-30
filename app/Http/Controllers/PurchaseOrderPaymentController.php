@@ -75,12 +75,10 @@ class PurchaseOrderPaymentController extends Controller
                      * user superadmin dan yang punya akses edit aja yang bisa muncul
                      */
                     if ($item->status == 'Draft'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaseorderpayment.edit')):
-                            $button .= '<li>
+                        $button .= '<li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
                                 </li>';
-                        endif;
                     endif;
 
                     /**
@@ -88,11 +86,9 @@ class PurchaseOrderPaymentController extends Controller
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
                     if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('purchaseorderpayment.delete')):
-                            $button .= '<li>
+                        $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
-                        endif;
                     endif;
 
                     $button .= '</ul>

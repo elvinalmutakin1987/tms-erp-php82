@@ -92,8 +92,8 @@
                         searchable: true,
                     },
                     {
-                        data: 'name',
-                        name: 'name',
+                        data: 'number',
+                        name: 'number',
                         orderable: true,
                         searchable: true,
                     },
