@@ -37,8 +37,10 @@ class ApprovalController extends Controller
                     ->make(true);
             }
             $approval_process = Approval_process::query();
-            $apporval_process = $approval_process->whereIn('approval_step_id', $approval_step->pluck('id'));
-            $approval_process = $approval_process->orderBy('id', 'desc')->get();
+            $approval_process->whereIn('approval_step_id', $approval_step->pluck('id'))
+                ->where('action', 'Create')
+                ->orderBy('id', 'desc')
+                ->get();
             return DataTables::of($approval_process)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
