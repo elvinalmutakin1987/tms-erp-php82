@@ -52,9 +52,11 @@
     <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
     <script>
         const saveButton = document.getElementById('saveButton');
-        var clientvendorId = '';
-        var locationId = '';
+        var approvableId = '';
         var type = '';
+        var status = '';
+        var model = '';
+        var procId = '';
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
             var table = $('#table-data').DataTable({
@@ -111,34 +113,37 @@
                 ],
             });
 
-            $(document).on('click', '.editButton', function() {
-                clientvendorId = $(this).data('id');
-                $('#modal-header').text('Edit ' + this.dataset.type);
-                type = this.dataset.type;
-                $('#id').val(clientvendorId);
-                let url = '{{ route('clientvendor.show', ':_id') }}';
-                url = url.replace(':_id', clientvendorId);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit ' + type);
-
-                    },
-                    error: function() {
-                        alert('Error fetching data');
-                    }
-                });
-            });
+            // $(document).on('click', '.detailButton', function() {
+            //     $('#modal-detail-header').text('Detail Report');
+            //     let id = $(this).data('id');
+            //     let model = $(this).data('model');
+            //     let url =
+            //         '{{ route('approval.get_detail', ['approvable_model' => ':_approvable_model', 'id' => ':_id']) }}';
+            //     url = url.replace(':_approvable_model', model).replace(':_id', id);
+            //     $.ajax({
+            //         url: url,
+            //         type: 'GET',
+            //         success: function(response) {
+            //             $('#modal-detail-body').html(response);
+            //         },
+            //         error: function() {
+            //             alert('Error fetching data');
+            //         }
+            //     });
+            // });
 
             $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail Report');
-                let id = $(this).data('id');
-                let model = $(this).data('model');
+                $('#modal-detail-header').text('Detail');
+                approvableId = $(this).data('id');
+                procId = $(this).data('procid');
+                model = $(this).data('model');
+                $('#approveButton').data('id', procId);
+                $('#rejectButton').data('id', procId);
+                $('#approveButton').data('model', model);
+                $('#rejectButton').data('model', model);
                 let url =
                     '{{ route('approval.get_detail', ['approvable_model' => ':_approvable_model', 'id' => ':_id']) }}';
-                url = url.replace(':_approvable_model', model).replace(':_id', id);
+                url = url.replace(':_approvable_model', model).replace(':_id', approvableId);
                 $.ajax({
                     url: url,
                     type: 'GET',
@@ -154,48 +159,14 @@
             gen_select2();
         });
 
-        $('#saveButton').on('click', function() {
-            disableButton();
-            var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('clientvendor.store') }}';
-            var typeAjax = 'POST';
-            $('#type').val(type);
-            if (clientvendorId != '') {
-                url = '{{ route('clientvendor.update', ':_id') }}';
-                url = url.replace(':_id', clientvendorId);
-                formData.append('_method', 'PUT');
+        $(document).on('click', '.saveButton', function() {
+            status = $(this).val();
+            model = $(this).data('model');
+            if (status === 'Approve') {
+                approve(procId);
+            } else if (status === 'Reject') {
+                reject(procId);
             }
-            $.ajax({
-                url: url,
-                type: typeAjax,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: "success",
-                        timer: 5000,
-                        didOpen: () => {},
-                        willClose: () => {
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formModal form')[0].reset();
-                            clientvendorId = '';
-                            type = '';
-                            $('#formModal').modal('hide');
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage,
-                    });
-                }
-            });
         });
 
         $('#formModal').on('show.bs.modal', function() {
@@ -265,8 +236,10 @@
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
-            locationId = '';
-            clientvendorId = '';
+            approvalProcessId = '';
+            procId = '';
+            status = '';
+            model = '';
             enableButton();
             $('#request_token').val("");
             $("#type").val(type).trigger('change');
@@ -309,6 +282,101 @@
 
         function enableButton() {
             saveButton.disabled = false;
+        }
+
+        function approve(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to approve this item.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, approve it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('approval.approve', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire(
+                                response.title,
+                                response.message,
+                                'success'
+                            );
+                            $('#table-data').DataTable().ajax.reload(null, false);
+                            $('#formDetail').modal('hide');
+                            $('#modal-detail-body').html("");
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON
+                                .message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        function reject(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to reject this item.",
+                icon: 'warning',
+                input: 'text',
+                inputPlaceholder: 'Enter reject reason',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return 'Reason is required!';
+                    }
+                },
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, reject it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('approval.reject', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'PUT',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            reason: result.value
+                        },
+                        success: function(response) {
+                            Swal.fire(
+                                response.title,
+                                response.message,
+                                'success'
+                            );
+
+                            $('#table-data').DataTable().ajax.reload(null, false);
+                            $('#formDetail').modal('hide');
+                            $('#modal-detail-body').html("");
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
         }
     </script>
     <!--app JS-->

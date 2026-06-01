@@ -46,7 +46,8 @@
                         </td>
                         <td class="p-1 align-middle">
                             <input type="text" class="form-control" readonly
-                                value=" {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}">
+                                value=" {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}"
+                                style="text-align: right">
                         </td>
                         <td class="p-1 align-middle">
                             <input type="text" class="form-control datepicker" id="received_at{{ $d->id }}"

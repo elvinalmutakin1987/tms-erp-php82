@@ -54,13 +54,13 @@ class ApprovalController extends Controller
                             <ul class="dropdown-menu">
                                 <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                                    data-id="' . $item->id . '" data-model="' . str_replace('App\\Models\\', '', $item->approval_flow->approvable_model) . '">Detail</a>
+                                    data-id="' . $item->approvable_id . '" data-model="' . str_replace('App\\Models\\', '', $item->approval_flow->approvable_model) . '" data-procid="' . $item->id . '">Detail</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" onclick="approve_(\'' . $item->approval_flow->approvable_model . '\', \'' . $item->id . '\')">Approved</a>
+                                    <a class="dropdown-item" href="#" onclick="approve(\'' . $item->id . '\')">Approve</a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" href="#" onclick="reject_(\'' . $item->approval_flow->approvable_model . '\', \'' . $item->id . '\')">Reject</a>
+                                    <a class="dropdown-item" href="#" onclick="reject(\'' . $item->id . '\')">Reject</a>
                                 </li>
                             </ul>
                         </div>
@@ -172,14 +172,14 @@ class ApprovalController extends Controller
             $detail = null;
             $compact = [];
             if ($approvable_model == 'Purchase_requisition') {
-                $data = Purchase_requisition::find($id);
-                $detail = $data->purchase_requisition_detail;
-                if ($data->type == 'General') {
+                $purchase_requisition = Purchase_requisition::find($id);
+                $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
+                if ($purchase_requisition->type == 'General') {
                     $view = 'approval.detail-pr-general';
                 } else {
                     $view = 'approval.detail-pr';
                 }
-                $compact = compact('data', 'detail');
+                $compact = compact('purchase_requisition', 'purchase_requisition_detail');
             } else if ($approvable_model == 'Purchase_order') {
                 $purchase_order = Purchase_order::find($id);
                 $purchase_order_detail = $purchase_order->purchase_order_detail;
@@ -191,6 +191,49 @@ class ApprovalController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    public function approve(Approval_process $approval_process)
+    {
+        DB::beginTransaction();
+        try {
+            approve($approval_process);
+            nextStep($approval_process);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data approved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    public function reject(Approval_process $approval_process)
+    {
+        DB::beginTransaction();
+        try {
+            rejected($approval_process);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data rejected!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
                 'message' => $th->getMessage()
             ], 400);
         }

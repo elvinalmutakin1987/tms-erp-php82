@@ -6,10 +6,10 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%" style="vertical-align: top">Number <br>
                     <b>{{ $purchase_order->order_no }}</b>
                 </td>
-                <td>Status <br>
+                <td style="vertical-align: top">Status <br>
                     @if ($purchase_order->status == 'Draft')
                         <span class="badge bg-secondary" style="font-size: 13px">{{ $purchase_order->status }}</span>
                     @elseif($purchase_order->status == 'Approval')
@@ -22,7 +22,7 @@
                         <span class="badge bg-success" style="font-size: 13px">{{ $purchase_order->status }}</span>
                     @endif
                 </td>
-                <td width="30%">Requisition No. <br>
+                <td width="30%" style="vertical-align: top">Requisition No. <br>
                     <b>
                         @if ($purchase_order->purchase_requisition_id)
                             {{ $purchase_order->purchase_requisition->requisition_no }} -
@@ -35,10 +35,10 @@
                 </td>
             </tr>
             <tr>
-                <td width="30%">Date <br>
+                <td width="30%" style="vertical-align: top">Date <br>
                     <b>{{ $purchase_order->date }}</b>
                 </td>
-                <td width="30%">Vendor <br>
+                <td width="30%" style="vertical-align: top">Vendor <br>
                     <b>{{ $purchase_order->client_vendor->name ?? '' }}</b>
                 </td>
                 <td></td>

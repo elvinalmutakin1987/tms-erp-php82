@@ -21,6 +21,7 @@ use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PurchaseRequisitionController extends Controller
 {
@@ -503,45 +504,74 @@ class PurchaseRequisitionController extends Controller
             'system_setting' => $system_setting
         ])->setPaper('a4', 'portrait');
 
-        // WAJIB: render dulu
         $dompdf = $pdf->getDomPDF();
         $dompdf->render();
 
-        // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $canvas = $dompdf->getCanvas();
         $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
 
-        // Tulis nomor halaman ke semua halaman
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
+
+        $width  = $canvas->get_width();
+        $height = $canvas->get_height();
+
+        if (in_array($purchase_requisition->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+            $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+                'Nomor PO : ' . $purchase_requisition->order_no . "\n" .
+                'Tanggal : ' . Carbon::parse($purchase_requisition->date)->format('d-m-Y') . "\n" .
+                'Total : ' . Number::format($purchase_requisition->grand_total, 0) . "\n" .
+                'Telah disetujui secara digital.';
+
+            $qrImage = QrCode::format('png')
+                ->size(150)
+                ->margin(1)
+                ->generate($qrText);
+
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+            // Posisi QR Code di atas page number
+            $qrSize = 55;
+            $qrX = $width - 120;
+            $qrY = $height - 100;
+
+            $canvas->image(
+                $qrBase64,
+                $qrX,
+                $qrY,
+                $qrSize,
+                $qrSize
+            );
+        }
         $canvas->page_text(
-            255, // X (geser kiri/kanan kalau perlu)
-            58,  // Y (geser atas/bawah kalau perlu)
+            $width - 120,
+            $height - 35,
             "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
+            $fontNormal,
             10,
             [0, 0, 0]
         );
-
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($purchase_requisition->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
             $size = 48;
-            $text = "Status : " . $purchase_requisition->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
             $text = $purchase_requisition->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
-        }
 
-        $safeFilename = Str::of($purchase_requisition->requisition_no)
-            ->replace(['/', '\\'], '-')   // ganti 
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
+        $safeFilename = Str::of($purchase_requisition->order_no)
+            ->replace(['/', '\\'], '-')
             ->toString();
+
         return $pdf->stream("report-{$safeFilename}.pdf");
     }
 
@@ -566,44 +596,74 @@ class PurchaseRequisitionController extends Controller
             'system_setting' => $system_setting
         ])->setPaper('a4', 'portrait');
 
-        // WAJIB: render dulu
         $dompdf = $pdf->getDomPDF();
         $dompdf->render();
 
-        // Ambil canvas + font
-        $canvas = $dompdf->getCanvas(); // kalau error, ganti jadi: $dompdf->get_canvas();
+        $canvas = $dompdf->getCanvas();
         $fontMetrics = $dompdf->getFontMetrics();
-        $font = $fontMetrics->getFont('Helvetica', 'normal');
 
-        // Tulis nomor halaman ke semua halaman
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
+
+        $width  = $canvas->get_width();
+        $height = $canvas->get_height();
+
+        if (in_array($purchase_requisition->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+            $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+                'Nomor PO : ' . $purchase_requisition->order_no . "\n" .
+                'Tanggal : ' . Carbon::parse($purchase_requisition->date)->format('d-m-Y') . "\n" .
+                'Total : ' . Number::format($purchase_requisition->grand_total, 0) . "\n" .
+                'Telah disetujui secara digital.';
+
+            $qrImage = QrCode::format('png')
+                ->size(150)
+                ->margin(1)
+                ->generate($qrText);
+
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+            // Posisi QR Code di atas page number
+            $qrSize = 55;
+            $qrX = $width - 120;
+            $qrY = $height - 100;
+
+            $canvas->image(
+                $qrBase64,
+                $qrX,
+                $qrY,
+                $qrSize,
+                $qrSize
+            );
+        }
         $canvas->page_text(
-            255, // X (geser kiri/kanan kalau perlu)
-            58,  // Y (geser atas/bawah kalau perlu)
+            $width - 120,
+            $height - 35,
             "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
+            $fontNormal,
             10,
             [0, 0, 0]
         );
-        /**
-         * Buat check statusnya, kalo draft, open, approval, cancel
-         * nanti ada watermarknya
-         */
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($purchase_requisition->status, $status, true)) {
-            $w = $canvas->get_width();
-            $h = $canvas->get_height();
-            $font = $fontMetrics->getFont('Helvetica', 'bold');
             $size = 48;
-            $text = "Status : " . $purchase_requisition->status;
-            $x = ($w / 2) - 100;
-            $y = $h / 2 - 350;
             $text = $purchase_requisition->status;
-            $canvas->text($x, $y, $text, $font, $size, [0.6, 0.6, 0.6]);
-        }
 
-        $safeFilename = Str::of($purchase_requisition->requisition_no)
-            ->replace(['/', '\\'], '-')   // ganti slash
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
+        $safeFilename = Str::of($purchase_requisition->order_no)
+            ->replace(['/', '\\'], '-')
             ->toString();
+
         return $pdf->download("report-{$safeFilename}.pdf");
     }
 

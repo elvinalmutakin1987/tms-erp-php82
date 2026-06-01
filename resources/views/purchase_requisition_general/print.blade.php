@@ -1,11 +1,43 @@
 @php
     use Carbon\Carbon;
     use Illuminate\Support\Number;
+    use SimpleSoftwareIO\QrCode\Facades\QrCode;
     use App\Models\Approval_flow;
     use App\Models\Approval_status;
     use App\Models\Approval_process;
     use App\Models\Approval_step;
 
+    $maxRowsPerPage = 15;
+
+    $details = collect($purchase_requisition_detail)->values();
+
+    $detailChunks = $details->isNotEmpty() ? $details->chunk($maxRowsPerPage) : collect([collect()]);
+
+    $approvalStepCount = $approval_step ? count($approval_step) : 0;
+
+    $qrDate = $purchase_requisition->date ? Carbon::parse($purchase_requisition->date)->format('d-m-Y') : '-';
+
+    $qrText =
+        'PT. Tunas Mitra Sejati' .
+        "\n" .
+        "\n" .
+        'Nomor PR : ' .
+        $purchase_requisition->requisition_no .
+        "\n" .
+        'Tanggal : ' .
+        $qrDate .
+        "\n" .
+        'Department : ' .
+        ($purchase_requisition->department ?? '-') .
+        "\n" .
+        'Total : ' .
+        Number::format($purchase_requisition->grand_total ?? 0, 0) .
+        "\n" .
+        'Telah disetujui secara digital.';
+
+    $qrImage = QrCode::format('png')->size(150)->margin(1)->generate($qrText);
+
+    $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
 @endphp
 
 <style>
@@ -14,20 +46,17 @@
     }
 
     body {
-        font-family: "DejaVu Sans", "DejaVu Sans Mono", "DejaVu",
-            "Helvetica", "Arial", sans-serif;
+        font-family: "DejaVu Sans", "DejaVu Sans Mono", "DejaVu", "Helvetica", "Arial", sans-serif;
         margin: 0;
         padding: 0;
         font-size: 9.5pt;
         color: #000;
     }
 
-    /* ===== Main table (single table to repeat header) ===== */
     .table-p2h {
         width: 100%;
         border-collapse: collapse;
         border-spacing: 0;
-        /* table-layout: fixed; */
         margin: 0;
         padding: 0;
     }
@@ -41,8 +70,6 @@
         word-wrap: break-word;
     }
 
-
-    /* ===== Document header wrapper row (nested header table) ===== */
     .table-p2h .doc-header-wrapper {
         padding: 0 !important;
         border: 0 !important;
@@ -103,13 +130,6 @@
         line-height: 1.1;
     }
 
-    .page-placeholder {
-        display: inline-block;
-        min-width: 70px;
-        letter-spacing: .3px;
-    }
-
-    /* ===== Info block under header ===== */
     .doc-info-cell {
         padding: 0 !important;
         line-height: 0;
@@ -129,7 +149,6 @@
         line-height: 1.2;
     }
 
-    /* remove outer borders to avoid double border with parent cell */
     .doc-info-table tr:first-child td {
         border-top: 0 !important;
     }
@@ -174,7 +193,6 @@
         width: 50%;
     }
 
-    /* ===== Checklist header ===== */
     .checklist-head th {
         background: #111;
         color: #fff;
@@ -182,113 +200,38 @@
         text-transform: uppercase;
         letter-spacing: .3px;
         border-top: 0 !important;
-        /* avoid double border with doc header bottom */
     }
 
-    /* ===== Group row ===== */
-    .group-row td {
-        background: #e9ecef;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: .2px;
-        padding: 7px 8px;
-    }
-
-    /* ===== Item rows ===== */
-    .item-row td {
-        background: #fff;
-    }
-
-    /* subtle zebra for readability */
-    .item-row.zebra td {
-        background: #fafafa;
-    }
-
-    /* ===== Column widths (kept stable for DomPDF) ===== */
     .col-no {
         width: 5%;
         text-align: center;
         vertical-align: middle;
-
     }
 
-    .col-desctiption {}
-
-    .col-mro-item {
-        width: 35%;
+    .col-description {
+        width: 39%;
     }
 
     .col-uom {
-        width: 15%;
+        width: 10%;
     }
 
     .col-qty {
-        width: 15%;
+        width: 10%;
     }
 
-    /* Make "BROKEN" fit on narrow col */
-    .checklist-head th.col-broken {
-        font-size: 8pt;
-        line-height: 1.05;
-        padding-left: 3px;
-        padding-right: 3px;
-        white-space: normal;
-        word-break: break-word;
+    .col-price {
+        width: 12%;
     }
 
-    /* ===== Status badge (print-friendly) ===== */
-
-    .status {
-        display: inline-block;
-        min-width: 18px;
-        height: 18px;
-        line-height: 18px;
-        text-align: center;
-        border: 1px solid #000;
-        border-radius: 3px;
-        font-weight: 700;
-        font-size: 11pt;
-        font-family: "DejaVu Sans", "DejaVu", "Symbola", "Arial Unicode MS", sans-serif;
+    .col-discount {
+        width: 12%;
     }
 
-    .status.ok {
-        background-color: #d1e7dd;
-        color: #000;
+    .col-amount {
+        width: 12%;
     }
 
-    .status.ng {
-        background-color: #f8d7da;
-        color: #000;
-    }
-
-    /* Force Unicode rendering */
-    .status.ok::before {
-        content: "✔";
-        vertical-align: middle;
-    }
-
-    .status.ng::before {
-        content: "✗";
-        vertical-align: middle;
-    }
-
-
-    /* Notes HTML inside cells */
-    .cell-notes p {
-        margin: 0 0 4px 0;
-    }
-
-    .cell-notes ul,
-    .cell-notes ol {
-        margin: 0;
-        padding-left: 16px;
-    }
-
-    .cell-notes li {
-        margin: 0 0 2px 0;
-    }
-
-    /* Avoid awkward splitting */
     .avoid-break {
         page-break-inside: avoid;
     }
@@ -297,21 +240,9 @@
         display: block;
     }
 
-    .watermark {
-        position: fixed;
-        top: 35%;
-        left: 15%;
-        transform: rotate(-30deg);
-        font-size: 72px;
-        color: rgba(150, 150, 150, 0.2);
-        opacity: 0.08;
-        z-index: -1;
-    }
-
     @media print {
         @page {
             size: A4 !important;
-            /* leave a bit more bottom space for footer page number */
             margin: 14px 14px 20px 14px !important;
         }
 
@@ -332,7 +263,6 @@
             page-break-after: auto;
         }
 
-        /* try to preserve background colors */
         * {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -340,185 +270,229 @@
     }
 </style>
 
-@php
-    $no = 1;
-@endphp
+@foreach ($detailChunks as $chunkIndex => $detailChunk)
+    @if ($chunkIndex > 0)
+        <div style="page-break-before: always;"></div>
+    @endif
 
-<table class="table-p2h">
-    <colgroup>
-        <col class="col-no" style="width:5px;">
-        <col class="col-description">
-        <col class="col-uom" style="width:13%;">
-        <col class="col-qty" style="width:13%;">
-        <col class="col-price" style="width:13%;">
-        <col class="col-discount" style="width:13%;">
-        <col class="col-amount" style="width:13%;">
-    </colgroup>
+    <table class="table-p2h">
+        <colgroup>
+            <col class="col-no" style="width:5%;">
+            <col class="col-description" style="width:39%;">
+            <col class="col-uom" style="width:10%;">
+            <col class="col-qty" style="width:10%;">
+            <col class="col-price" style="width:12%;">
+            <col class="col-discount" style="width:12%;">
+            <col class="col-amount" style="width:12%;">
+        </colgroup>
 
-    <thead>
-        <tr>
-            <th colspan="7" class="doc-header-wrapper">
-                <table class="doc-header-table">
-                    <tr>
-                        <td class="logo-cell">
-                            <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                style="max-width:95px;height:auto;margin:0 auto;">
-                        </td>
-
-                        <td class="title-cell">
-                            <div class="doc-title">Purchase Requisition</div>
-                            <div class="doc-subtitle">Equipment Dept.</div>
-                        </td>
-
-                        <td class="meta-cell">
-                            <div class="docno-label">Document No.</div>
-                            <div class="docno">{{ $purchase_requisition->requisition_no }}</div>
-                        </td>
-
-                    </tr>
-                    <tr>
-                        <td colspan="3" class="doc-info-cell">
-                            <table class="doc-info-table">
-                                <tr>
-                                    <td width="30%">
-                                        <table class="info-inner">
-                                            <tr>
-                                                <td class="label" style="width: 15%">Department</td>
-                                                <td class="sep">:</td>
-                                                <td class="val">{{ $purchase_requisition->department ?? '-' }}
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="label">Date</td>
-                                                <td class="sep">:</td>
-                                                <td class="val">{{ $purchase_requisition->date ?? '-' }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="label">Job</td>
-                                                <td class="sep">:</td>
-                                                <td class="val">{{ $purchase_requisition->job ?? '-' }}</td>
-                                            </tr>
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-            </th>
-        </tr>
-        <tr class="checklist-head">
-            <th class="col-no" style="width:5px;">#</th>
-            <th class="col-description">Description</th>
-            <th class="col-uom" style="width:10%;">Uom</th>
-            <th class="col-qty" style="width:10%;">Qty</th>
-            <th class="col-price" style="width:13%;">Price</th>
-            <th class="col-discount" style="width:13%;">Discount</th>
-            <th class="col-amount" style="width:13%;">Amount</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach ($purchase_requisition_detail as $d)
-            <tr>
-                <td class="p-1 align-middle">
-                    {{ $loop->iteration }}
-                </td>
-                <td class="p-1 align-middle">
-                    {{ $d->description }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: center">
-                    {{ $d->uom }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: center">
-                    {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}
-                </td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
-                </td>
-            </tr>
-        @endforeach
-    </tbody>
-    <tfoot>
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Total</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
-            </td>
-        </tr>
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Discount</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
-            </td>
-        </tr>
-        @if ($purchase_requisition->tax != 0)
-            <tr>
-                <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Tax</b></td>
-                <td class="p-1 align-middle" style="text-align: right">
-                    {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
-                </td>
-            </tr>
-        @endif
-        <tr>
-            <td class="p-1 align-middle" style="text-align: right" colspan="6"><b>Grand Total</b></td>
-            <td class="p-1 align-middle" style="text-align: right">
-                {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
-            </td>
-        </tr>
-    </tfoot>
-    <thead>
-        <tr>
-            <td colspan="7" class="p-1">
-                Notes : <br>
-                @if ($purchase_requisition->notes != '')
-                    {!! $purchase_requisition->notes !!}
-                @endif
-                <br>
-            </td>
-        </tr>
-    </thead>
-    @if (!in_array($purchase_requisition->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']))
         <thead>
             <tr>
-                <td colspan="7" class="p-1">
+                <th colspan="7" class="doc-header-wrapper">
+                    <table class="doc-header-table">
+                        <tr>
+                            <td class="logo-cell">
+                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
+                                    style="max-width:95px;height:auto;margin:0 auto;">
+                            </td>
+
+                            <td class="title-cell">
+                                <div class="doc-title">Purchase Requisition</div>
+                                <div class="doc-subtitle">Equipment Dept.</div>
+                            </td>
+
+                            <td class="meta-cell">
+                                <div class="docno-label">Document No.</div>
+                                <div class="docno">{{ $purchase_requisition->requisition_no }}</div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3" class="doc-info-cell">
+                                <table class="doc-info-table">
+                                    <tr>
+                                        <td width="30%">
+                                            <table class="info-inner">
+                                                <tr>
+                                                    <td class="label" style="width: 15%">Department</td>
+                                                    <td class="sep">:</td>
+                                                    <td class="val">
+                                                        {{ $purchase_requisition->department ?? '-' }}
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="label">Date</td>
+                                                    <td class="sep">:</td>
+                                                    <td class="val">
+                                                        {{ $purchase_requisition->date ?? '-' }}
+                                                    </td>
+                                                </tr>
+
+                                                <tr>
+                                                    <td class="label">Job</td>
+                                                    <td class="sep">:</td>
+                                                    <td class="val">
+                                                        {{ $purchase_requisition->job ?? '-' }}
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+
+            <tr class="checklist-head">
+                <th class="col-no" style="width:5%;">#</th>
+                <th class="col-description" style="width:39%;">Description</th>
+                <th class="col-uom" style="width:10%;">Uom</th>
+                <th class="col-qty" style="width:10%;">Qty</th>
+                <th class="col-price" style="width:12%;">Price</th>
+                <th class="col-discount" style="width:12%;">Discount</th>
+                <th class="col-amount" style="width:12%;">Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach ($detailChunk as $d)
+                <tr>
+                    <td class="p-1 align-middle" style="text-align: center;">
+                        {{ $chunkIndex * $maxRowsPerPage + $loop->iteration }}
+                    </td>
+
+                    <td class="p-1 align-middle">
+                        {{ $d->description }}
+                    </td>
+
+                    <td class="p-1 align-middle" style="text-align: center;">
+                        {{ $d->uom }}
+                    </td>
+
+                    <td class="p-1 align-middle" style="text-align: center;">
+                        {{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}
+                    </td>
+
+                    <td class="p-1 align-middle" style="text-align: right;">
+                        {{ $d->price ? Number::format($d->price, precision: 0) : '' }}
+                    </td>
+
+                    <td class="p-1 align-middle" style="text-align: right;">
+                        {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}
+                    </td>
+
+                    <td class="p-1 align-middle" style="text-align: right;">
+                        {{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+
+        @if ($loop->last)
+            <tfoot>
+                <tr>
+                    <td class="p-1 align-middle" style="text-align: right;" colspan="6">
+                        <b>Total</b>
+                    </td>
+                    <td class="p-1 align-middle" style="text-align: right;">
+                        {{ $purchase_requisition->total ? Number::format($purchase_requisition->total, precision: 0) : '' }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="p-1 align-middle" style="text-align: right;" colspan="6">
+                        <b>Discount</b>
+                    </td>
+                    <td class="p-1 align-middle" style="text-align: right;">
+                        {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
+                    </td>
+                </tr>
+
+                @if ($purchase_requisition->tax != 0)
+                    <tr>
+                        <td class="p-1 align-middle" style="text-align: right;" colspan="6">
+                            <b>Tax</b>
+                        </td>
+                        <td class="p-1 align-middle" style="text-align: right;">
+                            {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
+                        </td>
+                    </tr>
+                @endif
+
+                <tr>
+                    <td class="p-1 align-middle" style="text-align: right;" colspan="6">
+                        <b>Grand Total</b>
+                    </td>
+                    <td class="p-1 align-middle" style="text-align: right;">
+                        {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="7" class="p-1">
+                        Notes : <br>
+                        @if ($purchase_requisition->notes != '')
+                            {!! $purchase_requisition->notes !!}
+                        @endif
+                        <br>
+                    </td>
+                </tr>
+            </tfoot>
+        @endif
+    </table>
+
+    @if ($loop->last && !in_array($purchase_requisition->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']))
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 10px;" class="avoid-break">
+            <tr>
+                <td colspan="{{ $approvalStepCount + 1 }}" class="p-1" style="border: none;">
                     <table style="width: 100%; border-collapse: separate; border-spacing: 0;">
                         <tr>
-                            <td style="border: none; text-align: center">
-                                Created By
-                                <br>
+                            <td style="border: none; text-align: center; vertical-align: top; padding: 10px;">
+                                <div style="height: 30px;">
+                                    Created By,
+                                </div>
                             </td>
+
                             @if ($approval_step)
                                 @foreach ($approval_step as $d)
-                                    <td style="border: none; text-align: center">
-                                        {{ $d->action }} By
-                                        <br>
+                                    <td style="border: none; text-align: center; vertical-align: top; padding: 10px;">
+                                        <div style="height: 30px;">
+                                            {{ $d->action }} By,
+                                        </div>
                                     </td>
                                 @endforeach
                             @endif
                         </tr>
+
                         <tr>
-                            <td style="border: none; text-align: center">
-                                @if ($purchase_requisition->user->sign_path)
-                                    <img src="{{ public_path('storage/' . $purchase_requisition->user->sign_path) }}"
-                                        alt="Logo" style="max-width:100px;height:auto;margin:0 auto;">
-                                    <br>
-                                @else
-                                    <br>
-                                    <br>
-                                    <br>
-                                    <br>
-                                @endif
-                                {{ $purchase_requisition->user->name }}
+                            <td style="border: none; text-align: center; vertical-align: top; padding: 10px;">
+                                <div style="height: 95px; text-align: center;">
+                                    @if ($purchase_requisition->user->sign_path)
+                                        <img src="{{ public_path('storage/' . $purchase_requisition->user->sign_path) }}"
+                                            alt="Signature"
+                                            style="
+                                                max-width: 150px;
+                                                max-height: 85px;
+                                                width: auto;
+                                                height: auto;
+                                                margin: 0 auto;
+                                                display: block;
+                                                object-fit: contain;
+                                            ">
+                                    @endif
+                                </div>
+
+                                <div style="min-height: 35px; text-align: center;">
+                                    {{ $purchase_requisition->user->name }}
+                                </div>
                             </td>
+
                             @if ($approval_step)
                                 @foreach ($approval_step as $d)
-                                    <td style="border: none; text-align: center">
+                                    <td style="border: none; text-align: center; vertical-align: top; padding: 10px;">
                                         @php
                                             $approval_status = Approval_status::where(
                                                 'approval_flow_id',
@@ -528,33 +502,38 @@
                                                 ->where('step', $d->order)
                                                 ->first();
                                         @endphp
-                                        @if ($approval_status)
-                                            @if ($approval_status->status == 'Open')
-                                                <br>
-                                                <br>
-                                                <b>Approval Process</b>
-                                                <br>
-                                                <br>
-                                            @elseif($approval_status->status == 'Rejected')
-                                                <br>
-                                                <br>
-                                                <b>Rejected</b>
-                                                <br>
-                                                <br>
-                                            @else
-                                                @if ($d->user->sign_path)
-                                                    <img src="{{ public_path('storage/' . $d->user->sign_path) }}"
-                                                        alt="Logo"
-                                                        style="max-width:100px;height:auto;margin:0 auto;">
+
+                                        <div style="height: 95px; text-align: center;">
+                                            @if ($approval_status)
+                                                @if ($approval_status->status == 'Open')
+                                                    <div style="height: 95px; line-height: 95px;">
+                                                        <b>Approval Process</b>
+                                                    </div>
+                                                @elseif ($approval_status->status == 'Rejected')
+                                                    <div style="height: 95px; line-height: 95px;">
+                                                        <b>Rejected</b>
+                                                    </div>
+                                                @else
+                                                    @if ($d->user->sign_path)
+                                                        <img src="{{ public_path('storage/' . $d->user->sign_path) }}"
+                                                            alt="Signature"
+                                                            style="
+                                                                max-width: 150px;
+                                                                max-height: 85px;
+                                                                width: auto;
+                                                                height: auto;
+                                                                margin: 0 auto;
+                                                                display: block;
+                                                                object-fit: contain;
+                                                            ">
+                                                    @endif
                                                 @endif
                                             @endif
-                                        @else
-                                            <br>
-                                            <br>
-                                            <br>
-                                            <br>
-                                        @endif
-                                        {{ $d->user->name }}
+                                        </div>
+
+                                        <div style="min-height: 35px; text-align: center;">
+                                            {{ $d->user->name }}
+                                        </div>
                                     </td>
                                 @endforeach
                             @endif
@@ -562,24 +541,38 @@
                     </table>
                 </td>
             </tr>
-        </thead>
+        </table>
     @endif
-</table>
+@endforeach
 
-
-{{-- Page number footer (DomPDF) --}}
+{{-- Page number footer and QR Code footer for DomPDF --}}
 <script type="text/php">
     if (isset($pdf)) {
         $font = $fontMetrics->getFont("Helvetica", "normal");
         $size = 8;
 
-        // Footer right
         $text = "Halaman {PAGE_NUM} / {PAGE_COUNT}";
 
-        // A4 portrait ~ 595x842 pt. Adjust slightly if needed.
-        $x = 430;   // move left/right
-        $y = 820;   // move up/down
+        $x = 430;
+        $y = 820;
 
-        $pdf->page_text($x, $y, $text, $font, $size, array(0,0,0));
+        $pdf->page_text($x, $y, $text, $font, $size, array(0, 0, 0));
+
+        $qrBase64 = {!! json_encode($qrBase64) !!};
+
+        $width = $pdf->get_width();
+        $height = $pdf->get_height();
+
+        $qrSize = 55;
+        $qrX = $width - 120;
+        $qrY = $height - 125;
+
+        $pdf->image(
+            $qrBase64,
+            $qrX,
+            $qrY,
+            $qrSize,
+            $qrSize
+        );
     }
 </script>

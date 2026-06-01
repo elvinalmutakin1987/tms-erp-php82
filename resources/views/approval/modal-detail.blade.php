@@ -10,9 +10,14 @@
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-3">
                     <button type="button" class="btn btn-light btn-success saveButton" id="approveButton"
-                        name="status" value="Approve">Approve</button>
+                        name="status" value="Approve">
+                        Approve
+                    </button>
+
                     <button type="button" class="btn btn-light btn-danger saveButton" id="rejectButton" name="status"
-                        value="Reject">Reject</button>
+                        value="Reject">
+                        Reject
+                    </button>
                     <button type="button" class="btn btn-light" id="cancelDetailButton">Cancel</button>
                 </div>
             </div>

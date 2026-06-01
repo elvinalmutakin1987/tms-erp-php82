@@ -4,6 +4,10 @@ use App\Models\Approval_flow;
 use App\Models\Approval_process;
 use App\Models\Approval_status;
 use App\Models\Approval_step;
+use App\Models\Proforma_invoice;
+use App\Models\Purchase_order;
+use App\Models\Purchase_order_payment;
+use App\Models\Purchase_requisition;
 use Illuminate\Support\Str;
 
 /**
@@ -35,7 +39,7 @@ if (! function_exists('getApprovalFlowId')) {
  * membuat proses approval baru
  */
 if (! function_exists('createApprovalProcess')) {
-    function createApprovalProcess(string $approval_flow_id, string $approvable_id): string
+    function createApprovalProcess(string $approval_flow_id, string $approvable_id): void
     {
         $request_token = (string) Str::uuid();
         $approval_step = Approval_step::where('approval_flow_id', $approval_flow_id)->orderBy('order')->get();
@@ -56,7 +60,6 @@ if (! function_exists('createApprovalProcess')) {
                 'action' => $d->order == 1 ? 'Open' : 'Create',
             ]);
         }
-        return true;
     }
 }
 
@@ -64,11 +67,11 @@ if (! function_exists('createApprovalProcess')) {
 /**
  * buat lanjut ke step berikutnya
  */
-if (! function_exists('nextStep')) {
-    function nextStep(string $model, string $id, string $approval_flow_id): string
+if (! function_exists('approve')) {
+    function approve(Approval_process $approval_process): void
     {
-
-        return sprintf('%02d:%02d', $hour, $minute);
+        $approval_process->action = 'Approved';
+        $approval_process->save();
     }
 }
 
@@ -76,10 +79,53 @@ if (! function_exists('nextStep')) {
  * buat ngereject approval
  */
 if (! function_exists('rejected')) {
-    function rejected(string $model, string $id, string $approval_flow_id): string
+    function rejected(Approval_process $approval_process): void
     {
+        $approval_process->action = 'Rejected';
+        $approval_process->save();
+        done($approval_process->approval_flow_id, $approval_process->approvable_id, 'Rejected');
+    }
+}
 
-        return sprintf('%02d:%02d', $hour, $minute);
+/**
+ * buat lanjut ke step berikutnya
+ */
+if (! function_exists('nextStep')) {
+    function nextStep(Approval_process $approval_process): void
+    {
+        $order = Approval_step::whereKey($approval_process->approval_step_id)
+            ->value('order');
+        if ($order === null) {
+            done(
+                $approval_process->approval_flow_id,
+                $approval_process->approvable_id,
+                'Approved'
+            );
+            return;
+        }
+
+        $nextProcess = Approval_process::where('approval_flow_id', $approval_process->approval_flow_id)
+            ->whereHas('approval_step', function ($query) use ($order) {
+                $query->where('order', $order + 1);
+            })
+            ->first();
+
+        if ($nextProcess) {
+            $nextProcess->update([
+                'action' => 'Open',
+            ]);
+            Approval_status::where('approval_flow_id', $approval_process->approval_flow_id)
+                ->where('approvable_id', $approval_process->approvable_id)
+                ->update([
+                    'step' => $order + 1,
+                ]);
+        } else {
+            done(
+                $approval_process->approval_flow_id,
+                $approval_process->approvable_id,
+                'Approved'
+            );
+        }
     }
 }
 
@@ -87,10 +133,24 @@ if (! function_exists('rejected')) {
  * ini buat nyelesaiin approvalnya.
  * approval terakhir
  */
-if (! function_exists('doneApproval')) {
-    function doneApproval(string $model, string $id, string $approval_flow_id): string
+if (! function_exists('done')) {
+    function done(string $approval_flow_id, string $approvable_id, string $status): void
     {
-
-        return sprintf('%02d:%02d', $hour, $minute);
+        Approval_status::where('approval_flow_id', $approval_flow_id)
+            ->where('approvable_id', $approvable_id)
+            ->update(['status' => 'Done']);
+        $approval_flow = Approval_flow::find($approval_flow_id);
+        $models = [
+            'Purchase_requisition' => Purchase_requisition::class,
+            'Purchase_order' => Purchase_order::class,
+            'Proforma_invoice' => Proforma_invoice::class,
+            'Purchase_order_payment' => Purchase_order_payment::class,
+        ];
+        $model = $models[class_basename($approval_flow?->approvable_model)] ?? null;
+        if ($model) {
+            $model::whereKey($approvable_id)->update([
+                'status' => $status,
+            ]);
+        }
     }
 }

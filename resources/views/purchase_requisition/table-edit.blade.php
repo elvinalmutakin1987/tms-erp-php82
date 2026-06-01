@@ -73,7 +73,7 @@
             <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
                 value="{{ $d->qty ?? 0 }}">
             <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                value="{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}">
+                value="{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}" style="text-align: right">
         </td>
         <td class="p-1 align-middle">
             <input type="hidden" class="form-control" id="price" name="price[]" readonly

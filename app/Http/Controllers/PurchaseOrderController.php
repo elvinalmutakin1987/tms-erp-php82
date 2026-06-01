@@ -490,18 +490,6 @@ class PurchaseOrderController extends Controller
      */
     public function get_purchase_requisition(Request $request)
     {
-        // try {
-        //     $purchase_requisition = Purchase_requisition::whereIn('status', ['Approved', 'Received'])->get();
-        //     return response()->json([
-        //         'success' => true,
-        //         'data' => $purchase_requisition
-        //     ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $th->getMessage()
-        //     ], 400);
-        // }
         if ($request->ajax()) {
             $term = trim($request->term);
             $purchase_requisition = Purchase_requisition::selectRaw("id, requisition_no as text")
@@ -916,7 +904,7 @@ class PurchaseOrderController extends Controller
             ->replace(['/', '\\'], '-')
             ->toString();
 
-        return $pdf->stream("report-{$safeFilename}.pdf");
+        return $pdf->download("report-{$safeFilename}.pdf");
     }
 
     /**

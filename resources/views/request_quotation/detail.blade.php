@@ -6,17 +6,18 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number <br>
+                <td width="30%" style="vertical-align: top">Number :<br>
                     <b>{{ $purchase_requisition->requisition_no }}</b>
                 </td>
-                <td colspan="2">Status <br>
+                <td colspan="2" style="vertical-align: top">Status :<br>
                     @if ($purchase_requisition->status == 'Draft')
                         <span class="badge bg-secondary"
                             style="font-size: 13px">{{ $purchase_requisition->status }}</span>
                     @elseif($purchase_requisition->status == 'Approval')
                         <span class="badge bg-info" style="font-size: 13px">{{ $purchase_requisition->status }}</span>
                     @elseif($purchase_requisition->status == 'Open')
-                        <span class="badge bg-primary" style="font-size: 13px">{{ $purchase_requisition->status }}</span>
+                        <span class="badge bg-primary"
+                            style="font-size: 13px">{{ $purchase_requisition->status }}</span>
                     @elseif($purchase_requisition->status == 'Approved' || $purchase_received->status == 'Received')
                         <span class="badge bg-warning"
                             style="font-size: 13px">{{ $purchase_requisition->status }}</span>
@@ -27,13 +28,13 @@
                 </td>
             </tr>
             <tr>
-                <td width="30%">Unit <br>
+                <td width="30%" style="vertical-align: top">Unit :<br>
                     <b>{{ $purchase_requisition->unit->vehicle_no }}</b>
                 </td>
-                <td width="30%">Date <br>
+                <td width="30%" style="vertical-align: top">Date :<br>
                     <b>{{ $purchase_requisition->date }}</b>
                 </td>
-                <td width="30%">Maintenance No. <br>
+                <td width="30%" style="vertical-align: top">Maintenance No. :<br>
                     <b> {{ $purchase_requisition->maintenance->maintenance_no }}</b>
                 </td>
             </tr>

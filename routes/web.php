@@ -717,6 +717,15 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|approval')
         ->name('approval.get_detail');
 
+
+    Route::put('approval-approve/{approval_process}', [ApprovalController::class, 'approve'])
+        ->middleware('role_or_permission:superadmin|approval')
+        ->name('approval.approve');
+
+    Route::put('approval-reject/{approvable_process}', [ApprovalController::class, 'reject'])
+        ->middleware('role_or_permission:superadmin|approval')
+        ->name('approval.reject');
+
     /**
      * Routenya summary breakdown
      */

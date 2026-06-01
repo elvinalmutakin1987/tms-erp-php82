@@ -6,15 +6,15 @@
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
             <tr>
-                <td width="30%">Number :<br>
+                <td width="30%" style="vertical-align: top">Number :<br>
                     <b>{{ $purchase_order_payment->payment_no }}</b>
                 </td>
-                <td width="30%">Purchase Order No. :<br>
+                <td width="30%" style="vertical-align: top">Purchase Order No. :<br>
                     <b>
                         {{ $purchase_order_payment->purchase_order->order_no }}
                     </b>
                 </td>
-                <td>Status :<br>
+                <td width="30%" style="vertical-align: top">Status :<br>
                     @if ($purchase_order_payment->status == 'Draft')
                         <span class="badge bg-secondary"
                             style="font-size: 13px">{{ $purchase_order_payment->status }}</span>
@@ -33,35 +33,35 @@
                 </td>
             </tr>
             <tr>
-                <td width="30%">Date :<br>
+                <td width="30%" style="vertical-align: top">Date :<br>
                     <b>{{ $purchase_order_payment?->date }}</b>
                 </td>
-                <td width="30%">Vendor :<br>
+                <td width="30%" style="vertical-align: top">Vendor :<br>
                     <b>{{ $purchase_order_payment->purchase_order->client_vendor?->name ?? '' }}</b>
                 </td>
-                <td width="30%">Transfer From :<br>
+                <td width="30%" style="vertical-align: top">Transfer From :<br>
                     <b>{{ $purchase_order_payment->bank_sender }} -
                         {{ $purchase_order_payment->bank_account_sender }}</b>
                 </td>
             </tr>
             <tr>
-                <td width="30%">Bank :<br>
+                <td width="30%" style="vertical-align: top">Bank :<br>
                     <b>{{ $purchase_order_payment->bank }}</b>
                 </td>
-                <td width="30%">Account :<br>
+                <td width="30%" style="vertical-align: top">Account :<br>
                     <b>{{ $purchase_order_payment->bank_account ?? '' }}</b>
                 </td>
-                <td width="30%">Total :<br>
+                <td width="30%" style="vertical-align: top">Total :<br>
                     <b>{{ $purchase_order_payment?->total ? Number::format($purchase_order_payment?->total, precision: 0) : '' }}</b>
                 </td>
             </tr>
             <tr>
-                <td width="30%">Ref No. :<br>
+                <td width="30%" style="vertical-align: top">Ref No. :<br>
                     <b>{{ $purchase_order_payment->ref_no }}</b>
                 </td>
-                <td width="30%"><br>
+                <td width="30%" style="vertical-align: top"><br>
                 </td>
-                <td width="30%"><br>
+                <td width="30%" style="vertical-align: top"><br>
                 </td>
             </tr>
         </table>
