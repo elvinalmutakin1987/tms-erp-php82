@@ -17,4 +17,14 @@ class Approval_process extends Model
     {
         return $this->belongsTo(Approval_flow::class);
     }
+
+    public function approval_step(): BelongsTo
+    {
+        return $this->belongsTo(Approval_step::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

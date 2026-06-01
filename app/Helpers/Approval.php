@@ -38,7 +38,7 @@ if (! function_exists('createApprovalProcess')) {
     function createApprovalProcess(string $approval_flow_id, string $approvable_id): string
     {
         $request_token = (string) Str::uuid();
-        $approval_step = Approval_step::where('approval_flow_id', $approval_flow_id)->orderBy('order')->first();
+        $approval_step = Approval_step::where('approval_flow_id', $approval_flow_id)->orderBy('order')->get();
         Approval_status::create([
             'request_token' =>  $request_token,
             'approval_flow_id' => $approval_flow_id,
@@ -46,14 +46,16 @@ if (! function_exists('createApprovalProcess')) {
             'step' => 1,
             'status' => 'Open'
         ]);
-        Approval_process::create([
-            'request_token' =>  $request_token,
-            'approval_flow_id' => $approval_flow_id,
-            'approval_step_id' => $approval_step->id,
-            'approvable_id' => $approvable_id,
-            'action' => 'Create',
-
-        ]);
+        foreach ($approval_step as $d) {
+            Approval_process::create([
+                'request_token' => $request_token,
+                'approval_flow_id' => $approval_flow_id,
+                'approval_step_id' => $d->id,
+                'approvable_id' => $approvable_id,
+                'user_id' => $d->user_id,
+                'action' => $d->order == 1 ? 'Open' : 'Create',
+            ]);
+        }
         return true;
     }
 }

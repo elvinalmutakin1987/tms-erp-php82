@@ -713,6 +713,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|approval')
         ->name('approval.index');
 
+    Route::get('approval-get-detail/{approvable_model}/{id}', [ApprovalController::class, 'get_detail'])
+        ->middleware('role_or_permission:superadmin|approval')
+        ->name('approval.get_detail');
+
     /**
      * Routenya summary breakdown
      */

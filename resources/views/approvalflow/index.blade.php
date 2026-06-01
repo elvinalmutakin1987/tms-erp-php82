@@ -336,6 +336,14 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             approvalFlowId = '';
+            $('#department').val("").trigger(
+                'change');
+            $('#approvable_model').val("").trigger(
+                'change');
+            $('#approver_id').val("").trigger(
+                'change');
+            $('#slc_action').val("").trigger(
+                'change');
             enableButton();
             $('#request_token').val("");
             $('#tableStep tbody tr').not(':first').remove();
@@ -490,6 +498,10 @@
             `;
             var $newRow = $(newRow);
             $("#txt_order").val('');
+            $('#approver_id').val("").trigger(
+                'change');
+            $('#slc_action').val("").trigger(
+                'change');
             tbody.append($newRow);
             gen_select2($newRow);
             renumberRows();

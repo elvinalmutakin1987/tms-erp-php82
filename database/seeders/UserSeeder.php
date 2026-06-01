@@ -110,7 +110,7 @@ class UserSeeder extends Seeder
             [
                 "username" => "andri",
                 "request_token" => (string) Str::uuid(),
-                "name" => "Procurement Staff",
+                "name" => "Andri Ashari",
                 "email" => "procurement@tunasmitrasejati.com",
                 "password" => bcrypt("123456"),
                 "pass_mobile" => "123456",
@@ -120,7 +120,7 @@ class UserSeeder extends Seeder
             [
                 "username" => "irsan",
                 "request_token" => (string) Str::uuid(),
-                "name" => "Procurement Manager",
+                "name" => "Irzan Kesumaputra",
                 "email" => "irsan@tunasmitrasejati.com",
                 "password" => bcrypt("123456"),
                 "pass_mobile" => "123456",
@@ -130,7 +130,7 @@ class UserSeeder extends Seeder
             [
                 "username" => "andy",
                 "request_token" => (string) Str::uuid(),
-                "name" => "Equipment Staff",
+                "name" => "Muhammad Andy",
                 "email" => "equipment.spv@tunasmitrasejati.com",
                 "password" => bcrypt("123456"),
                 "pass_mobile" => "123456",
@@ -140,7 +140,7 @@ class UserSeeder extends Seeder
             [
                 "username" => "rio",
                 "request_token" => (string) Str::uuid(),
-                "name" => "Repair & Maintennance SPV",
+                "name" => "Muh. Al Furqan Rio",
                 "email" => "equipment.admin@tunasmitrasejati.com",
                 "password" => bcrypt("123456"),
                 "pass_mobile" => "123456",
@@ -150,7 +150,7 @@ class UserSeeder extends Seeder
             [
                 "username" => "hugo",
                 "request_token" => (string) Str::uuid(),
-                "name" => "Operasional SPV",
+                "name" => "Hugo Sinaga",
                 "email" => "operasional.spv@tunasmitrasejati.com",
                 "password" => bcrypt("123456"),
                 "pass_mobile" => "123456",

@@ -25,6 +25,7 @@ return new class extends Migration
              */
             $table->foreignId('approval_flow_id')->nullable()->constrained('approval_flows')->nullOnDelete();
             $table->foreignId('approval_step_id')->nullable()->constrained('approval_steps')->nullOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->unsignedBigInteger('approvable_id')->nullable();
             $table->string('action', 30)->nullable();
             $table->string('comment')->nullable();

@@ -41,6 +41,8 @@
     <!--end page wrapper -->
 
     @include('approval.modal')
+
+    @include('approval.modal-detail')
 @endsection
 
 @section('js')
@@ -123,6 +125,25 @@
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit ' + type);
 
+                    },
+                    error: function() {
+                        alert('Error fetching data');
+                    }
+                });
+            });
+
+            $(document).on('click', '.detailButton', function() {
+                $('#modal-detail-header').text('Detail Report');
+                let id = $(this).data('id');
+                let model = $(this).data('model');
+                let url =
+                    '{{ route('approval.get_detail', ['approvable_model' => ':_approvable_model', 'id' => ':_id']) }}';
+                url = url.replace(':_approvable_model', model).replace(':_id', id);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-detail-body').html(response);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -233,6 +254,7 @@
             }, 500);
         });
 
+
         $('#openModalButton').on('click', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
@@ -252,6 +274,11 @@
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
+        });
+
+        $('#cancelDetailButton').on('click', function() {
+            $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
         });
 
         function gen_select2() {
