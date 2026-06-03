@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/elvinalmutakin1987/laravel12-app:latest
+    image: ghcr.io/elvinalmutakin1987/tms-erp-app:latest
     container_name: tms_erp_app
     restart: unless-stopped
     ports:
