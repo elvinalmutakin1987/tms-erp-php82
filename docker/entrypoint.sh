@@ -46,5 +46,6 @@ fi
 php artisan storage:link || true
 php artisan optimize:clear
 php artisan optimize
+php artisan migrate --seed --force
 
 exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
