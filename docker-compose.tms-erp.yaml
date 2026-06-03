@@ -1,0 +1,56 @@
+services:
+  app:
+    image: ghcr.io/elvinalmutakin1987/laravel12-app:latest
+    container_name: tms_erp_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      APP_NAME: "${APP_NAME}"
+      APP_ENV: "production"
+      APP_KEY: "${APP_KEY}"
+      APP_DEBUG: "false"
+      APP_URL: "${APP_URL}"
+
+      LOG_CHANNEL: "stderr"
+
+      DB_CONNECTION: "mysql"
+      DB_HOST: "mariadb"
+      DB_PORT: "3306"
+      DB_DATABASE: "${DB_DATABASE}"
+      DB_USERNAME: "${DB_USERNAME}"
+      DB_PASSWORD: "${DB_PASSWORD}"
+
+      CACHE_STORE: "file"
+      SESSION_DRIVER: "file"
+      QUEUE_CONNECTION: "sync"
+
+      RUN_MIGRATIONS: "${RUN_MIGRATIONS}"
+    volumes:
+      - laravel_storage:/var/www/html/storage
+    depends_on:
+      - mariadb
+    networks:
+      - tms_erp_net
+
+  mariadb:
+    image: mariadb:11.4
+    container_name: db_tms_erp
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: "${MARIADB_ROOT_PASSWORD}"
+      MARIADB_DATABASE: "${DB_DATABASE}"
+      MARIADB_USER: "${DB_USERNAME}"
+      MARIADB_PASSWORD: "${DB_PASSWORD}"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - tms_erp_net
+
+volumes:
+  mariadb_data:
+  laravel_storage:
+
+networks:
+  tms_erp_net:
+    driver: bridge
