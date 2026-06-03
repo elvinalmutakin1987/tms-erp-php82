@@ -68,6 +68,7 @@ class ClientVendorController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
+                'code' => 'required|unique:client_vendors,code',
                 'name' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
@@ -116,6 +117,7 @@ class ClientVendorController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
+                'code' => 'required|unique:client_vendors,code,' . $client_vendor->id,
                 'name' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method', 'request_token'));

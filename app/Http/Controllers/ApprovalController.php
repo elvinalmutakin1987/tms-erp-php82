@@ -174,18 +174,30 @@ class ApprovalController extends Controller
             if ($approvable_model == 'Purchase_requisition') {
                 $purchase_requisition = Purchase_requisition::find($id);
                 $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
+                $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')
+                    ->where('department', $purchase_requisition->department)
+                    ->first();
+                $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
+                    ->where('approvable_id', $purchase_requisition->id)
+                    ->get();
                 if ($purchase_requisition->type == 'General') {
                     $view = 'approval.detail-pr-general';
                 } else {
                     $view = 'approval.detail-pr';
                 }
-                $compact = compact('purchase_requisition', 'purchase_requisition_detail');
+                $compact = compact('purchase_requisition', 'purchase_requisition_detail', 'approval_process', 'approvable_model');
             } else if ($approvable_model == 'Purchase_order') {
                 $purchase_order = Purchase_order::find($id);
                 $purchase_order_detail = $purchase_order->purchase_order_detail;
+                $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')
+                    ->where('department', $purchase_order->department)
+                    ->first();
+                $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
+                    ->where('approvable_id', $purchase_order->id)
+                    ->get();
                 $view = 'approval.detail-po';
                 $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->get();
-                $compact = compact('purchase_order', 'purchase_order_detail', 'request_quotation');
+                $compact = compact('purchase_order', 'purchase_order_detail', 'request_quotation', 'approvable_model', 'approval_process');
             }
             return response()->view($view, $compact, 200);
         } catch (\Throwable $th) {

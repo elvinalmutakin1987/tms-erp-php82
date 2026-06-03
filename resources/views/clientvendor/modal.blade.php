@@ -13,6 +13,10 @@
                         <input type="text" class="form-control" id="name" name="name">
                         <input type="hidden" class="form-control" id="type" name="type">
                     </div>
+                    <div class="col-md-12 mb-2" id="divCode">
+                        <label for="code" class="form-label">Code</label>
+                        <input type="text" class="form-control" id="code" name="code">
+                    </div>
                     <div class="col-md-12 mb-2" id="divLocation">
                         <label for="location_id" class="form-label">Project Location</label>
                         <select class="form-select select-select" id="location_id" name="location_id">
@@ -29,6 +33,10 @@
                     <div class="col-md-12 mb-2">
                         <label for="pic" class="form-label">PIC</label>
                         <input type="text" class="form-control" id="pic" name="pic">
+                    </div>
+                    <div class="col-md-12 mb-2">
+                        <label for="applied_by" class="form-label">Applied By</label>
+                        <input type="text" class="form-control" id="applied_by" name="applied_by">
                     </div>
                     <div class="col-md-12 mb-2">
                         <label for="phone" class="form-label">Phone</label>

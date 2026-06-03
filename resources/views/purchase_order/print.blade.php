@@ -334,25 +334,32 @@
 
                         <thead>
                             <tr>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
                                     Item
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
                                     Qty
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 10%">
                                     Unit
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 30%">
                                     Description
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
                                     Price IDR
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
                                     Discount
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
                                     Total IDR
                                 </th>
                             </tr>
@@ -595,25 +602,32 @@
 
                         <thead>
                             <tr>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
                                     Item
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
                                     Qty
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 10%">
                                     Unit
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 30%">
                                     Description
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
                                     Price IDR
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
                                     Discount
                                 </th>
-                                <th style="text-align: center; border: 1px solid #000; background-color: #d9ecff;">
+                                <th
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
                                     Total IDR
                                 </th>
                             </tr>

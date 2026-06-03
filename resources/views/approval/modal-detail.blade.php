@@ -8,7 +8,7 @@
 
             </div>
             <div class="modal-footer">
-                <div class="d-md-flex d-grid align-items-center gap-3">
+                <div class="d-md-flex d-grid align-items-center gap-1">
                     <button type="button" class="btn btn-light btn-success saveButton" id="approveButton"
                         name="status" value="Approve">
                         Approve

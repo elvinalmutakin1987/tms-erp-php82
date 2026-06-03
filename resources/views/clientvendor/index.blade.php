@@ -49,6 +49,7 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Type</th>
+                                        <th>Code</th>
                                         <th>Name</th>
                                         <th>Email</th>
                                         <th>PIC</th>
@@ -122,6 +123,12 @@
                         searchable: true,
                     },
                     {
+                        data: 'code',
+                        name: 'code',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
                         data: 'name',
                         name: 'name',
                         orderable: true,
@@ -175,6 +182,7 @@
                         $('#address').val(response.data.address);
                         $('#email').val(response.data.email);
                         $('#pic').val(response.data.pic);
+                        $('#applied_by').val(response.data.applied_by);
                         $('#phone').val(response.data.phone);
                         $('#top').val(response.data.top);
                         // type = response.data.type;
@@ -182,6 +190,7 @@
                         $('#divLocation').hide();
                         if (type == 'Client') {
                             $('#divLocation').show();
+                            $('#divCode').show();
                         }
                         $('#bank').val(response.data.bank).trigger('change');
                         $('#bank_account').val(response.data.bank_account);
@@ -356,6 +365,7 @@
             type = 'Client';
             $('#type').val(type);
             $('#divLocation').show();
+            $('#divCode').hide();
         });
 
         $('#openModalButton2').on('click', function() {
@@ -364,6 +374,7 @@
             $('#modal-header').text(title);
             type = 'Vendor';
             $('#type').val(type);
+            $('#divCode').show();
             $('#divLocation').hide();
         });
 

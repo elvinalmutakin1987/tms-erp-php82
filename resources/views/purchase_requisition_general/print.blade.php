@@ -7,7 +7,7 @@
     use App\Models\Approval_process;
     use App\Models\Approval_step;
 
-    $maxRowsPerPage = 15;
+    $maxRowsPerPage = 10;
 
     $details = collect($purchase_requisition_detail)->values();
 

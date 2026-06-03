@@ -26,6 +26,7 @@ class UserSeeder extends Seeder
         Role::create(['name' => 'equipment_staff']);
         Role::create(['name' => 'operational_spv']);
         Role::create(['name' => 'maintenance_spv']);
+        Role::create(['name' => 'pjo']);
 
         /**
          * User
@@ -156,6 +157,16 @@ class UserSeeder extends Seeder
                 "pass_mobile" => "123456",
                 "email_verified_at" => now(),
                 "remember_token" =>  Str::random(10)
+            ],
+            [
+                "username" => "aries",
+                "request_token" => (string) Str::uuid(),
+                "name" => "Aries Maulana",
+                "email" => "pjo@tunasmitrasejati.com",
+                "password" => bcrypt("123456"),
+                "pass_mobile" => "123456",
+                "email_verified_at" => now(),
+                "remember_token" =>  Str::random(10)
             ]
         ];
 
@@ -191,6 +202,19 @@ class UserSeeder extends Seeder
                 'user_id' => 6,
                 'role_id' => 6,
                 'permissions' => ['dashboard.maintenance', 'approval'],
+            ],
+            [
+                'user_id' => 7,
+                'role_id' => 7,
+                'permissions' => [
+                    'dashboard.operational',
+                    'dashboard.maintenance',
+                    'dashboard.procurement',
+                    'dashboard.survey',
+                    'dashboard.safety',
+                    'dashboard.finance',
+                    'approval'
+                ],
             ],
         ];
 

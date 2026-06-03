@@ -103,13 +103,13 @@ if (! function_exists('nextStep')) {
             );
             return;
         }
-
         $nextProcess = Approval_process::where('approval_flow_id', $approval_process->approval_flow_id)
-            ->whereHas('approval_step', function ($query) use ($order) {
+            ->where('approvable_id', $approval_process->approvable_id)
+            ->whereHas('approval_step', function ($query) use ($order, $approval_process) {
+                $query->where('approval_flow_id', $approval_process->approval_flow_id);
                 $query->where('order', $order + 1);
             })
             ->first();
-
         if ($nextProcess) {
             $nextProcess->update([
                 'action' => 'Open',

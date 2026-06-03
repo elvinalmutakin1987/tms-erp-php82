@@ -13,7 +13,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <div class="d-md-flex d-grid align-items-center gap-3">
+                <div class="d-md-flex d-grid align-items-center gap-1">
                     <button type="button" class="btn btn-warning receiveButton" id="receiveSaveButton1" name="status"
                         value="Received">Save</button>
                     <button type="button" class="btn btn-success receiveButton" id="receiveSaveButton2" name="status"
