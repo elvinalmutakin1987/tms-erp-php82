@@ -26,8 +26,11 @@
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
                                 <div class="col-4">
-                                    <select class="form-select select-select" id="client" name="client">
-                                        <option value="All">All Client</option>
+                                    <select class="form-select .select-top" id="client" name="client">
+                                    </select>
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select .select-top" id="service" name="service">
                                     </select>
                                 </div>
                             </div>
@@ -102,7 +105,8 @@
                 "ajax": {
                     url: ajax,
                     data: function(d) {
-                        d.service_id = $('#client').val();
+                        d.client_vendor_id = $('#client').val();
+                        d.service_id = $('#service').val();
                     }
                 },
                 "columns": [{
@@ -194,12 +198,57 @@
                             }) : '');
                         $('#value').val(response.data.value);
                         $('#notes').val(response.data.notes);
-                        $('#service_id').val(response.data.service_id).trigger('change');
-                        $('#client_vendor_id').val(response.data.client_vendor_id).trigger(
-                            'change');
                         $('#request_token').val(response.data.request_token);
-                        clientVendorId = response.data.client_vendor_id;
-                        serviceId = response.data.service_id;
+
+                        /*
+                         * Select client
+                         * */
+                        const clientVendorId = response.data.client_vendor_id;
+                        const clientVendorText = response.client_vendor ? response.client_vendor
+                            .name :
+                            ``;
+
+                        const $clientVendor = $("#client_vendor_id");
+
+                        if (clientVendorId) {
+                            const optionExists = $clientVendor.find('option').filter(
+                                function() {
+                                    return String(this.value) === String(clientVendorId);
+                                }).length > 0;
+
+                            if (!optionExists) {
+                                const newOption = new Option(clientVendorText, clientVendorId,
+                                    true, true);
+                                $clientVendor.append(newOption);
+                            }
+
+                            $clientVendor.val(clientVendorId).trigger('change.select2');
+                        }
+                        /* End */
+
+                        /*
+                         * Select service
+                         * */
+                        const serviceId = response.data.service_id;
+                        const serviceText = response.service ? response.service.name : null;
+
+                        const $service = $("#service_id");
+
+                        if (serviceId) {
+                            const optionExists = $service.find('option').filter(
+                                function() {
+                                    return String(this.value) === String(serviceId);
+                                }).length > 0;
+
+                            if (!optionExists) {
+                                const newOption = new Option(serviceText, serviceId, true,
+                                    true);
+                                $service.append(newOption);
+                            }
+
+                            $service.val(serviceId).trigger('change.select2');
+                        }
+                        /* End */
 
                         var newRow = $(response.html_item);
                         var newRow1 = $(response.html_target);
@@ -270,109 +319,13 @@
                 });
             });
 
-            $.ajax({
-                url: '{{ route('contract.get_client_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#client').empty();
-                    $('#client').append('<option value="All">All Client</client>');
-                    $.each(response.data, function(index, client) {
-                        $('#client').append('<option value="' + client.id +
-                            '">' +
-                            client.name +
-                            '</client>');
-                    });
-                    if (clientId != '') {
-                        $("#client").val(clientId).trigger('change');
-                    }
+            initClientTopSelect2();
+            initServiceTopSelect2();
 
-                    $('#client_vendor_id').empty();
-                    $.each(response.data, function(index, client) {
-                        $('#client_vendor_id').append('<option value="' + client.id +
-                            '">' +
-                            client.name +
-                            '</client>');
-                    });
-                    if (clientVendorId != '') {
-                        $("#client_vendor_id").val(clientVendorId).trigger('change');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
+            $(".datepicker").flatpickr({
+                allowInput: true
             });
 
-            $.ajax({
-                url: '{{ route('contract.get_unit_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#unit').empty();
-                    $('#unit').append('<option value="" selected disabled></option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
-
-            $('#service_id').val('').trigger('change');
-            $.ajax({
-                url: '{{ route('contract.get_service_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#service_id').empty();
-                    $('#service_id').append(
-                        '<option value="" selected disabled></option>');
-                    $.each(response.data, function(index, service) {
-                        $('#service_id').append('<option value="' + service.id + '">' + service
-                            .name + '</option>');
-                    });
-
-                    if (serviceId != '') {
-                        $("#service_id").val(serviceId).trigger('change');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
-
-            $("#client").select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                    'w-100') ? '100%' : 'style',
-            }).on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
-
-            $("#unit").select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                    'w-100') ? '100%' : 'style',
-            }).on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
-
-            $(".datepicker").flatpickr();
-
-            gen_select2();
         });
 
         function delete_(id) {
@@ -459,6 +412,7 @@
                         title: "Oops...",
                         text: errorMessage,
                     });
+                    disableButton();
                 }
             });
         });
@@ -468,6 +422,7 @@
             var title = button.data('title');
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
+            enableButton();
             $.ajax({
                 url: '{{ route('gen_request_token') }}',
                 type: 'GET',
@@ -493,9 +448,19 @@
             $('#tableTarget tbody tr').not(':first').remove();
             $('#tableItem tbody tr').not(':first').remove();
             $('#tableFmf tbody tr').not(':first').remove();
-            $('#service_id').val(null).trigger('change');
-            $('#client_vendor_id').prop('selectedIndex', -1);
-            $("#unit").val(null).trigger('change');
+            $("#client_vendor_id")
+                .val(null)
+                .empty()
+                .trigger('change');
+
+            $("#service_id")
+                .val(null)
+                .empty()
+                .trigger('change');
+            $("#unit")
+                .val(null)
+                .empty()
+                .trigger('change');
             $('#request_token').val("");
             // $('#client_vendor_id').val(null).trigger('change');
         });
@@ -509,8 +474,8 @@
                 const $el = $(this);
                 $el.select2({
                         theme: "bootstrap-5",
-                        dropdownParent: $(
-                            '#formModal'),
+                        // dropdownParent: $(
+                        //     '#formModal'),
                         width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                             'style'),
                         selectOnClose: false,
@@ -847,6 +812,382 @@
         function enableButton() {
             saveButton.disabled = false;
         }
+
+        function initClientVendorSelect2() {
+            const $client_vendor = $('#client_vendor_id');
+
+            if (!$client_vendor.length) {
+                return;
+            }
+
+            const selectedValue = $client_vendor.val();
+
+            if ($client_vendor.hasClass('select2-hidden-accessible')) {
+                $client_vendor.select2('destroy');
+            }
+
+            $client_vendor.off('.clientVendor');
+
+            $client_vendor.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $('#client_vendor_id').data('width') ? $('#client_vendor_id').data('width') : (
+                    $(
+                        '#client_vendor_id').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('contract.get_client_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            if (selectedValue) {
+                $client_vendor.val(selectedValue).trigger('change.select2');
+            }
+
+            $client_vendor.on('select2:open.clientVendor', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+        }
+
+        function initClientTopSelect2() {
+            const $client = $('#client');
+
+            if (!$client.length) {
+                return;
+            }
+
+            const selectedValue = $client.val();
+
+            if ($client.hasClass('select2-hidden-accessible')) {
+                $client.select2('destroy');
+            }
+
+            $client.off('.client');
+
+            $client.select2({
+                theme: "bootstrap-5",
+                width: $('#client').data('width') ? $('#client').data('width') : (
+                    $(
+                        '#client').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: 'All Client',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('contract.get_client_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+
+            if (selectedValue) {
+                $client.val(selectedValue).trigger('change.select2');
+            }
+
+            // $client.on('select2:open.client', function() {
+            //     setTimeout(function() {
+            //         const search = document.querySelector(
+            //             '.select2-container--open .select2-search__field'
+            //         );
+
+            //         if (search) {
+            //             search.focus({
+            //                 preventScroll: true
+            //             });
+            //         }
+
+            //         $('.select2-container--open').css('z-index', 1056);
+            //     }, 0);
+            // });
+        }
+
+        function initUnitSelect2() {
+            const $unit = $('#unit');
+
+            if (!$unit.length) {
+                return;
+            }
+
+            const selectedValue = $unit.val();
+
+            if ($unit.hasClass('select2-hidden-accessible')) {
+                $unit.select2('destroy');
+            }
+
+            $unit.off('.unit');
+
+            $unit.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $('#unit').data('width') ? $('#unit').data('width') : (
+                    $(
+                        '#unit').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('contract.get_unit_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            if (selectedValue) {
+                $unit.val(selectedValue).trigger('change.select2');
+            }
+
+            $unit.on('select2:open.unit', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $unit.on('change.unit', function() {
+                const unitId = $(this).val();
+            });
+        }
+
+        function initServiceSelect2() {
+            const $service = $('#service_id');
+
+            if (!$service.length) {
+                return;
+            }
+
+            const selectedValue = $service.val();
+
+            if ($service.hasClass('select2-hidden-accessible')) {
+                $service.select2('destroy');
+            }
+
+            $service.off('.service');
+
+            $service.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $('#service_id').data('width') ? $('#service_id').data('width') : (
+                    $(
+                        '#service_id').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('contract.get_service_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            if (selectedValue) {
+                $service.val(selectedValue).trigger('change.select2');
+            }
+
+            $service.on('select2:open.service', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $service.on('change.service', function() {
+                const serviceId = $(this).val();
+            });
+        }
+
+        function initServiceTopSelect2() {
+            const $service = $('#service');
+
+            if (!$service.length) {
+                return;
+            }
+
+            const selectedValue = $service.val();
+
+            if ($service.hasClass('select2-hidden-accessible')) {
+                $service.select2('destroy');
+            }
+
+            $service.off('.service');
+
+            $service.select2({
+                theme: "bootstrap-5",
+                width: $('#service').data('width') ? $('#service').data('width') : (
+                    $(
+                        '#service').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: 'All Service',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('contract.get_service_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            if (selectedValue) {
+                $service.val(selectedValue).trigger('change.select2');
+            }
+
+            // $service.on('select2:open.service', function() {
+            //     setTimeout(function() {
+            //         const search = document.querySelector(
+            //             '.select2-container--open .select2-search__field'
+            //         );
+
+            //         if (search) {
+            //             search.focus({
+            //                 preventScroll: true
+            //             });
+            //         }
+
+            //         $('.select2-container--open').css('z-index', 1056);
+            //     }, 0);
+            // });
+        }
+
+        initClientVendorSelect2();
+        initUnitSelect2();
+        initServiceSelect2();
+
+        $('#formModal').off('shown.bs.modal.select2PO').on('shown.bs.modal.select2PO', function() {
+            initClientVendorSelect2();
+            initUnitSelect2();
+            initServiceSelect2();
+        });
     </script>
     <!--app JS-->
 @endsection

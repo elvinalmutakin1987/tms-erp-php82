@@ -23,9 +23,13 @@ class ContractController extends Controller
     {
         if (request()->ajax()) {
             $contract = Contract::query();
-            if (request()->service_id != 'All') {
-                $contract = $contract->where('service_id', request()->service_id)->get();
+            if (request()->service_id != '') {
+                $contract = $contract->where('service_id', request()->service_id);
             }
+            if (request()->client_vendor_id != '') {
+                $contract = $contract->where('client_vendor_id', request()->client_vendor_id);
+            }
+            $contract = $contract->get();
             return DataTables::of($contract)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) {
@@ -180,6 +184,8 @@ class ContractController extends Controller
      */
     public function show(Contract $contract)
     {
+        $service = Service::find($contract->service_id);
+        $client_vendor = Client_vendor::find($contract->client_vendor_id);
         $service_item = Service_item::where('service_id', $contract->service_id)->get();
         $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
         $unit_target = Unit_target::where('contract_id', $contract->id)->get();
@@ -196,7 +202,9 @@ class ContractController extends Controller
             'data' => $contract,
             'html_item' => $html_item,
             'html_target' => $html_target,
-            'html_fmf' => $html_fmf
+            'html_fmf' => $html_fmf,
+            'service' => $service,
+            'client_vendor' => $client_vendor
         ], 200);
     }
 
@@ -326,17 +334,38 @@ class ContractController extends Controller
      */
     public function get_client_all(Request $request)
     {
-        try {
-            $client_vendor = Client_vendor::where('type', 'Client')->orderBy('name')->get();
-            return response()->json([
-                'success' => true,
-                'data' => $client_vendor
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        // try {
+        //     $client_vendor = Client_vendor::where('type', 'Client')->orderBy('name')->get();
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $client_vendor
+        //     ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $th->getMessage()
+        //     ], 400);
+        // }
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $client_vendor = Client_vendor::selectRaw("id, name as text")
+                ->where('type', 'Client')
+                ->where('name', 'like', '%' . $term . '%')
+                ->orderBy('name')->simplePaginate(10);
+            $total_count = count($client_vendor);
+            $morePages = true;
+            $pagination_obj = json_encode($client_vendor);
+            if (empty($client_vendor->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $client_vendor->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 
@@ -345,17 +374,37 @@ class ContractController extends Controller
      */
     public function get_service_all(Request $request)
     {
-        try {
-            $service = Service::all();
-            return response()->json([
-                'success' => true,
-                'data' => $service
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        // try {
+        //     $service = Service::all();
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $service
+        //     ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $th->getMessage(8)
+        //     ], 400);
+        // }
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $service = Service::selectRaw("id, name as text")
+                ->where('name', 'like', '%' . $term . '%')
+                ->orderBy('name')->simplePaginate(10);
+            $total_count = count($service);
+            $morePages = true;
+            $pagination_obj = json_encode($service);
+            if (empty($service->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $service->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 
@@ -413,17 +462,37 @@ class ContractController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        try {
-            $unit = Unit::all();
-            return response()->json([
-                'success' => true,
-                'data' => $unit
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        // try {
+        //     $unit = Unit::all();
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $unit
+        //     ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $th->getMessage()
+        //     ], 400);
+        // }
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $unit = Unit::selectRaw("id, vehicle_no as text")
+                ->where('vehicle_no', 'like', '%' . $term . '%')
+                ->orderBy('vehicle_no')->simplePaginate(10);
+            $total_count = count($unit);
+            $morePages = true;
+            $pagination_obj = json_encode($unit);
+            if (empty($unit->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $unit->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 }
