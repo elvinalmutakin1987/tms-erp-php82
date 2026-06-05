@@ -860,6 +860,7 @@
 
             $purchase_requisition.select2({
                 theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
                 width: $('#purchase_requisition_id').data('width') ? $('#purchase_requisition_id').data('width') : (
                     $(
                         '#purchase_requisition_id').hasClass(
@@ -877,8 +878,12 @@
                         };
                     },
                     processResults: function(data) {
+                        params.page = params.page || 1;
                         return {
-                            results: data.results || data
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
                         };
                     },
                     cache: true
@@ -933,9 +938,10 @@
 
             $vendor.select2({
                 theme: "bootstrap-5",
-                width: $('#client_venodr_id').data('width') ? $('#client_venodr_id').data('width') : (
+                dropdownParent: $('#formModal'),
+                width: $('#client_vendor_id').data('width') ? $('#client_vendor_id').data('width') : (
                     $(
-                        '#client_venodr_id').hasClass(
+                        '#client_vendor_id').hasClass(
                         'w-100') ? '100%' : 'style'),
                 placeholder: '',
                 allowClear: true,
@@ -949,9 +955,13 @@
                             page: params.page || 1
                         };
                     },
-                    processResults: function(data) {
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
                         return {
-                            results: data.results || data
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
                         };
                     },
                     cache: true

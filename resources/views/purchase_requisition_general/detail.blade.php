@@ -109,38 +109,39 @@
     </div>
 </div>
 
-
-<table style="border-collapse:separate; border-spacing:0;">
-    <tr>
-        <td style="vertical-align: top" colspan="3">
-            <b>
-                <h6 style="border-bottom: 1px solid #000; display: inline-block;">
-                    Approval Progress
-                </h6>
-            </b>
-        </td>
-    </tr>
-    @foreach ($approval_process as $d)
+@empty(!$approval_process)
+    <table style="border-collapse:separate; border-spacing:0;">
         <tr>
-            <td style="vertical-align: top">
-                <b>{{ $d->approval_step->order }}. {{ $d->user->name }}</b> &nbsp;
-            </td>
-            <td>
-                @if ($d->action == 'Approved')
-                    <span class="badge bg-success" style="font-size: 13px">{{ $d->action }}</span>
-                @elseif($d->action == 'Rejected')
-                    <span class="badge bg-danger" style="font-size: 13px">{{ $d->action }}</span>
-                @elseif($d->action == 'Open')
-                    <span class="badge bg-primary" style="font-size: 13px">{{ $d->action }}</span>
-                @else
-                    <span class="badge bg-secondary" style="font-size: 13px">{{ $d->action }}</span>
-                @endif
-            </td>
-            <td>
-                @if ($d->action == 'Approved')
-                    {{ Carbon::parse($d->updated_at)->translatedFormat('d F Y H:i') }}
-                @endif
+            <td style="vertical-align: top" colspan="3">
+                <b>
+                    <h6 style="border-bottom: 1px solid #000; display: inline-block;">
+                        Approval Progress
+                    </h6>
+                </b>
             </td>
         </tr>
-    @endforeach
-</table>
+        @foreach ($approval_process as $d)
+            <tr>
+                <td style="vertical-align: top">
+                    <b>{{ $d->approval_step->order }}. {{ $d->user->name }}</b> &nbsp;
+                </td>
+                <td>
+                    @if ($d->action == 'Approved')
+                        <span class="badge bg-success" style="font-size: 13px">{{ $d->action }}</span>
+                    @elseif($d->action == 'Rejected')
+                        <span class="badge bg-danger" style="font-size: 13px">{{ $d->action }}</span>
+                    @elseif($d->action == 'Open')
+                        <span class="badge bg-primary" style="font-size: 13px">{{ $d->action }}</span>
+                    @else
+                        <span class="badge bg-secondary" style="font-size: 13px">{{ $d->action }}</span>
+                    @endif
+                </td>
+                <td>
+                    @if ($d->action == 'Approved')
+                        {{ Carbon::parse($d->updated_at)->translatedFormat('d F Y H:i') }}
+                    @endif
+                </td>
+            </tr>
+        @endforeach
+    </table>
+@endempty

@@ -708,12 +708,21 @@ class PurchaseOrderController extends Controller
             $purchase_order = Purchase_order::find($po_id);
             $purchase_order_detail = $purchase_order->purchase_order_detail;
             $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->get();
+            // $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')
+            //     ->where('department', $purchase_order->department)
+            //     ->first();
+            // $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
+            //     ->where('approvable_id', $purchase_order->id)
+            //     ->get();
             $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')
                 ->where('department', $purchase_order->department)
                 ->first();
-            $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
+
+            $approval_process = $approval_flow
+                ? Approval_process::where('approval_flow_id', $approval_flow->id)
                 ->where('approvable_id', $purchase_order->id)
-                ->get();
+                ->get()
+                : null;
             $view = 'purchase_order.detail';
             return response()->view($view, compact('purchase_order', 'purchase_order_detail', 'request_quotation', 'approval_process'), 200);
         } catch (\Throwable $th) {

@@ -585,12 +585,21 @@ class PurchaseRequisitionGeneralController extends Controller
         try {
             $purchase_requisition = Purchase_requisition::find($pr_id);
             $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
+            // $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')
+            //     ->where('department', $purchase_requisition->department)
+            //     ->first();
+            // $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
+            //     ->where('approvable_id', $purchase_requisition->id)
+            //     ->get();
             $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')
                 ->where('department', $purchase_requisition->department)
                 ->first();
-            $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
+
+            $approval_process = $approval_flow
+                ? Approval_process::where('approval_flow_id', $approval_flow->id)
                 ->where('approvable_id', $purchase_requisition->id)
-                ->get();
+                ->get()
+                : null;
             $view = 'purchase_requisition_general.detail';
             return response()->view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'approval_process'), 200);
         } catch (\Throwable $th) {
