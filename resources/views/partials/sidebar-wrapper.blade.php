@@ -74,9 +74,12 @@
                      <div class="menu-title">Equipment</div>
                  </a>
                  <ul>
-                     <li>
-                         <a href="{{ route('dailyreport.index') }}"><i class='bx bx-radio-circle'></i>Daily Report</a>
-                     </li>
+                     @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('daily_report'))
+                         <li>
+                             <a href="{{ route('dailyreport.index') }}"><i class='bx bx-radio-circle'></i>Daily
+                                 Report</a>
+                         </li>
+                     @endif
                      @if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h'))
                          <li>
                              <a href="{{ route('p2h.index') }}"><i class='bx bx-radio-circle'></i>P2H</a>
