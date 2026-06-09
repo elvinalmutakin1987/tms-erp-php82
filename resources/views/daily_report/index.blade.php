@@ -239,13 +239,13 @@
                 allowInput: true
             });
 
-            $("#unit").select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                    'w-100') ? '100%' : 'style',
-            }).on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
+            // $("#unit").select2({
+            //     theme: "bootstrap-5",
+            //     width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+            //         'w-100') ? '100%' : 'style',
+            // }).on('change', function() {
+            //     $('#table-data').DataTable().draw();
+            // });
 
             $("#date_start").on('change', function() {
                 $('#table-data').DataTable().draw();
@@ -255,44 +255,47 @@
                 $('#table-data').DataTable().draw();
             });
 
-            $.ajax({
-                url: '{{ route('dailyreport.get_unit_all') }}',
-                type: 'GET',
-                success: function(response) {
-                    $('#unit').empty();
-                    $('#unit').append('<option value="All">All Unit</option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                    if (unitId != '') {
-                        $("#unit").val(unitId).trigger('change');
-                    }
 
-                    $('#unit_id').empty();
-                    $('#unit_id').append('<option value="All">All Unit</option>');
-                    $.each(response.data, function(index, unit) {
-                        $('#unit_id').append('<option value="' + unit.id +
-                            '">' +
-                            unit.vehicle_no +
-                            '</option>');
-                    });
-                    if (unitId != '') {
-                        $("#unit_id").val(unitId).trigger('change');
-                    }
-                },
-                error: function(xhr, status, error) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: error,
-                    });
-                }
-            });
+            // $.ajax({
+            //     url: '{{ route('dailyreport.get_unit_all') }}',
+            //     type: 'GET',
+            //     success: function(response) {
+            //         $('#unit').empty();
+            //         $('#unit').append('<option value="All">All Unit</option>');
+            //         $.each(response.data, function(index, unit) {
+            //             $('#unit').append('<option value="' + unit.id +
+            //                 '">' +
+            //                 unit.vehicle_no +
+            //                 '</option>');
+            //         });
+            //         if (unitId != '') {
+            //             $("#unit").val(unitId).trigger('change');
+            //         }
 
-            gen_select2();
+            //         $('#unit_id').empty();
+            //         $('#unit_id').append('<option value="All">All Unit</option>');
+            //         $.each(response.data, function(index, unit) {
+            //             $('#unit_id').append('<option value="' + unit.id +
+            //                 '">' +
+            //                 unit.vehicle_no +
+            //                 '</option>');
+            //         });
+            //         if (unitId != '') {
+            //             $("#unit_id").val(unitId).trigger('change');
+            //         }
+            //     },
+            //     error: function(xhr, status, error) {
+            //         Swal.fire({
+            //             icon: "error",
+            //             title: "Oops...",
+            //             text: error,
+            //         });
+            //     }
+            // });
+
+            // gen_select2();
+
+            initUnitTopSelect2();
         });
 
         function delete_(id) {
@@ -441,7 +444,10 @@
             enableButton();
             $('#request_token').val("");
             $('#div-form').html('');
-            $("#unit_id").val('All').trigger('change');
+            $("#unit_id")
+                .val(null)
+                .empty()
+                .trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -454,72 +460,223 @@
         });
 
         function gen_select2() {
-            $('.select-select').each(function() {
-                const $el = $(this);
-                $el.select2({
-                        theme: "bootstrap-5",
-                        dropdownParent: $(
-                            '#formModal'),
-                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                            'style'),
-                        selectOnClose: false,
-                        minimumResultsForSearch: 0,
-                    })
-                    .on('select2:open', function() {
-                        setTimeout(function() {
-                            const $search = $('.select2-container--open .select2-search__field');
-                            $search.trigger('focus');
-                            $('.select2-container--open').css('z-index', 1056);
-                        }, 0);
-                    });
+            // $('.select-select').each(function() {
+            //     const $el = $(this);
+            //     $el.select2({
+            //             theme: "bootstrap-5",
+            //             dropdownParent: $(
+            //                 '#formModal'),
+            //             width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+            //                 'style'),
+            //             selectOnClose: false,
+            //             minimumResultsForSearch: 0,
+            //         })
+            //         .on('select2:open', function() {
+            //             setTimeout(function() {
+            //                 const $search = $('.select2-container--open .select2-search__field');
+            //                 $search.trigger('focus');
+            //                 $('.select2-container--open').css('z-index', 1056);
+            //             }, 0);
+            //         });
+            // });
+        }
+
+        // $("#unit_id").on('change', function() {
+        //     const modalEl = document.getElementById('formModal');
+        //     const modalBody = modalEl.querySelector('.modal-body');
+        //     const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+
+        //     $(this).select2('close');
+        //     $(this).blur();
+
+        //     if (document.activeElement) {
+        //         document.activeElement.blur();
+        //     }
+
+        //     $("#div-form").html(`
+    //             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    //             <span class="visually">Loading...</span>
+    //             `);
+        //     var url = '{{ route('dailyreport.get_form_add') }}';
+        //     if (reportId != '') {
+        //         url = '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
+        //             reportId);
+        //     }
+        //     $.ajax({
+        //         url: url,
+        //         type: 'GET',
+        //         data: {
+        //             unit_id: $(this).val()
+        //         },
+        //         success: function(response) {
+        //             $("#div-form").html(response.html);
+
+        //             requestAnimationFrame(function() {
+        //                 const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        //                 modalInstance.handleUpdate();
+
+        //                 if (modalBody) {
+        //                     modalBody.scrollTop = lastScrollTop;
+        //                 }
+        //             });
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.error('Error:', error);
+        //             $tbody.empty();
+        //         }
+        //     });
+        // });
+
+        function initUnitSelect2() {
+            const $unit_id = $('#unit_id');
+
+            if (!$unit_id.length) {
+                return;
+            }
+
+            const selectedValue = $unit_id.val();
+
+            if ($unit_id.hasClass('select2-hidden-accessible')) {
+                $unit_id.select2('destroy');
+            }
+
+            $unit_id.off('.unit');
+
+            $unit_id.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $('#unit_id').data('width') ? $('#unit_id').data('width') : (
+                    $(
+                        '#unit_id').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('dailyreport.get_unit_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            if (selectedValue) {
+                $unit_id.val(selectedValue).trigger('change.select2');
+            }
+
+            $unit_id.on('select2:open.unit', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $unit_id.on('change.unit', function() {
+                const unitId = $(this).val();
             });
         }
 
-        $("#unit_id").on('change', function() {
-            const modalEl = document.getElementById('formModal');
-            const modalBody = modalEl.querySelector('.modal-body');
-            const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+        function initUnitTopSelect2() {
+            const $unit = $('#unit');
 
-            $(this).select2('close');
-            $(this).blur();
-
-            if (document.activeElement) {
-                document.activeElement.blur();
+            if (!$unit.length) {
+                return;
             }
 
-            $("#div-form").html(`
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="visually">Loading...</span>
-                    `);
-            var url = '{{ route('dailyreport.get_form_add') }}';
-            if (reportId != '') {
-                url = '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
-                    reportId);
+            const selectedValue = $unit.val();
+
+            if ($unit.hasClass('select2-hidden-accessible')) {
+                $unit.select2('destroy');
             }
-            $.ajax({
-                url: url,
-                type: 'GET',
-                data: {
-                    unit_id: $(this).val()
-                },
-                success: function(response) {
-                    $("#div-form").html(response.html);
 
-                    requestAnimationFrame(function() {
-                        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-                        modalInstance.handleUpdate();
+            $unit.off('.unit');
 
-                        if (modalBody) {
-                            modalBody.scrollTop = lastScrollTop;
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error:', error);
-                    $tbody.empty();
+            $unit.select2({
+                theme: "bootstrap-5",
+                width: $('#unit').data('width') ? $('#unit').data('width') : (
+                    $(
+                        '#unit').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: 'All Unit',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('dailyreport.get_unit_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
                 }
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
             });
-        });
+
+            if (selectedValue) {
+                $unit.val(selectedValue).trigger('change.select2');
+            }
+
+            // $unit.on('select2:open.unit', function() {
+            //     setTimeout(function() {
+            //         const search = document.querySelector(
+            //             '.select2-container--open .select2-search__field'
+            //         );
+
+            //         if (search) {
+            //             search.focus({
+            //                 preventScroll: true
+            //             });
+            //         }
+
+            //         $('.select2-container--open').css('z-index', 1056);
+            //     }, 0);
+            // });
+
+            // $unit.on('change.unit', function() {
+            //     const unitId = $(this).val();
+            // });
+        }
+
 
         function disableButton() {
             saveButton.disabled = true;
@@ -528,6 +685,12 @@
         function enableButton() {
             saveButton.disabled = false;
         }
+
+        initUnitSelect2();
+
+        $('#formModal').off('shown.bs.modal.select2').on('shown.bs.modal.select2', function() {
+            initUnitSelect2();
+        });
     </script>
     <!--app JS-->
 @endsection

@@ -30,10 +30,10 @@
                     <b>{{ $p2h->date }}</b>
                 </td>
                 <td width="30%">KM Start :<br>
-                    <b>{{ Number::format($p2h->km_start, precision: 2) }}</b>
+                    <b>{{ Number::format($p2h?->km_start ?? 0, precision: 0) }}</b>
                 </td>
                 <td width="30%">KM Finish :<br>
-                    <b> {{ Number::format($p2h->km_finish, precision: 2) }}</b>
+                    <b> {{ Number::format($p2h?->km_finish ?? 0, precision: 0) }}</b>
                 </td>
             </tr>
             <tr>

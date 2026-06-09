@@ -51,31 +51,42 @@ class P2hController extends Controller
                                 <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
-                                </li>';
+                                </li>
+                                <li>
+                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                                    data-id="' . $item->id . '">Edit</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    ';
 
                     /**
                      * user superadmin dan yang punya akses edit aja baru bisa muncul
                      */
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h.edit')):
-                        $button .= '<li>
-                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
-                                </li>';
-                    endif;
+                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h')):
+                    //     $button .= '<li>
+                    //                 <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                    //                 data-id="' . $item->id . '">Edit</a>
+                    //             </li>';
+                    // endif;
 
                     /**
                      * user superadmin dan yang punya akses delete aja baru bisa muncul
                      */
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h.delete')):
-                        $button .= '<li>
-                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>';
-                    endif;
+                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h')):
+                    //     $button .= '<li>
+                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                    //             </li>';
+                    // endif;
 
-                    $button .= '</ul>
-                        </div>
-                    </div>
-                    ';
+                    // $button .= '</ul>
+                    //     </div>
+                    // </div>
+                    // ';
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
@@ -130,19 +141,15 @@ class P2hController extends Controller
                 'date' => 'required',
                 'driver' => 'required',
                 'km_start' => 'required',
-                'km_finish' => 'required',
+                // 'km_finish' => 'required',
             ]);
             $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    'inspection_group',
-                    'inspection_item',
-                    'check',
-                    'defect_listed',
-                    'action_taken',
-                    '_km_start',
-                    '_km_finish'
+                $request->only(
+                    'unit_id',
+                    'date',
+                    'driver',
+                    'km_start',
+                    'km_finish'
                 ),
                 [
                     'request_token' => $request->request_token,
@@ -217,19 +224,16 @@ class P2hController extends Controller
                 'km_finish' => 'required',
             ]);
             $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    'inspection_group',
-                    'inspection_item',
-                    'check',
-                    'defect_listed',
-                    'action_taken',
-                    'request_token',
-                    '_km_start',
-                    '_km_finish'
+                $request->only(
+                    'unit_id',
+                    'date',
+                    'driver',
+                    'km_start',
+                    'km_finish'
                 ),
-                ['input_method' => 'Web']
+                [
+                    'input_method' => 'Web'
+                ]
             );
             $lockP2h = P2h::where('id', $p2h->id)->lockForUpdate()->first();
             $lockP2h->update($data);

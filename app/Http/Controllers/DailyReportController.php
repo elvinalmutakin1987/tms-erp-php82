@@ -55,31 +55,42 @@ class DailyReportController extends Controller
                                <li>
                                     <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
                                     data-id="' . $item->id . '">Detail</a>
-                                </li>';
+                                </li>
+                                <li>
+                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                                    data-id="' . $item->id . '">Edit</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                                ';
 
                     /**
                      * user superadmin dan yang punya akses edit aja yang bisa muncul
                      */
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dailyreport.edit')):
-                        $button .= '<li>
-                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
-                                </li>';
-                    endif;
+                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dailyreport.edit')):
+                    //     $button .= '<li>
+                    //                 <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                    //                 data-id="' . $item->id . '">Edit</a>
+                    //             </li>';
+                    // endif;
 
                     /**
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dailyreport.delete')):
-                        $button .= '<li>
-                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>';
-                    endif;
+                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('dailyreport.delete')):
+                    //     $button .= '<li>
+                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                    //             </li>';
+                    // endif;
 
-                    $button .= '</ul>
-                        </div>
-                    </div>
-                    ';
+                    // $button .= '</ul>
+                    //     </div>
+                    // </div>
+                    // ';
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
@@ -466,17 +477,38 @@ class DailyReportController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        try {
-            $unit = Unit::all();
-            return response()->json([
-                'success' => true,
-                'data' => $unit
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        // try {
+        //     $unit = Unit::all();
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $unit
+        //     ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $th->getMessage()
+        //     ], 400);
+        // }
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $unit = Unit::selectRaw("id, vehicle_no as text")
+                ->where('vehicle_no', 'like', '%' . $term . '%')
+                ->orderBy('vehicle_no')
+                ->simplePaginate(10);
+            $total_count = count($unit);
+            $morePages = true;
+            $pagination_obj = json_encode($unit);
+            if (empty($unit->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $unit->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 

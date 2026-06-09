@@ -61,6 +61,7 @@ class UserSeeder extends Seeder
             'dashboard.finance',
 
             'p2h',
+            'daily_report',
             'mechanical_inspection',
             'maintenance',
             'purchase_requisition',

@@ -27,7 +27,7 @@
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select select-top" id="unit" name="unit">
-                                        <option value="All">All Unit</option>
+                                        {{-- <option value="All">All Unit</option> --}}
                                     </select>
                                 </div>
                                 <div class="col-2">
