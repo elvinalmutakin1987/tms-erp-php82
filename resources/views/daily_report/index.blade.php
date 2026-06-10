@@ -6,6 +6,30 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+
+    <style>
+        #formModal .modal-content {
+            max-height: calc(100vh - 1rem);
+        }
+
+        #formModal .modal-body {
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        #formModal .modal-body table {
+            min-width: 900px;
+        }
+
+        .select2-container--open {
+            z-index: 1065 !important;
+        }
+
+        .flatpickr-calendar {
+            z-index: 1066 !important;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -239,14 +263,6 @@
                 allowInput: true
             });
 
-            // $("#unit").select2({
-            //     theme: "bootstrap-5",
-            //     width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-            //         'w-100') ? '100%' : 'style',
-            // }).on('change', function() {
-            //     $('#table-data').DataTable().draw();
-            // });
-
             $("#date_start").on('change', function() {
                 $('#table-data').DataTable().draw();
             });
@@ -254,44 +270,6 @@
             $("#date_end").on('change', function() {
                 $('#table-data').DataTable().draw();
             });
-
-
-            // $.ajax({
-            //     url: '{{ route('dailyreport.get_unit_all') }}',
-            //     type: 'GET',
-            //     success: function(response) {
-            //         $('#unit').empty();
-            //         $('#unit').append('<option value="All">All Unit</option>');
-            //         $.each(response.data, function(index, unit) {
-            //             $('#unit').append('<option value="' + unit.id +
-            //                 '">' +
-            //                 unit.vehicle_no +
-            //                 '</option>');
-            //         });
-            //         if (unitId != '') {
-            //             $("#unit").val(unitId).trigger('change');
-            //         }
-
-            //         $('#unit_id').empty();
-            //         $('#unit_id').append('<option value="All">All Unit</option>');
-            //         $.each(response.data, function(index, unit) {
-            //             $('#unit_id').append('<option value="' + unit.id +
-            //                 '">' +
-            //                 unit.vehicle_no +
-            //                 '</option>');
-            //         });
-            //         if (unitId != '') {
-            //             $("#unit_id").val(unitId).trigger('change');
-            //         }
-            //     },
-            //     error: function(xhr, status, error) {
-            //         Swal.fire({
-            //             icon: "error",
-            //             title: "Oops...",
-            //             text: error,
-            //         });
-            //     }
-            // });
 
             gen_select2();
 
@@ -407,6 +385,18 @@
                     type: 'GET',
                     success: function(response) {
                         $("#div-form").html(response.html);
+
+                        requestAnimationFrame(function() {
+                            initDailyReportAjaxForm(document.getElementById(
+                                'div-form'));
+                            initUnitSelect2();
+
+                            const currentModalEl = document.getElementById('formModal');
+                            if (currentModalEl && window.bootstrap) {
+                                bootstrap.Modal.getOrCreateInstance(currentModalEl)
+                                    .handleUpdate();
+                            }
+                        });
 
                         const titleText = isEdit ? 'Edit Report' : 'Add Report';
                         const number = isEdit ? response.report_no : response
@@ -562,6 +552,9 @@
                         $("#div-form").html(response.html);
 
                         requestAnimationFrame(function() {
+                            initDailyReportAjaxForm(document.getElementById('div-form'));
+                            initUnitSelect2();
+
                             const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
                             modalInstance.handleUpdate();
 
@@ -655,6 +648,508 @@
             }
         }
 
+
+
+        function initDailyReportAjaxForm(root) {
+            root = root || document.getElementById('div-form');
+
+            if (!root) {
+                return;
+            }
+
+            const modalEl = document.getElementById('formModal');
+            const modalBody = modalEl ? modalEl.querySelector('.modal-body') : null;
+
+            initAjaxSelect2(root, modalEl, modalBody);
+            initAjaxDetailUnitSelect2(root, modalBody);
+            initAjaxTimepicker(root, modalEl, modalBody);
+            initAjaxNumberFormat(root);
+            initAjaxUnitTable(root);
+        }
+
+        function initAjaxSelect2(root, modalEl, modalBody) {
+            if (!window.jQuery || !$.fn.select2) {
+                return;
+            }
+
+            $(root).find('.select-select').not('#_unit_id').each(function() {
+                const $el = $(this);
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.off('.ajaxFormSelect');
+
+                const allowClear = ['_item', '_uom_1', '_uom_2'].includes($el.attr('id'));
+
+                $el.select2({
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style'),
+                    placeholder: $el.data('placeholder') || 'Choose',
+                    allowClear: allowClear,
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0
+                });
+
+                $el.on('select2:open.ajaxFormSelect', function() {
+                    const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+
+                    setTimeout(function() {
+                        const search = document.querySelector(
+                            '.select2-container--open .select2-search__field');
+
+                        if (search) {
+                            search.focus({
+                                preventScroll: true
+                            });
+                        }
+
+                        $('.select2-container--open').css('z-index', 1065);
+
+                        if (modalBody) {
+                            modalBody.scrollTop = lastScrollTop;
+                        }
+                    }, 0);
+                });
+            });
+        }
+
+        function initAjaxDetailUnitSelect2(root, modalBody) {
+            if (!window.jQuery || !$.fn.select2) {
+                return;
+            }
+
+            const $unitDetail = $(root).find('#_unit_id');
+
+            if (!$unitDetail.length) {
+                return;
+            }
+
+            if ($unitDetail.hasClass('select2-hidden-accessible')) {
+                $unitDetail.select2('destroy');
+            }
+
+            $unitDetail.off('.ajaxDetailUnit');
+            $unitDetail.empty().append(new Option('', '', true, true));
+
+            $unitDetail.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $unitDetail.data('width') ? $unitDetail.data('width') : ($unitDetail.hasClass('w-100') ?
+                    '100%' : 'style'),
+                placeholder: 'Choose Unit',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('dailyreport.get_unit_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $unitDetail.on('select2:open.ajaxDetailUnit', function() {
+                const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field');
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1065);
+
+                    if (modalBody) {
+                        modalBody.scrollTop = lastScrollTop;
+                    }
+                }, 0);
+            });
+        }
+
+        function initAjaxTimepicker(root, modalEl, modalBody) {
+            if (typeof flatpickr === 'undefined') {
+                return;
+            }
+
+            root.querySelectorAll('.timepicker').forEach(function(input) {
+                if (input._flatpickr) {
+                    input._flatpickr.destroy();
+                }
+
+                flatpickr(input, {
+                    enableTime: true,
+                    noCalendar: true,
+                    dateFormat: "H:i",
+                    time_24hr: true,
+                    minuteIncrement: 1,
+                    disableMobile: true,
+                    allowInput: true,
+                    appendTo: modalEl || document.body,
+                    positionElement: input,
+                    position: "below left",
+                    onOpen: function(selectedDates, dateStr, instance) {
+                        instance._scrollTop = modalBody ? modalBody.scrollTop : 0;
+                    },
+                    onClose: function(selectedDates, dateStr, instance) {
+                        if (modalBody && typeof instance._scrollTop !== 'undefined') {
+                            modalBody.scrollTop = instance._scrollTop;
+                        }
+                    },
+                    onReady: function(selectedDates, dateStr, instance) {
+                        instance.calendarContainer.style.zIndex = "1066";
+                    }
+                });
+            });
+        }
+
+        function initAjaxNumberFormat(root) {
+            let isFmt = false;
+            let userDecSep = null;
+
+            function sanitize(value) {
+                return (value ?? '').toString().replace(/[^0-9.,]/g, '');
+            }
+
+            function groupThousands(digits, sep) {
+                digits = digits.replace(/^0+(?=\d)/, '');
+
+                if (digits === '') {
+                    digits = '0';
+                }
+
+                return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+            }
+
+            function countDigitsLeft(str, pos) {
+                return (str.slice(0, pos).match(/\d/g) || []).length;
+            }
+
+            function caretByDigits(str, digitCount) {
+                let count = 0;
+
+                for (let i = 0; i < str.length; i++) {
+                    if (/\d/.test(str[i])) {
+                        count++;
+                    }
+
+                    if (count >= digitCount) {
+                        return i + 1;
+                    }
+                }
+
+                return str.length;
+            }
+
+            function textKeyDown(e) {
+                if (e.ctrlKey || e.metaKey || e.altKey) {
+                    return;
+                }
+
+                const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter'];
+
+                if (allowedKeys.includes(e.key)) {
+                    return;
+                }
+
+                if (/^[0-9.,]$/.test(e.key)) {
+                    return;
+                }
+
+                e.preventDefault();
+            }
+
+            function unformatNumber(value) {
+                if (window.numbro) {
+                    return numbro.unformat(value);
+                }
+
+                return sanitize(value).replace(/,/g, '');
+            }
+
+            function updateKmTotal() {
+                const kmStart = document.getElementById('km_start');
+                const kmFinish = document.getElementById('km_finish');
+                const kmTotal = document.getElementById('km_total');
+                const kmTotalDisplay = document.getElementById('_km_total');
+
+                if (!kmStart || !kmFinish || !kmTotal || !kmTotalDisplay) {
+                    return;
+                }
+
+                if (kmStart.value === '' || kmFinish.value === '') {
+                    kmTotal.value = '';
+                    kmTotalDisplay.value = '';
+                    return;
+                }
+
+                const total = (parseFloat(kmFinish.value) || 0) - (parseFloat(kmStart.value) || 0);
+                kmTotal.value = total;
+
+                if (window.numbro) {
+                    kmTotalDisplay.value = numbro(total).format({
+                        thousandSeparated: true,
+                        mantissa: 0
+                    });
+                } else {
+                    kmTotalDisplay.value = total;
+                }
+            }
+
+            function textInput(hiddenId, e) {
+                if (isFmt) {
+                    return;
+                }
+
+                isFmt = true;
+
+                const el = e.target;
+                const raw = el.value || '';
+                const caretRaw = typeof el.selectionStart === 'number' ? el.selectionStart : raw.length;
+                const inserted = e.inputType === 'insertText' && e.data ? e.data : '';
+                const prevDecSep = userDecSep;
+                const justTypedSep = inserted === '.' || inserted === ',';
+                const san = sanitize(raw);
+                const leftSan = sanitize(raw.slice(0, caretRaw));
+                const caretSan = leftSan.length;
+
+                if (userDecSep && !san.includes(userDecSep)) {
+                    userDecSep = null;
+                }
+
+                if (!prevDecSep && justTypedSep) {
+                    userDecSep = inserted;
+                }
+
+                const digitsLeft = countDigitsLeft(san, caretSan);
+                let intDigits = '';
+                let fracDigits = '';
+                let keepDec = false;
+
+                if (userDecSep && san.includes(userDecSep)) {
+                    const pos = san.indexOf(userDecSep);
+                    keepDec = true;
+                    intDigits = san.slice(0, pos).replace(/[.,]/g, '');
+                    fracDigits = san.slice(pos + 1).replace(/[.,]/g, '');
+
+                    if (intDigits === '') {
+                        intDigits = '0';
+                    }
+                } else {
+                    intDigits = san.replace(/[.,]/g, '');
+                }
+
+                const thousandsSep = userDecSep ? (userDecSep === ',' ? '.' : ',') : ',';
+                const formattedInt = groupThousands(intDigits, thousandsSep);
+                const formatted = keepDec ? formattedInt + userDecSep + fracDigits : formattedInt;
+
+                el.value = formatted;
+
+                if (typeof el.setSelectionRange === 'function') {
+                    if (!prevDecSep && justTypedSep && keepDec) {
+                        const newCaret = formatted.indexOf(userDecSep) + 1;
+                        el.setSelectionRange(newCaret, newCaret);
+                    } else {
+                        const newCaret = caretByDigits(formatted, digitsLeft);
+                        el.setSelectionRange(newCaret, newCaret);
+                    }
+                }
+
+                const hiddenInput = document.getElementById(hiddenId);
+
+                if (hiddenInput) {
+                    hiddenInput.value = unformatNumber(el.value);
+                }
+
+                updateKmTotal();
+                isFmt = false;
+            }
+
+            const inputMap = [
+                ['_value_1_', '_value_1'],
+                ['_value_2_', '_value_2'],
+                ['_refule_liter', 'refule_liter'],
+                ['_refule_km', 'refule_km']
+            ];
+
+            inputMap.forEach(function(item) {
+                const displayInput = root.querySelector('#' + item[0]);
+                const hiddenId = item[1];
+
+                if (!displayInput) {
+                    return;
+                }
+
+                displayInput.onkeydown = textKeyDown;
+                displayInput.oninput = function(e) {
+                    textInput(hiddenId, e);
+                };
+            });
+        }
+
+        function initAjaxUnitTable(root) {
+            const addButton = root.querySelector('#addUnitButton');
+            const tableUnit = root.querySelector('#tableUnit');
+
+            if (!addButton || !tableUnit) {
+                return;
+            }
+
+            addButton.onclick = function() {
+                const tbody = tableUnit.querySelector('tbody');
+                const unitSelect = root.querySelector('#_unit_id');
+                const itemSelect = root.querySelector('#_item');
+                const uom1Select = root.querySelector('#_uom_1');
+                const uom2Select = root.querySelector('#_uom_2');
+
+                const unitId = unitSelect ? unitSelect.value : '';
+                const unitSelectData = unitSelect && window.jQuery && $.fn.select2 ? $(unitSelect).select2('data') : [];
+                const unitName = unitSelectData.length ? unitSelectData[0].text : (unitSelect && unitSelect.options[
+                    unitSelect.selectedIndex] ? unitSelect.options[unitSelect.selectedIndex].text : '');
+                const item = itemSelect ? itemSelect.value : '';
+                const uom1 = uom1Select ? uom1Select.value : '';
+                const uom2 = uom2Select ? uom2Select.value : '';
+                const value1 = root.querySelector('#_value_1') ? root.querySelector('#_value_1').value : '';
+                const value1Display = root.querySelector('#_value_1_') ? root.querySelector('#_value_1_').value : '';
+                const value2 = root.querySelector('#_value_2') ? root.querySelector('#_value_2').value : '';
+                const value2Display = root.querySelector('#_value_2_') ? root.querySelector('#_value_2_').value : '';
+                const tr = document.createElement('tr');
+
+                tr.innerHTML = `
+                    <td class="p-1 align-middle row-number">#</td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="detail_unit_id[]" readonly value="${escapeHtml(unitId)}">
+                        <input type="text" class="form-control" name="unit_name[]" readonly value="${escapeHtml(unitName)}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" name="item[]" readonly value="${escapeHtml(item)}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" name="uom_1[]" readonly value="${escapeHtml(uom1)}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="value_1[]" readonly value="${escapeHtml(value1)}">
+                        <input type="text" class="form-control" name="value_1__[]" readonly value="${escapeHtml(value1Display)}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" name="uom_2[]" readonly value="${escapeHtml(uom2)}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" name="value_2[]" readonly value="${escapeHtml(value2)}">
+                        <input type="text" class="form-control" name="value_2__[]" readonly value="${escapeHtml(value2Display)}">
+                    </td>
+                    <td class="text-center p-1 align-middle">
+                        <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row"></button>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+
+                resetTableUnitInputRow(root);
+
+                renumberAjaxUnitRows(root);
+            };
+
+            tableUnit.onclick = function(e) {
+                const deleteButton = e.target.closest('.delete-row');
+
+                if (!deleteButton) {
+                    return;
+                }
+
+                const row = deleteButton.closest('tr');
+
+                if (row) {
+                    row.remove();
+                }
+
+                renumberAjaxUnitRows(root);
+            };
+        }
+
+        function resetTableUnitInputRow(root) {
+            const resetSelects = ['#_unit_id', '#_item', '#_uom_1', '#_uom_2'];
+            const resetInputs = ['#_value_1', '#_value_1_', '#_value_2', '#_value_2_'];
+
+            resetSelects.forEach(function(selector) {
+                const select = root.querySelector(selector);
+
+                if (!select) {
+                    return;
+                }
+
+                if (window.jQuery && $.fn.select2 && $(select).hasClass('select2-hidden-accessible')) {
+                    $(select).val(null).trigger('change.select2');
+                } else {
+                    select.value = '';
+                }
+            });
+
+            resetInputs.forEach(function(selector) {
+                clearInputValue(root, selector);
+            });
+        }
+
+        function renumberAjaxUnitRows(root) {
+            let no = 13;
+
+            root.querySelectorAll('#tableUnit > tbody > tr').forEach(function(row) {
+                if (row.classList.contains('fixed-row')) {
+                    const fixedNumberCell = row.querySelector('.row-number');
+
+                    if (fixedNumberCell) {
+                        fixedNumberCell.textContent = '';
+                    }
+
+                    return;
+                }
+
+                const numberCell = row.querySelector('.row-number');
+
+                if (numberCell) {
+                    numberCell.textContent = no;
+                    no++;
+                }
+            });
+        }
+
+        function clearInputValue(root, selector) {
+            const input = root.querySelector(selector);
+
+            if (input) {
+                input.value = '';
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
 
         function disableButton() {
             saveButton.disabled = true;
