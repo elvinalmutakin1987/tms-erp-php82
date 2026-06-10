@@ -12,7 +12,7 @@
                     <div class="row mb-2">
                         <div class="col">
                             <label for="unit_id" class="form-label">Unit</label>
-                            <select class="form-select select-select" id="unit_id" name="unit_id">
+                            <select class="form-select" id="unit_id" name="unit_id">
                             </select>
                         </div>
                         <div class="col">

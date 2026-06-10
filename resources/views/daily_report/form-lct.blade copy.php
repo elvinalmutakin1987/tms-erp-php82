@@ -328,64 +328,64 @@
 
     (() => {
 
-        $.ajax({
-            url: '{{ route('dailyreport.get_project_location') }}',
-            type: 'GET',
-            success: function(response) {
-                $('#trip_1_location_id').empty();
-                $('#trip_1_arr_location_id').empty();
-                $.each(response.data, function(index, location) {
-                    $('#trip_1_location_id').append('<option value="' + location.id +
-                        '">' +
-                        location.name +
-                        '</option>');
+        // $.ajax({
+        //     url: '{{ route('dailyreport.get_project_location') }}',
+        //     type: 'GET',
+        //     success: function(response) {
+        //         $('#trip_1_location_id').empty();
+        //         $('#trip_1_arr_location_id').empty();
+        //         $.each(response.data, function(index, location) {
+        //             $('#trip_1_location_id').append('<option value="' + location.id +
+        //                 '">' +
+        //                 location.name +
+        //                 '</option>');
 
-                    $('#trip_1_arr_location_id').append('<option value="' + location.id +
-                        '">' +
-                        location.name +
-                        '</option>');
+        //             $('#trip_1_arr_location_id').append('<option value="' + location.id +
+        //                 '">' +
+        //                 location.name +
+        //                 '</option>');
 
-                    $('#trip_2_location_id').append('<option value="' + location.id +
-                        '">' +
-                        location.name +
-                        '</option>');
+        //             $('#trip_2_location_id').append('<option value="' + location.id +
+        //                 '">' +
+        //                 location.name +
+        //                 '</option>');
 
-                    $('#trip_2_arr_location_id').append('<option value="' + location.id +
-                        '">' +
-                        location.name +
-                        '</option>');
-                });
+        //             $('#trip_2_arr_location_id').append('<option value="' + location.id +
+        //                 '">' +
+        //                 location.name +
+        //                 '</option>');
+        //         });
 
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: error,
-                });
-            }
-        });
+        //     },
+        //     error: function(xhr, status, error) {
+        //         Swal.fire({
+        //             icon: "error",
+        //             title: "Oops...",
+        //             text: error,
+        //         });
+        //     }
+        // });
 
-        $.ajax({
-            url: '{{ route('dailyreport.get_unit_all') }}',
-            type: 'GET',
-            success: function(response) {
-                $('#_unit_id').empty();
-                $.each(response.data, function(index, unit) {
-                    $('#_unit_id').append('<option value="' + unit.id +
-                        '">' +
-                        unit.vehicle_no +
-                        '</option>');
-                });
-            },
-            error: function(xhr, status, error) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: error,
-                });
-            }
-        });
+        // $.ajax({
+        //     url: '{{ route('dailyreport.get_unit_all') }}',
+        //     type: 'GET',
+        //     success: function(response) {
+        //         $('#_unit_id').empty();
+        //         $.each(response.data, function(index, unit) {
+        //             $('#_unit_id').append('<option value="' + unit.id +
+        //                 '">' +
+        //                 unit.vehicle_no +
+        //                 '</option>');
+        //         });
+        //     },
+        //     error: function(xhr, status, error) {
+        //         Swal.fire({
+        //             icon: "error",
+        //             title: "Oops...",
+        //             text: error,
+        //         });
+        //     }
+        // });
 
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
