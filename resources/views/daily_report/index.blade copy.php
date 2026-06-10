@@ -293,7 +293,7 @@
             //     }
             // });
 
-            gen_select2();
+            // gen_select2();
 
             initUnitTopSelect2();
         });
@@ -481,6 +481,52 @@
             // });
         }
 
+        // $("#unit_id").on('change', function() {
+        //     const modalEl = document.getElementById('formModal');
+        //     const modalBody = modalEl.querySelector('.modal-body');
+        //     const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+
+        //     $(this).select2('close');
+        //     $(this).blur();
+
+        //     if (document.activeElement) {
+        //         document.activeElement.blur();
+        //     }
+
+        //     $("#div-form").html(`
+    //             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    //             <span class="visually">Loading...</span>
+    //             `);
+        //     var url = '{{ route('dailyreport.get_form_add') }}';
+        //     if (reportId != '') {
+        //         url = '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
+        //             reportId);
+        //     }
+        //     $.ajax({
+        //         url: url,
+        //         type: 'GET',
+        //         data: {
+        //             unit_id: $(this).val()
+        //         },
+        //         success: function(response) {
+        //             $("#div-form").html(response.html);
+
+        //             requestAnimationFrame(function() {
+        //                 const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        //                 modalInstance.handleUpdate();
+
+        //                 if (modalBody) {
+        //                     modalBody.scrollTop = lastScrollTop;
+        //                 }
+        //             });
+        //         },
+        //         error: function(xhr, status, error) {
+        //             console.error('Error:', error);
+        //             $tbody.empty();
+        //         }
+        //     });
+        // });
+
         function initUnitSelect2() {
             const $unit_id = $('#unit_id');
 
@@ -503,7 +549,7 @@
                     $(
                         '#unit_id').hasClass(
                         'w-100') ? '100%' : 'style'),
-                placeholder: 'Choose Unit',
+                placeholder: '',
                 allowClear: true,
                 selectOnClose: false,
                 ajax: {
@@ -531,50 +577,6 @@
                     $('.select2-container--open .select2-search__field').trigger('focus');
                     $('.select2-container--open').css('z-index', 1056);
                 }, 0);
-            }).on('change', function() {
-                const modalEl = document.getElementById('formModal');
-                const modalBody = modalEl.querySelector('.modal-body');
-                const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
-
-                $(this).select2('close');
-                $(this).blur();
-
-                if (document.activeElement) {
-                    document.activeElement.blur();
-                }
-
-                $("#div-form").html(`
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually">Loading...</span>
-                                `);
-                var url = '{{ route('dailyreport.get_form_add') }}';
-                if (reportId != '') {
-                    url = '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
-                        reportId);
-                }
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    data: {
-                        unit_id: $(this).val()
-                    },
-                    success: function(response) {
-                        $("#div-form").html(response.html);
-
-                        requestAnimationFrame(function() {
-                            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-                            modalInstance.handleUpdate();
-
-                            if (modalBody) {
-                                modalBody.scrollTop = lastScrollTop;
-                            }
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        $tbody.empty();
-                    }
-                });
             });
 
             if (selectedValue) {
@@ -653,6 +655,26 @@
             if (selectedValue) {
                 $unit.val(selectedValue).trigger('change.select2');
             }
+
+            // $unit.on('select2:open.unit', function() {
+            //     setTimeout(function() {
+            //         const search = document.querySelector(
+            //             '.select2-container--open .select2-search__field'
+            //         );
+
+            //         if (search) {
+            //             search.focus({
+            //                 preventScroll: true
+            //             });
+            //         }
+
+            //         $('.select2-container--open').css('z-index', 1056);
+            //     }, 0);
+            // });
+
+            // $unit.on('change.unit', function() {
+            //     const unitId = $(this).val();
+            // });
         }
 
 

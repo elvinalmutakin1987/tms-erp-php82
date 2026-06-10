@@ -521,14 +521,16 @@ class DailyReportController extends Controller
             $presenter = new DatePrefixPresenter('Y/m', '/');
             $unit = Unit::find($request->unit_id);
             $view = 'daily_report.form';
+            $html = view($view)->render();
             if ($unit && $unit->type == 'LCT') {
+                $location = Location::where('loc_type', 'Project Location')->get();
                 $view = 'daily_report.form-lct';
+                $html = view($view, compact('location'))->render();
             }
             $report_prev_no = Generator::make()
                 ->type('rep')
                 ->formatter($presenter)
                 ->preview();
-            $html = view($view)->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -551,10 +553,12 @@ class DailyReportController extends Controller
             $daily_report_detail = $daily_report->daily_report_detail;
             $view = 'daily_report.form-edit';
             $unit = Unit::find($daily_report->unit_id);
-            if ($unit && $unit->type == 'LCT') {
-                $view = 'daily_report.form-lct-edit';
-            }
             $html = view($view, compact('daily_report', 'daily_report_detail'))->render();
+            if ($unit && $unit->type == 'LCT') {
+                $location = Location::where('loc_type', 'Project Location')->get();
+                $view = 'daily_report.form-lct-edit';
+                $html = view($view, compact('daily_report', 'daily_report_detail', 'location'))->render();
+            }
             return response()->json([
                 'success' => true,
                 'html' => $html,
