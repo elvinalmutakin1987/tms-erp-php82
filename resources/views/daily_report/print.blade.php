@@ -1,6 +1,55 @@
 @php
     use Carbon\Carbon;
     use Illuminate\Support\Number;
+
+    $formatTime = function ($time) {
+        if ($time === null || $time === '') {
+            return '';
+        }
+
+        try {
+            return Carbon::parse($time)->format('H:i');
+        } catch (\Throwable $e) {
+            return '';
+        }
+    };
+
+    $formatNumber = function ($value, $precision = 0) {
+        if ($value === null || $value === '') {
+            return '';
+        }
+
+        return Number::format($value, precision: $precision);
+    };
+
+    $durationToMinutes = function ($time) {
+        if ($time === null || $time === '') {
+            return 0;
+        }
+
+        $parts = explode(':', (string) $time);
+
+        $hour = isset($parts[0]) ? (int) $parts[0] : 0;
+        $minute = isset($parts[1]) ? (int) $parts[1] : 0;
+
+        return ($hour * 60) + $minute;
+    };
+
+    $durationTotal = function ($time1, $time2) use ($durationToMinutes) {
+        if (($time1 === null || $time1 === '') && ($time2 === null || $time2 === '')) {
+            return '';
+        }
+
+        $totalMinutes = $durationToMinutes($time1) + $durationToMinutes($time2);
+
+        return sprintf(
+            '%02d:%02d',
+            intdiv($totalMinutes, 60),
+            $totalMinutes % 60,
+        );
+    };
+
+    $logoPath = public_path('assets/images/tms_logo.png');
 @endphp
 
 <style>
@@ -17,12 +66,10 @@
         color: #000;
     }
 
-    /* ===== Main table (single table to repeat header) ===== */
     .table-p2h {
         width: 100%;
         border-collapse: collapse;
         border-spacing: 0;
-        /* table-layout: fixed; */
         margin: 0;
         padding: 0;
     }
@@ -36,8 +83,6 @@
         word-wrap: break-word;
     }
 
-
-    /* ===== Document header wrapper row (nested header table) ===== */
     .table-p2h .doc-header-wrapper {
         padding: 0 !important;
         border: 0 !important;
@@ -104,7 +149,6 @@
         letter-spacing: .3px;
     }
 
-    /* ===== Info block under header ===== */
     .doc-info-cell {
         padding: 0 !important;
         line-height: 0;
@@ -124,7 +168,6 @@
         line-height: 1.2;
     }
 
-    /* remove outer borders to avoid double border with parent cell */
     .doc-info-table tr:first-child td {
         border-top: 0 !important;
     }
@@ -169,7 +212,6 @@
         width: 50%;
     }
 
-    /* ===== Checklist header ===== */
     .checklist-head th {
         background: #111;
         color: #fff;
@@ -177,10 +219,8 @@
         text-transform: uppercase;
         letter-spacing: .3px;
         border-top: 0 !important;
-        /* avoid double border with doc header bottom */
     }
 
-    /* ===== Group row ===== */
     .group-row td {
         background: #e9ecef;
         font-weight: 700;
@@ -189,22 +229,18 @@
         padding: 7px 8px;
     }
 
-    /* ===== Item rows ===== */
     .item-row td {
         background: #fff;
     }
 
-    /* subtle zebra for readability */
     .item-row.zebra td {
         background: #fafafa;
     }
 
-    /* ===== Column widths (kept stable for DomPDF) ===== */
     .col-no {
         width: 5%;
         text-align: center;
         vertical-align: middle;
-
     }
 
     .col-item {
@@ -221,7 +257,6 @@
         width: 20%;
     }
 
-    /* Make "BROKEN" fit on narrow col */
     .checklist-head th.col-broken {
         font-size: 8pt;
         line-height: 1.05;
@@ -230,8 +265,6 @@
         white-space: normal;
         word-break: break-word;
     }
-
-    /* ===== Status badge (print-friendly) ===== */
 
     .status {
         display: inline-block;
@@ -256,7 +289,6 @@
         color: #000;
     }
 
-    /* Force Unicode rendering */
     .status.ok::before {
         content: "✔";
         vertical-align: middle;
@@ -267,8 +299,6 @@
         vertical-align: middle;
     }
 
-
-    /* Notes HTML inside cells */
     .cell-notes p {
         margin: 0 0 4px 0;
     }
@@ -283,7 +313,6 @@
         margin: 0 0 2px 0;
     }
 
-    /* Avoid awkward splitting */
     .avoid-break {
         page-break-inside: avoid;
     }
@@ -295,7 +324,6 @@
     @media print {
         @page {
             size: A4 !important;
-            /* leave a bit more bottom space for footer page number */
             margin: 14px 14px 20px 14px !important;
         }
 
@@ -316,7 +344,6 @@
             page-break-after: auto;
         }
 
-        /* try to preserve background colors */
         * {
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
@@ -345,8 +372,11 @@
                 <table class="doc-header-table">
                     <tr>
                         <td class="logo-cell">
-                            <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                style="max-width:95px;height:auto;margin:0 auto;">
+                            @if (file_exists($logoPath))
+                                <img src="{{ $logoPath }}" alt="Logo" style="max-width:95px;height:auto;margin:0 auto;">
+                            @else
+                                <div style="font-weight:700;font-size:12pt;">TMS</div>
+                            @endif
                         </td>
 
                         <td class="title-cell">
@@ -356,7 +386,7 @@
 
                         <td class="meta-cell">
                             <div class="docno-label">Document No.</div>
-                            <div class="docno">{{ $daily_report->report_no }}</div>
+                            <div class="docno">{{ $daily_report->report_no ?? '-' }}</div>
                         </td>
                     </tr>
                     <tr>
@@ -368,7 +398,7 @@
                                             <tr>
                                                 <td class="label" style="width: 10%">Unit</td>
                                                 <td class="sep">:</td>
-                                                <td class="val">{{ $daily_report->unit->vehicle_no ?? '-' }}</td>
+                                                <td class="val">{{ data_get($daily_report, 'unit.vehicle_no', '-') }}</td>
                                             </tr>
                                             <tr>
                                                 <td class="label">Date</td>
@@ -411,36 +441,35 @@
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Location</td>
-                <td class="p-1 align-middle">{{ $daily_report->trip_1_location->name }}</td>
+                <td class="p-1 align-middle">{{ data_get($daily_report, 'trip_1_location.name', '') }}</td>
                 <td class="p-1 align-middle" style="width: 20%">Location</td>
-                <td class="p-1 align-middle">{{ $daily_report->trip_1_arr_location->name }}</td>
+                <td class="p-1 align-middle">{{ data_get($daily_report, 'trip_1_arr_location.name', '') }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Loading At</td>
-                <td class="p-1 align-middle">{{ Carbon::parse($daily_report->trip_1_loading_at)->format('H:i') }}</td>
+                <td class="p-1 align-middle">{{ $formatTime($daily_report->trip_1_loading_at ?? null) }}</td>
                 <td class="p-1 align-middle" style="width: 20%">Arrived At</td>
-                <td class="p-1 align-middle">{{ Carbon::parse($daily_report->trip_1_arrived_at)->format('H:i') }}</td>
+                <td class="p-1 align-middle">{{ $formatTime($daily_report->trip_1_arrived_at ?? null) }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Complete Loading At</td>
-                <td class="p-1 align-middle">
-                    {{ Carbon::parse($daily_report->trip_1_complete_loading_at)->format('H:i') }}</td>
+                <td class="p-1 align-middle">{{ $formatTime($daily_report->trip_1_complete_loading_at ?? null) }}</td>
                 <td class="p-1 align-middle" style="width: 20%">Berthing At</td>
                 <td class="p-1 align-middle">
-                    <b>{{ Carbon::parse($daily_report->trip_1_berthing_at)->format('H:i') }}</b>
+                    <b>{{ $formatTime($daily_report->trip_1_berthing_at ?? null) }}</b>
                 </td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Departed At</td>
                 <td class="p-1 align-middle">
-                    <b>{{ Carbon::parse($daily_report->trip_1_departed_at)->format('H:i') }}</b>
+                    <b>{{ $formatTime($daily_report->trip_1_departed_at ?? null) }}</b>
                 </td>
                 <td class="p-1 align-middle" style="width: 20%" colspan="2"></td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%"><b>Duration</b></td>
                 <td class="p-1 align-middle" colspan="3">
-                    <b>{{ Carbon::parse($daily_report->duration_trip_1)->format('H:i') }}</b>
+                    <b>{{ $formatTime($daily_report->duration_trip_1 ?? null) }}</b>
                 </td>
             </tr>
         </tbody>
@@ -462,42 +491,41 @@
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Location</td>
-                <td class="p-1 align-middle">{{ $daily_report->trip_2_location->name }}</td>
+                <td class="p-1 align-middle">{{ data_get($daily_report, 'trip_2_location.name', '') }}</td>
                 <td class="p-1 align-middle" style="width: 20%">Location</td>
-                <td class="p-1 align-middle">{{ $daily_report->trip_2_arr_location->name }}</td>
+                <td class="p-1 align-middle">{{ data_get($daily_report, 'trip_2_arr_location.name', '') }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Loading At</td>
-                <td class="p-1 align-middle">{{ Carbon::parse($daily_report->trip_2_loading_at)->format('H:i') }}</td>
+                <td class="p-1 align-middle">{{ $formatTime($daily_report->trip_2_loading_at ?? null) }}</td>
                 <td class="p-1 align-middle" style="width: 20%">Arrived At</td>
-                <td class="p-1 align-middle">{{ Carbon::parse($daily_report->trip_2_arrived_at)->format('H:i') }}</td>
+                <td class="p-1 align-middle">{{ $formatTime($daily_report->trip_2_arrived_at ?? null) }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Complete Loading At</td>
-                <td class="p-1 align-middle">
-                    {{ Carbon::parse($daily_report->trip_2_complete_loading_at)->format('H:i') }}</td>
+                <td class="p-1 align-middle">{{ $formatTime($daily_report->trip_2_complete_loading_at ?? null) }}</td>
                 <td class="p-1 align-middle" style="width: 20%">Berthing At</td>
                 <td class="p-1 align-middle">
-                    <b>{{ Carbon::parse($daily_report->trip_2_berthing_at)->format('H:i') }}</b>
+                    <b>{{ $formatTime($daily_report->trip_2_berthing_at ?? null) }}</b>
                 </td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Departed At</td>
                 <td class="p-1 align-middle">
-                    <b>{{ Carbon::parse($daily_report->trip_2_departed_at)->format('H:i') }}</b>
+                    <b>{{ $formatTime($daily_report->trip_2_departed_at ?? null) }}</b>
                 </td>
                 <td class="p-1 align-middle" style="width: 20%" colspan="2"></td>
             </tr>
             <tr>
-                <td class="p-1 align-middle" style="width: 20%"><b>Duration </b></td>
+                <td class="p-1 align-middle" style="width: 20%"><b>Duration</b></td>
                 <td class="p-1 align-middle" colspan="3">
-                    <b>{{ Carbon::parse($daily_report->duration_trip_2)->format('H:i') }}</b>
+                    <b>{{ $formatTime($daily_report->duration_trip_2 ?? null) }}</b>
                 </td>
             </tr>
-            <tr style='background-color: #FAF6F5'>
+            <tr style="background-color: #FAF6F5">
                 <td class="p-1 align-middle" style="width: 20%"><b>Duration Total</b></td>
                 <td class="p-1 align-middle" colspan="3">
-                    <b>{{ addTime($daily_report->duration_trip_1, $daily_report->duration_trip_2) }}</b>
+                    <b>{{ $durationTotal($daily_report->duration_trip_1 ?? null, $daily_report->duration_trip_2 ?? null) }}</b>
                 </td>
             </tr>
         </tbody>
@@ -511,7 +539,7 @@
         <tbody>
             <tr>
                 <td class="p-1 align-middle" colspan="4">
-                    {!! $daily_report->remarks !!}
+                    {!! $daily_report->remarks ?? '' !!}
                 </td>
             </tr>
         </tbody>
@@ -525,18 +553,19 @@
         <tbody>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">From</td>
-                <td class="p-1 align-middle" colspan="3">{{ $daily_report->refule_type }}</td>
+                <td class="p-1 align-middle" colspan="3">{{ $daily_report->refule_type ?? '' }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">Liter</td>
                 <td class="p-1 align-middle" colspan="3">
-                    {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
+                    {{ $formatNumber($daily_report->refule_liter ?? null, 0) }}
                 </td>
             </tr>
             <tr>
                 <td class="p-1 align-middle" style="width: 20%">KM</td>
                 <td class="p-1 align-middle" colspan="3">
-                    {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}</td>
+                    {{ $formatNumber($daily_report->refule_km ?? null, 0) }}
+                </td>
             </tr>
         </tbody>
     </table>
@@ -554,31 +583,37 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($daily_report_detail as $d)
+            @forelse ($daily_report_detail as $d)
                 <tr>
                     <td class="p-1 align-middle">
                         {{ $loop->iteration }}
                     </td>
                     <td class="p-1 align-middle">
-                        {{ $d->unit->vehicle_no }}
+                        {{ data_get($d, 'unit.vehicle_no', '') }}
                     </td>
                     <td class="p-1 align-middle">
-                        {{ $d->item }}
+                        {{ $d->item ?? '' }}
                     </td>
                     <td class="p-1 align-middle">
-                        {{ $d->uom_1 }}
+                        {{ $d->uom_1 ?? '' }}
                     </td>
                     <td class="p-1 align-middle">
-                        {{ $d->value_1 ? Number::format($d->value_1, precision: 2) : '' }}
+                        {{ $formatNumber($d->value_1 ?? null, 2) }}
                     </td>
                     <td class="p-1 align-middle">
-                        {{ $d->uom_2 }}
+                        {{ $d->uom_2 ?? '' }}
                     </td>
                     <td class="p-1 align-middle">
-                        {{ $d->value_2 ? Number::format($d->value_2, precision: 2) : '' }}
+                        {{ $formatNumber($d->value_2 ?? null, 2) }}
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td class="p-1 align-middle" colspan="7" style="text-align:center;">
+                        No detail data
+                    </td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 @else
@@ -601,19 +636,22 @@
                 <td class="p-1 align-middle">1</td>
                 <td class="p-1 align-middle">Start</td>
                 <td class="p-1 align-middle">
-                    {{ $daily_report->km_start ? Number::format($daily_report->km_start, precision: 0) : '' }}</td>
+                    {{ $formatNumber($daily_report->km_start ?? null, 0) }}
+                </td>
             </tr>
             <tr>
                 <td class="p-1 align-middle">2</td>
                 <td class="p-1 align-middle">Finish</td>
                 <td class="p-1 align-middle">
-                    {{ $daily_report->km_finish ? Number::format($daily_report->km_finish, precision: 0) : '' }}</td>
+                    {{ $formatNumber($daily_report->km_finish ?? null, 0) }}
+                </td>
             </tr>
             <tr>
                 <td class="p-1 align-middle">3</td>
                 <td class="p-1 align-middle">Total</td>
                 <td class="p-1 align-middle">
-                    {{ $daily_report->km_total ? Number::format($daily_report->km_total, precision: 0) : '' }}</td>
+                    {{ $formatNumber($daily_report->km_total ?? null, 0) }}
+                </td>
             </tr>
 
             <tr style="background-color: #D9D2D0">
@@ -624,18 +662,19 @@
             <tr>
                 <td class="p-1 align-middle">4</td>
                 <td class="p-1 align-middle">Operator</td>
-                <td class="p-1 align-middle">{{ $daily_report->operator }}</td>
+                <td class="p-1 align-middle">{{ $daily_report->operator ?? '' }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle">5</td>
                 <td class="p-1 align-middle">Helper</td>
-                <td class="p-1 align-middle">{{ $daily_report->helper }}</td>
+                <td class="p-1 align-middle">{{ $daily_report->helper ?? '' }}</td>
             </tr>
             <tr>
                 <td class="p-1 align-middle">6</td>
                 <td class="p-1 align-middle">Total</td>
                 <td class="p-1 align-middle">
-                    {{ $daily_report->load ? Number::format($daily_report->load, precision: 0) : '' }}</td>
+                    {{ $formatNumber($daily_report->load ?? null, 0) }}
+                </td>
             </tr>
 
             <tr style="background-color: #D9D2D0">
@@ -644,25 +683,27 @@
                 </td>
             </tr>
             <tr>
-                <td class="p-1 align-middle">6</td>
+                <td class="p-1 align-middle">7</td>
                 <td class="p-1 align-middle">From</td>
                 <td class="p-1 align-middle">
-                    {{ $daily_report->refule_liter || $daily_report->refule_km ? $daily_report->refule_type : '' }}
-                </td>
-            </tr>
-            <tr>
-                <td class="p-1 align-middle">7</td>
-                <td class="p-1 align-middle">Liter</td>
-                <td class="p-1 align-middle">
-                    {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
+                    {{ ($daily_report->refule_liter || $daily_report->refule_km) ? ($daily_report->refule_type ?? '') : '' }}
                 </td>
             </tr>
             <tr>
                 <td class="p-1 align-middle">8</td>
+                <td class="p-1 align-middle">Liter</td>
+                <td class="p-1 align-middle">
+                    {{ $formatNumber($daily_report->refule_liter ?? null, 0) }}
+                </td>
+            </tr>
+            <tr>
+                <td class="p-1 align-middle">9</td>
                 <td class="p-1 align-middle">KM</td>
                 <td class="p-1 align-middle">
-                    {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}</td>
+                    {{ $formatNumber($daily_report->refule_km ?? null, 0) }}
+                </td>
             </tr>
+
             <tr style="background-color: #D9D2D0">
                 <td class="p-1 align-middle" colspan="3">
                     <b>Remarks</b>
@@ -670,7 +711,7 @@
             </tr>
             <tr>
                 <td class="p-1 align-middle" colspan="3">
-                    {!! $daily_report->remarks !!}
+                    {!! $daily_report->remarks ?? '' !!}
                 </td>
             </tr>
         </tbody>
@@ -683,12 +724,10 @@
         $font = $fontMetrics->getFont("Helvetica", "normal");
         $size = 8;
 
-        // Footer right
         $text = "Halaman {PAGE_NUM} / {PAGE_COUNT}";
 
-        // A4 portrait ~ 595x842 pt. Adjust slightly if needed.
-        $x = 430;   // move left/right
-        $y = 820;   // move up/down
+        $x = 430;
+        $y = 820;
 
         $pdf->page_text($x, $y, $text, $font, $size, array(0,0,0));
     }

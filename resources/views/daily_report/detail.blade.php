@@ -1,7 +1,38 @@
 @php
     use Illuminate\Support\Number;
     use Carbon\Carbon;
+
+    $durationTrip1 = $daily_report->duration_trip_1 ?? null;
+    $durationTrip2 = $daily_report->duration_trip_2 ?? null;
+
+    $durationToMinutes = function ($time) {
+        if (empty($time)) {
+            return 0;
+        }
+
+        $parts = explode(':', (string) $time);
+
+        $hour = isset($parts[0]) ? (int) $parts[0] : 0;
+        $minute = isset($parts[1]) ? (int) $parts[1] : 0;
+
+        return ($hour * 60) + $minute;
+    };
+
+    $hasDuration = !empty($durationTrip1) || !empty($durationTrip2);
+
+    $durationTotal = '';
+
+    if ($hasDuration) {
+        $totalMinutes = $durationToMinutes($durationTrip1) + $durationToMinutes($durationTrip2);
+
+        $durationTotal = sprintf(
+            '%02d:%02d',
+            intdiv($totalMinutes, 60),
+            $totalMinutes % 60,
+        );
+    }
 @endphp
+
 <div class="row mb-2">
     <div class="col">
         <table style="width: 100%;border-collapse:separate; border-spacing:0 12px;">
@@ -19,17 +50,19 @@
                     <b>{{ $daily_report->date }}</b>
                 </td>
                 <td width="30%">Shift :<br>
-                    <b> {{ $daily_report->shift }}</b>
+                    <b>{{ $daily_report->shift }}</b>
                 </td>
             </tr>
         </table>
     </div>
 </div>
+
 <div class="row mb-2">
     <div class="col">
         @php
             $no = 1;
         @endphp
+
         @if ($daily_report->type == 'LCT')
             <table class="table mb-0">
                 <thead class="table-dark">
@@ -42,94 +75,61 @@
                         <th style="width: 50%" colspan="3" class="align-middle">Departure</th>
                         <th style="width: 50%" colspan="3" class="align-middle">Arrival</th>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Location
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">Location</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->trip_1_location->name }}
+                            {{ $daily_report->trip_1_location->name ?? '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Location
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">Location</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->trip_1_arr_location->name }}
+                            {{ $daily_report->trip_1_arr_location->name ?? '' }}
                         </td>
                     </tr>
-                    <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Loading At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
 
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">Loading At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_1_loading_at ? Carbon::parse($daily_report->trip_1_loading_at)->format('H:i') : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Arrived At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">Arrived At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_1_arrived_at ? Carbon::parse($daily_report->trip_1_arrived_at)->format('H:i') : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Complete Loading At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%">Complete Loading At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_1_complete_loading_at ? Carbon::parse($daily_report->trip_1_complete_loading_at)->format('H:i') : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Berthing At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%">Berthing At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_1_berthing_at ? Carbon::parse($daily_report->trip_1_berthing_at)->format('H:i') : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Departed At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%">Departed At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_1_departed_at ? Carbon::parse($daily_report->trip_1_departed_at)->format('H:i') : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
+
                     <tr>
                         <td class="p-1 align-middle" style="width: 15%">
                             <b>Duration</b>
@@ -138,20 +138,17 @@
                             <b>:</b>
                         </td>
                         <td class="p-1 align-middle">
-                            <b>{{ $daily_report->duration_trip_1 ? Carbon::parse($daily_report->duration_trip_1)->format('H:i') : '' }}</b>
+                            <b>
+                                {{ $daily_report->duration_trip_1 ? Carbon::parse($daily_report->duration_trip_1)->format('H:i') : '' }}
+                            </b>
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
                 </tbody>
+
                 <thead class="table-dark">
                     <tr>
                         <th scope="col" colspan="6">Trip 2</th>
@@ -162,94 +159,61 @@
                         <th style="width: 50%" colspan="3" class="align-middle">Departure</th>
                         <th style="width: 50%" colspan="3" class="align-middle">Arrival</th>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Location
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">Location</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->trip_2_location->name }}
+                            {{ $daily_report->trip_2_location->name ?? '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Location
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">Location</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->trip_2_arr_location->name }}
+                            {{ $daily_report->trip_2_arr_location->name ?? '' }}
                         </td>
                     </tr>
-                    <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Loading At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
 
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">Loading At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_2_loading_at ? Carbon::parse($daily_report->trip_2_loading_at)->format('H:i') : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Arrived At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">Arrived At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_2_arrived_at ? Carbon::parse($daily_report->trip_2_arrived_at)->format('H:i') : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Complete Loading At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%">Complete Loading At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_2_complete_loading_at ? Carbon::parse($daily_report->trip_2_complete_loading_at)->format('H:i') : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Berthing At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%">Berthing At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_2_berthing_at ? Carbon::parse($daily_report->trip_2_berthing_at)->format('H:i') : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            Departed At
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%">Departed At</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->trip_2_departed_at ? Carbon::parse($daily_report->trip_2_departed_at)->format('H:i') : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
+
                     <tr>
                         <td class="p-1 align-middle" style="width: 15%">
                             <b>Duration</b>
@@ -258,20 +222,17 @@
                             <b>:</b>
                         </td>
                         <td class="p-1 align-middle">
-                            <b>{{ $daily_report->duration_trip_2 ? Carbon::parse($daily_report->duration_trip_2)->format('H:i') : '' }}</b>
+                            <b>
+                                {{ $daily_report->duration_trip_2 ? Carbon::parse($daily_report->duration_trip_2)->format('H:i') : '' }}
+                            </b>
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
-                    <tr style='background-color: #FAF6F5; border-top: 3px double #000 !important;'>
+
+                    <tr style="background-color: #FAF6F5; border-top: 3px double #000 !important;">
                         <td class="p-1 align-middle" style="width: 15%">
                             <b>Duration Total</b>
                         </td>
@@ -279,20 +240,15 @@
                             <b>:</b>
                         </td>
                         <td class="p-1 align-middle">
-                            <b>{{ addTime($daily_report->duration_trip_1, $daily_report->duration_trip_2) }}</b>
+                            <b>{{ $durationTotal }}</b>
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
                 </tbody>
+
                 <thead class="table-dark">
                     <tr>
                         <th scope="col" colspan="6">Refule</th>
@@ -300,76 +256,43 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            From
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
-
+                        <td class="p-1 align-middle" style="width: 15%">From</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->refule_type }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
-                    <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            KM
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
 
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">KM</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
-                    <tr>
-                        <td class="p-1 align-middle" style="width: 15%">
-                            From
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
 
+                    <tr>
+                        <td class="p-1 align-middle" style="width: 15%">Liter</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
                         </td>
 
-                        <td class="p-1 align-middle" style="width: 15%">
-
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-
-                        </td>
-
-                        <td class="p-1 align-middle">
-
-                        </td>
+                        <td class="p-1 align-middle" style="width: 15%"></td>
+                        <td class="p-1 align-middle" style="width: 5px"></td>
+                        <td class="p-1 align-middle"></td>
                     </tr>
                 </tbody>
             </table>
+
             <table class="table mb-0">
                 <thead class="table-dark">
                     <tr>
@@ -389,7 +312,7 @@
                                 {{ $loop->iteration }}
                             </td>
                             <td class="p-1 align-middle">
-                                {{ $d->unit->vehicle_no }}
+                                {{ $d->unit->vehicle_no ?? '' }}
                             </td>
                             <td class="p-1 align-middle">
                                 {{ $d->item }}
@@ -423,134 +346,91 @@
                     <tr class="table-secondary">
                         <th colspan="4" class="align-middle">KM</th>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            1
-                        </td>
-                        <td class="p-1 align-middle">
-                            Start
-                        </td>
-                        <td class="p-1 align-middle" style="width: 5px">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">1</td>
+                        <td class="p-1 align-middle">Start</td>
+                        <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->km_start ? Number::format($daily_report->km_start, precision: 0) : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            2
-                        </td>
-                        <td class="p-1 align-middle">
-                            Finish
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">2</td>
+                        <td class="p-1 align-middle">Finish</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->km_finish ? Number::format($daily_report->km_finish, precision: 0) : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            3
-                        </td>
-                        <td class="p-1 align-middle">
-                            Total
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">3</td>
+                        <td class="p-1 align-middle">Total</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->km_total ? Number::format($daily_report->km_total, precision: 0) : '' }}
                         </td>
                     </tr>
+
                     <tr class="table-secondary">
                         <th colspan="4" class="align-middle">Person</th>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            4
-                        </td>
-                        <td class="p-1 align-middle">
-                            Operator
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">4</td>
+                        <td class="p-1 align-middle">Operator</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->operator }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            5
-                        </td>
-                        <td class="p-1 align-middle">
-                            Helper
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">5</td>
+                        <td class="p-1 align-middle">Helper</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->helper }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            6
-                        </td>
-                        <td class="p-1 align-middle">
-                            Load
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">6</td>
+                        <td class="p-1 align-middle">Load</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->load ? Number::format($daily_report->load, precision: 0) : '' }}
                         </td>
                     </tr>
+
                     <tr class="table-secondary">
                         <th colspan="4" class="align-middle">Refule</th>
                     </tr>
+
                     <tr>
+                        <td class="p-1 align-middle">7</td>
+                        <td class="p-1 align-middle">From</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
-                            7
-                        </td>
-                        <td class="p-1 align-middle">
-                            From
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
-                        <td class="p-1 align-middle">
-                            {{ $daily_report->refule_liter || $daily_report->refule_km ? $daily_report->operator : '' }}
+                            {{ $daily_report->refule_liter || $daily_report->refule_km ? $daily_report->refule_type : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            8
-                        </td>
-                        <td class="p-1 align-middle">
-                            Liter
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">8</td>
+                        <td class="p-1 align-middle">Liter</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
                         </td>
                     </tr>
+
                     <tr>
-                        <td class="p-1 align-middle">
-                            9
-                        </td>
-                        <td class="p-1 align-middle">
-                            KM
-                        </td>
-                        <td class="p-1 align-middle">
-                            :
-                        </td>
+                        <td class="p-1 align-middle">9</td>
+                        <td class="p-1 align-middle">KM</td>
+                        <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
                             {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}
                         </td>
