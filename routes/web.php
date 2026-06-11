@@ -281,35 +281,35 @@ Route::middleware(['auth'])->group(function () {
         ->names('mechanicalinspection');
 
     Route::get('mechanicalinspection-get-unit-all', [MechanicalInspectionController::class, 'get_unit_all'])
-        ->middleware('role_or_permission:superadmin|mechanical inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.get_unit_all');
 
     Route::get('mechanicalinspection-print/{mechanical_inspection}', [MechanicalInspectionController::class, 'print'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.print');
 
     Route::get('mechanicalinspection-export-pdf/{mechanical_inspection}', [MechanicalInspectionController::class, 'export_pdf'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.export_pdf');
 
     Route::get('mechanicalinspection-load-table-add', [MechanicalInspectionController::class, 'get_table_add'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.get_table_add');
 
     Route::get('mechanicalinspection-load-table-edit/{mechanical_inspection}', [MechanicalInspectionController::class, 'get_table_edit'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.get_table_edit');
 
     Route::get('mechanicalinspection-get-detail/{mechanical_inspection}', [MechanicalInspectionController::class, 'get_detail'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.get_detail');
 
     Route::get('mechanicalinspection-print/{mechanical_inspection}', [MechanicalInspectionController::class, 'print'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.print');
 
     Route::get('mechanicalinspection-export-pdf/{mechanical_inspection}', [MechanicalInspectionController::class, 'export_pdf'])
-        ->middleware('role_or_permission:superadmin|mecahincal inspection')
+        ->middleware('role_or_permission:superadmin|mechanical_inspection')
         ->name('mechanicalinspection.export_pdf');
 
 

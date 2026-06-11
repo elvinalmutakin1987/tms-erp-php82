@@ -44,6 +44,9 @@ return new class extends Migration
             $table->decimal('refule_hm', 16, 2)->nullable();
             $table->decimal('refule_km', 16, 2)->nullable();
             $table->decimal('refule_liter', 16, 2)->nullable();
+            $table->decimal('refule_water', 16, 2)->nullable();
+            $table->decimal('refule_mechine', 16, 2)->nullable();
+            $table->decimal('refule_genset', 16, 2)->nullable();
             $table->string('refule_type', 20)->nullable();
             $table->decimal('supply_fuel', 16, 2)->nullable();
             $table->decimal('supply_water', 16, 2)->nullable();

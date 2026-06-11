@@ -25,7 +25,7 @@ class DailyReportController extends Controller
     {
         if (request()->ajax()) {
             $daily_report = Daily_report::query();
-            if (request()->unit_id != 'All') {
+            if (request()->unit_id != 'All' && request()->unit_id != '') {
                 $daily_report = $daily_report->where('unit_id', request()->unit_id);
             }
             if (request()->date_start != '') {
@@ -152,13 +152,6 @@ class DailyReportController extends Controller
                     'unit_id' => ['required', 'not_in:All'],
                     'date' => 'required',
                 ]);
-                // $berthing_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_berthing_at);
-                // $depart_trip_1 = Carbon::createFromFormat('H:i', $request->trip_1_departed_at);
-                // $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
-
-                // $berthing_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_berthing_at);
-                // $depart_trip_2 = Carbon::createFromFormat('H:i', $request->trip_2_departed_at);
-                // $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
                 $berthing_trip_1 = $request->trip_1_berthing_at;
                 $depart_trip_1 = $request->trip_1_departed_at;
 
@@ -182,36 +175,6 @@ class DailyReportController extends Controller
                     'km_total' => 'required',
                 ]);
             }
-            // $data = array_merge(
-            //     $request->except(
-            //         '_token',
-            //         '_method',
-            //         'detail_unit_id',
-            //         'unit_name',
-            //         'item',
-            //         'uom_1',
-            //         'value_1',
-            //         'value_1__',
-            //         'uom_2',
-            //         'value_2',
-            //         'value_2__',
-            //         '_km_start',
-            //         '_km_finish',
-            //         '_km_total',
-            //         '_load',
-            //         '_refule_filter',
-            //         '_refule_km',
-            //         '_refule_liter'
-            //     ),
-            //     [
-            //         'request_token' => $request->request_token,
-            //         'input_method' => 'Web',
-            //         'type' => $type,
-            //         'duration_trip_1' => $duration_trip_1,
-            //         'duration_trip_2' => $duration_trip_2,
-            //         'remarks' => $request->remarks,
-            //     ]
-            // );
             $data = [
                 'unit_id' => $request->unit_id,
                 'date' => $request->date,
@@ -238,6 +201,9 @@ class DailyReportController extends Controller
                 'load' => $request->load,
                 'refule_km' => $request->refule_km,
                 'refule_liter' => $request->refule_liter,
+                'refule_water' => $request->refule_water,
+                'refule_mechine' => $request->refule_mechine,
+                'refule_genset' => $request->refule_genset,
                 'refule_type' => $request->refule_type,
                 'request_token' => $request->request_token,
                 'input_method' => 'Web',
@@ -320,13 +286,6 @@ class DailyReportController extends Controller
                     'unit_id' => ['required', 'not_in:All'],
                     'date' => 'required',
                 ]);
-                // $berthing_trip_1 = $request->trip_1_berthing_at;
-                // $depart_trip_1 = $request->trip_1_departed_at;
-                // $duration_trip_1 = countTime($depart_trip_1, $berthing_trip_1);
-
-                // $berthing_trip_2 = $request->trip_2_berthing_at;
-                // $depart_trip_2 = $request->trip_2_departed_at;
-                // $duration_trip_2 = countTime($depart_trip_2, $berthing_trip_2);
                 $berthing_trip_1 = $request->trip_1_berthing_at;
                 $depart_trip_1 = $request->trip_1_departed_at;
 
@@ -350,35 +309,6 @@ class DailyReportController extends Controller
                     'km_total' => 'required',
                 ]);
             }
-            // $data = array_merge(
-            //     $request->except(
-            //         '_token',
-            //         '_method',
-            //         'detail_unit_id',
-            //         'unit_name',
-            //         'item',
-            //         'uom_1',
-            //         'value_1',
-            //         'value_1__',
-            //         'uom_2',
-            //         'value_2',
-            //         'value_2__',
-            //         '_km_start',
-            //         '_km_finish',
-            //         '_km_total',
-            //         '_load',
-            //         '_refule_filter',
-            //         '_refule_km',
-            //         '_refule_liter'
-            //     ),
-            //     [
-            //         'input_method' => 'Web',
-            //         'type' => $type,
-            //         'duration_trip_1' => $duration_trip_1,
-            //         'duration_trip_2' => $duration_trip_2,
-            //         'remarks' => $request->remarks,
-            //     ]
-            // );
             $data = [
                 'unit_id' => $request->unit_id,
                 'date' => $request->date,
@@ -405,6 +335,9 @@ class DailyReportController extends Controller
                 'load' => $request->load,
                 'refule_km' => $request->refule_km,
                 'refule_liter' => $request->refule_liter,
+                'refule_water' => $request->refule_water,
+                'refule_mechine' => $request->refule_mechine,
+                'refule_genset' => $request->refule_genset,
                 'refule_type' => $request->refule_type,
                 'request_token' => $request->request_token,
                 'input_method' => 'Web',
@@ -477,18 +410,6 @@ class DailyReportController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        // try {
-        //     $unit = Unit::all();
-        //     return response()->json([
-        //         'success' => true,
-        //         'data' => $unit
-        //     ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $th->getMessage()
-        //     ], 400);
-        // }
         if ($request->ajax()) {
             $term = trim($request->term);
             $unit = Unit::selectRaw("id, vehicle_no as text")
@@ -562,6 +483,7 @@ class DailyReportController extends Controller
             return response()->json([
                 'success' => true,
                 'html' => $html,
+                'unit' => $unit,
                 'report_no' => $daily_report->report_no
             ], 200);
         } catch (\Throwable $th) {

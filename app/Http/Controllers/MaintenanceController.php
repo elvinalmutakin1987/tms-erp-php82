@@ -26,14 +26,13 @@ class MaintenanceController extends Controller
     {
         if (request()->ajax()) {
             $maintenance = Maintenance::query();
-            if (request()->unit_id != 'All') {
+            if (request()->unit_id != 'All' && request()->unit_id != '') {
                 $maintenance = $maintenance->where('unit_id', request()->unit_id);
             }
-            if (request()->status != 'All') {
+            if (request()->status != 'All' && request()->status != '') {
                 $maintenance = $maintenance->where('status', request()->status);
             }
-
-            if (request()->type != 'All') {
+            if (request()->type != 'All' && request()->type != '') {
                 $maintenance = $maintenance->where('type', request()->type);
             }
             if (request()->date_start != '') {
@@ -81,23 +80,33 @@ class MaintenanceController extends Controller
                      * user superadmin dan yang punya akses edit aja baru bisa muncul
                      */
                     if ($item->status == 'Draft'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
-                            $button .= '<li>
+                        // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
+                        //     $button .= '<li>
+                        //         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                        //         data-id="' . $item->id . '">Edit</a>
+                        //     </li>';
+                        // endif;
+                        $button .= '<li>
                         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                         data-id="' . $item->id . '">Edit</a>
                     </li>';
-                        endif;
+
                     endif;
+
 
 
                     /**
                      * ini cuma user superadmin dan yang punya akses delete aja baru muncul
                      */
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
-                        $button .= '<li>
+                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
+                    //     $button .= '<li>
+                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                    //             </li>';
+                    // endif;
+
+                    $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
-                    endif;
 
                     $button .= '</ul>
                         </div>
@@ -169,11 +178,11 @@ class MaintenanceController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
                 // 'client_vendor_id' => ['required', 'not_in:All'],
-                'hour_meter' => 'required',
-                'km_hm' => 'required',
-                'start' => 'required',
-                'finish' => 'required',
-                'work_duration' => 'required'
+                // 'hour_meter' => 'required',
+                // 'km_hm' => 'required',
+                // 'start' => 'required',
+                // 'finish' => 'required',
+                // 'work_duration' => 'required'
             ]);
             $data = [
                 'unit_id' => $request->unit_id,
@@ -222,11 +231,13 @@ class MaintenanceController extends Controller
     public function show(Maintenance $maintenance)
     {
         $maintenance_detail = $maintenance->maintenance_detail;
+        $unit = Unit::find($maintenance->unit_id);
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $maintenance,
-            'maintenance_detail' => $maintenance_detail
+            'maintenance_detail' => $maintenance_detail,
+            'unit' => $unit
         ], 200);
     }
 
@@ -249,11 +260,11 @@ class MaintenanceController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
                 // 'client_vendor_id' => ['required', 'not_in:All'],    
-                'hour_meter' => 'required',
-                'km_hm' => 'required',
-                'start' => 'required',
-                'finish' => 'required',
-                'work_duration' => 'required'
+                // 'hour_meter' => 'required',
+                // 'km_hm' => 'required',
+                // 'start' => 'required',
+                // 'finish' => 'required',
+                // 'work_duration' => 'required'
             ]);
             $data = [
                 'unit_id' => $request->unit_id,
@@ -328,17 +339,39 @@ class MaintenanceController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        try {
-            $unit = Unit::all();
-            return response()->json([
-                'success' => true,
-                'data' => $unit
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        // try {
+        //     $unit = Unit::all();
+        //     return response()->json([
+        //         'success' => true,
+        //         'data' => $unit
+        //     ], 200);
+        // } catch (\Throwable $th) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => $th->getMessage()
+        //     ], 400);
+        // }
+
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $unit = Unit::selectRaw("id, vehicle_no as text")
+                ->where('vehicle_no', 'like', '%' . $term . '%')
+                ->orderBy('vehicle_no')
+                ->simplePaginate(10);
+            $total_count = count($unit);
+            $morePages = true;
+            $pagination_obj = json_encode($unit);
+            if (empty($unit->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $unit->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 

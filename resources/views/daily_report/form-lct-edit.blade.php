@@ -207,7 +207,7 @@
     </thead>
     <tbody id="tbody3">
         <tr>
-            <td class="p-1 align-middle">5</td>
+            <td class="p-1 align-middle">10</td>
             <td class="p-1 align-middle">
                 From
             </td>
@@ -227,7 +227,7 @@
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle">6</td>
+            <td class="p-1 align-middle">11</td>
             <td class="p-1 align-middle">
                 Liter
             </td>
@@ -245,7 +245,7 @@
             </td>
         </tr>
         <tr>
-            <td class="p-1 align-middle">7</td>
+            <td class="p-1 align-middle">12</td>
             <td class="p-1 align-middle">
                 KM
             </td>
@@ -254,6 +254,42 @@
                     value="{{ $daily_report?->refule_km ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_km" name="_refule_km"
                     value="{{ $daily_report?->refule_km ? Number::format($daily_report?->refule_km ?? 0, precision: 0) : '' }}">
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">13</td>
+            <td class="p-1 align-middle">
+                Main Mechine
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_mechine" name="refule_mechine"
+                    value="{{ $daily_report?->refule_mechine ?? 0 }}">
+                <input type="text" class="form-control" id="_refule_mechine" name="_refule_mechine"
+                    value="{{ $daily_report?->refule_mechine ? Number::format($daily_report?->refule_mechine ?? 0, precision: 0) : '' }}">
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">14</td>
+            <td class="p-1 align-middle">
+                Generator
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_genset" name="refule_genset"
+                    value="{{ $daily_report?->refule_genset ?? 0 }}">
+                <input type="text" class="form-control" id="_refule_genset" name="_refule_genset"
+                    value="{{ $daily_report?->refule_genset ? Number::format($daily_report?->refule_genset ?? 0, precision: 0) : '' }}">
             </td>
             <td class="p-1 align-middle">
 
