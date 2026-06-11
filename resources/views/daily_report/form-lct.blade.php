@@ -237,6 +237,38 @@
 
             </td>
         </tr>
+        <tr>
+            <td class="p-1 align-middle">13</td>
+            <td class="p-1 align-middle">
+                Main Mechine
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_mechine" name="refule_mechine">
+                <input type="text" class="form-control" id="_refule_mechine" name="_refule_mechine">
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
+        <tr>
+            <td class="p-1 align-middle">14</td>
+            <td class="p-1 align-middle">
+                Generator
+            </td>
+            <td class="p-1 align-middle">
+                <input type="hidden" class="form-control" id="refule_genset" name="refule_genset">
+                <input type="text" class="form-control" id="_refule_genset" name="_refule_genset">
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+            <td class="p-1 align-middle">
+
+            </td>
+        </tr>
     </tbody>
 </table>
 <table class="table mb-0" id="tableUnit">
@@ -262,7 +294,8 @@
                 </select>
             </td>
             <td class="p-1 align-middle">
-                <select class="form-select select-select" id="_item" name="_item" data-placeholder="Choose Item">
+                <select class="form-select select-select" id="_item" name="_item"
+                    data-placeholder="Choose Item">
                     <option value=""></option>
                     <option value="ANSOL">ANSOL</option>
                     <option value="AN">AN</option>
@@ -272,7 +305,8 @@
                 </select>
             </td>
             <td class="p-1 align-middle">
-                <select class="form-select select-select" id="_uom_1" name="_uom_1" data-placeholder="Choose UOM 1">
+                <select class="form-select select-select" id="_uom_1" name="_uom_1"
+                    data-placeholder="Choose UOM 1">
                     <option value=""></option>
                     <option value="Isotank">Isotank</option>
                     <option value="Bag">Bag</option>
@@ -287,7 +321,8 @@
                 <input type="text" class="form-control" id="_value_1_" name="_value_1_">
             </td>
             <td class="p-1 align-middle">
-                <select class="form-select select-select" id="_uom_2" name="_uom_2" data-placeholder="Choose UOM 2">
+                <select class="form-select select-select" id="_uom_2" name="_uom_2"
+                    data-placeholder="Choose UOM 2">
                     <option value=""></option>
                     <option value="Ton">Ton</option>
                 </select>

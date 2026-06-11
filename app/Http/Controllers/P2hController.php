@@ -23,7 +23,7 @@ class P2hController extends Controller
     {
         if (request()->ajax()) {
             $p2h = P2h::query();
-            if (request()->unit_id != 'All') {
+            if (request()->unit_id != 'All' && request()->unit_id != '') {
                 $p2h = $p2h->where('unit_id', request()->unit_id);
             }
             if (request()->date_start != '') {
@@ -146,6 +146,7 @@ class P2hController extends Controller
             $data = array_merge(
                 $request->only(
                     'unit_id',
+                    'shift',
                     'date',
                     'driver',
                     'km_start',
@@ -193,11 +194,13 @@ class P2hController extends Controller
     public function show(P2h $p2h)
     {
         $p2h_detail = $p2h->p2h_detail;
+        $unit = Unit::find($p2h->unit_id);
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $p2h,
-            'p2h_detail' => $p2h_detail
+            'p2h_detail' => $p2h_detail,
+            'unit' => $unit
         ], 200);
     }
 
@@ -221,12 +224,13 @@ class P2hController extends Controller
                 'date' => 'required',
                 'driver' => 'required',
                 'km_start' => 'required',
-                'km_finish' => 'required',
+                // 'km_finish' => 'required',
             ]);
             $data = array_merge(
                 $request->only(
                     'unit_id',
                     'date',
+                    'shift',
                     'driver',
                     'km_start',
                     'km_finish'
@@ -297,17 +301,26 @@ class P2hController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        try {
-            $unit = Unit::all();
-            return response()->json([
-                'success' => true,
-                'data' => $unit
-            ], 200);
-        } catch (\Throwable $th) {
-            return response()->json([
-                'success' => false,
-                'message' => $th->getMessage()
-            ], 400);
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $unit = Unit::selectRaw("id, vehicle_no as text")
+                ->where('vehicle_no', 'like', '%' . $term . '%')
+                ->orderBy('vehicle_no')
+                ->simplePaginate(10);
+            $total_count = count($unit);
+            $morePages = true;
+            $pagination_obj = json_encode($unit);
+            if (empty($unit->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $unit->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
         }
     }
 

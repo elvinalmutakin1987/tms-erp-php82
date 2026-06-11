@@ -112,26 +112,33 @@
 
     <script>
         const saveButton = document.getElementById('saveButton');
-        var reportId = '';
-        var unitId = '';
+
+        let reportId = '';
+        let unitId = '';
+        let isClosingFormModal = false;
+        let formAjaxRequest = null;
+        let tokenAjaxRequest = null;
+        let formLoadSeq = 0;
+
         $(document).ready(function() {
-            var ajax = '{{ url()->current() }}';
-            var table = $('#table-data').DataTable({
+            const ajax = '{{ url()->current() }}';
+
+            $('#table-data').DataTable({
                 scrollCollapse: true,
                 responsive: true,
-                "lengthMenu": [
+                lengthMenu: [
                     [10, 25, 50, 100, -1],
-                    [10, 25, 50, 100, "All"]
+                    [10, 25, 50, 100, 'All']
                 ],
-                "paging": true,
-                "lengthChange": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                processing: true,
+                serverSide: true,
+                ajax: {
                     url: ajax,
                     data: function(d) {
                         d.unit_id = $('#unit').val();
@@ -139,7 +146,7 @@
                         d.date_end = $('#date_end').val();
                     }
                 },
-                "columns": [{
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -152,33 +159,33 @@
                         data: 'report_no',
                         name: 'report_no',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'date',
                         name: 'date',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'unit',
                         name: 'unit',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'type',
                         name: 'type',
                         orderable: true,
                         searchable: true,
-                        render: function(data, type, row) {
-                            if (data == "LCT") {
+                        render: function(data) {
+                            if (data == 'LCT') {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
                                     data + '</span>';
-                            } else {
-                                return '<span class="badge bg-info" style="font-size: 13px">' +
-                                    data + '</span>';
                             }
+
+                            return '<span class="badge bg-info" style="font-size: 13px">' + data +
+                                '</span>';
                         }
                     },
                     {
@@ -187,12 +194,13 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (row.type == "Non LCT") {
+                            if (row.type == 'Non LCT') {
                                 return numbro(data).format({
                                     thousandSeparated: true
                                 });
                             }
-                            return "";
+
+                            return '';
                         }
                     },
                     {
@@ -201,10 +209,11 @@
                         orderable: true,
                         searchable: true,
                         render: function(data, type, row) {
-                            if (row.type == "LCT") {
+                            if (row.type == 'LCT') {
                                 return data;
                             }
-                            return "";
+
+                            return '';
                         }
                     },
                     {
@@ -216,62 +225,67 @@
                         className: 'text-center',
                         targets: '_all'
                     }
-                ],
+                ]
             });
 
-            $(document).on('click', '.editButton', function() {
-                reportId = $(this).data('id');
-                $('#modal-header').text('Edit Report');
-                $('#id').val(reportId);
-                let url = '{{ route('dailyreport.show', ':_id') }}';
-                url = url.replace(':_id', reportId);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit Report');
-                        $("#date").val(response.data.date);
-                        $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#shift").val(response.data.shift).trigger('change');
-                        $("#remarks").val(response.data.remarks);
-                        $('#request_token').val(response.data.request_token);
-                    },
-                    error: function() {
-                        alert('Error fetching data');
-                    }
+            $('#openModalButton').off('click.dailyReportAdd').on('click.dailyReportAdd', function() {
+                reportId = '';
+                unitId = '';
+                $('#id').val('');
+            });
+
+            $(document).off('click.dailyReportEdit', '.editButton').on('click.dailyReportEdit', '.editButton',
+                function() {
+                    reportId = String($(this).data('id') || '');
+                    unitId = '';
+                    let url = '{{ route('dailyreport.show', ':_id') }}';
+                    url = url.replace(':_id', reportId);
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function(response) {
+                            $("#date").val(response.data.date);
+                            $("#shift").val(response.data.shift).trigger('change.select2');
+                        },
+                        error: function() {
+                            alert('Error fetching data');
+                        }
+                    });
+                    $('#id').val(reportId);
+                    $('#modal-header').text('Edit Report');
                 });
-            });
 
-            $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail Report');
-                let url = '{{ route('dailyreport.get_detail', ':_id') }}';
-                url = url.replace(':_id', $(this).data('id'));
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#modal-detail-body').html(response);
-                    },
-                    error: function() {
-                        alert('Error fetching data');
-                    }
+            $(document).off('click.dailyReportDetail', '.detailButton').on('click.dailyReportDetail',
+                '.detailButton',
+                function() {
+                    $('#modal-detail-header').text('Detail Report');
+
+                    let url = '{{ route('dailyreport.get_detail', ':_id') }}';
+                    url = url.replace(':_id', $(this).data('id'));
+
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function(response) {
+                            $('#modal-detail-body').html(response);
+                        },
+                        error: function() {
+                            alert('Error fetching data');
+                        }
+                    });
                 });
-            });
 
-            $(".datepicker").flatpickr({
+            $('.datepicker').flatpickr({
                 allowInput: true
             });
 
-            $("#date_start").on('change', function() {
+            $('#date_start').off('change.dailyReportFilter').on('change.dailyReportFilter', function() {
                 $('#table-data').DataTable().draw();
             });
 
-            $("#date_end").on('change', function() {
+            $('#date_end').off('change.dailyReportFilter').on('change.dailyReportFilter', function() {
                 $('#table-data').DataTable().draw();
             });
-
-            gen_select2();
 
             initUnitTopSelect2();
         });
@@ -289,6 +303,7 @@
                 if (result.isConfirmed) {
                     let url = '{{ route('dailyreport.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
+
                     $.ajax({
                         url: url,
                         type: 'DELETE',
@@ -298,9 +313,9 @@
                         },
                         success: function(response) {
                             Swal.fire({
-                                title: "Deleted!",
+                                title: 'Deleted!',
                                 text: response.message,
-                                icon: "success",
+                                icon: 'success',
                                 timer: 5000,
                                 didOpen: () => {},
                                 willClose: () => {
@@ -309,11 +324,12 @@
                             });
                         },
                         error: function(xhr, status, error) {
-                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
                             Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: errorMessage,
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: errorMessage
                             });
                         }
                     });
@@ -321,16 +337,30 @@
             });
         }
 
-        $('#saveButton').on('click', function() {
+        $('#saveButton').off('click.dailyReportSave').on('click.dailyReportSave', function() {
+            const form = $('#formModal').find('form')[0];
+
+            if (!form) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Form not found.'
+                });
+                return;
+            }
+
             disableButton();
-            var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('dailyreport.store') }}';
-            var type = 'POST';
-            if (reportId != '') {
+
+            const formData = new FormData(form);
+            let url = '{{ route('dailyreport.store') }}';
+            const type = 'POST';
+
+            if (reportId !== '') {
                 url = '{{ route('dailyreport.update', ':_id') }}';
                 url = url.replace(':_id', reportId);
                 formData.append('_method', 'PUT');
             }
+
             $.ajax({
                 url: url,
                 type: type,
@@ -341,134 +371,361 @@
                     Swal.fire({
                         title: response.title,
                         text: response.message,
-                        icon: "success",
+                        icon: 'success',
                         timer: 5000,
                         didOpen: () => {},
                         willClose: () => {
                             $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formModal form')[0].reset();
+                            form.reset();
                             reportId = '';
+                            unitId = '';
                             $('#formModal').modal('hide');
                         }
                     });
                 },
                 error: function(xhr, status, error) {
                     enableButton();
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+                    const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
                     Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage,
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: errorMessage
                     });
                 }
             });
         });
 
-        $('#formModal').on('show.bs.modal', function() {
-            var button = $('#openModalButton');
-            var title = button.data('title');
-            $('#formModal form')[0].reset();
-            $('#modal-header').text(title);
+        $('#formModal').off('show.bs.modal.dailyReport').on('show.bs.modal.dailyReport', function(e) {
+            isClosingFormModal = false;
 
-            $("#div-form").html(`
-                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                    <span class="visually">Loading...</span>
-                    `);
-            setTimeout(function() {
-                const isEdit = reportId != '';
-                const url = isEdit ?
-                    '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
-                        reportId) :
-                    '{{ route('dailyreport.get_form_add') }}';
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $("#div-form").html(response.html);
+            const $relatedButton = e.relatedTarget ? $(e.relatedTarget) : $();
+            const relatedId = $relatedButton.data('id');
+            const isEditButton = $relatedButton.hasClass('editButton') || relatedId;
 
-                        requestAnimationFrame(function() {
-                            initDailyReportAjaxForm(document.getElementById(
-                                'div-form'));
-                            initUnitSelect2();
+            if (isEditButton) {
+                reportId = String(relatedId || reportId || '');
+                $('#id').val(reportId);
+            } else if ($relatedButton.is('#openModalButton')) {
+                reportId = '';
+                unitId = '';
+                $('#id').val('');
+            }
 
-                            const currentModalEl = document.getElementById('formModal');
-                            if (currentModalEl && window.bootstrap) {
-                                bootstrap.Modal.getOrCreateInstance(currentModalEl)
-                                    .handleUpdate();
-                            }
-                        });
+            const form = $('#formModal').find('form')[0];
 
-                        const titleText = isEdit ? 'Edit Report' : 'Add Report';
-                        const number = isEdit ? response.report_no : response
-                            .report_prev_no;
+            if (form) {
+                form.reset();
+            }
 
-                        $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                    }
-                });
+            $('#modal-header').text(reportId !== '' ? 'Edit Report' : ($relatedButton.data('title') ||
+                'Add Report'));
 
-                if (!isEdit) {
-                    $.ajax({
-                        url: '{{ route('gen_request_token') }}',
-                        type: 'GET',
-                        success: function(response) {
-                            $('#request_token').val(response.data);
-                        },
-                        error: function(xhr, status, error) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: error,
-                            });
-                        }
-                    });
-                }
-            }, 500);
+            loadDailyReportForm();
         });
 
-        $('#formModal').on('hidden.bs.modal', function() {
+        $('#formModal').off('hide.bs.modal.dailyReport').on('hide.bs.modal.dailyReport', function() {
+            isClosingFormModal = true;
+            formLoadSeq++;
+
+            fixFormFieldsWithoutIdOrName(document.getElementById('formModal'));
+
+            if (formAjaxRequest) {
+                formAjaxRequest.abort();
+                formAjaxRequest = null;
+            }
+
+            if (tokenAjaxRequest) {
+                tokenAjaxRequest.abort();
+                tokenAjaxRequest = null;
+            }
+
+            closeOpenSelect2();
+        });
+
+        $('#formModal').off('hidden.bs.modal.dailyReport').on('hidden.bs.modal.dailyReport', function() {
+            const modalEl = document.getElementById('formModal');
+
+            if (modalEl && document.activeElement && modalEl.contains(document.activeElement)) {
+                document.activeElement.blur();
+            }
+
+            fixFormFieldsWithoutIdOrName(modalEl);
+            destroyDynamicSelect2();
+
             reportId = '';
             unitId = '';
+
             enableButton();
-            $('#request_token').val("");
-            $('#div-form').html('');
-            $("#unit_id")
-                .val(null)
-                .empty()
-                .trigger('change');
+            $('#request_token').val('');
+            $('#div-form').empty();
+
+            const form = $('#formModal').find('form')[0];
+
+            if (form) {
+                form.reset();
+            }
+
+            isClosingFormModal = false;
         });
 
-        $('#cancelButton').on('click', function() {
+        $('#cancelButton').off('click.dailyReportCancel').on('click.dailyReportCancel', function() {
             $('#formModal').modal('hide');
         });
 
-        $('#cancelDetailButton').on('click', function() {
+        $('#cancelDetailButton').off('click.dailyReportCancelDetail').on('click.dailyReportCancelDetail', function() {
             $('#formDetail').modal('hide');
-            $('#modal-detail-body').html("");
+            $('#modal-detail-body').html('');
         });
 
-        function gen_select2() {
-            // $('.select-select').each(function() {
-            //     const $el = $(this);
-            //     $el.select2({
-            //             theme: "bootstrap-5",
-            //             dropdownParent: $(
-            //                 '#formModal'),
-            //             width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-            //                 'style'),
-            //             selectOnClose: false,
-            //             minimumResultsForSearch: 0,
-            //         })
-            //         .on('select2:open', function() {
-            //             setTimeout(function() {
-            //                 const $search = $('.select2-container--open .select2-search__field');
-            //                 $search.trigger('focus');
-            //                 $('.select2-container--open').css('z-index', 1056);
-            //             }, 0);
-            //         });
-            // });
+        function loadDailyReportForm(options = {}) {
+            if (isClosingFormModal) {
+                return;
+            }
+
+            const isEdit = reportId !== '';
+            const currentSeq = ++formLoadSeq;
+
+            if (formAjaxRequest) {
+                formAjaxRequest.abort();
+                formAjaxRequest = null;
+            }
+
+            $('#div-form').html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually">Loading...</span>
+            `);
+
+            let url = isEdit ?
+                '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id', reportId) :
+                '{{ route('dailyreport.get_form_add') }}';
+
+            const requestData = {};
+
+            if (options.unit_id !== undefined) {
+                requestData.unit_id = options.unit_id;
+            }
+
+            formAjaxRequest = $.ajax({
+                url: url,
+                type: 'GET',
+                data: requestData,
+                success: function(response) {
+                    if (isClosingFormModal || currentSeq !== formLoadSeq) {
+                        return;
+                    }
+
+                    const html = typeof response === 'string' ? response : response.html;
+
+                    $('#div-form').html(html || '');
+
+                    requestAnimationFrame(function() {
+                        if (isClosingFormModal || currentSeq !== formLoadSeq) {
+                            return;
+                        }
+
+                        const root = document.getElementById('div-form');
+
+                        initDailyReportAjaxForm(root);
+                        initUnitSelect2();
+                        hydrateEditUnitSelect2(response);
+                        fixFormFieldsWithoutIdOrName(root);
+
+                        const currentModalEl = document.getElementById('formModal');
+
+                        if (currentModalEl && window.bootstrap) {
+                            bootstrap.Modal.getOrCreateInstance(currentModalEl).handleUpdate();
+                        }
+                    });
+
+                    if (typeof response === 'object') {
+                        const titleText = isEdit ? 'Edit Report' : 'Add Report';
+                        const number = isEdit ? response.report_no : response.report_prev_no;
+
+                        if (number) {
+                            $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
+                        } else {
+                            $('#modal-header').text(titleText);
+                        }
+                    }
+
+                    if (!isEdit) {
+                        generateRequestToken();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    if (status === 'abort') {
+                        return;
+                    }
+
+                    console.error('Error loading form:', error);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error || 'Error loading form'
+                    });
+                },
+                complete: function() {
+                    formAjaxRequest = null;
+                }
+            });
+        }
+
+        function generateRequestToken() {
+            if (tokenAjaxRequest) {
+                tokenAjaxRequest.abort();
+                tokenAjaxRequest = null;
+            }
+
+            tokenAjaxRequest = $.ajax({
+                url: '{{ route('gen_request_token') }}',
+                type: 'GET',
+                success: function(response) {
+                    if (isClosingFormModal) {
+                        return;
+                    }
+
+                    $('#request_token').val(response.data);
+                },
+                error: function(xhr, status, error) {
+                    if (status === 'abort') {
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: error
+                    });
+                },
+                complete: function() {
+                    tokenAjaxRequest = null;
+                }
+            });
+        }
+
+        function closeOpenSelect2() {
+            $('.select2-hidden-accessible').each(function() {
+                try {
+                    $(this).select2('close');
+                } catch (e) {}
+            });
+        }
+
+        function destroyDynamicSelect2() {
+            $('#div-form').find('select.select2-hidden-accessible').each(function() {
+                const $select = $(this);
+
+                $select.off();
+
+                try {
+                    $select.select2('destroy');
+                } catch (e) {
+                    console.warn('Failed to destroy select2:', e);
+                }
+            });
+        }
+
+        function hydrateEditUnitSelect2(response) {
+            const $unitId = $('#unit_id');
+
+            if (!$unitId.length) {
+                return;
+            }
+
+            if (typeof response !== 'object' || response === null) {
+                const existingValue = $unitId.val();
+
+                if (existingValue) {
+                    unitId = String(existingValue);
+                    $unitId.trigger('change.select2');
+                }
+
+                return;
+            }
+
+            const selectedId =
+                response.unit_id ||
+                response.selected_unit_id ||
+                (response.unit ? response.unit.id : null) ||
+                (response.data ? response.data.unit_id : null);
+
+            const selectedText =
+                response.unit_name ||
+                response.selected_unit_name ||
+                response.unit_text ||
+                (response.unit ? (response.unit.vehicle_no || response.unit.unit_no || response.unit.name || response.unit
+                    .text) : null) ||
+                (response.data ? (response.data.unit_name || response.data.vehicle_no || response.data.unit_no) : null) ||
+                selectedId;
+
+            if (!selectedId) {
+                const existingValue = $unitId.val();
+
+                if (existingValue) {
+                    unitId = String(existingValue);
+                    $unitId.trigger('change.select2');
+                }
+
+                return;
+            }
+
+            setSelect2Value('#unit_id', selectedId, selectedText);
+            unitId = String(selectedId);
+        }
+
+        function setSelect2Value(selector, id, text) {
+            const $select = $(selector);
+
+            if (!$select.length || id === undefined || id === null || id === '') {
+                return;
+            }
+
+            const optionExists = $select.find('option').filter(function() {
+                return String(this.value) === String(id);
+            }).length > 0;
+
+            if (!optionExists) {
+                const option = new Option(text || id, id, true, true);
+                $select.append(option);
+            }
+
+            $select.val(id).trigger('change.select2');
+        }
+
+        function fixSelect2SearchInputId($select) {
+            const selectId = $select.attr('id') || ('select2_' + Date.now());
+
+            setTimeout(function() {
+                $('.select2-container--open .select2-search__field').each(function(index) {
+                    if (!this.id) {
+                        this.id = selectId + '_search_' + index;
+                    }
+
+                    if (!this.getAttribute('aria-label')) {
+                        this.setAttribute('aria-label', 'Search ' + selectId);
+                    }
+
+                    if (!this.getAttribute('autocomplete')) {
+                        this.setAttribute('autocomplete', 'off');
+                    }
+                });
+            }, 0);
+        }
+
+        function fixFormFieldsWithoutIdOrName(root) {
+            if (!root) {
+                return;
+            }
+
+            root.querySelectorAll('input, select, textarea').forEach(function(field, index) {
+                if (!field.id && !field.name) {
+                    field.id = 'autofill_safe_' + Date.now() + '_' + index + '_' + Math.random().toString(36).slice(
+                        2);
+                }
+            });
         }
 
         function initUnitSelect2() {
@@ -484,15 +741,13 @@
                 $unit_id.select2('destroy');
             }
 
-            $unit_id.off('.unit');
+            $unit_id.off('.unitSelect');
 
             $unit_id.select2({
-                theme: "bootstrap-5",
+                theme: 'bootstrap-5',
                 dropdownParent: $('#formModal'),
-                width: $('#unit_id').data('width') ? $('#unit_id').data('width') : (
-                    $(
-                        '#unit_id').hasClass(
-                        'w-100') ? '100%' : 'style'),
+                width: $unit_id.data('width') ? $unit_id.data('width') : ($unit_id.hasClass('w-100') ? '100%' :
+                    'style'),
                 placeholder: 'Choose Unit',
                 allowClear: true,
                 selectOnClose: false,
@@ -507,6 +762,7 @@
                     },
                     processResults: function(data, params) {
                         params.page = params.page || 1;
+
                         return {
                             results: data.results,
                             pagination: {
@@ -516,13 +772,57 @@
                     },
                     cache: true
                 }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            }).on('change', function() {
+            });
+
+            if (selectedValue) {
+                unitId = String(selectedValue);
+                $unit_id.val(selectedValue).trigger('change.select2');
+            }
+
+            $unit_id.on('select2:open.unitSelect', function() {
+                fixSelect2SearchInputId($unit_id);
+
                 const modalEl = document.getElementById('formModal');
+                const modalBody = modalEl ? modalEl.querySelector('.modal-body') : null;
+                const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
+
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field');
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1065);
+
+                    if (modalBody) {
+                        modalBody.scrollTop = lastScrollTop;
+                    }
+                }, 0);
+            });
+
+            $unit_id.on('change.unitSelect', function() {
+                if (isClosingFormModal) {
+                    return;
+                }
+
+                const modalEl = document.getElementById('formModal');
+
+                if (!modalEl || !modalEl.classList.contains('show')) {
+                    return;
+                }
+
+                const selectedUnitId = $(this).val() || '';
+
+                if (String(selectedUnitId) === String(unitId)) {
+                    return;
+                }
+
+                unitId = String(selectedUnitId);
+
                 const modalBody = modalEl.querySelector('.modal-body');
                 const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
 
@@ -533,65 +833,15 @@
                     document.activeElement.blur();
                 }
 
-                $("#div-form").html(`
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span class="visually">Loading...</span>
-                                `);
-                var url = '{{ route('dailyreport.get_form_add') }}';
-                if (reportId != '') {
-                    url = '{{ route('dailyreport.get_form_edit', ':_id') }}'.replace(':_id',
-                        reportId);
-                }
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    data: {
-                        unit_id: $(this).val()
-                    },
-                    success: function(response) {
-                        $("#div-form").html(response.html);
+                loadDailyReportForm({
+                    unit_id: selectedUnitId
+                });
 
-                        requestAnimationFrame(function() {
-                            initDailyReportAjaxForm(document.getElementById('div-form'));
-                            initUnitSelect2();
-
-                            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
-                            modalInstance.handleUpdate();
-
-                            if (modalBody) {
-                                modalBody.scrollTop = lastScrollTop;
-                            }
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error:', error);
-                        $tbody.empty();
+                requestAnimationFrame(function() {
+                    if (modalBody) {
+                        modalBody.scrollTop = lastScrollTop;
                     }
                 });
-            });
-
-            if (selectedValue) {
-                $unit_id.val(selectedValue).trigger('change.select2');
-            }
-
-            $unit_id.on('select2:open.unit', function() {
-                setTimeout(function() {
-                    const search = document.querySelector(
-                        '.select2-container--open .select2-search__field'
-                    );
-
-                    if (search) {
-                        search.focus({
-                            preventScroll: true
-                        });
-                    }
-
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            });
-
-            $unit_id.on('change.unit', function() {
-                const unitId = $(this).val();
             });
         }
 
@@ -608,14 +858,11 @@
                 $unit.select2('destroy');
             }
 
-            $unit.off('.unit');
+            $unit.off('.unitTop');
 
             $unit.select2({
-                theme: "bootstrap-5",
-                width: $('#unit').data('width') ? $('#unit').data('width') : (
-                    $(
-                        '#unit').hasClass(
-                        'w-100') ? '100%' : 'style'),
+                theme: 'bootstrap-5',
+                width: $unit.data('width') ? $unit.data('width') : ($unit.hasClass('w-100') ? '100%' : 'style'),
                 placeholder: 'All Unit',
                 allowClear: true,
                 selectOnClose: false,
@@ -630,6 +877,7 @@
                     },
                     processResults: function(data, params) {
                         params.page = params.page || 1;
+
                         return {
                             results: data.results,
                             pagination: {
@@ -639,7 +887,13 @@
                     },
                     cache: true
                 }
-            }).on('change', function() {
+            });
+
+            $unit.on('select2:open.unitTop', function() {
+                fixSelect2SearchInputId($unit);
+            });
+
+            $unit.on('change.unitTop', function() {
                 $('#table-data').DataTable().draw();
             });
 
@@ -647,8 +901,6 @@
                 $unit.val(selectedValue).trigger('change.select2');
             }
         }
-
-
 
         function initDailyReportAjaxForm(root) {
             root = root || document.getElementById('div-form');
@@ -665,6 +917,7 @@
             initAjaxTimepicker(root, modalEl, modalBody);
             initAjaxNumberFormat(root);
             initAjaxUnitTable(root);
+            fixFormFieldsWithoutIdOrName(root);
         }
 
         function initAjaxSelect2(root, modalEl, modalBody) {
@@ -684,7 +937,7 @@
                 const allowClear = ['_item', '_uom_1', '_uom_2'].includes($el.attr('id'));
 
                 $el.select2({
-                    theme: "bootstrap-5",
+                    theme: 'bootstrap-5',
                     dropdownParent: $('#formModal'),
                     width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                         'style'),
@@ -695,6 +948,8 @@
                 });
 
                 $el.on('select2:open.ajaxFormSelect', function() {
+                    fixSelect2SearchInputId($el);
+
                     const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
 
                     setTimeout(function() {
@@ -736,7 +991,7 @@
             $unitDetail.empty().append(new Option('', '', true, true));
 
             $unitDetail.select2({
-                theme: "bootstrap-5",
+                theme: 'bootstrap-5',
                 dropdownParent: $('#formModal'),
                 width: $unitDetail.data('width') ? $unitDetail.data('width') : ($unitDetail.hasClass('w-100') ?
                     '100%' : 'style'),
@@ -767,6 +1022,8 @@
             });
 
             $unitDetail.on('select2:open.ajaxDetailUnit', function() {
+                fixSelect2SearchInputId($unitDetail);
+
                 const lastScrollTop = modalBody ? modalBody.scrollTop : 0;
 
                 setTimeout(function() {
@@ -801,14 +1058,14 @@
                 flatpickr(input, {
                     enableTime: true,
                     noCalendar: true,
-                    dateFormat: "H:i",
+                    dateFormat: 'H:i',
                     time_24hr: true,
                     minuteIncrement: 1,
                     disableMobile: true,
                     allowInput: true,
                     appendTo: modalEl || document.body,
                     positionElement: input,
-                    position: "below left",
+                    position: 'below left',
                     onOpen: function(selectedDates, dateStr, instance) {
                         instance._scrollTop = modalBody ? modalBody.scrollTop : 0;
                     },
@@ -818,7 +1075,7 @@
                         }
                     },
                     onReady: function(selectedDates, dateStr, instance) {
-                        instance.calendarContainer.style.zIndex = "1066";
+                        instance.calendarContainer.style.zIndex = '1066';
                     }
                 });
             });
@@ -990,7 +1247,9 @@
                 ['_value_1_', '_value_1'],
                 ['_value_2_', '_value_2'],
                 ['_refule_liter', 'refule_liter'],
-                ['_refule_km', 'refule_km']
+                ['_refule_km', 'refule_km'],
+                ['_refule_mechine', 'refule_mechine'],
+                ['_refule_genset', 'refule_genset']
             ];
 
             inputMap.forEach(function(item) {
@@ -1023,7 +1282,7 @@
                 const uom1Select = root.querySelector('#_uom_1');
                 const uom2Select = root.querySelector('#_uom_2');
 
-                const unitId = unitSelect ? unitSelect.value : '';
+                const detailUnitId = unitSelect ? unitSelect.value : '';
                 const unitSelectData = unitSelect && window.jQuery && $.fn.select2 ? $(unitSelect).select2('data') : [];
                 const unitName = unitSelectData.length ? unitSelectData[0].text : (unitSelect && unitSelect.options[
                     unitSelect.selectedIndex] ? unitSelect.options[unitSelect.selectedIndex].text : '');
@@ -1034,30 +1293,32 @@
                 const value1Display = root.querySelector('#_value_1_') ? root.querySelector('#_value_1_').value : '';
                 const value2 = root.querySelector('#_value_2') ? root.querySelector('#_value_2').value : '';
                 const value2Display = root.querySelector('#_value_2_') ? root.querySelector('#_value_2_').value : '';
+                const rowUid = Date.now() + '_' + Math.random().toString(36).slice(2);
                 const tr = document.createElement('tr');
 
                 tr.innerHTML = `
                     <td class="p-1 align-middle row-number">#</td>
                     <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" name="detail_unit_id[]" readonly value="${escapeHtml(unitId)}">
-                        <input type="text" class="form-control" name="unit_name[]" readonly value="${escapeHtml(unitName)}">
+                        <input type="hidden" id="detail_unit_id_${rowUid}" class="form-control" name="detail_unit_id[]" readonly value="${escapeHtml(detailUnitId)}">
+                        <input type="text" id="unit_name_display_${rowUid}" class="form-control" disabled value="${escapeHtml(unitName)}">
+                        <input type="hidden" id="unit_name_${rowUid}" name="unit_name[]" value="${escapeHtml(unitName)}">
                     </td>
                     <td class="p-1 align-middle">
-                        <input type="text" class="form-control" name="item[]" readonly value="${escapeHtml(item)}">
+                        <input type="text" id="item_${rowUid}" class="form-control" name="item[]" readonly value="${escapeHtml(item)}">
                     </td>
                     <td class="p-1 align-middle">
-                        <input type="text" class="form-control" name="uom_1[]" readonly value="${escapeHtml(uom1)}">
+                        <input type="text" id="uom_1_${rowUid}" class="form-control" name="uom_1[]" readonly value="${escapeHtml(uom1)}">
                     </td>
                     <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" name="value_1[]" readonly value="${escapeHtml(value1)}">
-                        <input type="text" class="form-control" name="value_1__[]" readonly value="${escapeHtml(value1Display)}">
+                        <input type="hidden" id="value_1_${rowUid}" class="form-control" name="value_1[]" readonly value="${escapeHtml(value1)}">
+                        <input type="text" id="value_1_display_${rowUid}" class="form-control" disabled value="${escapeHtml(value1Display)}">
                     </td>
                     <td class="p-1 align-middle">
-                        <input type="text" class="form-control" name="uom_2[]" readonly value="${escapeHtml(uom2)}">
+                        <input type="text" id="uom_2_${rowUid}" class="form-control" name="uom_2[]" readonly value="${escapeHtml(uom2)}">
                     </td>
                     <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" name="value_2[]" readonly value="${escapeHtml(value2)}">
-                        <input type="text" class="form-control" name="value_2__[]" readonly value="${escapeHtml(value2Display)}">
+                        <input type="hidden" id="value_2_${rowUid}" class="form-control" name="value_2[]" readonly value="${escapeHtml(value2)}">
+                        <input type="text" id="value_2_display_${rowUid}" class="form-control" disabled value="${escapeHtml(value2Display)}">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row"></button>
@@ -1067,8 +1328,8 @@
                 tbody.appendChild(tr);
 
                 resetTableUnitInputRow(root);
-
                 renumberAjaxUnitRows(root);
+                fixFormFieldsWithoutIdOrName(root);
             };
 
             tableUnit.onclick = function(e) {
@@ -1112,7 +1373,7 @@
         }
 
         function renumberAjaxUnitRows(root) {
-            let no = 13;
+            let no = 15;
 
             root.querySelectorAll('#tableUnit > tbody > tr').forEach(function(row) {
                 if (row.classList.contains('fixed-row')) {
@@ -1152,18 +1413,16 @@
         }
 
         function disableButton() {
-            saveButton.disabled = true;
+            if (saveButton) {
+                saveButton.disabled = true;
+            }
         }
 
         function enableButton() {
-            saveButton.disabled = false;
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
         }
-
-        initUnitSelect2();
-
-        $('#formModal').off('shown.bs.modal.select2').on('shown.bs.modal.select2', function() {
-            initUnitSelect2();
-        });
     </script>
     <!--app JS-->
 @endsection

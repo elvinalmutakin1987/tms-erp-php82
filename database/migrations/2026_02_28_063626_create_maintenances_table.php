@@ -25,7 +25,7 @@ return new class extends Migration
             /**
              * ----------------
              */
-            $table->foreignId('unit_id')->nullable()->constrained('unit_brands')->nullOnDelete();
+            $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->foreignId('mechanical_inspection_id')->nullable()->constrained('mechanical_inspections')->nullOnDelete();
             $table->foreignId('p2h_id')->nullable()->constrained('p2hs')->nullOnDelete();
             $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
