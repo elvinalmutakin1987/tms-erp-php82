@@ -510,9 +510,8 @@
                                                 ->where('step', $d->order)
                                                 ->first();
                                         @endphp
-
                                         <div style="height: 95px; text-align: center;">
-                                            @if ($approval_status)
+                                            {{-- @if ($approval_status)
                                                 @if ($approval_status->status == 'Open')
                                                     <div style="height: 95px; line-height: 95px;">
                                                         <b>Approval Process</b>
@@ -536,6 +535,19 @@
                                                             ">
                                                     @endif
                                                 @endif
+                                            @endif --}}
+                                            @if ($d->user->sign_path)
+                                                <img src="{{ public_path('storage/' . $d->user->sign_path) }}"
+                                                    alt="Signature"
+                                                    style="
+                                                                max-width: 150px;
+                                                                max-height: 85px;
+                                                                width: auto;
+                                                                height: auto;
+                                                                margin: 0 auto;
+                                                                display: block;
+                                                                object-fit: contain;
+                                                            ">
                                             @endif
                                         </div>
 
