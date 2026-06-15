@@ -843,6 +843,84 @@
             });
         }
 
+        // function initPurchaseRequisitionSelect2() {
+        //     const $purchase_requisition = $('#purchase_requisition_id');
+
+        //     if (!$purchase_requisition.length) {
+        //         return;
+        //     }
+
+        //     const selectedValue = $purchase_requisition.val();
+
+        //     if ($purchase_requisition.hasClass('select2-hidden-accessible')) {
+        //         $purchase_requisition.select2('destroy');
+        //     }
+
+        //     $purchase_requisition.off('.purchaseOrder');
+
+        //     $purchase_requisition.select2({
+        //         theme: "bootstrap-5",
+        //         dropdownParent: $('#formModal'),
+        //         width: $('#purchase_requisition_id').data('width') ? $('#purchase_requisition_id').data('width') : (
+        //             $(
+        //                 '#purchase_requisition_id').hasClass(
+        //                 'w-100') ? '100%' : 'style'),
+        //         placeholder: 'Direct PO',
+        //         allowClear: true,
+        //         selectOnClose: false,
+        //         ajax: {
+        //             url: '{{ route('purchaseorder.get_purchase_requisition') }}',
+        //             dataType: 'json',
+        //             data: function(params) {
+        //                 return {
+        //                     term: params.term || '',
+        //                     page: params.page || 1
+        //                 };
+        //             },
+        //             processResults: function(data) {
+        //                 params.page = params.page || 1;
+        //                 return {
+        //                     results: data.results,
+        //                     pagination: {
+        //                         more: data.pagination ? data.pagination.more : false
+        //                     }
+        //                 };
+        //             },
+        //             cache: true
+        //         }
+        //     }).on('select2:open', function() {
+        //         setTimeout(function() {
+        //             $('.select2-container--open .select2-search__field').trigger('focus');
+        //             $('.select2-container--open').css('z-index', 1056);
+        //         }, 0);
+        //     });
+
+        //     if (selectedValue) {
+        //         $purchase_requisition.val(selectedValue).trigger('change.select2');
+        //     }
+
+        //     $purchase_requisition.on('select2:open.purchaseRequisition', function() {
+        //         setTimeout(function() {
+        //             const search = document.querySelector(
+        //                 '.select2-container--open .select2-search__field'
+        //             );
+
+        //             if (search) {
+        //                 search.focus({
+        //                     preventScroll: true
+        //                 });
+        //             }
+
+        //             $('.select2-container--open').css('z-index', 1056);
+        //         }, 0);
+        //     });
+
+        //     $purchase_requisition.on('change.purchaseRequisition', function() {
+        //         requisitionId = $(this).val();
+        //         loadItemTable();
+        //     });
+        // }
+
         function initPurchaseRequisitionSelect2() {
             const $purchase_requisition = $('#purchase_requisition_id');
 
@@ -856,15 +934,14 @@
                 $purchase_requisition.select2('destroy');
             }
 
-            $purchase_requisition.off('.purchaseOrder');
+            $purchase_requisition.off('.purchaseRequisition');
 
             $purchase_requisition.select2({
                 theme: "bootstrap-5",
                 dropdownParent: $('#formModal'),
-                width: $('#purchase_requisition_id').data('width') ? $('#purchase_requisition_id').data('width') : (
-                    $(
-                        '#purchase_requisition_id').hasClass(
-                        'w-100') ? '100%' : 'style'),
+                width: $purchase_requisition.data('width') ?
+                    $purchase_requisition.data('width') : ($purchase_requisition.hasClass('w-100') ? '100%' :
+                        'style'),
                 placeholder: 'Direct PO',
                 allowClear: true,
                 selectOnClose: false,
@@ -877,22 +954,18 @@
                             page: params.page || 1
                         };
                     },
-                    processResults: function(data) {
+                    processResults: function(data, params) {
                         params.page = params.page || 1;
+
                         return {
-                            results: data.results,
+                            results: Array.isArray(data.results) ? data.results : [],
                             pagination: {
-                                more: data.pagination ? data.pagination.more : false
+                                more: !!(data.pagination && data.pagination.more)
                             }
                         };
                     },
                     cache: true
                 }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
             });
 
             if (selectedValue) {

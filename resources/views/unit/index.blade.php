@@ -176,10 +176,11 @@
                     type: 'GET',
                     success: function(response) {
                         $('#modal-header').text('Edit Unit');
-                        unitbrandId = response.data.unit_brand_id;
-                        unitmodelId = response.data.unit_model_id;
-                        locationId = response.data.location_id;
-                        $("#type").val(response.data.type).trigger('change');
+                        unitbrandId = response.data.unit_brand_id || '';
+                        unitmodelId = response.data.unit_model_id || '';
+                        locationId = response.data.location_id || '';
+
+                        setSelect2Value('#type', response.data.type, response.data.type);
                         $("#registration_no").val(response.data.registration_no);
                         $("#vehicle_no").val(response.data.vehicle_no);
                         $("#cetificate_no").val(response.data.cetificate_no);
@@ -308,7 +309,10 @@
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
-            $('#formModal form')[0].reset();
+            if (unitId == '') {
+                $('#formModal form')[0].reset();
+                resetUnitFormSelect2();
+            }
             $('#modal-header').text(title);
 
             setTimeout(function() {
@@ -341,8 +345,7 @@
                     type: 'GET',
                     success: function(response) {
                         $('#location_id').empty();
-                        $('#location_id').append(
-                            '<option value="" selected disabled></option>');
+                        $('#location_id').append('<option value=""></option>');
                         $.each(response.data, function(index, location) {
                             $('#location_id').append('<option value="' + location.id +
                                 '">' +
@@ -350,7 +353,9 @@
                                 '</option>');
                         });
                         if (locationId != '') {
-                            $("#location_id").val(locationId).trigger('change');
+                            $("#location_id").val(locationId).trigger('change.select2');
+                        } else {
+                            resetSelect2Value('#location_id');
                         }
                     },
                     error: function(xhr, status, error) {
@@ -368,8 +373,7 @@
                     type: 'GET',
                     success: function(response) {
                         $('#unit_brand_id').empty();
-                        $('#unit_brand_id').append(
-                            '<option value="" selected disabled></option>');
+                        $('#unit_brand_id').append('<option value=""></option>');
                         $.each(response.data, function(index, brand) {
                             $('#unit_brand_id').append('<option value="' + brand.id +
                                 '">' +
@@ -377,9 +381,12 @@
                                 '</option>');
                         });
                         if (unitbrandId != '') {
-                            $("#unit_brand_id").val(unitbrandId).trigger('change');
+                            $("#unit_brand_id").val(unitbrandId).trigger('change.select2');
+                            get_unit_model(unitbrandId, unitmodelId);
+                        } else {
+                            resetSelect2Value('#unit_brand_id');
+                            resetSelect2Value('#unit_model_id', true);
                         }
-                        get_unit_model($("#unit_brand_id").val());
                     },
                     error: function(xhr, status, error) {
                         var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
@@ -394,14 +401,78 @@
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
+            resetUnitForm();
+        });
+
+        $('#cancelButton').on('click', function() {
+            $('#formModal').modal('hide');
+        });
+
+        function ensureEmptyOption(selector) {
+            const $el = $(selector);
+
+            if (!$el.length) return;
+
+            if ($el.find('option[value=""]').length === 0) {
+                $el.prepend('<option value=""></option>');
+            }
+        }
+
+        function resetSelect2Value(selector, clearOptions = false) {
+            const $el = $(selector);
+
+            if (!$el.length) return;
+
+            $el.find('option').prop('selected', false);
+
+            if (clearOptions) {
+                $el.empty().append('<option value=""></option>');
+            } else {
+                ensureEmptyOption(selector);
+            }
+
+            $el.val(null).trigger('change.select2');
+        }
+
+        function setSelect2Value(selector, value, text = null) {
+            const $el = $(selector);
+
+            if (!$el.length || value === null || value === undefined || value === '') return;
+
+            ensureEmptyOption(selector);
+
+            const valueString = String(value);
+            const optionExists = $el.find('option').filter(function() {
+                return String(this.value) === valueString;
+            }).length > 0;
+
+            if (!optionExists) {
+                $el.append(new Option(text ?? value, value, true, true));
+            }
+
+            $el.val(value).trigger('change.select2');
+        }
+
+        function resetUnitFormSelect2() {
+            resetSelect2Value('#type');
+            resetSelect2Value('#location_id', true);
+            resetSelect2Value('#unit_brand_id', true);
+            resetSelect2Value('#unit_model_id', true);
+        }
+
+        function resetUnitForm() {
             unitId = '';
             locationId = '';
             unitbrandId = '';
             unitmodelId = '';
-            $("#type").val("").trigger('change');
-            $("#location_id").val("").trigger('change');
-            $("#unit_brand_id").val("").trigger('change');
-            $("#unit_model_id").val("").trigger('change');
+
+            if ($('#formModal form').length) {
+                $('#formModal form')[0].reset();
+            }
+
+            $('#id').val('');
+            resetUnitFormSelect2();
+
             $("#registration_no").val("");
             $("#vehicle_no").val("");
             $("#cetificate_no").val("");
@@ -419,27 +490,33 @@
             $("#exp_comm").val("");
             $("#description").val("");
             $("#request_token").val("");
-            enableButton();
-            $("#request_token").val("");
-        });
 
-        $('#cancelButton').on('click', function() {
-            $('#formModal').modal('hide');
-        });
+            enableButton();
+        }
 
         function gen_select2() {
             $('.select-select').each(function() {
                 const $el = $(this);
+
+                ensureEmptyOption($el);
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.off('.unitFormSelect2');
+
                 $el.select2({
                         theme: "bootstrap-5",
-                        dropdownParent: $(
-                            '#formModal'),
+                        dropdownParent: $('#formModal'),
                         width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                             'style'),
+                        placeholder: '',
+                        allowClear: true,
                         selectOnClose: false,
                         minimumResultsForSearch: 0,
                     })
-                    .on('select2:open', function() {
+                    .on('select2:open.unitFormSelect2', function() {
                         setTimeout(function() {
                             const $search = $('.select2-container--open .select2-search__field');
                             $search.trigger('focus');
@@ -447,9 +524,25 @@
                         }, 0);
                     });
             });
+
+            $('#unit_brand_id').off('change.unitFormSelect2').on('change.unitFormSelect2', function() {
+                const brandId = $(this).val();
+
+                unitmodelId = '';
+                resetSelect2Value('#unit_model_id', true);
+
+                if (brandId) {
+                    get_unit_model(brandId);
+                }
+            });
         }
 
-        function get_unit_model(unit_brand_id) {
+        function get_unit_model(unit_brand_id, selected_model_id = null) {
+            if (!unit_brand_id) {
+                resetSelect2Value('#unit_model_id', true);
+                return;
+            }
+
             $.ajax({
                 url: '{{ route('unit.get_model_all') }}',
                 data: {
@@ -458,15 +551,19 @@
                 type: 'GET',
                 success: function(response) {
                     $('#unit_model_id').empty();
-                    $('#unit_model_id').append('<option value="" selected disabled></option>');
+                    $('#unit_model_id').append('<option value=""></option>');
                     $.each(response.data, function(index, brand) {
                         $('#unit_model_id').append('<option value="' + brand.id +
                             '">' +
                             brand.desc +
                             '</option>');
                     });
-                    if (unitmodelId != '') {
-                        $("#unit_model_id").val(unitmodelId).trigger('change');
+                    const modelToSelect = selected_model_id || unitmodelId;
+
+                    if (modelToSelect != '') {
+                        $("#unit_model_id").val(modelToSelect).trigger('change.select2');
+                    } else {
+                        resetSelect2Value('#unit_model_id');
                     }
                 },
                 error: function(xhr, status, error) {
@@ -478,14 +575,6 @@
                 }
             });
         }
-
-        $("#unit_brand_id").select2({
-            theme: "bootstrap-5",
-            width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                'w-100') ? '100%' : 'style',
-        }).on('change', function() {
-            get_unit_model($(this).val());
-        });
 
         function disableButton() {
             saveButton.disabled = true;
