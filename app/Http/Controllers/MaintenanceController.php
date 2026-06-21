@@ -98,15 +98,15 @@ class MaintenanceController extends Controller
                     /**
                      * ini cuma user superadmin dan yang punya akses delete aja baru muncul
                      */
-                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
-                    //     $button .= '<li>
-                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                    //             </li>';
-                    // endif;
-
-                    $button .= '<li>
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
+                        $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
+                    endif;
+
+                    // $button .= '<li>
+                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+                    //             </li>';
 
                     $button .= '</ul>
                         </div>
