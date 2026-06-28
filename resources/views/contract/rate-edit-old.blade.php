@@ -9,6 +9,7 @@
             <th scope="col">Item No.</th>
             <th scope="col">Description</th>
             <th scope="col">Rate</th>
+            <th scope="col">Notes</th>
         </tr>
     </thead>
     <tbody>
@@ -32,6 +33,7 @@
                         <input type="text" class="form-control" id="_rate{{ $d->id }}" name="_rate[]"
                             value="{{ Number::format($rate, precision: 0) }}">
                     </td>
+                    <td class="p-1 align-middle">{{ $d->notes }}</td>
                 </tr>
             @endforeach
         @else

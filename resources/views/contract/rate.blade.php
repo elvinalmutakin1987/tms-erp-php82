@@ -5,6 +5,7 @@
             <th scope="col">Item No.</th>
             <th scope="col">Description</th>
             <th scope="col">Rate</th>
+            <th scope="col">Notes</th>
         </tr>
     </thead>
     <tbody>
@@ -20,6 +21,7 @@
                         <input type="hidden" class="form-control" id="rate{{ $d->id }}" name="rate[]">
                         <input type="text" class="form-control" id="_rate{{ $d->id }}" name="_rate[]">
                     </td>
+                    <td class="p-1 align-middle">{{ $d->notes }}</td>
                 </tr>
             @endforeach
         @else

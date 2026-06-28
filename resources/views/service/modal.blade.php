@@ -20,38 +20,6 @@
                          <label for="name" class="form-label">Name</label>
                          <input type="text" class="form-control" id="name" name="name">
                      </div>
-                     {{-- <div class="col-md-12 mb-2">
-                         <table class="table mb-0" id="tableStep">
-                             <thead class="table-light">
-                                 <tr>
-                                     <th scope="col" width="5%">#</th>
-                                     <th scope="col" width="25%">Item No</th>
-                                     <th scope="col">Description</th>
-                                     <th scope="col" width="10%">Action</th>
-                                 </tr>
-                             </thead>
-                             <tbody id='bodyTableStep'>
-                                 <tr class="fixed-row">
-                                     <td class="p-1 align-middle"></td>
-                                     <td class="p-1 align-middle">
-                                         <input type="text" class="form-control" id="txt_item_no" name="txt_item_no">
-                                     </td>
-                                     <td class="p-1 align-middle">
-                                         <input type="text" class="form-control" id="txt_item_des"
-                                             name="txt_item_des">
-                                     </td>
-                                     <td class="text-center p-1 align-middle">
-                                         <div class="row row-cols-auto g-3">
-                                             <div class="col">
-                                                 <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"
-                                                     id="addItemButton"></button>
-                                             </div>
-                                         </div>
-                                     </td>
-                                 </tr>
-                             </tbody>
-                         </table>
-                     </div> --}}
                  </form>
 
              </div>

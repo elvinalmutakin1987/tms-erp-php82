@@ -53,7 +53,7 @@
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Status</th>
-                                        <th width="20">Action</th>
+                                        <th width="15">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -70,6 +70,8 @@
     <!--end page wrapper -->
 
     @include('contract.modal')
+
+    @include('contract.modal-detail')
 @endsection
 
 @section('js')
@@ -256,6 +258,22 @@
                         $("#tbody_tableItem tr").eq(0).after(newRow);
                         $("#tbody_tableTarget tr").eq(0).after(newRow1);
                         $("#tbody_tableFmf tr").eq(0).after(newRow2);
+                    },
+                    error: function() {
+                        alert('Error fetching data');
+                    }
+                });
+            });
+
+            $(document).on('click', '.detailButton', function() {
+                $('#modal-detail-header').text('Detail Contract');
+                let url = '{{ route('contract.get_detail', ':_id') }}';
+                url = url.replace(':_id', $(this).data('id'));
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-detail-body').html(response);
                     },
                     error: function() {
                         alert('Error fetching data');
@@ -452,7 +470,6 @@
                 .val(null)
                 .empty()
                 .trigger('change');
-
             $("#service_id")
                 .val(null)
                 .empty()
@@ -467,6 +484,11 @@
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
+        });
+
+        $('#cancelDetailButton').on('click', function() {
+            $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
         });
 
         function gen_select2() {
@@ -642,6 +664,7 @@
             var description = $("#_description").val();
             var rate = $("#_rate_t").val();
             var _rate = $("#_rate_t_").val();
+            var notes = $("#_notes").val();
             var newRow = `
                 <tr>
                     <td class="p-1 align-middle row-number">
@@ -657,6 +680,9 @@
                        <input type="hidden" class="form-control" id="rate" name="rate[]" readonly value="${rate}">
                        <input type="text" class="form-control" id="_rate" name="_rate[]" readonly value="${_rate}">
                     </td>
+                     <td class="p-1 align-middle">
+                       <input type="text" class="form-control" id="note_rates" name="note_rates[]" readonly value="${notes}">
+                    </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
                             <div class="col">
@@ -671,6 +697,7 @@
             $("#_description").val('');
             $("#_rate_t").val('');
             $("#_rate_t_").val('');
+            $("#_notes").val('');
             tbody.append(newRow);
             renumberRows('item');
         });

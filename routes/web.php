@@ -192,6 +192,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin')
         ->name('contract.get_unit_all');
 
+    Route::get('contract-get-detail/{contract}', [ContractController::class, 'get_detail'])
+        ->middleware('role_or_permission:superadmin')
+        ->name('contract.get_detail');
+
 
 
     /**
@@ -508,6 +512,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('proformainvoice-load-table-add', [ProformaInvoiceController::class, 'get_table_add'])
         ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_table_add');
+
+
+    Route::get('proformainvoice-get-unit-all', [ProformaInvoiceController::class, 'get_unit_all'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.get_unit_all');
 
     /**
      * Routenya Unit Epxired

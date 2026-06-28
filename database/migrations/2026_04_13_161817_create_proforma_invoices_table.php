@@ -50,6 +50,7 @@ return new class extends Migration
             $table->timestamp('approval_at')->nullable();
             $table->timestamp('user_approval_at')->nullable();
             $table->timestamp('custodian_approval_at')->nullable();
+            $table->string('type')->nullable();
             //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->timestamp('checked_at')->nullable();
