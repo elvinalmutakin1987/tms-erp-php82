@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('password');
             $table->string('pass_mobile');
             $table->text('sign_path')->nullable();
+            $table->string('theme')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

@@ -51,13 +51,17 @@ class ContractController extends Controller
                                 <ul class="dropdown-menu">
                                 ' . $button_change_status . '
                                 <li>
+                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
+                                    data-id="' . $item->id . '">Detail</a>
+                                </li>
+                                <li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
                                 </li>
                                 <li><a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>
                             </ul>
-                        </div>
+                        </div> 
                     </div>
                     ';
                     return $button;
@@ -70,13 +74,14 @@ class ContractController extends Controller
                 })
                 ->make();
         }
+        $uom = config('uom');
         $breadcrum = [
             'module' => 'Master Data',
             'route-module' => null,
             'sub-module' => 'Contract',
             'route-sub-module' => 'contract.index',
         ];
-        return view('contract.index', compact('breadcrum'));
+        return view('contract.index', compact('breadcrum', 'uom'));
     }
 
     /**
@@ -117,6 +122,7 @@ class ContractController extends Controller
                     'status' => 'Active'
                 ]
             );
+
             $contract = Contract::firstOrCreate($data);
             //service rate
             if ($request->item_no) {
@@ -128,7 +134,8 @@ class ContractController extends Controller
                             'item_no' => $item,
                             'request_token' => $contract->request_token,
                             'service_item' => $request->service_item[$i],
-                            'rate' => $rate
+                            'rate' => $rate,
+                            'notes' => $request->note_rates[$i]
                         ],
                     );
                 }
@@ -253,6 +260,10 @@ class ContractController extends Controller
                             'item_no' => $item,
                             'request_token' => $contract->request_token,
                             'service_item' => $request->service_item[$i],
+                            'est_qty_per_month' => $request->est_qty_per_month[$i],
+                            'unit' => $request->unit[$i],
+                            'periode' => $request->periode[$i],
+                            'est_subtotal' => $request->est_subtotal[$i],
                             'rate' => $rate
                         ]
                     );
@@ -334,18 +345,6 @@ class ContractController extends Controller
      */
     public function get_client_all(Request $request)
     {
-        // try {
-        //     $client_vendor = Client_vendor::where('type', 'Client')->orderBy('name')->get();
-        //     return response()->json([
-        //         'success' => true,
-        //         'data' => $client_vendor
-        //     ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $th->getMessage()
-        //     ], 400);
-        // }
         if ($request->ajax()) {
             $term = trim($request->term);
             $client_vendor = Client_vendor::selectRaw("id, name as text")
@@ -374,18 +373,6 @@ class ContractController extends Controller
      */
     public function get_service_all(Request $request)
     {
-        // try {
-        //     $service = Service::all();
-        //     return response()->json([
-        //         'success' => true,
-        //         'data' => $service
-        //     ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $th->getMessage(8)
-        //     ], 400);
-        // }
         if ($request->ajax()) {
             $term = trim($request->term);
             $service = Service::selectRaw("id, name as text")
@@ -462,18 +449,6 @@ class ContractController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        // try {
-        //     $unit = Unit::all();
-        //     return response()->json([
-        //         'success' => true,
-        //         'data' => $unit
-        //     ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $th->getMessage()
-        //     ], 400);
-        // }
         if ($request->ajax()) {
             $term = trim($request->term);
             $unit = Unit::selectRaw("id, vehicle_no as text")
@@ -493,6 +468,26 @@ class ContractController extends Controller
                 "total_count" => $total_count
             ];
             return response()->json($result);
+        }
+    }
+
+    /**
+     * ngambil detail contract
+     */
+    public function get_detail(Request $request, $contract_id)
+    {
+        try {
+            $contract = Contract::find($contract_id);
+            $contract_fmf = Contract_fmf::where('contract_id', $contract_id)->get();
+            $contract_rate = Contract_rate::where('contract_id', $contract_id)->get();
+            $unit_target = Unit_target::where('contract_id', $contract_id)->get();
+            $view = 'contract.detail';
+            return response()->view($view, compact('contract', 'contract_fmf', 'contract_rate', 'unit_target'), 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
         }
     }
 }

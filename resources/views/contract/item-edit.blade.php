@@ -20,6 +20,10 @@
             <input type="text" class="form-control" id="_rate" name="_rate[]" readonly
                 value="{{ $d->rate ? Number::format($d->rate, precision: 0) : '' }}">
         </td>
+        <td class="p-1 align-middle">
+            <input type="text" class="form-control" id="notes" name="notes[]" readonly
+                value="{{ $d->notes }}">
+        </td>
         <td class="text-center p-1 align-middle">
             <div class="row row-cols-auto g-3">
                 <div class="col">

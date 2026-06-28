@@ -26,7 +26,10 @@ return new class extends Migration
             $table->foreignId('service_item_id')->nullable()->constrained('service_items')->nullOnDelete();
             $table->string('item_no')->nullable();
             $table->string('service_item')->nullable();
+            $table->string('unit')->nullable();
             $table->decimal('rate', 16, 2)->nullable();
+            $table->string('type')->nullable();
+            $table->text('notes')->nullable();
             $table->timestamps();
             /**
              * Ini yang lama

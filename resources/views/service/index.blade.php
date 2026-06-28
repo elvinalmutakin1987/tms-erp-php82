@@ -24,7 +24,7 @@
                                         data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Service"><i
                                             class='bx bxs-plus-square'></i>New</a>
                                 </div>
-                                <div class="col-3">
+                                <div class="col-4">
                                     <select class="form-select" id="typeSevice" name="typeSevice">
                                         <option value="All">All Type</option>
                                         @foreach ($servicetype as $key => $value)
@@ -144,7 +144,9 @@
                         $("#divSignPath").css('display', 'block');
                         $('#modal-header').text('Edit Service');
                         $('#name').val(response.data.name);
-                        $('#type').val(response.data.type);
+                        $("#type")
+                            .val(response.data.type)
+                            .trigger('change');
                         $("#request_token").val(response.data.request_token);
                     },
                     error: function() {
@@ -197,6 +199,7 @@
                             });
                         },
                         error: function(xhr, status, error) {
+                            enableButton();
                             var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
                             Swal.fire({
                                 icon: "error",
@@ -270,45 +273,8 @@
                     }
                 });
             }
-            $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-            // var tbody = $("#tableStep > tbody");
-            // tbody.append(`
-        //         <tr>
-        //             <td colspan="5">
-        //                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        //                 <span class="visually">Loading...</span>
-        //             </td>
-        //         </tr>
-        //         `);
 
-            // setTimeout(function() {
-            //     var data = {
-            //         'form': 'create'
-            //     };
-            //     if (serviceId != '') {
-            //         data = {
-            //             'form': 'edit',
-            //             'service_id': serviceId
-            //         };
-            //         $.ajax({
-            //             url: '{{ route('service.get_service_item_list') }}',
-            //             data: data,
-            //             type: 'GET',
-            //             success: function(response) {
-            //                 setTimeout(function() {
-            //                     $('#tableStep tbody tr').not(':first').remove();
-            //                     tbody.append(response);
-            //                 }, 500);
-            //             },
-            //             error: function(xhr, status, error) {
-            //                 console.log(error)
-            //             }
-            //         });
-            //     } else {
-            //         $('#tableStep tbody tr').not(':first').remove();
-            //     }
-            // }, 500);
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
@@ -316,69 +282,15 @@
             enableButton();
             $("#request_token").val("");
             // $('#tableStep tbody tr').not(':first').remove();
+            $('#formModal form')[0].reset();
+            $("#type")
+                .val(null)
+                .trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
             $('#formModal').modal('hide');
         });
-
-        // $('#addItemButton').on('click', function() {
-        //     var tbody = $("#tableStep > tbody");
-        //     var item_no = $("#txt_item_no").val();
-        //     var item_des = $("#txt_item_des").val();
-        //     var newRow = `
-    //         <tr>
-    //             <td class="p-1 align-middle row-number">
-    //                 #
-    //             </td>
-    //             <td class="p-1 align-middle">
-    //                <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="${item_no}">
-    //             </td>
-    //             <td class="p-1 align-middle">
-    //                <input type="text" class="form-control" id="item_des" name="item_des[]" readonly value="${item_des}">
-    //             </td>
-    //             <td class="text-center p-1 align-middle">
-    //                 <div class="row row-cols-auto g-3">
-    //                     <div class="col">
-    //                         <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-    //                                                 id="removeItemButton"></button>
-    //                     </div>
-    //                 </div>
-    //             </td>
-    //         </tr>
-    //     `;
-        //     $("#txt_item_no").val('');
-        //     $("#txt_item_des").val('');
-        //     tbody.append(newRow);
-
-        //     renumberRows();
-        // });
-
-        // function renumberRows() {
-        //     let no = 1;
-
-        //     $('#tableStep > tbody > tr').each(function() {
-        //         // row khusus tidak ikut nomor
-        //         if ($(this).hasClass('fixed-row')) {
-        //             $(this).find('.row-number').text('');
-        //             return;
-        //         }
-
-        //         $(this).find('.row-number').text(no);
-        //         no++;
-        //     });
-        // }
-
-        // $("#tableStep").on("click", ".delete-row", function() {
-        //     $(this).closest("tr").remove();
-
-        //     if ($(this).hasClass('fixed-row')) {
-        //         return;
-        //     }
-
-        //     $(this).remove();
-        //     renumberRows();
-        // });
 
         function gen_select2() {
             $('#type').each(function() {
@@ -401,31 +313,6 @@
                     });
             });
         }
-
-        // function renumberRows() {
-        //     let no = 1;
-        //     $('#tableStep > tbody > tr').each(function() {
-        //         // row khusus tidak ikut nomor
-        //         if ($(this).hasClass('fixed-row')) {
-        //             $(this).find('.row-number').text('');
-        //             return;
-        //         }
-
-        //         $(this).find('.row-number').text(no);
-        //         no++;
-        //     });
-        // }
-
-        // $("#tableStep").on("click", ".delete-row", function() {
-        //     $(this).closest("tr").remove();
-
-        //     if ($(this).hasClass('fixed-row')) {
-        //         return;
-        //     }
-
-        //     $(this).remove();
-        //     renumberRows();
-        // });
 
         function disableButton() {
             saveButton.disabled = true;

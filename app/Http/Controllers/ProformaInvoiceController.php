@@ -136,6 +136,7 @@ class ProformaInvoiceController extends Controller
                     'mro_item',
                     'uom',
                     'qty',
+                    'type'
                 ),
                 [
                     'request_token' => $request->request_token,
@@ -143,6 +144,28 @@ class ProformaInvoiceController extends Controller
                     'user_id' => Auth::user()->id
                 ]
             );
+            $data = [
+                'client_vendor_id' => $request->client_vendor_id,
+                'contract_id' => $request->contract_id,
+                'unit_id' => $request->unit_id,
+                //Ini nanti digenerate otomatis aja
+                'generate_no' => $request->generate_no,
+                'proforma_no' => $request->proforma_no,
+                'date' => $request->date,
+                'periode' => $request->periode,
+                'periode_start' => $request->periode_start,
+                'periode_finish' => $request->periode_finish,
+                'km_awal' => $request->km_awal,
+                'km_akhir' => $request->km_akhir,
+                'target' => $request->target,
+                'pa' => $request->pa,
+                'penalty' => $request->penalty,
+                'breakdown' => $request->breakdown,
+                'l' => $request->l,
+                'request_token' => $request->request_token,
+                'input_method' => 'Web',
+                'user_id' => Auth::user()->id
+            ];
             $purchase_requisition = Purchase_requisition::firstOrCreate($data);
             foreach ($request->maintenance_item_id as $i => $item) {
                 $purchase_requisition->purchase_requisition_detail()->updateOrCreate(
@@ -160,6 +183,24 @@ class ProformaInvoiceController extends Controller
                     ]
                 );
             }
+
+            // $purchase_requisition = Purchase_requisition::firstOrCreate($data);
+            // foreach ($request->maintenance_item_id as $i => $item) {
+            //     $purchase_requisition->purchase_requisition_detail()->updateOrCreate(
+            //         [
+            //             'maintenance_item_id' => $item,
+            //             'mro_item_id' => $request->mro_item_id[$i],
+            //             'uom' => $request->uom[$i],
+            //             'qty' => $request->qty[$i]
+            //         ],
+            //         [
+            //             'request_token' => $purchase_requisition->request_token,
+            //             'mro_item_id' => $request->mro_item_id[$i],
+            //             'uom' => $request->uom[$i],
+            //             'qty' => $request->qty[$i]
+            //         ]
+            //     );
+            // }
             /**
              * Buat check ada approvalnya gak
              * Kalo ada statusnya jadi Approval.
@@ -235,4 +276,32 @@ class ProformaInvoiceController extends Controller
      * Ngambil tabel add
      */
     public function get_table_add(Request $request) {}
+
+    /**
+     * Ngambil data unit
+     */
+    public function get_unit_all(Request $request)
+    {
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $unit = Unit::selectRaw("id, vehicle_no as text")
+                ->where('vehicle_no', 'like', '%' . $term . '%')
+                ->orderBy('vehicle_no')
+                ->simplePaginate(10);
+            $total_count = count($unit);
+            $morePages = true;
+            $pagination_obj = json_encode($unit);
+            if (empty($unit->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $unit->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
+        }
+    }
 }

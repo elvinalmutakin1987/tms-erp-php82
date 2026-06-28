@@ -19,22 +19,23 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="row align-items-center">
+                            <div class="row align-items-center mb-2">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal"
                                         data-title="Add Proforma Invoice"><i class='bx bxs-plus-square'></i>New</a>
-
                                     <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formBulkModal"
                                         data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a>
                                 </div>
-                                <div class="col-2">
+                            </div>
+                            <div class="row align-items-center">
+                                <div class="col">
                                     <select class="form-select select-top" id="unit" name="unit">
                                         <option value="All">All Unit</option>
                                     </select>
                                 </div>
-                                <div class="col-3">
+                                <div class="col">
                                     <select class="form-select select-top" id="_status" name="_status">
                                         <option value="All">All Status</option>
                                         <option value="Draft">Draft</option>
@@ -48,11 +49,11 @@
                                         <option value="Done">Done</option>
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
                                     <input type="text" class="form-control datepicker" id="date_start" name="date_start"
                                         placeholder="Start Date">
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
                                     <input type="text" class="form-control datepicker" id="date_end" name="date_end"
                                         placeholder="End Date">
                                 </div>
@@ -350,7 +351,6 @@
             });
         });
 
-
         $('#formModal').on('show.bs.modal', function() {
             var button = $('#openModalButton');
             var title = button.data('title');
@@ -435,6 +435,160 @@
             }
         });
 
+        function initUnitSelect2() {
+            const $unit = $('#unit_id');
+
+            if (!$unit.length) {
+                return;
+            }
+
+            const selectedValue = $unit.val();
+
+            if ($unit.hasClass('select2-hidden-accessible')) {
+                $unit.select2('destroy');
+            }
+
+            $unit.off('.unit');
+
+            $unit.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $('#unit_id').data('width') ? $('#unit_id').data('width') : (
+                    $(
+                        '#unit_id').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('proformainvoice.get_unit_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            if (selectedValue) {
+                $unit.val(selectedValue).trigger('change.select2');
+            }
+
+            $unit.on('select2:open.unit', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $unit.on('change.unit', function() {
+                const unitId = $(this).val();
+            });
+        }
+
+        function initUnitTopSelect2() {
+            const $unit = $('#unit');
+
+            if (!$unit.length) {
+                return;
+            }
+
+            const selectedValue = $unit.val();
+
+            if ($unit.hasClass('select2-hidden-accessible')) {
+                $unit.select2('destroy');
+            }
+
+            $unit.off('.service');
+
+            $unit.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $('#unit').data('width') ? $('#service_id').data('width') : (
+                    $(
+                        '#unit').hasClass(
+                        'w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('proformainvocie.get_unit_all') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            if (selectedValue) {
+                $unit.val(selectedValue).trigger('change.select2');
+            }
+
+            $unit.on('select2:open.service', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $unit.on('change.unit', function() {
+                const unitId = $(this).val();
+            });
+        }
+
         function disableButton() {
             saveButton.disabled = true;
         }
@@ -442,6 +596,13 @@
         function enableButton() {
             saveButton.disabled = false;
         }
+
+        initUnitSelect2();
+        initUnitTopSelect2();
+
+        $('#formModal').off('shown.bs.modal.select2PO').on('shown.bs.modal.select2PO', function() {
+            initUnitSelect2();
+        });
     </script>
     <!--app JS-->
 @endsection
