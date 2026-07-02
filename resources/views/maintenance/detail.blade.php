@@ -34,10 +34,10 @@
             </tr>
             <tr>
                 <td width="30%">Start :<br>
-                    <b>{{ \Carbon\Carbon::parse($maintenance->start)->format('H:i') }}</b>
+                    <b>{{ \Carbon\Carbon::parse($maintenance->start)->format('Y-m-d H:i') }}</b>
                 </td>
                 <td width="30%">Finish :<br>
-                    <b>{{ \Carbon\Carbon::parse($maintenance->finish)->format('H:i') }}</b>
+                    <b>{{ \Carbon\Carbon::parse($maintenance->finish)->format('Y-m-d H:i') }}</b>
                 </td>
                 <td width="30%">Work Duration :<br>
                     <b> {{ \Carbon\Carbon::parse($maintenance->work_duration)->format('H:i') }}</b>
