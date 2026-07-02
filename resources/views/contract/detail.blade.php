@@ -34,7 +34,7 @@
 
 <div class="row mb-4">
     <div class="col-lg-12">
-        Service Rate
+        <b>Service Rate</b>
     </div>
     <div class="col-lg-12">
         <table class="table mb-0">
@@ -60,7 +60,7 @@
                     @endforeach
                 @else
                     <tr>
-                        <td colspan="4">No data showed</td>
+                        <td colspan="5">No data showed</td>
                     </tr>
                 @endif
             </tbody>
@@ -70,7 +70,7 @@
 
 <div class="row mb-4">
     <div class="col-lg-12">
-        Unit Rate
+        <b>Unit Rate</b>
     </div>
     <div class="col-lg-12">
         <table class="table mb-0">
@@ -88,8 +88,8 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $d->unit->vehicle_no }}</td>
-                            <td>{{ $d->target ? Number::format($d->target, precision: 0) : '' }}</td>
-                            <td>{{ $d->rate ? Number::format($d->rate, precision: 0) : '' }}</td>
+                            <td>{{ $d->target ? Number::format($d->target, precision: 0) : '' }} %</td>
+                            <td>{{ $d->price ? Number::format($d->price, precision: 0) : '' }}</td>
                         </tr>
                     @endforeach
                 @else
@@ -104,7 +104,7 @@
 
 <div class="row mb-4">
     <div class="col-lg-12">
-        Fix Monthly Fee
+        <b>Fix Monthly Fee</b>
     </div>
     <div class="col-lg-12">
         <table class="table mb-0">

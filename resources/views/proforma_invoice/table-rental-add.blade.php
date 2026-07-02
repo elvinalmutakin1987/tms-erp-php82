@@ -61,8 +61,8 @@
         <thead class="table-dark">
             <tr>
                 <th scope="col" style="width: 30%">Order Number</th>
-                <th scope="col" style="width: 30%">Description</th>
-                <th scope="col" style="width: 30%" colspan="2">Amount</th>
+                <th scope="col" style="width: 50%">Description</th>
+                <th scope="col" style="width: 20%" colspan="2">Amount</th>
             </tr>
         </thead>
 
@@ -83,7 +83,7 @@
 
             <tr>
                 <td class="p-1">
-                    (Rate IDR {{ Number::format($price, precision: 0, locale: 'id') }})
+                    (Rate IDR {{ Number::format($price, precision: 0) }})
                 </td>
 
                 <td class="p-1">
@@ -103,7 +103,7 @@
                 <td class="p-1"></td>
 
                 <td class="p-1">
-                    1. Target PA &nbsp;&nbsp; {{ Number::format($target, precision: 2, locale: 'id') }}%
+                    1. Target PA &nbsp;&nbsp; {{ Number::format($target, precision: 2) }}%
                 </td>
 
                 <td class="p-1" width="10px"></td>
@@ -116,12 +116,12 @@
                 <td class="p-1">
                     2. Actual Hari Kerja {{ $hariKerja }} <br>
                     &nbsp;&nbsp;&nbsp;&nbsp; ({{ $hariKerja }} hari @ Rp.
-                    {{ Number::format($price, precision: 0, locale: 'id') }})
+                    {{ Number::format($price, precision: 0) }})
                 </td>
 
                 <td class="p-1" width="10px">IDR</td>
                 <td class="p-1" style="text-align: right">
-                    {{ Number::format($price, precision: 0, locale: 'id') }}
+                    {{ Number::format($price, precision: 0) }}
                 </td>
             </tr>
 
@@ -131,15 +131,15 @@
                 <td class="p-1">
                     3. Aktual PA <br>
                     &nbsp;&nbsp;&nbsp;&nbsp; Jam Tersedia {{ $hariKerja }} x 24 Jam =
-                    {{ Number::format($totalJamKerja, precision: 0, locale: 'id') }} Jam
+                    {{ Number::format($totalJamKerja, precision: 0) }} Jam
                     <br>
 
                     &nbsp;&nbsp;&nbsp;&nbsp; Breakdown =
-                    <b>{{ Number::format($total_breakdown, precision: 2, locale: 'id') }}</b> Jam
+                    <b>{{ Number::format($total_breakdown, precision: 2) }}</b> Jam
                     <br>
 
                     &nbsp;&nbsp;&nbsp;&nbsp; PA =
-                    {{ Number::format($pa, precision: 2, locale: 'id') }}%
+                    {{ Number::format($pa, precision: 2) }}%
                 </td>
 
                 <td class="p-1" width="10px"></td>
@@ -156,7 +156,7 @@
                 <td class="p-1" width="10px">IDR</td>
 
                 <td class="p-1" style="text-align: right">
-                    {{ Number::format($penalty, precision: 0, locale: 'id') }}
+                    {{ Number::format($penalty, precision: 0) }}
                 </td>
             </tr>
 
@@ -170,7 +170,7 @@
                 <td class="p-1" width="10px">IDR</td>
 
                 <td class="p-1" style="text-align: right">
-                    {{ Number::format($total_payment, precision: 0, locale: 'id') }}
+                    {{ Number::format($total_payment, precision: 0) }}
                 </td>
             </tr>
         </tbody>

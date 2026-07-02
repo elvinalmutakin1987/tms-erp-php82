@@ -349,15 +349,14 @@
                 });
             });
 
-            $('.timepicker').each(function() {
+            $('.date-time').each(function() {
                 if (this._flatpickr) {
                     this._flatpickr.destroy();
                 }
 
                 flatpickr(this, {
                     enableTime: true,
-                    noCalendar: true,
-                    dateFormat: 'H:i',
+                    dateFormat: "Y-m-d H:i",
                     time_24hr: true,
                     minuteIncrement: 1,
                     disableMobile: true,
@@ -1077,8 +1076,8 @@
                 setInputValue('#km_hm', kmHm);
                 setInputValue('#_km_hm', formatNumber(kmHm));
 
-                setFlatpickrOrInputValue('#start', timeFormat(getDataValue(data, ['start', 'start_time'])));
-                setFlatpickrOrInputValue('#finish', timeFormat(getDataValue(data, ['finish', 'finish_time'])));
+                setFlatpickrOrInputValue('#start', dateTimeFormat(getDataValue(data, ['start', 'start_time'])));
+                setFlatpickrOrInputValue('#finish', dateTimeFormat(getDataValue(data, ['finish', 'finish_time'])));
                 setInputValue('#work_duration', timeFormat(getDataValue(data, [
                     'work_duration',
                     'duration'
@@ -2017,6 +2016,28 @@
             return parts[0] + ':' + parts[1];
         }
 
+        function dateTimeFormat(data) {
+            if (!data) {
+                return '';
+            }
+
+            const value = String(data).trim();
+
+            if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}$/.test(value)) {
+                return value.substring(0, 16);
+            }
+
+            if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(value)) {
+                return value.replace('T', ' ').substring(0, 16);
+            }
+
+            if (/^\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}$/.test(value)) {
+                return value;
+            }
+
+            return value;
+        }
+
         function formatNumber(value) {
             if (value === undefined || value === null || value === '') {
                 return '';
@@ -2187,6 +2208,39 @@
                 return;
             }
 
+            function parseDateTime(value) {
+                if (!value) {
+                    return null;
+                }
+
+                value = String(value).trim();
+
+                const match = value.match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2})$/);
+
+                if (!match) {
+                    return null;
+                }
+
+                const year = Number(match[1]);
+                const month = Number(match[2]) - 1;
+                const day = Number(match[3]);
+                const hour = Number(match[4]);
+                const minute = Number(match[5]);
+                const date = new Date(year, month, day, hour, minute, 0, 0);
+
+                if (
+                    date.getFullYear() !== year ||
+                    date.getMonth() !== month ||
+                    date.getDate() !== day ||
+                    date.getHours() !== hour ||
+                    date.getMinutes() !== minute
+                ) {
+                    return null;
+                }
+
+                return date;
+            }
+
             function calculateDuration() {
                 const start = startElement.value.trim();
                 const finish = finishElement.value.trim();
@@ -2196,26 +2250,24 @@
                     return;
                 }
 
-                const startParts = start.replace('.', ':').split(':').map(Number);
-                const finishParts = finish.replace('.', ':').split(':').map(Number);
+                const startDate = parseDateTime(start);
+                const finishDate = parseDateTime(finish);
 
-                if (startParts.length !== 2 || finishParts.length !== 2 ||
-                    Number.isNaN(startParts[0]) || Number.isNaN(startParts[1]) ||
-                    Number.isNaN(finishParts[0]) || Number.isNaN(finishParts[1])) {
+                if (!startDate || !finishDate) {
                     durationElement.value = '';
                     return;
                 }
 
-                let startMinutes = startParts[0] * 60 + startParts[1];
-                let finishMinutes = finishParts[0] * 60 + finishParts[1];
+                const differenceMs = finishDate.getTime() - startDate.getTime();
 
-                if (finishMinutes < startMinutes) {
-                    finishMinutes += 24 * 60;
+                if (differenceMs < 0) {
+                    durationElement.value = '';
+                    return;
                 }
 
-                const difference = finishMinutes - startMinutes;
-                const hours = String(Math.floor(difference / 60)).padStart(2, '0');
-                const minutes = String(difference % 60).padStart(2, '0');
+                const totalMinutes = Math.floor(differenceMs / 60000);
+                const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+                const minutes = String(totalMinutes % 60).padStart(2, '0');
 
                 durationElement.value = hours + ':' + minutes;
             }

@@ -44,11 +44,11 @@
 
                         <div class="col">
                             <label for="start" class="form-label">Start</label>
-                            <input type="text" class="form-control timepicker" id="start" name="start">
+                            <input type="text" class="form-control date-time" id="start" name="start">
                         </div>
                         <div class="col">
                             <label for="finish" class="form-label">Finish</label>
-                            <input type="text" class="form-control timepicker" id="finish" name="finish">
+                            <input type="text" class="form-control date-time" id="finish" name="finish">
                         </div>
                         <div class="col">
                             <label for="work_duration" class="form-label">Work Duration</label>
