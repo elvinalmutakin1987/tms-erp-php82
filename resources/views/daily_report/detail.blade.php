@@ -15,7 +15,7 @@
         $hour = isset($parts[0]) ? (int) $parts[0] : 0;
         $minute = isset($parts[1]) ? (int) $parts[1] : 0;
 
-        return ($hour * 60) + $minute;
+        return $hour * 60 + $minute;
     };
 
     $hasDuration = !empty($durationTrip1) || !empty($durationTrip2);
@@ -25,11 +25,7 @@
     if ($hasDuration) {
         $totalMinutes = $durationToMinutes($durationTrip1) + $durationToMinutes($durationTrip2);
 
-        $durationTotal = sprintf(
-            '%02d:%02d',
-            intdiv($totalMinutes, 60),
-            $totalMinutes % 60,
-        );
+        $durationTotal = sprintf('%02d:%02d', intdiv($totalMinutes, 60), $totalMinutes % 60);
     }
 @endphp
 
