@@ -32,7 +32,7 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <select class="form-select select-top" id="unit" name="unit">
-                                        <option value="All">All Unit</option>
+                                        <option value=""></option>
                                     </select>
                                 </div>
                                 <div class="col">
@@ -105,36 +105,39 @@
 
     <script>
         const saveButton = document.getElementById('saveButton');
+
         var proformaInvoiceId = '';
         var contractId = '';
         var unitId = '';
+
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
-            var table = $('#table-data').DataTable({
+
+            $('#table-data').DataTable({
                 scrollCollapse: true,
                 responsive: true,
-                "lengthMenu": [
+                lengthMenu: [
                     [10, 25, 50, 100, -1],
                     [10, 25, 50, 100, "All"]
                 ],
-                "paging": true,
-                "lengthChange": true,
-                "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "processing": true,
-                "serverSide": true,
-                "ajax": {
+                paging: true,
+                lengthChange: true,
+                searching: true,
+                ordering: true,
+                info: true,
+                autoWidth: false,
+                processing: true,
+                serverSide: true,
+                ajax: {
                     url: ajax,
                     data: function(d) {
                         d.status = $('#_status').val();
-                        d.unit_id = $('#unit').val();
+                        d.unit_id = $('#unit').val() || '';
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
                     }
                 },
-                "columns": [{
+                columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',
                         orderable: false,
@@ -147,25 +150,25 @@
                         data: 'proforma_no',
                         name: 'proforma_no',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'contract_no',
                         name: 'contract_no',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'date',
                         name: 'date',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'unit',
                         name: 'unit',
                         orderable: true,
-                        searchable: true,
+                        searchable: true
                     },
                     {
                         data: 'status',
@@ -197,71 +200,457 @@
                         className: 'text-center',
                         targets: '_all'
                     }
-                ],
-            });
-
-            $(document).on('click', '.editButton', function() {
-                requisitionId = $(this).data('id');
-                $('#modal-header').text('Edit Requisition');
-                $('#id').val(requisitionId);
-                let url = '{{ route('purchaserequisition.show', ':_id') }}';
-                url = url.replace(':_id', requisitionId);
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit Requisition');
-                        $("#unit_id").val(response.data.unit_id).trigger('change');
-                        $("#maintenance_id").val(response.data.maintenance_id).trigger(
-                            'change');
-                        $("#date").val(response.data.date);
-                        $("#remarks").val(response.data.remarks);
-                        $("#request_token").val(response.data.request_token);
-                    },
-                    error: function() {
-                        alert('Error fetching data');
-                    }
-                });
-            });
-
-            $(document).on('click', '.detailButton', function() {
-                $('#modal-detail-header').text('Detail Requisition');
-                let url = '{{ route('purchaserequisition.get_detail', ':_id') }}';
-                url = url.replace(':_id', $(this).data('id'));
-                $.ajax({
-                    url: url,
-                    type: 'GET',
-                    success: function(response) {
-                        $('#modal-detail-body').html(response);
-                    },
-                    error: function() {
-                        alert('Error fetching data');
-                    }
-                });
+                ]
             });
 
             $(".datepicker").flatpickr({
                 allowInput: true
             });
 
-            $(".select-top").select2({
-                theme: "bootstrap-5",
-                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
-                    'w-100') ? '100%' : 'style',
-            }).on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
-
-            $("#date_start").on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
-
-            $("#date_end").on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
-
+            initTopStatusSelect2();
+            initUnitTopSelect2();
             gen_select2();
+
+            $("#date_start, #date_end").off('change.filterDate').on('change.filterDate', function() {
+                $('#table-data').DataTable().draw();
+            });
+        });
+
+        function initTopStatusSelect2() {
+            $('.select-top').not('#unit').each(function() {
+                const $el = $(this);
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.select2({
+                    theme: "bootstrap-5",
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style')
+                });
+
+                $el.off('change.topFilter').on('change.topFilter', function() {
+                    $('#table-data').DataTable().draw();
+                });
+            });
+        }
+
+        function initUnitTopSelect2() {
+            const $unit = $('#unit');
+
+            if (!$unit.length) {
+                return;
+            }
+
+            if ($unit.hasClass('select2-hidden-accessible')) {
+                $unit.select2('destroy');
+            }
+
+            $unit.off('.unitTop');
+
+            $unit.select2({
+                theme: "bootstrap-5",
+                width: $unit.data('width') ? $unit.data('width') : ($unit.hasClass('w-100') ? '100%' : 'style'),
+                placeholder: 'All Unit',
+                allowClear: true,
+                selectOnClose: false,
+                minimumInputLength: 0,
+                ajax: {
+                    url: '{{ route('proformainvoice.get_unit_all') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $unit.val(null).trigger('change.select2');
+
+            $unit.on('select2:open.unitTop', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                }, 0);
+            });
+
+            $unit.on('change.unitTop', function() {
+                $('#table-data').DataTable().draw();
+            });
+        }
+
+        function closeTopSelect2BeforeModal() {
+            const topSelects = ['#unit', '#_status'];
+
+            topSelects.forEach(function(selector) {
+                const $el = $(selector);
+
+                if ($el.length && $el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('close');
+                }
+            });
+        }
+
+        function gen_select2() {
+            $('.select-select').each(function() {
+                const $el = $(this);
+
+                if ($el.attr('id') === 'unit_id') {
+                    return;
+                }
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.select2({
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style'),
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0,
+                    placeholder: $el.attr('id') === 'contract_id' ? 'Choose Contract' : '',
+                    allowClear: $el.attr('id') === 'contract_id'
+                }).on('select2:close', function() {
+                    $(this).blur();
+
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                });
+
+                if ($el.attr('id') === 'contract_id') {
+                    $el.val(null).trigger('change.select2');
+                }
+            });
+        }
+
+        function initUnitSelect2() {
+            const $unit = $('#unit_id');
+
+            if (!$unit.length) {
+                return;
+            }
+
+            const selectedValue = $unit.val();
+
+            if ($unit.hasClass('select2-hidden-accessible')) {
+                $unit.select2('destroy');
+            }
+
+            $unit.off('.unitModal');
+
+            $unit.select2({
+                theme: "bootstrap-5",
+                dropdownParent: $('#formModal'),
+                width: $unit.data('width') ? $unit.data('width') : ($unit.hasClass('w-100') ? '100%' : 'style'),
+                placeholder: 'Choose Unit',
+                allowClear: true,
+                selectOnClose: false,
+                minimumInputLength: 0,
+                ajax: {
+                    url: '{{ route('proformainvoice.get_unit_all') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        return {
+                            results: data.results,
+                            pagination: {
+                                more: data.pagination ? data.pagination.more : false
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            if (selectedValue) {
+                $unit.val(selectedValue).trigger('change.select2');
+            }
+
+            $unit.on('select2:open.unitModal', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field');
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $unit.on('change.unitModal', function() {
+                unitId = $(this).val();
+            });
+        }
+
+        // $('#contract_id').off('change.contract').on('change.contract', function() {
+        //     var val = $(this).val();
+
+        //     if (!val) {
+        //         $("#div-table").html('');
+        //         return;
+        //     }
+
+        //     $("#div-table").html(`
+    //     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    //     <span class="visually">Loading...</span>
+    // `);
+
+        //     setTimeout(function() {
+        //         $.ajax({
+        //             url: "{{ route('proformainvoice.get_table_add') }}",
+        //             data: {
+        //                 contract_id: val,
+        //                 year: $("#year").val(),
+        //                 month: $("#month").val()
+        //             },
+        //             type: 'GET',
+        //             success: function(response) {
+        //                 $("#div-table").html(response.html);
+        //             },
+        //             error: function(xhr, status, error) {
+        //                 console.error('Error:', error);
+        //             }
+        //         });
+        //     }, 500);
+        // });
+
+        let loadTableTimer = null;
+
+        function loadProformaInvoiceTable() {
+            var contractId = $('#contract_id').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+
+            if (!contractId) {
+                $('#div-table').html('');
+                return;
+            }
+
+            $('#div-table').html(`
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+        <span class="visually">Loading...</span>
+    `);
+
+            clearTimeout(loadTableTimer);
+
+            loadTableTimer = setTimeout(function() {
+                $.ajax({
+                    url: "{{ route('proformainvoice.get_table_add') }}",
+                    type: 'GET',
+                    data: {
+                        contract_id: contractId,
+                        year: year,
+                        month: month
+                    },
+                    success: function(response) {
+                        $('#div-table').html(response.html);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+
+                        $('#div-table').html(`
+                    <div class="alert alert-danger mb-0">
+                        Failed to load data.
+                    </div>
+                `);
+                    }
+                });
+            }, 500);
+        }
+
+        $(document)
+            .off('change.loadTable', '#contract_id, #month')
+            .on('change.loadTable', '#contract_id, #month', function() {
+                loadProformaInvoiceTable();
+            });
+
+        $(document)
+            .off('input.loadTable change.loadTable', '#year')
+            .on('input.loadTable change.loadTable', '#year', function() {
+                loadProformaInvoiceTable();
+            });
+
+        $('#formModal').off('show.bs.modal.mainModal').on('show.bs.modal.mainModal', function(event) {
+            closeTopSelect2BeforeModal();
+
+            var button = $(event.relatedTarget);
+            var title = button.data('title') || 'Add Proforma Invoice';
+
+            $('#formModal form')[0].reset();
+            $('#modal-header').text(title);
+
+            if (proformaInvoiceId == '') {
+                $.ajax({
+                    url: '{{ route('gen_request_token') }}',
+                    type: 'GET',
+                    success: function(response) {
+                        $('#request_token').val(response.data);
+                    },
+                    error: function(xhr, status, error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Oops...",
+                            text: error
+                        });
+                    }
+                });
+            }
+        });
+
+        $('#formModal').off('shown.bs.modal.select2Modal').on('shown.bs.modal.select2Modal', function() {
+            gen_select2();
+            initUnitSelect2();
+
+            $('#contract_id').val(null).trigger('change.select2');
+            $('#unit_id').val(null).trigger('change.select2');
+            $('#div-table').html('');
+        });
+
+        $('#formModal').off('hidden.bs.modal.mainModal').on('hidden.bs.modal.mainModal', function() {
+            proformaInvoiceId = '';
+            contractId = '';
+            unitId = '';
+
+            $("#request_token").val("");
+            $("#div-table").html("");
+
+            $("#contract_id").val(null).trigger('change.select2');
+            $("#unit_id").val(null).trigger('change.select2');
+
+            closeTopSelect2BeforeModal();
+        });
+
+        $(document).off('click.editButton').on('click.editButton', '.editButton', function() {
+            proformaInvoiceId = $(this).data('id');
+
+            $('#modal-header').text('Edit Proforma Invoice');
+            $('#id').val(proformaInvoiceId);
+
+            let url = '{{ route('purchaserequisition.show', ':_id') }}';
+            url = url.replace(':_id', proformaInvoiceId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $("#divSignPath").css('display', 'block');
+                    $('#modal-header').text('Edit Proforma Invoice');
+
+                    $("#unit_id").val(response.data.unit_id).trigger('change');
+                    $("#maintenance_id").val(response.data.maintenance_id).trigger('change');
+                    $("#date").val(response.data.date);
+                    $("#remarks").val(response.data.remarks);
+                    $("#request_token").val(response.data.request_token);
+                },
+                error: function() {
+                    alert('Error fetching data');
+                }
+            });
+        });
+
+        $(document).off('click.detailButton').on('click.detailButton', '.detailButton', function() {
+            $('#modal-detail-header').text('Detail Proforma Invoice');
+
+            let url = '{{ route('purchaserequisition.get_detail', ':_id') }}';
+            url = url.replace(':_id', $(this).data('id'));
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $('#modal-detail-body').html(response);
+                },
+                error: function() {
+                    alert('Error fetching data');
+                }
+            });
+        });
+
+        $('.saveButton').off('click.saveProforma').on('click.saveProforma', function() {
+            var formData = new FormData($('#formModal').find('form')[0]);
+            var url = '{{ route('proformainvoice.store') }}';
+            var type = 'POST';
+
+            formData.append('status', $(this).val());
+
+            if (proformaInvoiceId != '') {
+                url = '{{ route('proformainvoice.update', ':_id') }}';
+                url = url.replace(':_id', proformaInvoiceId);
+                formData.append('_method', 'PUT');
+            }
+
+            $.ajax({
+                url: url,
+                type: type,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: response.title,
+                        text: response.message,
+                        icon: "success",
+                        timer: 5000,
+                        didOpen: () => {},
+                        willClose: () => {
+                            $('#table-data').DataTable().ajax.reload(null, false);
+                            $('#formModal form')[0].reset();
+
+                            proformaInvoiceId = '';
+                            contractId = '';
+                            unitId = '';
+
+                            $('#formModal').modal('hide');
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: errorMessage
+                    });
+                }
+            });
+        });
+
+        $('#cancelButton').off('click.cancelModal').on('click.cancelModal', function() {
+            $('#formModal').modal('hide');
+        });
+
+        $('#cancelDetailButton').off('click.cancelDetail').on('click.cancelDetail', function() {
+            $('#formDetail').modal('hide');
         });
 
         function delete_(id) {
@@ -277,6 +666,7 @@
                 if (result.isConfirmed) {
                     let url = '{{ route('proformainvoice.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
+
                     $.ajax({
                         url: url,
                         type: 'DELETE',
@@ -298,10 +688,11 @@
                         },
                         error: function(xhr, status, error) {
                             var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
                             Swal.fire({
                                 icon: "error",
                                 title: "Oops...",
-                                text: errorMessage,
+                                text: errorMessage
                             });
                         }
                     });
@@ -309,300 +700,17 @@
             });
         }
 
-        $('.saveButton').on('click', function() {
-            var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('proformainvoice.store') }}';
-            var type = 'POST';
-            formData.append('status', $(this).val());
-            if (proformaInvoiceId != '') {
-                url = '{{ route('proformainvoice.update', ':_id') }}';
-                url = url.replace(':_id', requisitionId);
-                formData.append('_method', 'PUT');
-            }
-            $.ajax({
-                url: url,
-                type: type,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: "success",
-                        timer: 5000,
-                        didOpen: () => {},
-                        willClose: () => {
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formModal form')[0].reset();
-                            requisitionId = '';
-                            $('#formModal').modal('hide');
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage,
-                    });
-                }
-            });
-        });
-
-        $('#formModal').on('show.bs.modal', function() {
-            var button = $('#openModalButton');
-            var title = button.data('title');
-            if (proformaInvoiceId = '') {
-                $.ajax({
-                    url: '{{ route('gen_request_token') }}',
-                    type: 'GET',
-                    success: function(response) {
-                        $('#request_token').val(response.data);
-                    },
-                    error: function(xhr, status, error) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Oops...",
-                            text: error,
-                        });
-                    }
-                });
-            }
-            $('#formModal form')[0].reset();
-            $('#modal-header').text(title);
-        });
-
-        $('#formModal').on('hidden.bs.modal', function() {
-            proformaInvoiceId = '';
-            contractId = '';
-            unitId = '';
-            $("#request_token").val("");
-            $("#div-table").html("");
-            $("#contract_id").val('').trigger('change');
-            $("#unit_id").val('All').trigger('change');
-        });
-
-        $('#cancelButton').on('click', function() {
-            $('#formModal').modal('hide');
-        });
-
-        $('#cancelDetailButton').on('click', function() {
-            $('#formDetail').modal('hide');
-        });
-
-        function gen_select2() {
-            $('.select-select').each(function() {
-                const $el = $(this);
-                $el.select2({
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0,
-                }).on('select2:close', function() {
-                    $(this).blur();
-                    if (document.activeElement) {
-                        document.activeElement.blur();
-                    }
-                });
-            });
-        }
-
-        $('#contract_id').on('change', function() {
-            var val = $(this).val();
-            if (val != null) {
-                $("#div-table").html(`<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span class="visually">Loading...</span>`);
-                setTimeout(function() {
-                    $.ajax({
-                        url: "{{ route('proformainvoice.get_table_add') }}",
-                        data: {
-                            contract_id: val
-                        },
-                        type: 'GET',
-                        success: function(response) {
-                            $("#div-table").html(response.html);
-
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error:', error);
-                        }
-                    });
-                }, 500);
-            }
-        });
-
-        function initUnitSelect2() {
-            const $unit = $('#unit_id');
-
-            if (!$unit.length) {
-                return;
-            }
-
-            const selectedValue = $unit.val();
-
-            if ($unit.hasClass('select2-hidden-accessible')) {
-                $unit.select2('destroy');
-            }
-
-            $unit.off('.unit');
-
-            $unit.select2({
-                theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: $('#unit_id').data('width') ? $('#unit_id').data('width') : (
-                    $(
-                        '#unit_id').hasClass(
-                        'w-100') ? '100%' : 'style'),
-                placeholder: '',
-                allowClear: true,
-                selectOnClose: false,
-                ajax: {
-                    url: '{{ route('proformainvoice.get_unit_all') }}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data, params) {
-                        params.page = params.page || 1;
-                        return {
-                            results: data.results,
-                            pagination: {
-                                more: data.pagination ? data.pagination.more : false
-                            }
-                        };
-                    },
-                    cache: true
-                }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            });
-
-            if (selectedValue) {
-                $unit.val(selectedValue).trigger('change.select2');
-            }
-
-            $unit.on('select2:open.unit', function() {
-                setTimeout(function() {
-                    const search = document.querySelector(
-                        '.select2-container--open .select2-search__field'
-                    );
-
-                    if (search) {
-                        search.focus({
-                            preventScroll: true
-                        });
-                    }
-
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            });
-
-            $unit.on('change.unit', function() {
-                const unitId = $(this).val();
-            });
-        }
-
-        function initUnitTopSelect2() {
-            const $unit = $('#unit');
-
-            if (!$unit.length) {
-                return;
-            }
-
-            const selectedValue = $unit.val();
-
-            if ($unit.hasClass('select2-hidden-accessible')) {
-                $unit.select2('destroy');
-            }
-
-            $unit.off('.service');
-
-            $unit.select2({
-                theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: $('#unit').data('width') ? $('#service_id').data('width') : (
-                    $(
-                        '#unit').hasClass(
-                        'w-100') ? '100%' : 'style'),
-                placeholder: '',
-                allowClear: true,
-                selectOnClose: false,
-                ajax: {
-                    url: '{{ route('proformainvocie.get_unit_all') }}',
-                    dataType: 'json',
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data, params) {
-                        params.page = params.page || 1;
-                        return {
-                            results: data.results,
-                            pagination: {
-                                more: data.pagination ? data.pagination.more : false
-                            }
-                        };
-                    },
-                    cache: true
-                }
-            }).on('select2:open', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            });
-
-            if (selectedValue) {
-                $unit.val(selectedValue).trigger('change.select2');
-            }
-
-            $unit.on('select2:open.service', function() {
-                setTimeout(function() {
-                    const search = document.querySelector(
-                        '.select2-container--open .select2-search__field'
-                    );
-
-                    if (search) {
-                        search.focus({
-                            preventScroll: true
-                        });
-                    }
-
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            });
-
-            $unit.on('change.unit', function() {
-                const unitId = $(this).val();
-            });
-        }
-
         function disableButton() {
-            saveButton.disabled = true;
+            if (saveButton) {
+                saveButton.disabled = true;
+            }
         }
 
         function enableButton() {
-            saveButton.disabled = false;
+            if (saveButton) {
+                saveButton.disabled = false;
+            }
         }
-
-        initUnitSelect2();
-        initUnitTopSelect2();
-
-        $('#formModal').off('shown.bs.modal.select2PO').on('shown.bs.modal.select2PO', function() {
-            initUnitSelect2();
-        });
     </script>
     <!--app JS-->
 @endsection

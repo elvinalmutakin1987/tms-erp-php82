@@ -38,8 +38,8 @@ return new class extends Migration
             $table->decimal('cost_total', 16, 2)->nullable();
             $table->decimal('hour_meter', 16, 2)->nullable();
             $table->decimal('km_hm', 16, 2)->nullable();
-            $table->time('start')->nullable();
-            $table->time('finish')->nullable();
+            $table->timestamp('start')->nullable();
+            $table->timestamp('finish')->nullable();
             $table->time('work_duration')->nullable();
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();

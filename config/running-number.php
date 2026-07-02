@@ -41,7 +41,8 @@ return [
         'pr', //Untuk penomoran maintenance
         'pi', //Untuk penomoran proforma invoice,
         'po-payment', //Untuk penomoran purchase order payment
-        'inv-payment', //Untuk penomoran invoice payment
+        'inv-payment', //Untuk penomoran invoice payment,
+        'pro-inv' //
     ],
 
     'model' => RunningNumber::class,
@@ -120,6 +121,7 @@ return [
             'insp' => ResetPeriod::YEARLY->value,
             'po-payment' => ResetPeriod::YEARLY->value,
             'inv-payment' => ResetPeriod::YEARLY->value,
+            'pro-invoice' => ResetPeriod::YEARLY->value,
         ],
     ],
 

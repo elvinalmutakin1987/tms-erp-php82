@@ -16,6 +16,7 @@ use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 
 class ProformaInvoiceController extends Controller
 {
@@ -63,12 +64,10 @@ class ProformaInvoiceController extends Controller
                      * user superadmin dan yang punya akses edit aja yang bisa muncul
                      */
                     if ($item->status == 'Draft'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('proformainvoice.edit')):
-                            $button .= '<li>
+                        $button .= '<li>
                                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                                     data-id="' . $item->id . '">Edit</a>
                                 </li>';
-                        endif;
                     endif;
 
                     /**
@@ -76,11 +75,9 @@ class ProformaInvoiceController extends Controller
                      * user superadmin dan yang punya akses delete aja yang bisa muncul
                      */
                     if ($item->status != 'Done'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('proformainvoice.delete')):
-                            $button .= '<li>
+                        $button .= '<li>
                                     <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
                                 </li>';
-                        endif;
                     endif;
 
                     $button .= '</ul>
@@ -124,31 +121,10 @@ class ProformaInvoiceController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
             ]);
-            $data = array_merge(
-                $request->except(
-                    '_token',
-                    '_method',
-                    '_uom',
-                    '__qty',
-                    'maintenance_item_id',
-                    'maintenance_item',
-                    'mro_item_id',
-                    'mro_item',
-                    'uom',
-                    'qty',
-                    'type'
-                ),
-                [
-                    'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'user_id' => Auth::user()->id
-                ]
-            );
             $data = [
                 'client_vendor_id' => $request->client_vendor_id,
                 'contract_id' => $request->contract_id,
                 'unit_id' => $request->unit_id,
-                //Ini nanti digenerate otomatis aja
                 'generate_no' => $request->generate_no,
                 'proforma_no' => $request->proforma_no,
                 'date' => $request->date,
@@ -161,59 +137,28 @@ class ProformaInvoiceController extends Controller
                 'pa' => $request->pa,
                 'penalty' => $request->penalty,
                 'breakdown' => $request->breakdown,
-                'l' => $request->l,
                 'request_token' => $request->request_token,
                 'input_method' => 'Web',
                 'user_id' => Auth::user()->id
             ];
-            $purchase_requisition = Purchase_requisition::firstOrCreate($data);
-            foreach ($request->maintenance_item_id as $i => $item) {
-                $purchase_requisition->purchase_requisition_detail()->updateOrCreate(
-                    [
-                        'maintenance_item_id' => $item,
-                        'mro_item_id' => $request->mro_item_id[$i],
-                        'uom' => $request->uom[$i],
-                        'qty' => $request->qty[$i]
-                    ],
-                    [
-                        'request_token' => $purchase_requisition->request_token,
-                        'mro_item_id' => $request->mro_item_id[$i],
-                        'uom' => $request->uom[$i],
-                        'qty' => $request->qty[$i]
-                    ]
-                );
-            }
+            $proforma_invoice = Proforma_invoice::firstOrCreate($data);
 
-            // $purchase_requisition = Purchase_requisition::firstOrCreate($data);
-            // foreach ($request->maintenance_item_id as $i => $item) {
-            //     $purchase_requisition->purchase_requisition_detail()->updateOrCreate(
-            //         [
-            //             'maintenance_item_id' => $item,
-            //             'mro_item_id' => $request->mro_item_id[$i],
-            //             'uom' => $request->uom[$i],
-            //             'qty' => $request->qty[$i]
-            //         ],
-            //         [
-            //             'request_token' => $purchase_requisition->request_token,
-            //             'mro_item_id' => $request->mro_item_id[$i],
-            //             'uom' => $request->uom[$i],
-            //             'qty' => $request->qty[$i]
-            //         ]
-            //     );
-            // }
+
+
             /**
              * Buat check ada approvalnya gak
              * Kalo ada statusnya jadi Approval.
              * Nanti kalo approval beres baru jadi Open
              */
-            $model = 'App\Models\Purchase_requisition';
+
+            $model = 'App\Models\Proforma_invoice';
             $department = 'Equipment';
             if (checkHasApproval($model, $department)) {
-                if ($purchase_requisition->status == 'Open') {
-                    $purchase_requisition->status = 'Approval';
-                    $purchase_requisition->save();
+                if ($proforma_invoice->status == 'Open') {
+                    $proforma_invoice->status = 'Approval';
+                    $proforma_invoice->save();
                     $approval_flow_id = getApprovalFlowId($model, $department);
-                    createApprovalProcess($approval_flow_id, $purchase_requisition->id);
+                    createApprovalProcess($approval_flow_id, $proforma_invoice->id);
                 }
             }
 
@@ -275,7 +220,68 @@ class ProformaInvoiceController extends Controller
     /**
      * Ngambil tabel add
      */
-    public function get_table_add(Request $request) {}
+    public function get_table_add(Request $request)
+    {
+        try {
+            $contract = Contract::find($request->contract_id);
+            $month = $request->month;
+            $year = $request->year;
+            $data = genProformaInvoice($contract, $year, $month);
+            $kodeDokumen = 'P-INV';
+            $year = date('y');
+            $month = date('m');
+            $proforma_prev_no = running_number()
+                ->type('pro-inv')
+                ->formatter(new class($kodeDokumen, $year, $month) implements Presenter {
+                    public function __construct(
+                        private string $kodeDokumen,
+                        private string $year,
+                        private string $month
+                    ) {}
+
+                    public function format(string $type, int $number): string
+                    {
+                        return sprintf(
+                            '%s/%s/%s-%03d',
+                            $this->kodeDokumen,
+                            $this->year,
+                            $this->month,
+                            $number
+                        );
+                    }
+                })
+                ->preview();
+
+            $view = 'proforma_invoice.table-rental-add';
+            if ($contract->type == 'LCT') {
+                $view = 'proforma_invoice.table-lct-add';
+            } else if ($contract->type == 'Fuel Truck Rental') {
+                $view = 'proforma_invoice.table-fuel-add';
+            }
+
+            /**
+             * Check contract id sudah dibuatkan proforma invoice di bulan ini atau belum
+             */
+            $doc_status = 0;
+            if (checkProformaInvoice($contract, $year, $month)) {
+                $doc_status = 1;
+            }
+
+            $html = view($view, compact('data', 'contract', 'year', 'month'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'proforma_prev_no' => $proforma_prev_no,
+                'data' => $data,
+                'doc_status' => $doc_status,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
 
     /**
      * Ngambil data unit

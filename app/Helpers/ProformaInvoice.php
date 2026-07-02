@@ -5,7 +5,9 @@ use App\Models\Contract_fmf;
 use App\Models\Contract_rate;
 use App\Models\Maintenance;
 use App\Models\Proforma_invoice;
+use App\Models\Unit_target;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -13,27 +15,62 @@ use Illuminate\Support\Str;
  * cek ada ngeset approval gak?
  */
 if (! function_exists('genProformaInvoice')) {
-    function genProformaInvoice(Contract $contract, string $periode, string $periode_awal, string $periode_akhir): string
+    function genProformaInvoice(Contract $contract, string $year, string $month): array
     {
-        $grand_total = 0;
+        // $total_breakdown = Maintenance::whereYear('date', $year)
+        //     ->whereMonth('date', $month)
+        //     ->selectRaw('ROUND(SUM(TIME_TO_SEC(work_duration)) / 3600, 2) as total_duration_decimal')
+        //     ->value('total_duration_decimal') ?? 0;
+        $contract_fmf = Contract_fmf::where('contract_id', '=', $contract->id)
+            ->where('year', $year)
+            ->first();
+        $fix_monthly_fee = $contract_fmf->fix_monthly_fee ?? 0;
+        $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+        $unit_target = Unit_target::where('contract_id', $contract->id)->get();
 
-        /**
-         * Kalo ngitung proforma invoicenya rental
-         * dihitung jumlah breakdownnya
-         * Jadi hitung work duration di table maintenance
-         */
-        if ($contract->type == 'Unit Rental') {
-            $total_breakdown = Maintenance::whereBetween('date', [$periode_awal, $periode_akhir])
-                ->selectRaw('ROUND(SUM(TIME_TO_SEC(work_duration)) / 3600, 2) as total_duration_decimal')
-                ->value('total_duration_decimal');
-        } else if ($contract->type == 'Fuel Truck Rental') {
-            $contract_fmf = Contract_fmf::where('contract_id', '=', $contract->id)
-                ->where('year', Carbon::parse($periode)->format('Y'))
-                ->first();
-            $fix_monthly_fee = $contract_fmf->fix_monthly_fee;
-            $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
-        } else if ($contract->type == 'LCT') {
-        };
-        return 0;
+        return [
+            'contract' => $contract,
+            'year' => $year,
+            'month' => $month,
+            // 'total_breakdown' => $total_breakdown,
+            'contract_fmf' => $contract_fmf,
+            'fix_monthly_fee' => $fix_monthly_fee,
+            'contract_rate' => $contract_rate,
+            'unit_target' => $unit_target
+        ];
+    }
+}
+
+/**
+ * Simpan proforma invoice
+ */
+if (! function_exists('saveProforvaInvoice')) {
+    function saveProforvaInvoice(array $data): void {}
+}
+
+/**
+ * Check apakah proforma dengan contract id itu udah ada atau belum.
+ */
+if (! function_exists('checkProformaInvoice')) {
+    function checkProformaInvoice(Contract $contract, string $year, string $month): bool
+    {
+        $periode = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
+        return Proforma_invoice::where('contract_id', $contract->id)
+            ->where('periode', $periode)
+            ->exists();
+    }
+}
+
+/**
+ * ambil data proforma invoice
+ */
+if (! function_exists('getProformaInvoice')) {
+    function getProformaInvoice(Contract $contract, string $year, string $month): Collection
+    {
+        $periode = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
+        return Proforma_invoice::where('contract_id', $contract->id)
+            ->where('periode', $periode)
+            ->where('status', 'Draft')
+            ->first();
     }
 }

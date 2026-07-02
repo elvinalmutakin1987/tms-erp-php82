@@ -528,7 +528,6 @@ class PurchaseOrderController extends Controller
             if ($purchase_requisition) {
                 $type = $purchase_requisition->type;
             }
-            $presenter = new DatePrefixPresenter('Y/m', '/');
             $view = 'purchase_order.table-add';
             if ($type == 'General') {
                 $view = 'purchase_order.table-gen-add';
