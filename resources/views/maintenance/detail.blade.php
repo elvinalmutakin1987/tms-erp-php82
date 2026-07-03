@@ -40,7 +40,14 @@
                     <b>{{ \Carbon\Carbon::parse($maintenance->finish)->format('Y-m-d H:i') }}</b>
                 </td>
                 <td width="30%">Work Duration :<br>
-                    <b> {{ \Carbon\Carbon::parse($maintenance->work_duration)->format('H:i') }}</b>
+                    @php
+                        $duration = $maintenance->work_duration ?? '00:00:00';
+                        $parts = explode(':', $duration);
+
+                        $hours = $parts[0] ?? '00';
+                        $minutes = $parts[1] ?? '00';
+                    @endphp
+                    <b> {{ $hours . ':' . $minutes }}</b>
                 </td>
             </tr>
             <tr>

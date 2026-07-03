@@ -456,9 +456,9 @@
             }
 
             $('#div-table').html(`
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-        <span class="visually">Loading...</span>
-    `);
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually">Loading...</span>
+            `);
 
             clearTimeout(loadTableTimer);
 
@@ -472,16 +472,24 @@
                         month: month
                     },
                     success: function(response) {
-                        $('#div-table').html(response.html);
+                        if (response.doc_status == 1) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: "Proforma Invoice on this periode already created!"
+                            });
+                        } else {
+                            $('#div-table').html(response.html);
+                        }
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
 
                         $('#div-table').html(`
-                    <div class="alert alert-danger mb-0">
-                        Failed to load data.
-                    </div>
-                `);
+                            <div class="alert alert-danger mb-0">
+                                Failed to load data.
+                            </div>
+                        `);
                     }
                 });
             }, 500);

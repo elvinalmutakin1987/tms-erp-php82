@@ -79,18 +79,20 @@ class MaintenanceController extends Controller
                      * kalo statusnya masih draft
                      * user superadmin dan yang punya akses edit aja baru bisa muncul
                      */
-                    if ($item->status == 'Draft'):
-                        // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
-                        //     $button .= '<li>
-                        //         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                        //         data-id="' . $item->id . '">Edit</a>
-                        //     </li>';
-                        // endif;
-                        $button .= '<li>
-                        <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                        data-id="' . $item->id . '">Edit</a>
-                    </li>';
+                    // if ($item->status == 'Draft'):
+                    //     if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
+                    //         $button .= '<li>
+                    //             <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                    //             data-id="' . $item->id . '">Edit</a>
+                    //         </li>';
+                    //     endif;
+                    // endif;
 
+                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
+                        $button .= '<li>
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+                                data-id="' . $item->id . '">Edit</a>
+                            </li>';
                     endif;
 
 
