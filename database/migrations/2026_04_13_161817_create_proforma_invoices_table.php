@@ -24,6 +24,7 @@ return new class extends Migration
             /**
              * ----------------
              */
+            $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
             $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
@@ -51,6 +52,7 @@ return new class extends Migration
             $table->timestamp('user_approval_at')->nullable();
             $table->timestamp('custodian_approval_at')->nullable();
             $table->string('type')->nullable();
+            $table->string('input_method', 20)->nullable();
             //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->timestamp('checked_at')->nullable();

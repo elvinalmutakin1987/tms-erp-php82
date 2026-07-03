@@ -115,7 +115,7 @@
 
                 <td class="p-1">
                     2. Actual Hari Kerja {{ $hariKerja }} <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp; ({{ $hariKerja }} hari @ Rp.
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ({{ $hariKerja }} hari @ Rp.
                     {{ Number::format($price, precision: 0) }})
                 </td>
 
@@ -130,15 +130,15 @@
 
                 <td class="p-1">
                     3. Aktual PA <br>
-                    &nbsp;&nbsp;&nbsp;&nbsp; Jam Tersedia {{ $hariKerja }} x 24 Jam =
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Jam Tersedia {{ $hariKerja }} x 24 Jam =
                     {{ Number::format($totalJamKerja, precision: 0) }} Jam
                     <br>
 
-                    &nbsp;&nbsp;&nbsp;&nbsp; Breakdown =
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Breakdown =
                     <b>{{ Number::format($total_breakdown, precision: 2) }}</b> Jam
                     <br>
 
-                    &nbsp;&nbsp;&nbsp;&nbsp; PA =
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PA =
                     {{ Number::format($pa, precision: 2) }}%
                 </td>
 

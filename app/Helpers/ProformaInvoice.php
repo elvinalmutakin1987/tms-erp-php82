@@ -70,7 +70,6 @@ if (! function_exists('getProformaInvoice')) {
         $periode = $year . '-' . str_pad($month, 2, '0', STR_PAD_LEFT);
         return Proforma_invoice::where('contract_id', $contract->id)
             ->where('periode', $periode)
-            ->where('status', 'Draft')
             ->first();
     }
 }
