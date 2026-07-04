@@ -16,6 +16,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
 
 class MaintenanceController extends Controller
 {
@@ -42,77 +43,196 @@ class MaintenanceController extends Controller
                 $maintenance = $maintenance->where('date', '<=', request()->date_end);
             }
             $maintenance = $maintenance->orderBy('maintenance_no', 'desc')->get();
+            // return DataTables::of($maintenance)
+            //     ->addIndexColumn()
+            //     ->addColumn('action', function ($item) {
+            //         $button = '
+            //         <div class="col">
+            //             <div class="dropdown">
+            //                 <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            //                     aria-expanded="false">Action</button>
+            //                 <ul class="dropdown-menu">
+            //                     <li>
+            //                         <a class="dropdown-item exportPdfButton" href="' . route('maintenance.export_pdf', $item->id) . '">Export PDF</a>
+            //                     </li>
+            //                     <li>
+            //                         <a class="dropdown-item printButton" href="' . route('maintenance.print', $item->id) . '" target="_blank">Print</a>
+            //                     </li>
+            //                    <li>
+            //                         <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
+            //                         data-id="' . $item->id . '">Detail</a>
+            //                     </li>';
+
+            //         /**
+            //          * kalo statusnya udah open
+            //          * user superadmin dan yang punya akses edit cost aja baru bisa muncul
+            //          */
+            //         if ($item->status == 'Open'):
+            //             if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.cost')):
+            //                 $button .= '<li>
+            //                         <a class="dropdown-item costButton" href="#" data-bs-toggle="modal" data-bs-target="#formCost"
+            //                         data-id="' . $item->id . '">Cost Setting</a>
+            //                     </li>';
+            //             endif;
+            //         endif;
+
+            //         /**
+            //          * kalo statusnya masih draft
+            //          * user superadmin dan yang punya akses edit aja baru bisa muncul
+            //          */
+            //         // if ($item->status == 'Draft'):
+            //         //     if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
+            //         //         $button .= '<li>
+            //         //             <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+            //         //             data-id="' . $item->id . '">Edit</a>
+            //         //         </li>';
+            //         //     endif;
+            //         // endif;
+
+            //         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
+            //             $button .= '<li>
+            //                     <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+            //                     data-id="' . $item->id . '">Edit</a>
+            //                 </li>';
+            //         endif;
+
+
+
+            //         /**
+            //          * ini cuma user superadmin dan yang punya akses delete aja baru muncul
+            //          */
+            //         if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
+            //             $button .= '<li>
+            //                         <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+            //                     </li>';
+            //         endif;
+
+            //         // $button .= '<li>
+            //         //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+            //         //             </li>';
+
+            //         $button .= '</ul>
+            //             </div>
+            //         </div>
+            //         ';
+            //         return $button;
+            //     })
+            //     ->addColumn('unit', function ($item) {
+            //         return $item->unit?->vehicle_no ?? '';
+            //     })
+            //     ->addColumn('main_type', function ($item) {
+            //         $type = "";
+            //         if ($item->type == "BO") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "B1") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "B2") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "B3") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "B4") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "M") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "N") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "A") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "OP") {
+            //             $type = "Breakdown under repair";
+            //         } elseif ($item->type == "STD") {
+            //             $type = "Stand By";
+            //         } elseif ($item->type == "B0") {
+            //             $type = "Breakdown";
+            //         } elseif ($item->type == "A/OP") {
+            //             $type = "Abnormal Operation";
+            //         }
+            //         return $type;
+            //     })
+            //     ->make();
+            $user = Auth::user();
+            $permissionNames = [
+                'maintenance.edit',
+                'maintenance.cost',
+                'maintenance.delete',
+            ];
+            $guardName = config('auth.defaults.guard', 'web');
+            $existingPermissions = Permission::query()
+                ->whereIn('name', $permissionNames)
+                ->where('guard_name', $guardName)
+                ->pluck('name')
+                ->flip();
+            $canAccess = function (string $permission) use ($user, $existingPermissions) {
+                if ($user->hasRole('superadmin')) {
+                    return true;
+                }
+                if (! $existingPermissions->has($permission)) {
+                    return false;
+                }
+                return $user->hasPermissionTo($permission);
+            };
+
             return DataTables::of($maintenance)
                 ->addIndexColumn()
-                ->addColumn('action', function ($item) {
+                ->addColumn('action', function ($item) use ($canAccess) {
                     $button = '
-                    <div class="col">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">Action</button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('maintenance.export_pdf', $item->id) . '">Export PDF</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item printButton" href="' . route('maintenance.print', $item->id) . '" target="_blank">Print</a>
-                                </li>
-                               <li>
-                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                                    data-id="' . $item->id . '">Detail</a>
-                                </li>';
+                        <div class="col">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Action
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item exportPdfButton" href="' . route('maintenance.export_pdf', $item->id) . '">
+                                            Export PDF
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item printButton" href="' . route('maintenance.print', $item->id) . '" target="_blank">
+                                            Print
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail" data-id="' . $item->id . '">
+                                            Detail
+                                        </a>
+                                    </li>
+                    ';
 
-                    /**
-                     * kalo statusnya udah open
-                     * user superadmin dan yang punya akses edit cost aja baru bisa muncul
-                     */
-                    if ($item->status == 'Open'):
-                        if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.cost')):
-                            $button .= '<li>
-                                    <a class="dropdown-item costButton" href="#" data-bs-toggle="modal" data-bs-target="#formCost"
-                                    data-id="' . $item->id . '">Cost Setting</a>
-                                </li>';
-                        endif;
-                    endif;
+                    if ($item->status === 'Open' && $canAccess('maintenance.cost')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item costButton" href="#" data-bs-toggle="modal" data-bs-target="#formCost" data-id="' . $item->id . '">
+                                    Cost Setting
+                                </a>
+                            </li>
+                        ';
+                    }
 
-                    /**
-                     * kalo statusnya masih draft
-                     * user superadmin dan yang punya akses edit aja baru bisa muncul
-                     */
-                    // if ($item->status == 'Draft'):
-                    //     if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
-                    //         $button .= '<li>
-                    //             <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                    //             data-id="' . $item->id . '">Edit</a>
-                    //         </li>';
-                    //     endif;
-                    // endif;
+                    if ($canAccess('maintenance.edit')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                    Edit
+                                </a>
+                            </li>
+                        ';
+                    }
 
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.edit')):
-                        $button .= '<li>
-                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                data-id="' . $item->id . '">Edit</a>
-                            </li>';
-                    endif;
+                    if ($canAccess('maintenance.delete')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
+                                    Delete
+                                </a>
+                            </li>
+                        ';
+                    }
 
-
-
-                    /**
-                     * ini cuma user superadmin dan yang punya akses delete aja baru muncul
-                     */
-                    if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('maintenance.delete')):
-                        $button .= '<li>
-                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>';
-                    endif;
-
-                    // $button .= '<li>
-                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                    //             </li>';
-
-                    $button .= '</ul>
+                    $button .= '
+                                </ul>
+                            </div>
                         </div>
-                    </div>
                     ';
                     return $button;
                 })
@@ -120,34 +240,26 @@ class MaintenanceController extends Controller
                     return $item->unit?->vehicle_no ?? '';
                 })
                 ->addColumn('main_type', function ($item) {
-                    $type = "";
-                    if ($item->type == "BO") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "B1") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "B2") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "B3") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "B4") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "M") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "N") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "A") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "OP") {
-                        $type = "Breakdown under repair";
-                    } elseif ($item->type == "STD") {
-                        $type = "Stand By";
-                    } elseif ($item->type == "B0") {
-                        $type = "Breakdown";
-                    } elseif ($item->type == "A/OP") {
-                        $type = "Abnormal Operation";
-                    }
-                    return $type;
+                    return match ($item->type) {
+                        'STD' => 'Stand By',
+                        'B0' => 'Breakdown',
+                        'A/OP' => 'Abnormal Operation',
+
+                        'BO',
+                        'B1',
+                        'B2',
+                        'B3',
+                        'B4',
+                        'M',
+                        'N',
+                        'A',
+                        'OP' => 'Breakdown under repair',
+
+                        default => '',
+                    };
                 })
+
+                ->rawColumns(['action'])
                 ->make();
         }
         $maintenance_item = Maintenance_item::all();
