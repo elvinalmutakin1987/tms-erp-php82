@@ -230,56 +230,6 @@ class ProformaInvoiceController extends Controller
             $end_date = $start_date->copy()->endOfMonth();
 
             if ($contract->service->type == 'Unit Rental') {
-                // foreach ($gen_proforma['unit_target'] as $unittarget) {
-                //     $hariKerja = $start_date->daysInMonth;
-                //     $total_breakdown = Maintenance::whereYear('date', $year)
-                //         ->whereMonth('date', $month)
-                //         ->where('unit_id', $unittarget->unit_id)
-                //         ->where('status', '!=', 'Draft')
-                //         ->selectRaw('COALESCE(ROUND(SUM(TIME_TO_SEC(work_duration)) / 3600, 2), 0) as total_duration_decimal')
-                //         ->value('total_duration_decimal');
-                //     $km_awal = Daily_report::whereBetween('date', [$start_date, $end_date])
-                //         ->orderBy('date', 'asc')
-                //         ->orderBy('id', 'asc')
-                //         ->value('km_start');
-                //     $km_akhir = Daily_report::whereBetween('date', [$start_date, $end_date])
-                //         ->orderBy('date', 'desc')
-                //         ->orderBy('id', 'desc')
-                //         ->value('km_finish');
-                //     $total_breakdown = (float) $total_breakdown;
-                //     $price = (float) ($unittarget->price ?? 0);
-                //     $target = (float) ($unittarget->target ?? 0);
-                //     $totalJamKerja = $hariKerja * 24;
-                //     $pa = $totalJamKerja > 0 ? 100 - ($total_breakdown / $totalJamKerja) * 100 : 0;
-                //     $pa = max(0, min(100, $pa));
-                //     if ($target > 0) {
-                //         $total_payment = $pa >= $target ? $price : ($pa / $target) * $price;
-                //     } else {
-                //         $total_payment = 0;
-                //     }
-                //     $total_payment = min($price, $total_payment);
-                //     $penalty = $price - $total_payment;
-                //     $data = [
-                //         'contract_id' => $request->contract_id,
-                //         'client_vendor_id' => $contract->client_vendor_id,
-                //         'request_token' => $request->request_token,
-                //         'input_method' => 'Web',
-                //         'user_id' => Auth::user()->id,
-                //         'unit_id' => $unittarget->unit_id,
-                //         'periode_start' => $start_date,
-                //         'periode_finish' => $end_date,
-                //         'periode' => Carbon::parse($year . '-' . $month)->format('Y-m'),
-                //         'target' => $target,
-                //         'price' => $price,
-                //         'pa' => $pa,
-                //         'penalty' => $penalty,
-                //         'total' => $total_payment,
-                //         'km_awal' => $km_awal,
-                //         'km_akhir' => $km_akhir,
-                //         'type' => $contract->service->type
-                //     ];
-                //     $proforma_invoice = Proforma_invoice::firstOrCreate($data);
-                // }
                 foreach ($gen_proforma['unit_target'] as $unittarget) {
                     $unitId = $unittarget->unit_id;
                     $price  = (float) ($unittarget->price ?? 0);
