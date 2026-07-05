@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Spatie\Permission\Models\Permission;
 
 class PurchaseRequisitionGeneralController extends Controller
 {
@@ -45,65 +46,173 @@ class PurchaseRequisitionGeneralController extends Controller
             }
             $purchase_requisition = $purchase_requisition->where('type', 'General');
             $purchase_requisition = $purchase_requisition->orderBy('id', 'desc')->get();
+            // return DataTables::of($purchase_requisition)
+            //     ->addIndexColumn()
+            //     ->addColumn('action', function ($item) {
+            //         $button = '
+            //         <div class="col">
+            //             <div class="dropdown">
+            //                 <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            //                     aria-expanded="false">Action</button>
+            //                 <ul class="dropdown-menu">
+            //                     <li>
+            //                         <a class="dropdown-item exportPdfButton" href="' . route('purchaserequisitiongeneral.export_pdf', $item->id) . '">Export PDF</a>
+            //                     </li>
+            //                     <li>
+            //                         <a class="dropdown-item printButton" href="' . route('purchaserequisitiongeneral.print', $item->id) . '" target="_blank">Print</a>
+            //                     </li>
+            //                     <li>
+            //                         <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
+            //                         data-id="' . $item->id . '">Detail</a>
+            //                     </li>';
+            //         /**
+            //          * status draft
+            //          * user superadmin dan yang punya akses edit aja yang bisa muncul
+            //          */
+            //         if ($item->status == 'Draft'):
+            //             $button .= '<li>
+            //                         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+            //                         data-id="' . $item->id . '">Edit</a>
+            //                     </li>';
+            //         endif;
+
+            //         /**
+            //          * status approved
+            //          * buat edit status jadi done. sambil check penerimaan barang
+            //          */
+            //         if ($item->status == 'Approved' || $item->status == 'Received'):
+            //             $button .= '<li>
+            //                          <a class="dropdown-item receiveButton" href="#" data-bs-toggle="modal" data-bs-target="#formReceive"
+            //                         data-id="' . $item->id . '">Receive</a>
+            //                     </li>';
+            //         endif;
+
+            //         /**
+            //          * status bukan done, approved, approval bisa di hapus.
+            //          * user superadmin dan yang punya akses delete aja yang bisa muncul
+            //          */
+            //         if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval' && $item->status != 'Received'):
+            //             $button .= '<li>
+            //                         <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+            //                     </li>';
+            //         endif;
+
+            //         $button .= '</ul>
+            //             </div>
+            //         </div>
+            //         ';
+
+            //         return $button;
+            //     })
+            //     ->make();
+            $user = Auth::user();
+            $permissionNames = [
+                'purchase_requisition_general.edit',
+                'purchase_requisition_general.delete',
+                'purchase_requisition_general.receive',
+            ];
+            $guardName = config('auth.defaults.guard', 'web');
+            $existingPermissions = Permission::query()
+                ->whereIn('name', $permissionNames)
+                ->where('guard_name', $guardName)
+                ->pluck('name')
+                ->flip();
+            $canAccess = function (string $permission) use ($user, $existingPermissions) {
+                if ($user->hasRole('superadmin')) {
+                    return true;
+                }
+                if (! $existingPermissions->has($permission)) {
+                    return false;
+                }
+                return $user->hasPermissionTo($permission);
+            };
             return DataTables::of($purchase_requisition)
                 ->addIndexColumn()
-                ->addColumn('action', function ($item) {
+                ->addColumn('action', function ($item) use ($canAccess) {
                     $button = '
-                    <div class="col">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">Action</button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('purchaserequisitiongeneral.export_pdf', $item->id) . '">Export PDF</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item printButton" href="' . route('purchaserequisitiongeneral.print', $item->id) . '" target="_blank">Print</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                                    data-id="' . $item->id . '">Detail</a>
-                                </li>';
-                    /**
-                     * status draft
-                     * user superadmin dan yang punya akses edit aja yang bisa muncul
-                     */
-                    if ($item->status == 'Draft'):
-                        $button .= '<li>
-                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
-                                </li>';
-                    endif;
+                        <div class="col">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Action
+                                </button>
 
-                    /**
-                     * status approved
-                     * buat edit status jadi done. sambil check penerimaan barang
-                     */
-                    if ($item->status == 'Approved' || $item->status == 'Received'):
-                        $button .= '<li>
-                                     <a class="dropdown-item receiveButton" href="#" data-bs-toggle="modal" data-bs-target="#formReceive"
-                                    data-id="' . $item->id . '">Receive</a>
-                                </li>';
-                    endif;
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item exportPdfButton" href="' . route('purchaserequisitiongeneral.export_pdf', $item->id) . '">
+                                            Export PDF
+                                        </a>
+                                    </li>
 
-                    /**
-                     * status bukan done, approved, approval bisa di hapus.
-                     * user superadmin dan yang punya akses delete aja yang bisa muncul
-                     */
-                    if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval' && $item->status != 'Received'):
-                        $button .= '<li>
-                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>';
-                    endif;
+                                    <li>
+                                        <a class="dropdown-item printButton" href="' . route('purchaserequisitiongeneral.print', $item->id) . '" target="_blank">
+                                            Print
+                                        </a>
+                                    </li>
 
-                    $button .= '</ul>
-                        </div>
-                    </div>
+                                    <li>
+                                        <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail" data-id="' . $item->id . '">
+                                            Detail
+                                        </a>
+                                    </li>
                     ';
-
+                    /**
+                     * Tombol Edit:
+                     * - hanya muncul jika status Draft
+                     * - hanya untuk superadmin atau user dengan permission purchase_requisition_general.edit
+                     */
+                    if (($item->status === 'Draft' && $canAccess('purchase_requisition_general.edit')) || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                    Edit
+                                </a>
+                            </li>
+                        ';
+                    }
+                    /**
+                     * Tombol Receive:
+                     * - hanya muncul jika status Approved atau Received
+                     * - hanya untuk superadmin atau user dengan permission purchase_requisition_general.receive
+                     */
+                    $canShowReceiveButton = in_array($item->status, ['Approved', 'Received'], true);
+                    if (($canShowReceiveButton && $canAccess('purchase_requisition_general.receive')) || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item receiveButton" href="#" data-bs-toggle="modal" data-bs-target="#formReceive" data-id="' . $item->id . '">
+                                    Receive
+                                </a>
+                            </li>
+                        ';
+                    }
+                    /**
+                     * Tombol Delete:
+                     * - hanya muncul jika status bukan Done, Approved, Approval, atau Received
+                     * - hanya untuk superadmin atau user dengan permission purchase_requisition_general.delete
+                     */
+                    $cannotDeleteStatuses = [
+                        'Done',
+                        'Approved',
+                        'Approval',
+                        'Received',
+                    ];
+                    if ((!in_array($item->status, $cannotDeleteStatuses, true) && $canAccess('purchase_requisition_general.delete')) || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
+                                    Delete
+                                </a>
+                            </li>
+                        ';
+                    }
+                    $button .= '
+                                </ul>
+                            </div>
+                        </div>
+                    ';
                     return $button;
                 })
-                ->make();
+                ->rawColumns(['action'])
+                ->make(true);
         }
         $uom = config('uom');
         $department = config('department');
