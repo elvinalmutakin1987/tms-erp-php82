@@ -23,6 +23,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Spatie\Permission\Models\Permission;
 
 class PurchaseOrderPaymentController extends Controller
 {
@@ -51,58 +52,155 @@ class PurchaseOrderPaymentController extends Controller
             $purchase_order_payment = $purchase_order_payment
                 ->orderBy('date', 'desc')
                 ->get();
+            // return DataTables::of($purchase_order_payment)
+            //     ->addIndexColumn()
+            //     ->addColumn('action', function ($item) {
+            //         $button = '
+            //         <div class="col">
+            //             <div class="dropdown">
+            //                 <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+            //                     aria-expanded="false">Action</button>
+            //                 <ul class="dropdown-menu">
+            //                     <li>
+            //                         <a class="dropdown-item exportPdfButton" href="' . route('purchaseorderpayment.export_pdf', $item->id) . '">Export PDF</a>
+            //                     </li>
+            //                     <li>
+            //                         <a class="dropdown-item printButton" href="' . route('purchaseorderpayment.print', $item->id) . '" target="_blank">Print</a>
+            //                     </li>
+            //                     <li>
+            //                         <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
+            //                         data-id="' . $item->id . '">Detail</a>
+            //                     </li>';
+            //         /**
+            //          * status draft
+            //          * user superadmin dan yang punya akses edit aja yang bisa muncul
+            //          */
+            //         if ($item->status == 'Draft'):
+            //             $button .= '<li>
+            //                         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
+            //                         data-id="' . $item->id . '">Edit</a>
+            //                     </li>';
+            //         endif;
+
+            //         /**
+            //          * status bukan done, bisa di hapus.
+            //          * user superadmin dan yang punya akses delete aja yang bisa muncul
+            //          */
+            //         if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval'):
+            //             $button .= '<li>
+            //                         <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
+            //                     </li>';
+            //         endif;
+
+            //         $button .= '</ul>
+            //             </div>
+            //         </div>
+            //         ';
+
+            //         return $button;
+            //     })
+            //     ->addColumn('vendor', function ($item) {
+            //         return $item->purchase_order->client_vendor ? $item->purchase_order->client_vendor->name : '';
+            //     })->addColumn('order_no', function ($item) {
+            //         return $item->purchase_order ? $item->purchase_order->order_no : '';
+            //     })
+            //     ->make();
+            $user = Auth::user();
+            $permissionNames = [
+                'purchase_order_payment.edit',
+                'purchase_order_payment.delete',
+            ];
+            $guardName = config('auth.defaults.guard', 'web');
+            $existingPermissions = Permission::query()
+                ->whereIn('name', $permissionNames)
+                ->where('guard_name', $guardName)
+                ->pluck('name')
+                ->flip();
+            $canAccess = function (string $permission) use ($user, $existingPermissions) {
+                if ($user->hasRole('superadmin')) {
+                    return true;
+                }
+                if (! $existingPermissions->has($permission)) {
+                    return false;
+                }
+                return $user->hasPermissionTo($permission);
+            };
             return DataTables::of($purchase_order_payment)
                 ->addIndexColumn()
-                ->addColumn('action', function ($item) {
+                ->addColumn('action', function ($item) use ($canAccess) {
                     $button = '
-                    <div class="col">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">Action</button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('purchaseorderpayment.export_pdf', $item->id) . '">Export PDF</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item printButton" href="' . route('purchaseorderpayment.print', $item->id) . '" target="_blank">Print</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                                    data-id="' . $item->id . '">Detail</a>
-                                </li>';
-                    /**
-                     * status draft
-                     * user superadmin dan yang punya akses edit aja yang bisa muncul
-                     */
-                    if ($item->status == 'Draft'):
-                        $button .= '<li>
-                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
-                                </li>';
-                    endif;
+                        <div class="col">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Action
+                                </button>
 
-                    /**
-                     * status bukan done, bisa di hapus.
-                     * user superadmin dan yang punya akses delete aja yang bisa muncul
-                     */
-                    if ($item->status != 'Done' && $item->status != 'Approved' && $item->status != 'Approval'):
-                        $button .= '<li>
-                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>';
-                    endif;
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item exportPdfButton" href="' . route('purchaseorderpayment.export_pdf', $item->id) . '">
+                                            Export PDF
+                                        </a>
+                                    </li>
 
-                    $button .= '</ul>
+                                    <li>
+                                        <a class="dropdown-item printButton" href="' . route('purchaseorderpayment.print', $item->id) . '" target="_blank">
+                                            Print
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail" data-id="' . $item->id . '">
+                                            Detail
+                                        </a>
+                                    </li>
+                    ';
+                    /**
+                     * Tombol Edit:
+                     * - hanya muncul jika status Draft
+                     * - hanya untuk superadmin atau user dengan permission purchase_order_payment.edit
+                     */
+                    if (($item->status === 'Draft' && $canAccess('purchase_order_payment.edit')) || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                    Edit
+                                </a>
+                            </li>
+                        ';
+                    }
+                    /**
+                     * Tombol Delete:
+                     * - hanya muncul jika status bukan Done, Approval, atau Approved
+                     * - hanya untuk superadmin atau user dengan permission purchase_order_payment.delete
+                     */
+                    $cannotDeleteStatuses = [
+                        'Done',
+                        'Approval',
+                        'Approved',
+                    ];
+                    if ((!in_array($item->status, $cannotDeleteStatuses, true) && $canAccess('purchase_order_payment.delete')) || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
+                                Delete
+                            </a>
+                        </li>
+                    ';
+                    }
+                    $button .= '
+                            </ul>
                         </div>
                     </div>
-                    ';
-
+                ';
                     return $button;
                 })
                 ->addColumn('vendor', function ($item) {
-                    return $item->purchase_order->client_vendor ? $item->purchase_order->client_vendor->name : '';
-                })->addColumn('order_no', function ($item) {
-                    return $item->purchase_order ? $item->purchase_order->order_no : '';
+                    return $item->purchase_order?->client_vendor?->name ?? '';
                 })
+                ->addColumn('order_no', function ($item) {
+                    return $item->purchase_order?->order_no ?? '';
+                })
+                ->rawColumns(['action'])
                 ->make();
         }
         $bank = config('bank');
