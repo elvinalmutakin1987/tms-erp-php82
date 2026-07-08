@@ -252,24 +252,24 @@ class ProformaInvoiceController extends Controller
                     $total_payment = max(0, min($price, $total_payment));
                     $total_payment = $excelRound($total_payment, 2);
                     $proforma_invoice = Proforma_invoice::firstOrCreate([
-                        'contract_id'       => $request->contract_id,
-                        'unit_target_id'    => $unittarget->id,
-                        'client_vendor_id'  => $contract->client_vendor_id,
-                        'request_token'     => $request->request_token,
-                        'user_id'           => Auth::id(),
-                        'unit_id'           => $unittarget->unit_id,
-                        'periode_start'     => $start_date,
-                        'periode_finish'    => $end_date,
-                        'periode'           => Carbon::parse("$year-$month")->format('Y-m'),
-                        'target'            => $target,
-                        'price'             => $price,
-                        'pa'                => $pa,
-                        'penalty'           => $penalty,
-                        'total'             => $total_payment,
-                        'km_awal'           => $km_awal,
-                        'km_akhir'          => $km_akhir,
-                        'type'              => $contract->service->type,
-                        'status'            => $request->status
+                        'contract_id' => $request->contract_id,
+                        'unit_target_id' => $unittarget->id,
+                        'client_vendor_id' => $contract->client_vendor_id,
+                        'request_token' => $request->request_token,
+                        'user_id' => Auth::id(),
+                        'unit_id' => $unittarget->unit_id,
+                        'periode_start' => $start_date,
+                        'periode_finish' => $end_date,
+                        'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                        'target' => $target,
+                        'price' => $price,
+                        'pa' => $pa,
+                        'penalty' => $penalty,
+                        'total' => $total_payment,
+                        'km_awal' => $km_awal,
+                        'km_akhir' => $km_akhir,
+                        'type' => $contract->service->type,
+                        'status' => $request->status
                     ]);
                     $this->check_aporoval($proforma_invoice);
                 }
@@ -366,23 +366,127 @@ class ProformaInvoiceController extends Controller
      */
     public function update(Request $request, Proforma_invoice $proforma_invoice)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'contract_id' => 'required',
+                'year' => 'required',
+                'month' => 'required'
+            ]);
+            $contract = Contract::find($request->contract_id);
+            $unit_target_id = $proforma_invoice->unit_target_id;
+            $unit_id = $proforma_invoice->unit_id;
+            $year = $request->year;
+            $month = $request->month;
+            if (checkProformaInvoice($contract, $year, $month)) {
+                return response()->json([
+                    'success' => false,
+                    'title' => 'Oops...',
+                    'message' => 'Proforma Invoice on this periode already created.!'
+                ], 200);
+            }
+            $gen_proforma = genProformaInvoice($contract, $year, $month);
+            $start_date = Carbon::create($year, $month, 1)->startOfMonth();
+            $end_date = $start_date->copy()->endOfMonth();
+            if ($contract->service->type == 'Unit Rental') {
+                $excelRound = function ($value, int $precision = 2) {
+                    return round((float) $value, $precision, PHP_ROUND_HALF_UP);
+                };
+                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                $endDate = $startDate->copy()->endOfMonth();
+                $hariKerja = $startDate->daysInMonth;
+                $totalJamKerja = $hariKerja * 24;
+                $totalBreakdownSeconds = Maintenance::whereYear('date', $year)
+                    ->whereMonth('date', $month)
+                    ->where('unit_id', $unit_id)
+                    ->where('status', '!=', 'Draft')
+                    ->selectRaw('COALESCE(SUM(TIME_TO_SEC(work_duration)), 0) as total_seconds')
+                    ->value('total_seconds');
+                $dailyReport = Daily_report::whereBetween('date', [$start_date, $end_date])
+                    ->where('unit_id', $unit_id);
+                $km_awal = (clone $dailyReport)
+                    ->orderBy('date')
+                    ->orderBy('id')
+                    ->value('km_start');
+                $km_akhir = (clone $dailyReport)
+                    ->orderByDesc('date')
+                    ->orderByDesc('id')
+                    ->value('km_finish');
+                $total_breakdown = $excelRound($totalBreakdownSeconds / 3600, 2);
+                $price = $excelRound($unittarget->price ?? 0, 2);
+                $target = $excelRound($unittarget->target ?? 0, 2);
+                if ($totalJamKerja > 0) {
+                    $pa = 100 - ($total_breakdown / $totalJamKerja) * 100;
+                } else {
+                    $pa = 0;
+                }
+                $pa = max(0, min(100, $pa));
+                $pa = $excelRound($pa, 2);
+                $penalty = $pa >= $target ? 0 : $excelRound(((100 - $pa) / 100) * $price, 2);
+                $total_payment = $price - $penalty;
+                $total_payment = max(0, min($price, $total_payment));
+                $total_payment = $excelRound($total_payment, 2);
+                $data = [
+                    'contract_id' => $request->contract_id,
+                    'unit_target_id' => $unit_target_id,
+                    'client_vendor_id' => $contract->client_vendor_id,
+                    'request_token' => $request->request_token,
+                    'user_id' => Auth::id(),
+                    'unit_id' => $unit_target_id,
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'target' => $target,
+                    'price' => $price,
+                    'pa' => $pa,
+                    'penalty' => $penalty,
+                    'total' => $total_payment,
+                    'km_awal' => $km_awal,
+                    'km_akhir' => $km_akhir,
+                    'type' => $contract->service->type,
+                    'status' => $request->status
+                ];
+                $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
+                $lockProforma_invoice->update($data);
+                $this->check_aporoval($proforma_invoice);
+            } else if ($contract->service->type == 'LCT') {
+                $data = [
+                    'contract_id' => $request->contract_id,
+                    'client_vendor_id' => $contract->client_vendor_id,
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web',
+                    'user_id' => Auth::user()->id,
+                ];
+            } else if ($contract->service->type == 'Fuel Truck Rental') {
+                $data = [
+                    'contract_id' => $request->contract_id,
+                    'client_vendor_id' => $contract->client_vendor_id,
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web',
+                    'user_id' => Auth::user()->id,
+                ];
+            } else if ($contract->service->type == 'Explo') {
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(Proforma_invoice $proforma_invoice) {}
-
-    /**
-     * Hitung summary breakdown
-     */
-    public function summary_breakdown(Request $request) {}
-
-    /**
-     * Hitung summary transport
-     */
-    public function summary_transport() {}
 
     /**
      * Ngambil tabel add
