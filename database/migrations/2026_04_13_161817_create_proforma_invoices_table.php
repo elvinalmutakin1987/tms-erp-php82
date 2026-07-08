@@ -27,6 +27,9 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
             $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
+            $table->foreignId('contract_rate_id')->nullable()->constrained('contract_rates')->nullOnDelete();
+            $table->foreignId('contract_fmf_id')->nullable()->constrained('contract_fmfs')->nullOnDelete();
+            $table->foreignId('unit_target_id')->nullable()->constrained('unit_targets')->nullOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             /**
@@ -53,6 +56,20 @@ return new class extends Migration
             $table->timestamp('custodian_approval_at')->nullable();
             $table->string('type')->nullable();
             $table->string('input_method', 20)->nullable();
+            $table->string('cancel_notes')->nullable();
+            $table->date('cut_off_date')->nullable(); //Tanggal Cut off
+            $table->date('consolidation_date')->nullable(); //Konsolidasi Data TMS & CMD
+            $table->date('progress_claim_date')->nullable(); //Kirim Progress Klaim Approval
+            $table->date('ops_received_date')->nullable(); //Data diterima dr ops
+            $table->date('prof_inv_app_date')->nullable(); //Proforma Inv approved
+            $table->date('cic_request_date')->nullable(); //Minta cic
+            $table->date('cic_created_date')->nullable(); //Pembuatan CIC
+            $table->date('inv_date')->nullable(); //Terima CIC
+            $table->date('inv_create_date')->nullable(); //Tgl INV
+            $table->date('cic_send_date')->nullable(); //Kirim CIC ke KPC
+            $table->date('cic_ready_to_pick_date')->nullable(); //Informasi CIC bisa diambil
+            $table->date('cic_pick_up_date')->nullable(); //CIC diambil TMS
+            $table->date('inv_send_date')->nullable(); //Inv Terima CIC
             //------------------------------------------------------------
             $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->timestamp('checked_at')->nullable();

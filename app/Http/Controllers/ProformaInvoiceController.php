@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Approval_flow;
+use App\Models\Approval_process;
 use App\Models\Contract;
+use App\Models\Contract_fmf;
+use App\Models\Contract_rate;
 use App\Models\Daily_report;
 use App\Models\Maintenance;
 use App\Models\Proforma_invoice;
 use App\Models\Purchase_requisition;
 use App\Models\Unit;
+use App\Models\Unit_target;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -33,70 +38,21 @@ class ProformaInvoiceController extends Controller
             if (request()->status != 'All') {
                 $proforma_invoice = $proforma_invoice->where('status', request()->status);
             }
-            if (request()->unit_id != 'All') {
+            if (request()->unit_id != '') {
                 $proforma_invoice = $proforma_invoice->where('unit_id', request()->unit_id);
             }
-            if (request()->date_start != '') {
-                $proforma_invoice = $proforma_invoice->where('date', '>=', request()->date_start);
-            }
-            if (request()->date_end != '') {
-                $proforma_invoice = $proforma_invoice->where('date', '<=', request()->date_end);
+            if (request()->year != 'All') {
+                if (request()->month != 'All') {
+                    $proforma_invoice = $proforma_invoice->where('periode', request()->year . "-" . request()->month);
+                } else {
+                    $proforma_invoice = $proforma_invoice->where('periode', 'like', request()->year . '-%');
+                }
             }
             $proforma_invoice = $proforma_invoice->orderBy('date', 'desc')->get();
-            // return DataTables::of($proforma_invoice)
-            //     ->addIndexColumn()
-            //     ->addColumn('action', function ($item) {
-            //         $button = '
-            //         <div class="col">
-            //             <div class="dropdown">
-            //                 <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-            //                     aria-expanded="false">Action</button>
-            //                 <ul class="dropdown-menu">
-            //                     <li>
-            //                         <a class="dropdown-item exportPdfButton" href="' . route('proformainvoice.export_pdf', $item->id) . '">Export PDF</a>
-            //                     </li>
-            //                     <li>
-            //                         <a class="dropdown-item printButton" href="' . route('proformainvoice.print', $item->id) . '" target="_blank">Print</a>
-            //                     </li>
-            //                     <li>
-            //                         <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-            //                         data-id="' . $item->id . '">Detail</a>
-            //                     </li>';
-            //         /**
-            //          * status draft
-            //          * user superadmin dan yang punya akses edit aja yang bisa muncul
-            //          */
-            //         if ($item->status == 'Draft'):
-            //             $button .= '<li>
-            //                         <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-            //                         data-id="' . $item->id . '">Edit</a>
-            //                     </li>';
-            //         endif;
-
-            //         /**
-            //          * status bukan done, bisa di hapus.
-            //          * user superadmin dan yang punya akses delete aja yang bisa muncul
-            //          */
-            //         if ($item->status != 'Done'):
-            //             $button .= '<li>
-            //                         <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-            //                     </li>';
-            //         endif;
-
-            //         $button .= '</ul>
-            //             </div>
-            //         </div>
-            //         ';
-
-            //         return $button;
-            //     })
-            //     ->addColumn('unit', function ($item) {
-            //         return $item->unit?->vehicle_no ?? '';
-            //     })
-            //     ->make();
             $user = Auth::user();
             $permissionNames = [
                 'proforma_invoice.edit',
+                'proforma_invoice.update_progress',
                 'proforma_invoice.delete',
             ];
             $guardName = config('auth.defaults.guard', 'web');
@@ -148,8 +104,22 @@ class ProformaInvoiceController extends Controller
                     if (($item->status === 'Draft' && $canAccess('proforma_invoice.edit')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
-                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formEdit" data-id="' . $item->id . '">
                                     Edit
+                                </a>
+                            </li>
+                        ';
+                    }
+                    /**
+                     * Tombol Update Progress:
+                     * - hanya muncul jika status Approved
+                     * - hanya untuk superadmin atau user dengan permission proforma_invoice.update_progress
+                     */
+                    if (($item->status === 'Draft' && $canAccess('proforma_invoice.update_progress')) || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item updateButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                    Update Progress
                                 </a>
                             </li>
                         ';
@@ -177,6 +147,24 @@ class ProformaInvoiceController extends Controller
                 })
                 ->addColumn('unit', function ($item) {
                     return $item->unit?->vehicle_no ?? '';
+                })
+                ->addColumn('contract_no', function ($item) {
+                    return $item->contract->contract_no ?? '';
+                })
+                ->addColumn('type', function ($item) {
+                    return $item->contract->service->type ?? '';
+                })
+                ->addColumn('periode_', function ($item) {
+                    return Carbon::parse($item->periode)->format('F Y') ?? '';
+                })
+                ->addColumn('price_', function ($item) {
+                    return Number::format($item->price, precision: 0) ?? '';
+                })
+                ->addColumn('penalty_', function ($item) {
+                    return Number::format($item->penalty, precision: 0) ?? '';
+                })
+                ->addColumn('total_', function ($item) {
+                    return Number::format($item->total, precision: 0) ?? '';
                 })
                 ->rawColumns(['action'])
                 ->make();
@@ -211,11 +199,9 @@ class ProformaInvoiceController extends Controller
                 'year' => 'required',
                 'month' => 'required'
             ]);
-
             $contract = Contract::find($request->contract_id);
             $year = $request->year;
             $month = $request->month;
-
             if (checkProformaInvoice($contract, $year, $month)) {
                 return response()->json([
                     'success' => false,
@@ -223,26 +209,26 @@ class ProformaInvoiceController extends Controller
                     'message' => 'Proforma Invoice on this periode already created.!'
                 ], 200);
             }
-
             $gen_proforma = genProformaInvoice($contract, $year, $month);
-
             $start_date = Carbon::create($year, $month, 1)->startOfMonth();
             $end_date = $start_date->copy()->endOfMonth();
-
             if ($contract->service->type == 'Unit Rental') {
                 foreach ($gen_proforma['unit_target'] as $unittarget) {
-                    $unitId = $unittarget->unit_id;
-                    $price  = (float) ($unittarget->price ?? 0);
-                    $target = (float) ($unittarget->target ?? 0);
-                    $totalJamKerja = $start_date->daysInMonth * 24;
-                    $total_breakdown = (float) Maintenance::whereYear('date', $year)
+                    $excelRound = function ($value, int $precision = 2) {
+                        return round((float) $value, $precision, PHP_ROUND_HALF_UP);
+                    };
+                    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                    $endDate = $startDate->copy()->endOfMonth();
+                    $hariKerja = $startDate->daysInMonth;
+                    $totalJamKerja = $hariKerja * 24;
+                    $totalBreakdownSeconds = Maintenance::whereYear('date', $year)
                         ->whereMonth('date', $month)
-                        ->where('unit_id', $unitId)
+                        ->where('unit_id', $unittarget->unit_id)
                         ->where('status', '!=', 'Draft')
-                        ->selectRaw('COALESCE(ROUND(SUM(TIME_TO_SEC(work_duration)) / 3600, 2), 0) as total')
-                        ->value('total');
+                        ->selectRaw('COALESCE(SUM(TIME_TO_SEC(work_duration)), 0) as total_seconds')
+                        ->value('total_seconds');
                     $dailyReport = Daily_report::whereBetween('date', [$start_date, $end_date])
-                        ->where('unit_id', $unitId);
+                        ->where('unit_id', $unittarget->unit_id);
                     $km_awal = (clone $dailyReport)
                         ->orderBy('date')
                         ->orderBy('id')
@@ -251,21 +237,27 @@ class ProformaInvoiceController extends Controller
                         ->orderByDesc('date')
                         ->orderByDesc('id')
                         ->value('km_finish');
-                    $pa = $totalJamKerja > 0
-                        ? 100 - (round($total_breakdown / $totalJamKerja, 2) * 100)
-                        : 0;
+                    $total_breakdown = $excelRound($totalBreakdownSeconds / 3600, 2);
+                    $price = $excelRound($unittarget->price ?? 0, 2);
+                    $target = $excelRound($unittarget->target ?? 0, 2);
+                    if ($totalJamKerja > 0) {
+                        $pa = 100 - ($total_breakdown / $totalJamKerja) * 100;
+                    } else {
+                        $pa = 0;
+                    }
                     $pa = max(0, min(100, $pa));
-                    $total_payment = $target > 0
-                        ? min($price, $pa >= $target ? $price : round($pa / $target, 2) * $price)
-                        : 0;
-                    $penalty = $price - $total_payment;
+                    $pa = $excelRound($pa, 2);
+                    $penalty = $pa >= $target ? 0 : $excelRound(((100 - $pa) / 100) * $price, 2);
+                    $total_payment = $price - $penalty;
+                    $total_payment = max(0, min($price, $total_payment));
+                    $total_payment = $excelRound($total_payment, 2);
                     $proforma_invoice = Proforma_invoice::firstOrCreate([
                         'contract_id'       => $request->contract_id,
+                        'unit_target_id'    => $unittarget->id,
                         'client_vendor_id'  => $contract->client_vendor_id,
                         'request_token'     => $request->request_token,
-                        // 'input_method'      => 'Web',
                         'user_id'           => Auth::id(),
-                        'unit_id'           => $unitId,
+                        'unit_id'           => $unittarget->unit_id,
                         'periode_start'     => $start_date,
                         'periode_finish'    => $end_date,
                         'periode'           => Carbon::parse("$year-$month")->format('Y-m'),
@@ -279,6 +271,7 @@ class ProformaInvoiceController extends Controller
                         'type'              => $contract->service->type,
                         'status'            => $request->status
                     ]);
+                    $this->check_aporoval($proforma_invoice);
                 }
             } else if ($contract->service->type == 'LCT') {
                 $data = [
@@ -296,24 +289,8 @@ class ProformaInvoiceController extends Controller
                     'input_method' => 'Web',
                     'user_id' => Auth::user()->id,
                 ];
+            } else if ($contract->service->type == 'Explo') {
             }
-
-            /**
-             * Buat check ada approvalnya gak
-             * Kalo ada statusnya jadi Approval.
-             * Nanti kalo approval beres baru jadi Open
-             */
-            $model = 'App\Models\Proforma_invoice';
-            $department = 'Equipment';
-            if (checkHasApproval($model, $department)) {
-                if ($proforma_invoice->status == 'Open') {
-                    $proforma_invoice->status = 'Approval';
-                    $proforma_invoice->save();
-                    $approval_flow_id = getApprovalFlowId($model, $department);
-                    createApprovalProcess($approval_flow_id, $proforma_invoice->id);
-                }
-            }
-
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -335,7 +312,45 @@ class ProformaInvoiceController extends Controller
      */
     public function show(Proforma_invoice $proforma_invoice)
     {
-        //
+        $proforma_no = $proforma_invoice->proforma_no;
+        $contract = Contract::find($proforma_invoice->contract_id);
+        $contract_id = $contract->id;
+        $contract_no = $contract->contract_no;
+        $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
+        $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
+        $unit_target = Unit_target::where('contract_id', $contract->id)->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+            ->where('department', 'Equipment')
+            ->first();
+        $approval_process = $approval_flow
+            ? Approval_process::where('approval_flow_id', $approval_flow->id)
+            ->where('approvable_id', $proforma_invoice->id)
+            ->get()
+            : null;
+        $periode = $proforma_invoice->periode;
+        $exp_periode = explode("-", $periode);
+        $year = $exp_periode[0];
+        $month = $this->convertMonthName($exp_periode[1]);
+        $html = view('proforma_invoice.detail', compact(
+            'proforma_invoice',
+            'contract',
+            'contract_rate',
+            'contract_fmf',
+            'unit_target',
+            'approval_process',
+            'year',
+            'month'
+        ))->render();
+        return response()->json([
+            'success' => true,
+            'message' => 'Data showed',
+            'year' => $year,
+            'month' => $month,
+            'contract_id' => $contract_id,
+            'contract_no' => $contract_no,
+            'proforma_no' => $proforma_no,
+            'html' => $html
+        ], 200);
     }
 
     /**
@@ -382,6 +397,7 @@ class ProformaInvoiceController extends Controller
             $kodeDokumen = 'P-INV';
             $year = date('y');
             $month = date('m');
+
             $proforma_prev_no = running_number()
                 ->type('pro-inv')
                 ->formatter(new class($kodeDokumen, $year, $month) implements Presenter {
@@ -403,7 +419,6 @@ class ProformaInvoiceController extends Controller
                     }
                 })
                 ->preview();
-
             $view = 'proforma_invoice.table-rental-add';
             if ($contract->type == 'LCT') {
                 $view = 'proforma_invoice.table-lct-add';
@@ -461,5 +476,94 @@ class ProformaInvoiceController extends Controller
             ];
             return response()->json($result);
         }
+    }
+
+    public function check_aporoval(Proforma_invoice $proforma_invoice)
+    {
+        $model = 'App\Models\Proforma_invoice';
+        $department = 'Equipment';
+        if (checkHasApproval($model, $department)) {
+            if ($proforma_invoice->status == 'Open') {
+                $proforma_invoice->status = 'Approval';
+                $proforma_invoice->save();
+                $approval_flow_id = getApprovalFlowId($model, $department);
+                createApprovalProcess($approval_flow_id, $proforma_invoice->id);
+            }
+        }
+    }
+
+    public function check_proforma_invoice(Request $request)
+    {
+        $contract = Contract::find($request->contract_id);
+        $year = $request->year;
+        $month = $request->month;
+        return response()->json([
+            'status' => checkProformaInvoice($contract, $year, $month)
+        ], 200);
+    }
+
+    /**
+     * ngambil detail purchase requisition
+     */
+    public function get_detail(Request $request, $proforma_invoice_id)
+    {
+        try {
+            $proforma_invoice = Proforma_invoice::find($proforma_invoice_id);
+            $contract = Contract::find($proforma_invoice->contract_id);
+            $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
+            $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
+            $unit_target = Unit_target::where('contract_id', $contract->id)->first();
+            $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+                ->where('department', 'Equipment')
+                ->first();
+            $approval_process = $approval_flow
+                ? Approval_process::where('approval_flow_id', $approval_flow->id)
+                ->where('approvable_id', $proforma_invoice->id)
+                ->get()
+                : null;
+            $periode = $proforma_invoice->periode;
+            $exp_periode = explode("-", $periode);
+            $year = $exp_periode[0];
+            $month = $exp_periode[1];
+            $view = 'proforma_invoice.detail';
+            $json_data = [
+                'proforma_no' => $proforma_invoice->proforma_no,
+            ];
+            return response()->view($view, compact(
+                'proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'approval_process',
+                'year',
+                'month'
+            ), 200)->header('X-Json-Data', base64_encode(json_encode($json_data)));
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    public function convertMonthName(string $month)
+    {
+        $months = [
+            '01' => 'January',
+            '02' => 'February',
+            '03' => 'March',
+            '04' => 'April',
+            '05' => 'May',
+            '06' => 'June',
+            '07' => 'July',
+            '08' => 'August',
+            '09' => 'September',
+            '10' => 'October',
+            '11' => 'November',
+            '12' => 'December',
+        ];
+
+        return $months[$month] ?? null;
     }
 }

@@ -64,4 +64,9 @@ class Unit extends Model implements Auditable
     {
         return $this->hasMany(Unit_target::class);
     }
+
+    public function proforma_invoice(): HasMany
+    {
+        return $this->hasMany(Maintenance::class);
+    }
 }

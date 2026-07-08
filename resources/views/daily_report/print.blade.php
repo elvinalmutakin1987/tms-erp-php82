@@ -32,7 +32,7 @@
         $hour = isset($parts[0]) ? (int) $parts[0] : 0;
         $minute = isset($parts[1]) ? (int) $parts[1] : 0;
 
-        return ($hour * 60) + $minute;
+        return $hour * 60 + $minute;
     };
 
     $durationTotal = function ($time1, $time2) use ($durationToMinutes) {
@@ -42,11 +42,7 @@
 
         $totalMinutes = $durationToMinutes($time1) + $durationToMinutes($time2);
 
-        return sprintf(
-            '%02d:%02d',
-            intdiv($totalMinutes, 60),
-            $totalMinutes % 60,
-        );
+        return sprintf('%02d:%02d', intdiv($totalMinutes, 60), $totalMinutes % 60);
     };
 
     $logoPath = public_path('assets/images/tms_logo.png');
@@ -373,7 +369,8 @@
                     <tr>
                         <td class="logo-cell">
                             @if (file_exists($logoPath))
-                                <img src="{{ $logoPath }}" alt="Logo" style="max-width:95px;height:auto;margin:0 auto;">
+                                <img src="{{ $logoPath }}" alt="Logo"
+                                    style="max-width:95px;height:auto;margin:0 auto;">
                             @else
                                 <div style="font-weight:700;font-size:12pt;">TMS</div>
                             @endif
@@ -398,7 +395,8 @@
                                             <tr>
                                                 <td class="label" style="width: 10%">Unit</td>
                                                 <td class="sep">:</td>
-                                                <td class="val">{{ data_get($daily_report, 'unit.vehicle_no', '-') }}</td>
+                                                <td class="val">{{ data_get($daily_report, 'unit.vehicle_no', '-') }}
+                                                </td>
                                             </tr>
                                             <tr>
                                                 <td class="label">Date</td>
@@ -686,7 +684,7 @@
                 <td class="p-1 align-middle">7</td>
                 <td class="p-1 align-middle">From</td>
                 <td class="p-1 align-middle">
-                    {{ ($daily_report->refule_liter || $daily_report->refule_km) ? ($daily_report->refule_type ?? '') : '' }}
+                    {{ $daily_report->refule_liter || $daily_report->refule_km ? $daily_report->refule_type ?? '' : '' }}
                 </td>
             </tr>
             <tr>

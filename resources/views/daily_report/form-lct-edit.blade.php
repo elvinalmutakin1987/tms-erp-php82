@@ -235,7 +235,7 @@
                 <input type="hidden" class="form-control" id="refule_liter" name="refule_liter"
                     value="{{ $daily_report?->refule_liter ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_liter" name="_refule_liter"
-                    value="{{ $daily_report?->refule_liter ? Number::format($daily_report?->refule_liter ?? 0, precision: 0) : '' }}">
+                    value="{{ $daily_report?->refule_liter ? Number::format($daily_report?->refule_liter ?? 0, precision: 2) : '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -253,7 +253,7 @@
                 <input type="hidden" class="form-control" id="refule_km" name="refule_km"
                     value="{{ $daily_report?->refule_km ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_km" name="_refule_km"
-                    value="{{ $daily_report?->refule_km ? Number::format($daily_report?->refule_km ?? 0, precision: 0) : '' }}">
+                    value="{{ $daily_report?->refule_km ? Number::format($daily_report?->refule_km ?? 0, precision: 2) : '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -271,7 +271,7 @@
                 <input type="hidden" class="form-control" id="refule_mechine" name="refule_mechine"
                     value="{{ $daily_report?->refule_mechine ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_mechine" name="_refule_mechine"
-                    value="{{ $daily_report?->refule_mechine ? Number::format($daily_report?->refule_mechine ?? 0, precision: 0) : '' }}">
+                    value="{{ $daily_report?->refule_mechine ? Number::format($daily_report?->refule_mechine ?? 0, precision: 2) : '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -289,7 +289,7 @@
                 <input type="hidden" class="form-control" id="refule_genset" name="refule_genset"
                     value="{{ $daily_report?->refule_genset ?? 0 }}">
                 <input type="text" class="form-control" id="_refule_genset" name="_refule_genset"
-                    value="{{ $daily_report?->refule_genset ? Number::format($daily_report?->refule_genset ?? 0, precision: 0) : '' }}">
+                    value="{{ $daily_report?->refule_genset ? Number::format($daily_report?->refule_genset ?? 0, precision: 2) : '' }}">
             </td>
             <td class="p-1 align-middle">
 
@@ -387,7 +387,7 @@
                     <input type="hidden" class="form-control" id="value_1" name="value_1[]" readonly
                         value="{{ $d->value_1 }}">
                     <input type="text" class="form-control" id="value_1__" name="value_1__[]" readonly
-                        value="{{ $d->value_1 ? Number::format($d->value_1, precision: 0) : '' }}">
+                        value="{{ $d->value_1 ? Number::format($d->value_1, precision: 2) : '' }}">
                 </td>
                 <td class="p-1 align-middle">
                     <input type="text" class="form-control" id="uom_2" name="uom_2[]" readonly
@@ -397,7 +397,7 @@
                     <input type="hidden" class="form-control" id="value_2" name="value_2[]" readonly
                         value="{{ $d->value_2 }}">
                     <input type="text" class="form-control" id="value_2__" name="value_2__[]" readonly
-                        value="{{ $d->value_2 ? Number::format($d->value_2, precision: 0) : '' }}">
+                        value="{{ $d->value_2 ? Number::format($d->value_2, precision: 2) : '' }}">
                 </td>
                 <td class="text-center p-1 align-middle">
                     <div class="row row-cols-auto g-3">

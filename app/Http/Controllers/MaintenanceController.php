@@ -91,7 +91,6 @@ class MaintenanceController extends Controller
                                         </a>
                                     </li>
                     ';
-
                     if (($item->status === 'Open' && $canAccess('maintenance.cost')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
@@ -101,7 +100,6 @@ class MaintenanceController extends Controller
                             </li>
                         ';
                     }
-
                     if ($canAccess('maintenance.edit') || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
@@ -111,7 +109,6 @@ class MaintenanceController extends Controller
                             </li>
                         ';
                     }
-
                     if ($canAccess('maintenance.delete') || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
@@ -121,7 +118,6 @@ class MaintenanceController extends Controller
                             </li>
                         ';
                     }
-
                     $button .= '
                                 </ul>
                             </div>
