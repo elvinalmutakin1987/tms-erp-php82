@@ -68,8 +68,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Order Number</th>
-                                        <th>Requisition Number</th>
+                                        <th>PO Number</th>
+                                        <th>PR Number</th>
                                         <th>Vendor</th>
                                         <th>Date</th>
                                         <th>Grand Total</th>

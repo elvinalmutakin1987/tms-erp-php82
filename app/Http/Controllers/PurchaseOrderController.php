@@ -141,9 +141,7 @@ class PurchaseOrderController extends Controller
                      * - hanya untuk superadmin atau user dengan permission purchase_order.close
                      */
                     $purchaseRequisitionStatus = $item->purchase_requisition?->status;
-                    $canShowCloseButton = $item->status === 'Approved'
-                        || $purchaseRequisitionStatus === 'Done';
-                    if (($canShowCloseButton && $canAccess('purchase_order.close')) || Auth::user()->hasRole('superadmin')) {
+                    if (($purchaseRequisitionStatus === 'Done' && $canAccess('purchase_order.close') && $item->status != "Done") || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
                                 <a class="dropdown-item" href="#" onclick="close_(\'' . $item->id . '\')">

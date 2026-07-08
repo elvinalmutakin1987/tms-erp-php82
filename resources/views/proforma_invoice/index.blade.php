@@ -91,8 +91,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>P. Invoice No.</th>
-                                        <th>Contract No.</th>
+                                        <th>PI Number</th>
+                                        <th>Contract Number</th>
                                         <th>Unit</th>
                                         <th>Type</th>
                                         <th>Periode</th>

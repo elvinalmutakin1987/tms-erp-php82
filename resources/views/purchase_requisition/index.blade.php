@@ -73,7 +73,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Requisition Number</th>
+                                        <th>PR Number</th>
                                         {{-- <th>Maintenance Number</th> --}}
                                         <th>Date</th>
                                         <th>Unit</th>
