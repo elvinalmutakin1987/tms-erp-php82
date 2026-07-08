@@ -318,7 +318,8 @@ class ProformaInvoiceController extends Controller
         $contract_no = $contract->contract_no;
         $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
         $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
-        $unit_target = Unit_target::where('contract_id', $contract->id)->first();
+        $unit_target = Unit_target::where('contract_id', $contract->id)->where('unit_id', $proforma_invoice->unit_id)->first();
+        $unit_id = $unit_target->unit_id;
         $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
             ->where('department', 'Equipment')
             ->first();
@@ -330,8 +331,9 @@ class ProformaInvoiceController extends Controller
         $periode = $proforma_invoice->periode;
         $exp_periode = explode("-", $periode);
         $year = $exp_periode[0];
-        $month = $this->convertMonthName($exp_periode[1]);
-        $html = view('proforma_invoice.detail', compact(
+        $month = $exp_periode[1];
+        $month_name = $this->convertMonthName($exp_periode[1]);
+        $html = view('proforma_invoice.table-rental-edit', compact(
             'proforma_invoice',
             'contract',
             'contract_rate',
@@ -339,13 +341,21 @@ class ProformaInvoiceController extends Controller
             'unit_target',
             'approval_process',
             'year',
-            'month'
+            'month',
+            'month_name',
+            'unit_id'
         ))->render();
+        if ($contract->type == 'LCT') {
+            $html = 'proforma_invoice.table-lct-edit';
+        } else if ($contract->type == 'Fuel Truck Rental') {
+            $html = 'proforma_invoice.table-fuel-edit';
+        }
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'year' => $year,
             'month' => $month,
+            'month_name' => $month_name,
             'contract_id' => $contract_id,
             'contract_no' => $contract_no,
             'proforma_no' => $proforma_no,
@@ -369,23 +379,18 @@ class ProformaInvoiceController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'contract_id' => 'required',
-                'year' => 'required',
-                'month' => 'required'
+                'edit_contract_id' => 'required',
+                'edit_year' => 'required',
+                'edit_month' => 'required'
             ]);
-            $contract = Contract::find($request->contract_id);
+            $contract = Contract::find($request->edit_contract_id);
             $unit_target_id = $proforma_invoice->unit_target_id;
+            $unit_target = Unit_target::find($unit_target_id);
+            $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+            $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
             $unit_id = $proforma_invoice->unit_id;
-            $year = $request->year;
-            $month = $request->month;
-            if (checkProformaInvoice($contract, $year, $month)) {
-                return response()->json([
-                    'success' => false,
-                    'title' => 'Oops...',
-                    'message' => 'Proforma Invoice on this periode already created.!'
-                ], 200);
-            }
-            $gen_proforma = genProformaInvoice($contract, $year, $month);
+            $year = $request->edit_year;
+            $month = $request->edit_month;
             $start_date = Carbon::create($year, $month, 1)->startOfMonth();
             $end_date = $start_date->copy()->endOfMonth();
             if ($contract->service->type == 'Unit Rental') {
@@ -413,8 +418,8 @@ class ProformaInvoiceController extends Controller
                     ->orderByDesc('id')
                     ->value('km_finish');
                 $total_breakdown = $excelRound($totalBreakdownSeconds / 3600, 2);
-                $price = $excelRound($unittarget->price ?? 0, 2);
-                $target = $excelRound($unittarget->target ?? 0, 2);
+                $price = $excelRound($unit_target->price ?? 0, 2);
+                $target = $excelRound($unit_target->target ?? 0, 2);
                 if ($totalJamKerja > 0) {
                     $pa = 100 - ($total_breakdown / $totalJamKerja) * 100;
                 } else {
@@ -427,12 +432,12 @@ class ProformaInvoiceController extends Controller
                 $total_payment = max(0, min($price, $total_payment));
                 $total_payment = $excelRound($total_payment, 2);
                 $data = [
-                    'contract_id' => $request->contract_id,
+                    'contract_id' => $contract->id,
                     'unit_target_id' => $unit_target_id,
                     'client_vendor_id' => $contract->client_vendor_id,
                     'request_token' => $request->request_token,
                     'user_id' => Auth::id(),
-                    'unit_id' => $unit_target_id,
+                    'unit_id' => $unit_id,
                     'periode_start' => $start_date,
                     'periode_finish' => $end_date,
                     'periode' => Carbon::parse("$year-$month")->format('Y-m'),
@@ -616,7 +621,7 @@ class ProformaInvoiceController extends Controller
             $contract = Contract::find($proforma_invoice->contract_id);
             $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
             $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
-            $unit_target = Unit_target::where('contract_id', $contract->id)->first();
+            $unit_target = Unit_target::where('contract_id', $contract->id)->where('unit_id', $proforma_invoice->unit_id)->first();
             $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
                 ->where('department', 'Equipment')
                 ->first();

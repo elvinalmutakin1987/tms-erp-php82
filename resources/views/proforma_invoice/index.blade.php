@@ -635,7 +635,7 @@
         $(document).off('click.editButton').on('click.editButton', '.editButton', function() {
             proformaInvoiceId = $(this).data('id');
 
-            $('#modal-header').text('Edit Proforma Invoice');
+            $('#modal-edit-header').text('Edit Proforma Invoice');
             $('#id').val(proformaInvoiceId);
 
             let url = '{{ route('proformainvoice.show', ':_id') }}';
@@ -652,6 +652,7 @@
                     $("#edit_contract_no").val(response.contract_no);
                     $("#edit_year").val(response.year);
                     $("#edit_month").val(response.month);
+                    $("#edit_month_name").val(response.month_name);
                     $('#div-table-edit').html(response.html);
                 },
                 error: function() {
@@ -718,6 +719,56 @@
                             unitId = '';
 
                             $('#formModal').modal('hide');
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: errorMessage
+                    });
+                }
+            });
+        });
+
+        $('.saveEditButton').off('click.saveProforma').on('click.saveProforma', function() {
+            var formData = new FormData($('#formEdit').find('form')[0]);
+            var url = '{{ route('proformainvoice.store') }}';
+            var type = 'POST';
+
+            formData.append('status', $(this).val());
+
+            if (proformaInvoiceId != '') {
+                url = '{{ route('proformainvoice.update', ':_id') }}';
+                url = url.replace(':_id', proformaInvoiceId);
+                formData.append('_method', 'PUT');
+            }
+
+            $.ajax({
+                url: url,
+                type: type,
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: response.title,
+                        text: response.message,
+                        icon: "success",
+                        timer: 5000,
+                        didOpen: () => {},
+                        willClose: () => {
+                            $('#table-data').DataTable().ajax.reload(null, false);
+                            $('#formEdit form')[0].reset();
+
+                            proformaInvoiceId = '';
+                            contractId = '';
+                            unitId = '';
+
+                            $('#formEdit').modal('hide');
                         }
                     });
                 },
