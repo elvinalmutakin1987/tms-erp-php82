@@ -267,7 +267,7 @@
                         <td class="p-1 align-middle" style="width: 15%">KM</td>
                         <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}
+                            {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 2) : '' }}
                         </td>
 
                         <td class="p-1 align-middle" style="width: 15%"></td>
@@ -279,7 +279,7 @@
                         <td class="p-1 align-middle" style="width: 15%">Liter</td>
                         <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
+                            {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 2) : '' }}
                         </td>
 
                         <td class="p-1 align-middle" style="width: 15%"></td>
@@ -302,6 +302,10 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php
+                        $total_value_1 = 0;
+                        $total_value_2 = 0;
+                    @endphp
                     @foreach ($daily_report_detail as $d)
                         <tr>
                             <td class="p-1 align-middle">
@@ -326,7 +330,18 @@
                                 {{ $d->value_2 ? Number::format($d->value_2, precision: 2) : '' }}
                             </td>
                         </tr>
+                        @php
+                            $total_value_1 += $d->value_1;
+                            $total_value_2 += $d->value_2;
+                        @endphp
                     @endforeach
+                    <tr>
+                        <td colspan="3" class="p-1 align-right"></td>
+                        <td class="p-1 align-middle"><b>Total</b></td>
+                        <td class="p-1 align-middle"><b>{{ Number::format($total_value_1, precision: 2) }}</b></td>
+                        <td class="p-1 align-middle"><b>Total</b></td>
+                        <td class="p-1 align-middle"><b>{{ Number::format($total_value_2, precision: 2) }}</b></td>
+                    </tr>
                 </tbody>
             </table>
         @else
@@ -348,7 +363,7 @@
                         <td class="p-1 align-middle">Start</td>
                         <td class="p-1 align-middle" style="width: 5px">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->km_start ? Number::format($daily_report->km_start, precision: 0) : '' }}
+                            {{ $daily_report->km_start ? Number::format($daily_report->km_start, precision: 2) : '' }}
                         </td>
                     </tr>
 
@@ -357,7 +372,7 @@
                         <td class="p-1 align-middle">Finish</td>
                         <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->km_finish ? Number::format($daily_report->km_finish, precision: 0) : '' }}
+                            {{ $daily_report->km_finish ? Number::format($daily_report->km_finish, precision: 2) : '' }}
                         </td>
                     </tr>
 
@@ -366,7 +381,7 @@
                         <td class="p-1 align-middle">Total</td>
                         <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->km_total ? Number::format($daily_report->km_total, precision: 0) : '' }}
+                            {{ $daily_report->km_total ? Number::format($daily_report->km_total, precision: 2) : '' }}
                         </td>
                     </tr>
 
@@ -397,7 +412,7 @@
                         <td class="p-1 align-middle">Load</td>
                         <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->load ? Number::format($daily_report->load, precision: 0) : '' }}
+                            {{ $daily_report->load ? Number::format($daily_report->load, precision: 2) : '' }}
                         </td>
                     </tr>
 
@@ -419,7 +434,7 @@
                         <td class="p-1 align-middle">Liter</td>
                         <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 0) : '' }}
+                            {{ $daily_report->refule_liter ? Number::format($daily_report->refule_liter, precision: 2) : '' }}
                         </td>
                     </tr>
 
@@ -428,7 +443,7 @@
                         <td class="p-1 align-middle">KM</td>
                         <td class="p-1 align-middle">:</td>
                         <td class="p-1 align-middle">
-                            {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 0) : '' }}
+                            {{ $daily_report->refule_km ? Number::format($daily_report->refule_km, precision: 2) : '' }}
                         </td>
                     </tr>
                 </tbody>

@@ -6,6 +6,7 @@ return [
     // 'Rehabilitation - Reclamation',
     // 'Coal Mining - Contractor',
     // 'Man Power',
+    'Explosive Material Transport',
     'Unit Rental',
     'Fuel Truck Rental',
     'LCT',

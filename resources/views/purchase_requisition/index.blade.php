@@ -164,12 +164,6 @@
                         orderable: true,
                         searchable: true,
                     },
-                    // {
-                    //     data: 'maintenance_no',
-                    //     name: 'maintenance_no',
-                    //     orderable: true,
-                    //     searchable: true,
-                    // },
                     {
                         data: 'date',
                         name: 'date',

@@ -513,10 +513,29 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_table_add');
 
+    Route::get('proformainvoice-load-table-edit/{proforma_invoice}', [ProformaInvoiceController::class, 'get_table_edit'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.get_table_edit');
 
     Route::get('proformainvoice-get-unit-all', [ProformaInvoiceController::class, 'get_unit_all'])
         ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_unit_all');
+
+    Route::get('proformainvoice-print/{proforma_invoice}', [ProformaInvoiceController::class, 'print'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.print');
+
+    Route::get('proformainvoice-export-pdf/{proforma_invoice}', [ProformaInvoiceController::class, 'export_pdf'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.export_pdf');
+
+    Route::get('proformainvoice-check-available', [ProformaInvoiceController::class, 'check_proforma_invoice'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.check_proforma_invoice');
+
+    Route::get('proformainvoice-get-detail/{proforma_invoice}', [ProformaInvoiceController::class, 'get_detail'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.get_detail');
 
     /**
      * Routenya Unit Epxired

@@ -50,12 +50,32 @@
                                     </select>
                                 </div>
                                 <div class="col">
-                                    <input type="text" class="form-control datepicker" id="date_start" name="date_start"
-                                        placeholder="Start Date">
+                                    <select class="form-select select-top" id="_month" name="_month">
+                                        <option value="All">All Month</option>
+                                        <option value="01">January</option>
+                                        <option value="02">February</option>
+                                        <option value="03">March</option>
+                                        <option value="04">April</option>
+                                        <option value="05">May</option>
+                                        <option value="06">June</option>
+                                        <option value="07">July</option>
+                                        <option value="08">August</option>
+                                        <option value="09">September</option>
+                                        <option value="10">October</option>
+                                        <option value="11">November</option>
+                                        <option value="12">December</option>
+                                    </select>
                                 </div>
                                 <div class="col">
-                                    <input type="text" class="form-control datepicker" id="date_end" name="date_end"
-                                        placeholder="End Date">
+                                    <select class="form-select select-top" id="_year" name="_year">
+                                        <option value="All">All Year</option>
+                                        @for ($year = date('Y'); $year >= 2010; $year--)
+                                            <option value="{{ $year }}"
+                                                {{ request('_year') == $year ? 'selected' : '' }}>
+                                                {{ $year }}
+                                            </option>
+                                        @endfor
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -71,10 +91,14 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Prof. Invoice Number</th>
-                                        <th>Contract Number</th>
-                                        <th>Date</th>
+                                        <th>P. Invoice No.</th>
+                                        <th>Contract No.</th>
                                         <th>Unit</th>
+                                        <th>Type</th>
+                                        <th>Periode</th>
+                                        <th>Total</th>
+                                        {{-- <th>Penalty</th>
+                                        <th>Grand Total</th> --}}
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -93,7 +117,13 @@
     <!--end page wrapper -->
     @include('proforma_invoice.modal', $contract)
 
+    @include('proforma_invoice.modal-edit')
+
+    @include('proforma_invoice.modal-detail')
+
     @include('proforma_invoice.modal-bulk')
+
+    @include('proforma_invoice.modal-update')
 @endsection
 
 @section('js')
@@ -133,8 +163,8 @@
                     data: function(d) {
                         d.status = $('#_status').val();
                         d.unit_id = $('#unit').val() || '';
-                        d.date_start = $('#date_start').val();
-                        d.date_end = $('#date_end').val();
+                        d.month = $('#_month').val();
+                        d.year = $('#_year').val();
                     }
                 },
                 columns: [{
@@ -159,14 +189,38 @@
                         searchable: true
                     },
                     {
-                        data: 'date',
-                        name: 'date',
+                        data: 'unit',
+                        name: 'unit',
                         orderable: true,
                         searchable: true
                     },
                     {
-                        data: 'unit',
-                        name: 'unit',
+                        data: 'type',
+                        name: 'type',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'periode_',
+                        name: 'periode_',
+                        orderable: true,
+                        searchable: true
+                    },
+                    // {
+                    //     data: 'price_',
+                    //     name: 'price_',
+                    //     orderable: true,
+                    //     searchable: true
+                    // },
+                    // {
+                    //     data: 'penalty_',
+                    //     name: 'penalty_',
+                    //     orderable: true,
+                    //     searchable: true
+                    // },
+                    {
+                        data: 'total_',
+                        name: 'total_',
                         orderable: true,
                         searchable: true
                     },
@@ -210,10 +264,6 @@
             initTopStatusSelect2();
             initUnitTopSelect2();
             gen_select2();
-
-            $("#date_start, #date_end").off('change.filterDate').on('change.filterDate', function() {
-                $('#table-data').DataTable().draw();
-            });
         });
 
         function initTopStatusSelect2() {
@@ -411,62 +461,50 @@
             });
         }
 
-        // $('#contract_id').off('change.contract').on('change.contract', function() {
-        //     var val = $(this).val();
-
-        //     if (!val) {
-        //         $("#div-table").html('');
-        //         return;
-        //     }
-
-        //     $("#div-table").html(`
-    //     <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-    //     <span class="visually">Loading...</span>
-    // `);
-
-        //     setTimeout(function() {
-        //         $.ajax({
-        //             url: "{{ route('proformainvoice.get_table_add') }}",
-        //             data: {
-        //                 contract_id: val,
-        //                 year: $("#year").val(),
-        //                 month: $("#month").val()
-        //             },
-        //             type: 'GET',
-        //             success: function(response) {
-        //                 $("#div-table").html(response.html);
-        //             },
-        //             error: function(xhr, status, error) {
-        //                 console.error('Error:', error);
-        //             }
-        //         });
-        //     }, 500);
-        // });
-
         let loadTableTimer = null;
 
-        function loadProformaInvoiceTable() {
+        async function loadProformaInvoiceTable() {
             var contractId = $('#contract_id').val();
             var year = $('#year').val();
             var month = $('#month').val();
 
             if (!contractId) {
                 $('#div-table').html('');
-                return;
+                return false;
+            }
+
+            const isAvailable = await checkProformaInvoice();
+
+            if (isAvailable) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Proforma Invoice on this periode already created!"
+                });
+                $('#div-table').html('');
+                return false;
             }
 
             $('#div-table').html(`
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                <span class="visually">Loading...</span>
+                <span class="visually-hidden">Loading...</span>
             `);
 
             clearTimeout(loadTableTimer);
 
             loadTableTimer = setTimeout(function() {
+                const isEdit = proformaInvoiceId != '';
+
+                const url = isEdit ?
+                    '{{ route('proformainvoice.get_table_edit', ':_id') }}'.replace(':_id',
+                        proformaInvoiceId) :
+                    '{{ route('proformainvoice.get_table_add') }}';
+
                 $.ajax({
-                    url: "{{ route('proformainvoice.get_table_add') }}",
+                    url: url,
                     type: 'GET',
                     data: {
+                        proforma_invoice_id: proformaInvoiceId,
                         contract_id: contractId,
                         year: year,
                         month: month
@@ -478,21 +516,59 @@
                                 title: "Oops...",
                                 text: "Proforma Invoice on this periode already created!"
                             });
-                        } else {
-                            $('#div-table').html(response.html);
+
+                            $('#div-table').html('');
+                            return false;
                         }
+
+                        $('#div-table').html(response.html);
+
+                        $('#modal-header').html(
+                            'Add Proforma Invoice -&nbsp;<b>' + response.proforma_prev_no +
+                            '</b>'
+                        );
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
 
                         $('#div-table').html(`
-                            <div class="alert alert-danger mb-0">
-                                Failed to load data.
-                            </div>
-                        `);
+                    <div class="alert alert-danger mb-0">
+                        Failed to load data.
+                    </div>
+                `);
                     }
                 });
             }, 500);
+        }
+
+        function checkProformaInvoice() {
+            var contractId = $('#contract_id').val();
+            var year = $('#year').val();
+            var month = $('#month').val();
+            return $.ajax({
+                    url: '{{ route('proformainvoice.check_proforma_invoice') }}',
+                    type: 'GET',
+                    data: {
+                        contract_id: contractId,
+                        year: year,
+                        month: month
+                    }
+                })
+                .then(function(response) {
+                    if (response.status == true) {
+                        return true;
+                    }
+                    return false;
+                })
+                .catch(function(xhr) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: xhr.responseJSON?.message || 'Failed to check proforma invoice.'
+                    });
+
+                    return false;
+                });
         }
 
         $(document)
@@ -515,8 +591,7 @@
 
             $('#formModal form')[0].reset();
             $('#modal-header').text(title);
-
-            if (proformaInvoiceId == '') {
+            if (proformaInvoiceId === '') {
                 $.ajax({
                     url: '{{ route('gen_request_token') }}',
                     type: 'GET',
@@ -563,21 +638,21 @@
             $('#modal-header').text('Edit Proforma Invoice');
             $('#id').val(proformaInvoiceId);
 
-            let url = '{{ route('purchaserequisition.show', ':_id') }}';
+            let url = '{{ route('proformainvoice.show', ':_id') }}';
             url = url.replace(':_id', proformaInvoiceId);
 
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
-                    $("#divSignPath").css('display', 'block');
-                    $('#modal-header').text('Edit Proforma Invoice');
-
-                    $("#unit_id").val(response.data.unit_id).trigger('change');
-                    $("#maintenance_id").val(response.data.maintenance_id).trigger('change');
-                    $("#date").val(response.data.date);
-                    $("#remarks").val(response.data.remarks);
-                    $("#request_token").val(response.data.request_token);
+                    $('#modal-edit-header').html(
+                        'Edit Proforma Invoice -&nbsp;<b>' + response.proforma_no + '</b>'
+                    );
+                    $("#edit_contract_id").val(response.contract_id);
+                    $("#edit_contract_no").val(response.contract_no);
+                    $("#edit_year").val(response.year);
+                    $("#edit_month").val(response.month);
+                    $('#div-table-edit').html(response.html);
                 },
                 error: function() {
                     alert('Error fetching data');
@@ -588,13 +663,18 @@
         $(document).off('click.detailButton').on('click.detailButton', '.detailButton', function() {
             $('#modal-detail-header').text('Detail Proforma Invoice');
 
-            let url = '{{ route('purchaserequisition.get_detail', ':_id') }}';
+            let url = '{{ route('proformainvoice.get_detail', ':_id') }}';
             url = url.replace(':_id', $(this).data('id'));
 
             $.ajax({
                 url: url,
                 type: 'GET',
-                success: function(response) {
+                success: function(response, textStatus, xhr) {
+                    const encodedJson = xhr.getResponseHeader('X-Json-Data');
+                    const jsonData = JSON.parse(atob(encodedJson));
+                    $('#modal-detail-header').html(
+                        'Detail Proforma Invoice -&nbsp;<b>' + jsonData.proforma_no + '</b>'
+                    );
                     $('#modal-detail-body').html(response);
                 },
                 error: function() {
@@ -659,6 +739,18 @@
 
         $('#cancelDetailButton').off('click.cancelDetail').on('click.cancelDetail', function() {
             $('#formDetail').modal('hide');
+        });
+
+        $('#cancelEditButton').off('click.cancelEdit').on('click.cancelEdit', function() {
+            $('#formEdit').modal('hide');
+        });
+
+        $("#_year").on('change', function() {
+            $('#table-data').DataTable().draw();
+        });
+
+        $("#_month").on('change', function() {
+            $('#table-data').DataTable().draw();
         });
 
         function delete_(id) {

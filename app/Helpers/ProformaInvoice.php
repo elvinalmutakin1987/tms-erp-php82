@@ -17,22 +17,16 @@ use Illuminate\Support\Str;
 if (! function_exists('genProformaInvoice')) {
     function genProformaInvoice(Contract $contract, string $year, string $month): array
     {
-        // $total_breakdown = Maintenance::whereYear('date', $year)
-        //     ->whereMonth('date', $month)
-        //     ->selectRaw('ROUND(SUM(TIME_TO_SEC(work_duration)) / 3600, 2) as total_duration_decimal')
-        //     ->value('total_duration_decimal') ?? 0;
         $contract_fmf = Contract_fmf::where('contract_id', '=', $contract->id)
             ->where('year', $year)
             ->first();
         $fix_monthly_fee = $contract_fmf->fix_monthly_fee ?? 0;
         $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
         $unit_target = Unit_target::where('contract_id', $contract->id)->get();
-
         return [
             'contract' => $contract,
             'year' => $year,
             'month' => $month,
-            // 'total_breakdown' => $total_breakdown,
             'contract_fmf' => $contract_fmf,
             'fix_monthly_fee' => $fix_monthly_fee,
             'contract_rate' => $contract_rate,

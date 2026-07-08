@@ -2,6 +2,10 @@
     use App\Models\Maintenance;
     use Illuminate\Support\Number;
     use Carbon\Carbon;
+
+    $unit_id = $proforma_invoice->unit_id;
+    $price = $proforma_invoice->unit_target->price;
+    $target = $proforma_invoice->unit_target->target;
 @endphp
 
 <h6 class="mb-2" style="display: inline-block;">
@@ -23,26 +27,26 @@
     </table>
 </h6>
 
-@foreach ($data['unit_target'] as $unittarget)
+@if ($contract->service->type == 'Unit Rental')
     @php
         $excelRound = function ($value, int $precision = 2) {
             return round((float) $value, $precision, PHP_ROUND_HALF_UP);
         };
-        $year = (int) $data['year'];
-        $month = (int) $data['month'];
+        $year = (int) $year;
+        $month = (int) $month;
         $startDate = Carbon::create($year, $month, 1)->startOfMonth();
         $endDate = $startDate->copy()->endOfMonth();
         $hariKerja = $startDate->daysInMonth;
         $totalJamKerja = $hariKerja * 24;
         $totalBreakdownSeconds = Maintenance::whereYear('date', $year)
             ->whereMonth('date', $month)
-            ->where('unit_id', $unittarget->unit_id)
+            ->where('unit_id', $unit_id)
             ->where('status', '!=', 'Draft')
             ->selectRaw('COALESCE(SUM(TIME_TO_SEC(work_duration)), 0) as total_seconds')
             ->value('total_seconds');
         $total_breakdown = $excelRound($totalBreakdownSeconds / 3600, 2);
-        $price = $excelRound($unittarget->price ?? 0, 2);
-        $target = $excelRound($unittarget->target ?? 0, 2);
+        $price = $excelRound($price ?? 0, 2);
+        $target = $excelRound($target ?? 0, 2);
         if ($totalJamKerja > 0) {
             $pa = 100 - ($total_breakdown / $totalJamKerja) * 100;
         } else {
@@ -72,8 +76,8 @@
                 </td>
 
                 <td class="p-1">
-                    {{ optional($unittarget->unit)->description }}
-                    (<b>{{ optional($unittarget->unit)->vehicle_no }}</b>)
+                    {{ $unit_target->unit->description }}
+                    (<b>{{ $unit_target->unit->vehicle_no }}</b>)
                 </td>
 
                 <td class="p-1" width="10px"></td>
@@ -174,4 +178,9 @@
             </tr>
         </tbody>
     </table>
-@endforeach
+@elseif($contract->service->type == 'LCT')
+
+@elseif($contract->service->type == 'Fuel Truck Rental')
+
+@elseif($contract->service->type == 'Explosive Material Rental')
+@endif
