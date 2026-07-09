@@ -11,6 +11,13 @@
 <h6 class="mb-2" style="display: inline-block;">
     <table style="width:100%">
         <tr>
+            <td>Number</td>
+            <td style="width:5px"> &nbsp;&nbsp;&nbsp;:</td>
+            <td>
+                &nbsp;&nbsp;&nbsp;<b>{{ $proforma_invoice->proforma_no }}</b>
+            </td>
+        </tr>
+        <tr>
             <td>Client</td>
             <td style="width:5px"> &nbsp;&nbsp;&nbsp;:</td>
             <td>

@@ -12,11 +12,15 @@ use App\Models\Approval_flow;
 use App\Models\Approval_process;
 use App\Models\Approval_status;
 use App\Models\Approval_step;
+use App\Models\Contract;
+use App\Models\Contract_fmf;
+use App\Models\Contract_rate;
 use App\Models\Proforma_invoice;
 use App\Models\Purchase_order;
 use App\Models\Purchase_order_payment;
 use App\Models\Purchase_requisition;
 use App\Models\Request_quotation;
+use App\Models\Unit_target;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
@@ -185,7 +189,12 @@ class ApprovalController extends Controller
                 } else {
                     $view = 'approval.detail-pr';
                 }
-                $compact = compact('purchase_requisition', 'purchase_requisition_detail', 'approval_process', 'approvable_model');
+                $compact = compact(
+                    'purchase_requisition',
+                    'purchase_requisition_detail',
+                    'approval_process',
+                    'approvable_model'
+                );
             } else if ($approvable_model == 'Purchase_order') {
                 $purchase_order = Purchase_order::find($id);
                 $purchase_order_detail = $purchase_order->purchase_order_detail;
@@ -198,6 +207,35 @@ class ApprovalController extends Controller
                 $view = 'approval.detail-po';
                 $request_quotation = Request_quotation::where('request_token', $purchase_order->request_token)->get();
                 $compact = compact('purchase_order', 'purchase_order_detail', 'request_quotation', 'approvable_model', 'approval_process');
+            } else if ($approvable_model == 'Proforma_invoice') {
+                $proforma_invoice = Proforma_invoice::find($id);
+                $contract = Contract::find($proforma_invoice->contract_id);
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
+                $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->where('unit_id', $proforma_invoice->unit_id)->first();
+                $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+                    ->where('department', 'Equipment')
+                    ->first();
+                $approval_process = $approval_flow
+                    ? Approval_process::where('approval_flow_id', $approval_flow->id)
+                    ->where('approvable_id', $proforma_invoice->id)
+                    ->get()
+                    : null;
+                $periode = $proforma_invoice->periode;
+                $exp_periode = explode("-", $periode);
+                $year = $exp_periode[0];
+                $month = $exp_periode[1];
+                $view = 'approval.detail-pi';
+                $compact = compact(
+                    'proforma_invoice',
+                    'contract',
+                    'contract_rate',
+                    'contract_fmf',
+                    'unit_target',
+                    'approval_process',
+                    'year',
+                    'month'
+                );
             }
             return response()->view($view, $compact, 200);
         } catch (\Throwable $th) {

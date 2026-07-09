@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Approval_flow;
 use App\Models\Approval_process;
+use App\Models\Approval_status;
+use App\Models\Approval_step;
 use App\Models\Contract;
 use App\Models\Contract_fmf;
 use App\Models\Contract_rate;
@@ -25,6 +27,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Spatie\Permission\Models\Permission;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ProformaInvoiceController extends Controller
 {
@@ -48,7 +51,7 @@ class ProformaInvoiceController extends Controller
                     $proforma_invoice = $proforma_invoice->where('periode', 'like', request()->year . '-%');
                 }
             }
-            $proforma_invoice = $proforma_invoice->orderBy('date', 'desc')->get();
+            $proforma_invoice = $proforma_invoice->orderBy('id', 'desc')->get();
             $user = Auth::user();
             $permissionNames = [
                 'proforma_invoice.edit',
@@ -115,7 +118,7 @@ class ProformaInvoiceController extends Controller
                      * - hanya muncul jika status Approved
                      * - hanya untuk superadmin atau user dengan permission proforma_invoice.update_progress
                      */
-                    if (($item->status === 'Draft' && $canAccess('proforma_invoice.update_progress')) || Auth::user()->hasRole('superadmin')) {
+                    if (($item->status === 'Approved' && $canAccess('proforma_invoice.update_progress')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
                                 <a class="dropdown-item updateButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
@@ -271,7 +274,7 @@ class ProformaInvoiceController extends Controller
                         'type' => $contract->service->type,
                         'status' => $request->status
                     ]);
-                    $this->check_aporoval($proforma_invoice);
+                    $this->check_approval($proforma_invoice, $request->status);
                 }
             } else if ($contract->service->type == 'LCT') {
                 $data = [
@@ -316,9 +319,9 @@ class ProformaInvoiceController extends Controller
         $contract = Contract::find($proforma_invoice->contract_id);
         $contract_id = $contract->id;
         $contract_no = $contract->contract_no;
-        $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
-        $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
-        $unit_target = Unit_target::where('contract_id', $contract->id)->where('unit_id', $proforma_invoice->unit_id)->first();
+        $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+        $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
+        $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
         $unit_id = $unit_target->unit_id;
         $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
             ->where('department', 'Equipment')
@@ -453,7 +456,7 @@ class ProformaInvoiceController extends Controller
                 ];
                 $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
                 $lockProforma_invoice->update($data);
-                $this->check_aporoval($proforma_invoice);
+                $this->check_approval($proforma_invoice, $request->status);
             } else if ($contract->service->type == 'LCT') {
                 $data = [
                     'contract_id' => $request->contract_id,
@@ -491,7 +494,25 @@ class ProformaInvoiceController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Proforma_invoice $proforma_invoice) {}
+    public function destroy(Proforma_invoice $proforma_invoice)
+    {
+        DB::beginTransaction();
+        try {
+            $proforma_invoice->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
 
     /**
      * Ngambil tabel add
@@ -506,7 +527,6 @@ class ProformaInvoiceController extends Controller
             $kodeDokumen = 'P-INV';
             $year = date('y');
             $month = date('m');
-
             $proforma_prev_no = running_number()
                 ->type('pro-inv')
                 ->formatter(new class($kodeDokumen, $year, $month) implements Presenter {
@@ -515,7 +535,6 @@ class ProformaInvoiceController extends Controller
                         private string $year,
                         private string $month
                     ) {}
-
                     public function format(string $type, int $number): string
                     {
                         return sprintf(
@@ -534,7 +553,6 @@ class ProformaInvoiceController extends Controller
             } else if ($contract->type == 'Fuel Truck Rental') {
                 $view = 'proforma_invoice.table-fuel-add';
             }
-
             /**
              * Check contract id sudah dibuatkan proforma invoice di bulan ini atau belum
              */
@@ -542,7 +560,6 @@ class ProformaInvoiceController extends Controller
             if (checkProformaInvoice($contract, $year, $month)) {
                 $doc_status = 1;
             }
-
             $html = view($view, compact('data', 'contract', 'year', 'month'))->render();
             return response()->json([
                 'success' => true,
@@ -587,16 +604,21 @@ class ProformaInvoiceController extends Controller
         }
     }
 
-    public function check_aporoval(Proforma_invoice $proforma_invoice)
+    public function check_approval(Proforma_invoice $proforma_invoice, string $status)
     {
         $model = 'App\Models\Proforma_invoice';
         $department = 'Equipment';
         if (checkHasApproval($model, $department)) {
-            if ($proforma_invoice->status == 'Open') {
+            if ($status == 'Open') {
                 $proforma_invoice->status = 'Approval';
                 $proforma_invoice->save();
                 $approval_flow_id = getApprovalFlowId($model, $department);
                 createApprovalProcess($approval_flow_id, $proforma_invoice->id);
+            }
+        } else {
+            if ($status == 'Open') {
+                $proforma_invoice->status = 'Approved';
+                $proforma_invoice->save();
             }
         }
     }
@@ -619,9 +641,9 @@ class ProformaInvoiceController extends Controller
         try {
             $proforma_invoice = Proforma_invoice::find($proforma_invoice_id);
             $contract = Contract::find($proforma_invoice->contract_id);
-            $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
-            $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
-            $unit_target = Unit_target::where('contract_id', $contract->id)->where('unit_id', $proforma_invoice->unit_id)->first();
+            $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+            $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
+            $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
             $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
                 ->where('department', 'Equipment')
                 ->first();
@@ -674,5 +696,216 @@ class ProformaInvoiceController extends Controller
         ];
 
         return $months[$month] ?? null;
+    }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Proforma_invoice $proforma_invoice)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')->first();
+        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $contract = Contract::find($proforma_invoice->contract_id);
+        $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+        $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
+        $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
+        $periode = $proforma_invoice->periode;
+        $exp_periode = explode("-", $periode);
+        $year = $exp_periode[0];
+        $month = $exp_periode[1];
+        $system_setting = config('system_setting');
+        $pdf = Pdf::loadView('proforma_invoice.print', [
+            'proforma_invoice' => $proforma_invoice,
+            'contract' => $contract,
+            'contract_rate' => $contract_rate,
+            'contract_fmf' => $contract_fmf,
+            'unit_target' => $unit_target,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting,
+            'year' => $year,
+            'month' => $month
+        ])->setPaper('a4', 'portrait');
+
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
+
+        $width  = $canvas->get_width();
+        $height = $canvas->get_height();
+
+        if (in_array($proforma_invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+            $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+                'Nomor Proforma Invoice : ' . $proforma_invoice->proforma_no . "\n" .
+                'Tanggal : ' . Carbon::parse($proforma_invoice->date)->format('d-m-Y') . "\n" .
+                'Client : ' . optional($proforma_invoice->client_vendor)->name . "\n" .
+                'Total : ' . Number::format($proforma_invoice->total, 0) . "\n" .
+                'Telah disetujui secara digital.';
+
+            $qrImage = QrCode::format('png')
+                ->size(150)
+                ->margin(1)
+                ->generate($qrText);
+
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+            // Posisi QR Code di atas page number
+            $qrSize = 55;
+            $qrX = $width - 120;
+            $qrY = $height - 100;
+
+            $canvas->image(
+                $qrBase64,
+                $qrX,
+                $qrY,
+                $qrSize,
+                $qrSize
+            );
+        }
+        $canvas->page_text(
+            $width - 120,
+            $height - 35,
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $fontNormal,
+            10,
+            [0, 0, 0]
+        );
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
+        if (in_array($proforma_invoice->status, $status, true)) {
+            $size = 48;
+            $text = $proforma_invoice->status;
+
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
+        $safeFilename = Str::of($proforma_invoice->order_no)
+            ->replace(['/', '\\'], '-')
+            ->toString();
+
+        return $pdf->stream("report-{$safeFilename}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Proforma_invoice $proforma_invoice)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')->first();
+        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $contract = Contract::find($proforma_invoice->contract_id);
+        $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+        $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
+        $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
+        $periode = $proforma_invoice->periode;
+        $exp_periode = explode("-", $periode);
+        $year = $exp_periode[0];
+        $month = $exp_periode[1];
+        $system_setting = config('system_setting');
+        $pdf = Pdf::loadView('proforma_invoice.print', [
+            'proforma_invoice' => $proforma_invoice,
+            'contract' => $contract,
+            'contract_rate' => $contract_rate,
+            'contract_fmf' => $contract_fmf,
+            'unit_target' => $unit_target,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting,
+            'year' => $year,
+            'month' => $month
+        ])->setPaper('a4', 'portrait');
+
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
+
+        $width  = $canvas->get_width();
+        $height = $canvas->get_height();
+
+        if (in_array($proforma_invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+            $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+                'Nomor Proforma Invoice : ' . $proforma_invoice->proforma_no . "\n" .
+                'Tanggal : ' . Carbon::parse($proforma_invoice->date)->format('d-m-Y') . "\n" .
+                'Client : ' . optional($proforma_invoice->client_vendor)->name . "\n" .
+                'Total : ' . Number::format($proforma_invoice->total, 0) . "\n" .
+                'Telah disetujui secara digital.';
+
+            $qrImage = QrCode::format('png')
+                ->size(150)
+                ->margin(1)
+                ->generate($qrText);
+
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+            // Posisi QR Code di atas page number
+            $qrSize = 55;
+            $qrX = $width - 120;
+            $qrY = $height - 100;
+
+            $canvas->image(
+                $qrBase64,
+                $qrX,
+                $qrY,
+                $qrSize,
+                $qrSize
+            );
+        }
+        $canvas->page_text(
+            $width - 120,
+            $height - 35,
+            "Page {PAGE_NUM} of {PAGE_COUNT}",
+            $fontNormal,
+            10,
+            [0, 0, 0]
+        );
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
+        if (in_array($proforma_invoice->status, $status, true)) {
+            $size = 48;
+            $text = $proforma_invoice->status;
+
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
+        $safeFilename = Str::of($proforma_invoice->proforma_no)
+            ->replace(['/', '\\'], '-')
+            ->toString();
+
+        return $pdf->download("{$safeFilename}.pdf");
     }
 }

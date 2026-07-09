@@ -206,23 +206,18 @@
                         orderable: true,
                         searchable: true
                     },
-                    // {
-                    //     data: 'price_',
-                    //     name: 'price_',
-                    //     orderable: true,
-                    //     searchable: true
-                    // },
-                    // {
-                    //     data: 'penalty_',
-                    //     name: 'penalty_',
-                    //     orderable: true,
-                    //     searchable: true
-                    // },
                     {
-                        data: 'total_',
-                        name: 'total_',
+                        data: 'total',
+                        name: 'total',
                         orderable: true,
-                        searchable: true
+                        searchable: true,
+                        className: 'text-end',
+                        render: function(data, type, row) {
+                            return numbro(data ?? 0).format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            });
+                        }
                     },
                     {
                         data: 'status',
@@ -233,11 +228,17 @@
                             if (data == "Done") {
                                 return '<span class="badge bg-success" style="font-size: 13px">' +
                                     data + '</span>';
+                            } else if (data == 'Approved' || data == 'Received') {
+                                return '<span class="badge bg-warning" style="font-size: 13px">' +
+                                    data + '</span>';
                             } else if (data == 'Open') {
                                 return '<span class="badge bg-primary" style="font-size: 13px">' +
                                     data + '</span>';
                             } else if (data == 'Approval') {
                                 return '<span class="badge bg-info" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Cancel') {
+                                return '<span class="badge bg-danger" style="font-size: 13px">' +
                                     data + '</span>';
                             } else {
                                 return '<span class="badge bg-secondary" style="font-size: 13px">' +
