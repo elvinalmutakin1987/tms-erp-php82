@@ -711,6 +711,6 @@ class MaintenanceController extends Controller
         $safeFilename = Str::of($maintenance->maintenance_no)
             ->replace(['/', '\\'], '-')   // ganti slash
             ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
+        return $pdf->download("{$safeFilename}.pdf");
     }
 }

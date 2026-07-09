@@ -485,7 +485,7 @@ class P2hController extends Controller
         $safeFilename = Str::of($p2h->p2h_no)
             ->replace(['/', '\\'], '-')   // ganti slash
             ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
+        return $pdf->download("{$safeFilename}.pdf");
     }
 
     /**

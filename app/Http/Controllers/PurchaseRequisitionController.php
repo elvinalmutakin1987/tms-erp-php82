@@ -711,7 +711,7 @@ class PurchaseRequisitionController extends Controller
             ->replace(['/', '\\'], '-')
             ->toString();
 
-        return $pdf->download("report-{$safeFilename}.pdf");
+        return $pdf->download("{$safeFilename}.pdf");
     }
 
     /**
