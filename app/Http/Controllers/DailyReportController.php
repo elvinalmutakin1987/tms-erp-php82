@@ -619,6 +619,6 @@ class DailyReportController extends Controller
         $safeFilename = Str::of($daily_report->report_no)
             ->replace(['/', '\\'], '-')   // ganti slash
             ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
+        return $pdf->download("{$safeFilename}.pdf");
     }
 }

@@ -640,7 +640,7 @@ class PurchaseOrderPaymentController extends Controller
         $safeFilename = Str::of($purchase_order_payment->payment_no)
             ->replace(['/', '\\'], '-')   // ganti slash
             ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
+        return $pdf->download("{$safeFilename}.pdf");
     }
 
     /**

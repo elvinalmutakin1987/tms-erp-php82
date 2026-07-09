@@ -449,6 +449,6 @@ class MechanicalInspectionController extends Controller
         $safeFilename = Str::of($mechanical_inspection->inspection_no)
             ->replace(['/', '\\'], '-')   // ganti 
             ->toString();
-        return $pdf->download("report-{$safeFilename}.pdf");
+        return $pdf->download("{$safeFilename}.pdf");
     }
 }

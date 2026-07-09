@@ -905,7 +905,6 @@ class ProformaInvoiceController extends Controller
         $safeFilename = Str::of($proforma_invoice->proforma_no)
             ->replace(['/', '\\'], '-')
             ->toString();
-
         return $pdf->download("{$safeFilename}.pdf");
     }
 }
