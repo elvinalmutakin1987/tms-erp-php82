@@ -14,13 +14,6 @@ return new class extends Migration
         Schema::create('damage_reports', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('unit_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->date('date')->nullable();
             $table->string('number', 30)->nullable();
@@ -33,13 +26,6 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

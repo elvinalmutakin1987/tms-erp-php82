@@ -1311,14 +1311,14 @@
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" id="value_1_${rowUid}" class="form-control" name="value_1[]" readonly value="${escapeHtml(value1)}">
-                        <input type="text" id="value_1_display_${rowUid}" class="form-control" disabled value="${escapeHtml(value1Display)}">
+                        <input type="text" id="value_1_display_${rowUid}" class="form-control" readonly value="${escapeHtml(value1Display)}">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="text" id="uom_2_${rowUid}" class="form-control" name="uom_2[]" readonly value="${escapeHtml(uom2)}">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" id="value_2_${rowUid}" class="form-control" name="value_2[]" readonly value="${escapeHtml(value2)}">
-                        <input type="text" id="value_2_display_${rowUid}" class="form-control" disabled value="${escapeHtml(value2Display)}">
+                        <input type="text" id="value_2_display_${rowUid}" class="form-control" readonly value="${escapeHtml(value2Display)}">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row"></button>

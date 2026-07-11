@@ -22,4 +22,9 @@ class Service_item extends Model
     {
         return $this->hasMany(Contract_rate::class);
     }
+
+    public function proforma_invoice_detail(): HasMany
+    {
+        return $this->hasMany(Proforma_invoice_detail::class);
+    }
 }

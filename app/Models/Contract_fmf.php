@@ -24,4 +24,9 @@ class Contract_fmf extends Model implements Auditable
     {
         return $this->hasMany(Proforma_invoice::class);
     }
+
+    public function proforma_invoice_detail(): HasMany
+    {
+        return $this->hasMany(Proforma_invoice_detail::class);
+    }
 }

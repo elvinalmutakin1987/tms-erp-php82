@@ -14,16 +14,6 @@ return new class extends Migration
         Schema::create('purchase_requisitions', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('user_id')->nullable();
-            // $table->unsignedBigInteger('unit_id')->nullable();
-            // $table->unsignedBigInteger('maintenance_id')->nullable();
-            // $table->unsignedBigInteger('checked_by')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->foreignId('maintenance_id')->nullable()->constrained('maintenances')->nullOnDelete();
@@ -50,16 +40,6 @@ return new class extends Migration
             $table->date('close_date')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            // $table->foreign('maintenance_id')->references('id')->on('maintenances')->onDelete('cascade');
-            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

@@ -40,11 +40,7 @@
                                         <option value="All">All Status</option>
                                         <option value="Draft">Draft</option>
                                         <option value="Approval">Approval</option>
-                                        <option value="Open">Open</option>
-                                        <option value="Send User">Send User</option>
-                                        <option value="User Approval">User Approval</option>
-                                        <option value="Custodian">Custodian Approval</option>
-                                        <option value="Received">Received</option>
+                                        <option value="Approved">Approved</option>
                                         <option value="Cancel">Cancel</option>
                                         <option value="Done">Done</option>
                                     </select>
@@ -135,6 +131,7 @@
 
     <script>
         const saveButton = document.getElementById('saveButton');
+        const saveUpdateButton = document.getElementById('saveUpdateButton');
 
         var proformaInvoiceId = '';
         var contractId = '';
@@ -633,6 +630,12 @@
             closeTopSelect2BeforeModal();
         });
 
+        $('#formUpdate').off('hidden.bs.modal.mainModal').on('hidden.bs.modal.mainModal', function() {
+            proformaInvoiceId = '';
+            contractId = '';
+            unitId = '';
+        });
+
         $(document).off('click.editButton').on('click.editButton', '.editButton', function() {
             proformaInvoiceId = $(this).data('id');
 
@@ -685,6 +688,37 @@
             });
         });
 
+        $(document).off('click.updateButton').on('click.updateButton', '.updateButton', function() {
+            proformaInvoiceId = $(this).data('id');
+
+            $('#modal-update-header').text('Update Progress');
+            $('#id').val(proformaInvoiceId);
+
+            let url = '{{ route('proformainvoice.show', ':_id') }}';
+            url = url.replace(':_id', proformaInvoiceId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    $('#modal-update-header').html(
+                        'Update Progress -&nbsp;<b>' + response.proforma_no + '</b>'
+                    );
+                    $("#update_contract_no").val(response.contract_no);
+                    $("#update_unit").val(response.unit);
+                    $("#cut_off_date").val(response.proforma_invoice.cut_off_date);
+                    $("#consolidation_date").val(response.proforma_invoice.consolidation_date);
+                    $("#progress_claim_date").val(response.proforma_invoice.progress_claim_date);
+                    $("#ops_received_date").val(response.proforma_invoice.ops_received_date);
+                    $("#prof_inv_app_date").val(response.proforma_invoice.prof_inv_app_date);
+                    $("#cic_request_date").val(response.proforma_invoice.cic_request_date);
+                },
+                error: function() {
+                    alert('Error fetching data');
+                }
+            });
+        });
+
         $('.saveButton').off('click.saveProforma').on('click.saveProforma', function() {
             var formData = new FormData($('#formModal').find('form')[0]);
             var url = '{{ route('proformainvoice.store') }}';
@@ -724,6 +758,7 @@
                     });
                 },
                 error: function(xhr, status, error) {
+                    enableButton();
                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
 
                     Swal.fire({
@@ -735,7 +770,7 @@
             });
         });
 
-        $('.saveEditButton').off('click.saveProforma').on('click.saveProforma', function() {
+        $('.saveEditButton').off('click.editProforma').on('click.editProforma', function() {
             var formData = new FormData($('#formEdit').find('form')[0]);
             var url = '{{ route('proformainvoice.store') }}';
             var type = 'POST';
@@ -774,6 +809,7 @@
                     });
                 },
                 error: function(xhr, status, error) {
+                    enableButton();
                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
 
                     Swal.fire({
@@ -783,6 +819,71 @@
                     });
                 }
             });
+        });
+
+        $('.saveUpdateButton').off('click.updateProforma').on('click.updateProforma', function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, process it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    var formData = new FormData($('#formUpdate').find('form')[0]);
+                    var url = '{{ route('proformainvoice.store') }}';
+                    var type = 'POST';
+
+                    formData.append('status', $(this).val());
+
+                    if (proformaInvoiceId != '') {
+                        url = '{{ route('proformainvoice.update_progress', ':_id') }}';
+                        url = url.replace(':_id', proformaInvoiceId);
+                        formData.append('_method', 'PUT');
+                    }
+
+                    $.ajax({
+                        url: url,
+                        type: type,
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            Swal.fire({
+                                title: response.title,
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#table-data').DataTable().ajax.reload(null,
+                                        false);
+                                    $('#formUpdate form')[0].reset();
+
+                                    proformaInvoiceId = '';
+                                    contractId = '';
+                                    unitId = '';
+
+                                    $('#formUpdate').modal('hide');
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            enableButton();
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message :
+                                error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage
+                            });
+                        }
+                    });
+                }
+            });
+
         });
 
         $('#cancelButton').off('click.cancelModal').on('click.cancelModal', function() {
@@ -795,6 +896,10 @@
 
         $('#cancelEditButton').off('click.cancelEdit').on('click.cancelEdit', function() {
             $('#formEdit').modal('hide');
+        });
+
+        $('#cancelUpdateButton').off('click.cancelUpdate').on('click.cancelUpdate', function() {
+            $('#formUpdate').modal('hide');
         });
 
         $("#_year").on('change', function() {
@@ -855,12 +960,14 @@
         function disableButton() {
             if (saveButton) {
                 saveButton.disabled = true;
+                saveUpdateButton.disabled = true;
             }
         }
 
         function enableButton() {
             if (saveButton) {
                 saveButton.disabled = false;
+                saveUpdateButton.disabled = false;
             }
         }
     </script>

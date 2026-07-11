@@ -309,6 +309,7 @@
                     $price = $proforma_invoice->unit_target->price;
                     $target = $proforma_invoice->unit_target->target;
                 @endphp
+
                 @if ($contract->service->type == 'Unit Rental')
                     @php
                         $excelRound = function ($value, int $precision = 2) {

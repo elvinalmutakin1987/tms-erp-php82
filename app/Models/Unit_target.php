@@ -27,4 +27,9 @@ class Unit_target extends Model
     {
         return $this->hasMany(Proforma_invoice::class);
     }
+
+    public function proforma_invoice_detail(): HasMany
+    {
+        return $this->hasMany(Proforma_invoice_detail::class);
+    }
 }

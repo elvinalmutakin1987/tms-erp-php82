@@ -14,15 +14,6 @@ return new class extends Migration
         Schema::create('purchase_requisition_details', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('purchase_requisition_id')->nullable();
-            // $table->unsignedBigInteger('maintenance_item_id')->nullable();
-            // $table->unsignedBigInteger('mro_item_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('purchase_requisition_id')->nullable()->constrained('purchase_requisitions')->nullOnDelete();
             $table->foreignId('maintenance_item_id')->nullable()->constrained('maintenance_items')->nullOnDelete();
             $table->foreignId('mro_item_id')->nullable()->constrained('mro_items')->nullOnDelete();
@@ -38,15 +29,6 @@ return new class extends Migration
             $table->string('received_note')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('purchase_requisition_id')->references('id')->on('purchase_requisitions')->onDelete('cascade');
-            // $table->foreign('maintenance_item_id')->references('id')->on('maintenance_items')->onDelete('cascade');
-            // $table->foreign('mro_item_id')->references('id')->on('mro_items')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

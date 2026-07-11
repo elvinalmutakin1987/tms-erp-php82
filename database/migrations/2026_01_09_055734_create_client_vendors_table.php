@@ -14,13 +14,6 @@ return new class extends Migration
         Schema::create('client_vendors', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('location_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->string('code', 30)->nullable(); // kode unik untuk vendor
             $table->string('type', 30)->nullable(); // ini isinya Client / Vendor
@@ -34,13 +27,6 @@ return new class extends Migration
             $table->integer('top')->nullable(); //Term of Payment
             $table->string('bank', 50)->nullable();
             $table->string('bank_account', 50)->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
-            /**
-             * ----------------
-             */
             $table->timestamps();
         });
     }
