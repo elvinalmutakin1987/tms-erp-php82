@@ -14,16 +14,6 @@ return new class extends Migration
         Schema::create('purchase_order_payments', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('user_id')->nullable();
-            // $table->unsignedBigInteger('client_vendor_id')->nullable();
-            // $table->unsignedBigInteger('purchase_order_id')->nullable();
-            // $table->unsignedBigInteger('checked_by')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('client_vendor_id')->nullable()->constrained('client_vendors')->nullOnDelete();
             $table->foreignId('purchase_order_id')->nullable()->constrained('purchase_orders')->nullOnDelete();
@@ -48,16 +38,6 @@ return new class extends Migration
             $table->timestamp('checked_at')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('client_vendor_id')->references('id')->on('client_vendors')->onDelete('cascade');
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            // $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
-            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

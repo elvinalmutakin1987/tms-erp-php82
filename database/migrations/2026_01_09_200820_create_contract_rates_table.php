@@ -14,14 +14,6 @@ return new class extends Migration
         Schema::create('contract_rates', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('contract_id')->nullable();
-            // $table->unsignedBigInteger('service_item_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
             $table->foreignId('service_item_id')->nullable()->constrained('service_items')->nullOnDelete();
             $table->string('item_no')->nullable();
@@ -31,14 +23,6 @@ return new class extends Migration
             $table->string('type')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
-            // $table->foreign('service_item_id')->references('id')->on('service_items')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

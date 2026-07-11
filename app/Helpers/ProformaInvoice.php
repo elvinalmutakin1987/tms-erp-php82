@@ -20,7 +20,7 @@ if (! function_exists('genProformaInvoice')) {
         $contract_fmf = Contract_fmf::where('contract_id', '=', $contract->id)
             ->where('year', $year)
             ->first();
-        $fix_monthly_fee = $contract_fmf->fix_monthly_fee ?? 0;
+        $fix_monthly_fee = $contract_fmf->value ?? 0;
         $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
         $unit_target = Unit_target::where('contract_id', $contract->id)->get();
         return [
@@ -66,4 +66,11 @@ if (! function_exists('getProformaInvoice')) {
             ->where('periode', $periode)
             ->first();
     }
+}
+
+/**
+ * generate invoice by proforma invoice
+ */
+if (! function_exists('genInvoiceFromProforma')) {
+    function genInvoiceFromProforma(Proforma_invoice $proforma_invoice): void {}
 }

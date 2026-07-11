@@ -14,13 +14,6 @@ return new class extends Migration
         Schema::create('mechanical_inspection_details', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('mechanical_inspection_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('mechanical_inspection_id')->nullable()->constrained('mechanical_inspections')->nullOnDelete();
             $table->text('inspection_group')->nullable();
             $table->text('inspection_item')->nullable();
@@ -30,13 +23,6 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('mechanical_inspection_id')->references('id')->on('mechanical_inspections')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

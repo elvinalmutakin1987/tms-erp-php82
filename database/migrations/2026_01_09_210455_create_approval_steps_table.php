@@ -14,15 +14,6 @@ return new class extends Migration
         Schema::create('approval_steps', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * ini yang lama
-             */
-            // $table->unsignedBigInteger('approval_flow_id')->nullable();
-            // $table->unsignedBigInteger('user_id')->nullable();
-            // $table->unsignedBigInteger('role_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('approval_flow_id')->nullable()->constrained('approval_flows')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->foreignId('role_id')->nullable()->constrained('roles')->nullOnDelete();
@@ -30,15 +21,6 @@ return new class extends Migration
             $table->string('action', 50)->nullable(); //Check, Approve
             $table->string('title', 50)->nullable(); //Diketahui oleh, Dicheck oleh
             $table->timestamps();
-            /**
-             * ini yang lama
-             */
-            // $table->foreign('approval_flow_id')->references('id')->on('approval_flows')->onDelete('cascade');
-            // $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

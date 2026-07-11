@@ -33,6 +33,8 @@ use App\Http\Controllers\RequestQuotationController;
 use App\Http\Controllers\SummaryBreakdownController;
 use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
+use App\Http\Controllers\InvoiceController;
+use App\Models\Invoice;
 use Illuminate\Support\Facades\Storage;
 
 Route::middleware('guest')->group(function () {
@@ -537,6 +539,11 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|proforma_invoice')
         ->name('proformainvoice.get_detail');
 
+    Route::put('proformainvoice-update-progress/{proforma_invoice}', [ProformaInvoiceController::class, 'update_progress'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('proformainvoice.update_progress');
+
+
     /**
      * Routenya Unit Epxired
      */
@@ -760,4 +767,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('summarybreakdown', [SummaryBreakdownController::class, 'index'])
         ->middleware('role_or_permission:superadmin|summary_breakdown')
         ->name('summarybreakdown.index');
+
+    /**
+     * Routenya Proforma Invoice
+     */
+    Route::resource('invoice', InvoiceController::class)
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->names('invoice');
 });

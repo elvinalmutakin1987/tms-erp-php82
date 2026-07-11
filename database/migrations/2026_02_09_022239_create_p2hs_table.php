@@ -14,15 +14,6 @@ return new class extends Migration
         Schema::create('p2hs', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('unit_id')->nullable();
-            // $table->unsignedBigInteger('location_id')->nullable();
-            // $table->unsignedBigInteger('checked_by')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->foreignId('location_id')->nullable()->constrained('locations')->nullOnDelete();
             $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
@@ -39,15 +30,6 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            // $table->foreign('location_id')->references('id')->on('locations')->onDelete('cascade');
-            // $table->foreign('checked_by')->references('id')->on('users')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

@@ -12,6 +12,7 @@ use App\Models\Contract_rate;
 use App\Models\Daily_report;
 use App\Models\Maintenance;
 use App\Models\Proforma_invoice;
+use App\Models\Proforma_invoice_detail;
 use App\Models\Purchase_requisition;
 use App\Models\Unit;
 use App\Models\Unit_target;
@@ -121,7 +122,7 @@ class ProformaInvoiceController extends Controller
                     if (($item->status === 'Approved' && $canAccess('proforma_invoice.update_progress')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
-                                <a class="dropdown-item updateButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                <a class="dropdown-item updateButton" href="#" data-bs-toggle="modal" data-bs-target="#formUpdate" data-id="' . $item->id . '">
                                     Update Progress
                                 </a>
                             </li>
@@ -197,6 +198,9 @@ class ProformaInvoiceController extends Controller
     {
         DB::beginTransaction();
         try {
+            $excelRound = function ($value, int $precision = 2) {
+                return round((float) $value, $precision, PHP_ROUND_HALF_UP);
+            };
             $request->validate([
                 'contract_id' => 'required',
                 'year' => 'required',
@@ -205,6 +209,8 @@ class ProformaInvoiceController extends Controller
             $contract = Contract::find($request->contract_id);
             $year = $request->year;
             $month = $request->month;
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = $startDate->copy()->endOfMonth();
             if (checkProformaInvoice($contract, $year, $month)) {
                 return response()->json([
                     'success' => false,
@@ -217,11 +223,6 @@ class ProformaInvoiceController extends Controller
             $end_date = $start_date->copy()->endOfMonth();
             if ($contract->service->type == 'Unit Rental') {
                 foreach ($gen_proforma['unit_target'] as $unittarget) {
-                    $excelRound = function ($value, int $precision = 2) {
-                        return round((float) $value, $precision, PHP_ROUND_HALF_UP);
-                    };
-                    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                    $endDate = $startDate->copy()->endOfMonth();
                     $hariKerja = $startDate->daysInMonth;
                     $totalJamKerja = $hariKerja * 24;
                     $totalBreakdownSeconds = Maintenance::whereYear('date', $year)
@@ -277,21 +278,59 @@ class ProformaInvoiceController extends Controller
                     $this->check_approval($proforma_invoice, $request->status);
                 }
             } else if ($contract->service->type == 'LCT') {
-                $data = [
+                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+                $fix_monthly_fee = $gen_proforma['fix_monthly_fee']->value;
+                $fmf_qty = 1;
+                $total = 0;
+                $amount = 0;
+                $qty_ptd = 0;
+                $amount_ptd = 0;
+                //Ambil data PTD nya
+                $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $$gen_proforma['contract_fmf']->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->count();
+                $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $$gen_proforma['contract_fmf']->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->sum('value');
+                $amount = $fix_monthly_fee * $fmf_qty;
+                $total += $amount;
+                $qty_ptd += $fmf_qty_ptd + $fmf_qty;
+                $amount_ptd += $fmf_amount_ptd + $amount;
+
+                $proforma_invoice = Proforma_invoice::firstOrCreate([
                     'contract_id' => $request->contract_id,
                     'client_vendor_id' => $contract->client_vendor_id,
                     'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'user_id' => Auth::user()->id,
-                ];
+                    'user_id' => Auth::id(),
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'total' => $total,
+                    'type' => $contract->service->type,
+                    'status' => $request->status
+                ]);
+                //Simpan FMF nya dulu
+                Proforma_invoice_detail::firstOrCreate([
+                    'proforma_invoice_id' => $proforma_invoice->id,
+                    'contract_fmf_id' => $gen_proforma['contract_fmf']->id,
+                    'value' => $gen_proforma['contract_fmf']->value,
+                    'qty' => 1,
+                    'amount' => $amount,
+                    'ptd_qty' => $qty_ptd,
+                    'ptd_amount' => $amount_ptd
+                ]);
+                //Baru simpan contract rate nya
+                $unit_lct_id = Unit::where('type', 'LCT')->pluck('id');
+                $daily_report = Daily_report::whereBetween('date', [
+                    Carbon::parse($startDate)->format('Y-m-d'),
+                    Carbon::parse($endDate)->format('Y-m-d'),
+                ])
+                    ->whereIn('unit_id', $unit_lct_id)
+                    ->get();
+                $trip = $daily_report->count();
             } else if ($contract->service->type == 'Fuel Truck Rental') {
-                $data = [
-                    'contract_id' => $request->contract_id,
-                    'client_vendor_id' => $contract->client_vendor_id,
-                    'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'user_id' => Auth::user()->id,
-                ];
             } else if ($contract->service->type == 'Explo') {
             }
             DB::commit();
@@ -362,6 +401,8 @@ class ProformaInvoiceController extends Controller
             'contract_id' => $contract_id,
             'contract_no' => $contract_no,
             'proforma_no' => $proforma_no,
+            'proforma_invoice' => $proforma_invoice,
+            'unit' => $proforma_invoice->unit->vehicle_no,
             'html' => $html
         ], 200);
     }
@@ -525,11 +566,11 @@ class ProformaInvoiceController extends Controller
             $year = $request->year;
             $data = genProformaInvoice($contract, $year, $month);
             $kodeDokumen = 'P-INV';
-            $year = date('y');
-            $month = date('m');
+            $year_no = date('y');
+            $month_no = date('m');
             $proforma_prev_no = running_number()
                 ->type('pro-inv')
-                ->formatter(new class($kodeDokumen, $year, $month) implements Presenter {
+                ->formatter(new class($kodeDokumen, $year_no, $month_no) implements Presenter {
                     public function __construct(
                         private string $kodeDokumen,
                         private string $year,
@@ -548,9 +589,9 @@ class ProformaInvoiceController extends Controller
                 })
                 ->preview();
             $view = 'proforma_invoice.table-rental-add';
-            if ($contract->type == 'LCT') {
+            if ($contract->service->type == 'LCT') {
                 $view = 'proforma_invoice.table-lct-add';
-            } else if ($contract->type == 'Fuel Truck Rental') {
+            } else if ($contract->service->type == 'Fuel Truck Rental') {
                 $view = 'proforma_invoice.table-fuel-add';
             }
             /**
@@ -560,7 +601,12 @@ class ProformaInvoiceController extends Controller
             if (checkProformaInvoice($contract, $year, $month)) {
                 $doc_status = 1;
             }
-            $html = view($view, compact('data', 'contract', 'year', 'month'))->render();
+            $html = view($view, compact(
+                'data',
+                'contract',
+                'year',
+                'month'
+            ))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -906,5 +952,46 @@ class ProformaInvoiceController extends Controller
             ->replace(['/', '\\'], '-')
             ->toString();
         return $pdf->download("{$safeFilename}.pdf");
+    }
+
+    /*
+    * Update progress proforma invoice
+    */
+    public function update_progress(Request $request, Proforma_invoice $proforma_invoice)
+    {
+        DB::beginTransaction();
+        try {
+            $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
+            if ($request->cut_off_date) $lockProforma_invoice->cut_off_date = $request->cut_off_date;
+            if ($request->consolidation_date) $lockProforma_invoice->consolidation_date = $request->consolidation_date;
+            if ($request->progress_claim_date) $lockProforma_invoice->progress_claim_date = $request->progress_claim_date;
+            if ($request->ops_received_date) $lockProforma_invoice->ops_received_date = $request->ops_received_date;
+            if ($request->prof_inv_app_date) $lockProforma_invoice->prof_inv_app_date = $request->prof_inv_app_date;
+            if ($request->cic_request_date) $lockProforma_invoice->cic_request_date = $request->cic_request_date;
+            if ($request->cic_created_date) $lockProforma_invoice->cic_created_date = $request->cic_created_date;
+            if ($request->inv_date) $lockProforma_invoice->inv_date = $request->inv_date;
+            if ($request->cic_send_date) $lockProforma_invoice->cic_send_date = $request->cic_send_date;
+            if ($request->cic_ready_to_pick_date) $lockProforma_invoice->cic_ready_to_pick_date = $request->cic_ready_to_pick_date;
+            if ($request->cic_pick_up_date) $lockProforma_invoice->cic_pick_up_date = $request->cic_pick_up_date;
+            if ($request->inv_send_date) $lockProforma_invoice->inv_send_date = $request->inv_send_date;
+            $lockProforma_invoice->status = $request->status;
+            $lockProforma_invoice->save();
+            if ($request->status == 'Done') {
+                genInvoiceFromProforma($lockProforma_invoice);
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

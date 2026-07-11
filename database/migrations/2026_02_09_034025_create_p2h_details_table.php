@@ -14,13 +14,6 @@ return new class extends Migration
         Schema::create('p2h_details', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('p2h_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('p2h_id')->nullable()->constrained('p2hs')->nullOnDelete();
             $table->text('inspection_group')->nullable();
             $table->text('inspection_item')->nullable();
@@ -30,13 +23,6 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('p2h_id')->references('id')->on('p2hs')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

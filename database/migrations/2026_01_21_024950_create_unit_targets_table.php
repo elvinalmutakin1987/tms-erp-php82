@@ -14,27 +14,11 @@ return new class extends Migration
         Schema::create('unit_targets', function (Blueprint $table) {
             $table->id();
             $table->uuid('request_token')->nullable();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('contract_id')->nullable();
-            // $table->unsignedBigInteger('unit_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->decimal('target', 16, 2)->nullable();
             $table->decimal('price', 16, 2)->nullable();
             $table->timestamps();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('contract_id')->references('id')->on('contracts')->onDelete('cascade');
-            // $table->foreign('unit_id')->references('id')->on('units')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 

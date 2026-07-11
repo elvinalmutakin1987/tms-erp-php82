@@ -40,6 +40,7 @@
 
                         </div>
                     </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-1">

@@ -13,28 +13,12 @@ return new class extends Migration
     {
         Schema::create('purchase_order_monitorings', function (Blueprint $table) {
             $table->id();
-            /**
-             * Ini yang lama
-             */
-            // $table->unsignedBigInteger('purchase_order_id')->nullable();
-            // $table->unsignedBigInteger('user_id')->nullable();
-            /**
-             * ----------------
-             */
             $table->foreignId('purchase_order_id')->nullable()->constrained('purchase_orders')->nullOnDelete();
             $table->foreignId('user_id')->nullable()->constrained('users')->nullOnDelete();
             $table->uuid('request_token')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
-            /**
-             * Ini yang lama
-             */
-            // $table->foreign('purchase_order_id')->references('id')->on('purchase_orders')->onDelete('cascade');
-            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            /**
-             * ----------------
-             */
         });
     }
 
