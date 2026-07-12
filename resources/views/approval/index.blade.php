@@ -113,25 +113,6 @@
                 ],
             });
 
-            // $(document).on('click', '.detailButton', function() {
-            //     $('#modal-detail-header').text('Detail Report');
-            //     let id = $(this).data('id');
-            //     let model = $(this).data('model');
-            //     let url =
-            //         '{{ route('approval.get_detail', ['approvable_model' => ':_approvable_model', 'id' => ':_id']) }}';
-            //     url = url.replace(':_approvable_model', model).replace(':_id', id);
-            //     $.ajax({
-            //         url: url,
-            //         type: 'GET',
-            //         success: function(response) {
-            //             $('#modal-detail-body').html(response);
-            //         },
-            //         error: function() {
-            //             alert('Error fetching data');
-            //         }
-            //     });
-            // });
-
             $(document).on('click', '.detailButton', function() {
                 $('#modal-detail-header').text('Detail');
                 approvableId = $(this).data('id');

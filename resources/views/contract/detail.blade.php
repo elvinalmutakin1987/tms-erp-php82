@@ -41,10 +41,11 @@
             <thead class="table-dark">
                 <tr>
                     <th scope="col" style="width: 5%">#</th>
-                    <th scope="col" style="width: 10%">Item No</th>
+                    {{-- <th scope="col" style="width: 10%">Item No</th> --}}
                     <th scope="col">Description</th>
-                    <th scope="col" style="width: 15%">Rate</th>
-                    <th scope="col">Notes</th>
+                    <th scope="col" style="width: 10%">Unit</th>
+                    <th scope="col" style="width: 15%" class="text-end">Rate</th>
+                    <th scope="col" style="width: 40%">Notes</th>
                 </tr>
             </thead>
             <tbody>
@@ -52,9 +53,10 @@
                     @foreach ($contract_rate as $d)
                         <tr>
                             <td>{{ $loop->iteration }}</td>
-                            <td>{{ $d->item_no }}</td>
+                            {{-- <td>{{ $d->item_no }}</td> --}}
                             <td>{{ $d->service_item }}</td>
-                            <td>{{ $d->rate ? Number::format($d->rate, precision: 0) : '' }}</td>
+                            <td>{{ $d->unit }}</td>
+                            <td class="text-end">{{ $d->rate ? Number::format($d->rate, precision: 0) : '' }}</td>
                             <td>{{ $d->notes }}</td>
                         </tr>
                     @endforeach
@@ -69,67 +71,75 @@
 </div>
 
 <div class="row mb-4">
-    <div class="col-lg-12">
-        <b>Unit Rate</b>
-    </div>
-    <div class="col-lg-12">
-        <table class="table mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col" style="width: 5%">#</th>
-                    <th scope="col">Unit</th>
-                    <th scope="col" style="width: 15%">Target</th>
-                    <th scope="col" style="width: 15%">Rate</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if ($unit_target->count() > 0)
-                    @foreach ($unit_target as $d)
+    <div class="col-6">
+        <div class="row">
+            <div class="col-lg-12">
+                <b>Fix Monthly Fee</b>
+            </div>
+            <div class="col-lg-12">
+                <table class="table mb-0">
+                    <thead class="table-dark">
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $d->unit->vehicle_no }}</td>
-                            <td>{{ $d->target ? Number::format($d->target, precision: 0) : '' }} %</td>
-                            <td>{{ $d->price ? Number::format($d->price, precision: 0) : '' }}</td>
+                            <th scope="col" style="width: 5%">#</th>
+                            <th scope="col" style="width: 45%">Year</th>
+                            <th scope="col" style="width: 45%" class="text-end">Value</th>
                         </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="4">No data showed</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @if ($contract_fmf->count() > 0)
+                            @foreach ($contract_fmf as $d)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $d->year }}</td>
+                                    <td class="text-end">{{ $d->value ? Number::format($d->value, precision: 0) : '' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="3">No data showed</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
-
-<div class="row mb-4">
-    <div class="col-lg-12">
-        <b>Fix Monthly Fee</b>
-    </div>
-    <div class="col-lg-12">
-        <table class="table mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col" style="width: 5%">#</th>
-                    <th scope="col">Year</th>
-                    <th scope="col">Value</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if ($contract_fmf->count() > 0)
-                    @foreach ($contract_fmf as $d)
+    <div class="col-6">
+        <div class="row">
+            <div class="col-lg-12">
+                <b>Unit Rate</b>
+            </div>
+            <div class="col-lg-12">
+                <table class="table mb-0">
+                    <thead class="table-dark">
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td>{{ $d->year }}</td>
-                            <td>{{ $d->value ? Number::format($d->value, precision: 0) : '' }}</td>
+                            <th scope="col" style="width: 5%">#</th>
+                            <th scope="col" style="width: 25%">Unit</th>
+                            <th scope="col" style="width: 30%" class="text-center">Target</th>
+                            <th scope="col" style="width: 30%" class="text-end">Rate</th>
                         </tr>
-                    @endforeach
-                @else
-                    <tr>
-                        <td colspan="3">No data showed</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+                    </thead>
+                    <tbody>
+                        @if ($unit_target->count() > 0)
+                            @foreach ($unit_target as $d)
+                                <tr>
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $d->unit->vehicle_no }}</td>
+                                    <td class="text-center">
+                                        {{ $d->target ? Number::format($d->target, precision: 0) : '' }} %</td>
+                                    <td class="text-end">{{ $d->price ? Number::format($d->price, precision: 0) : '' }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="4">No data showed</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>

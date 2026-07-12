@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('target', 16, 2)->nullable();
             $table->decimal('price', 16, 2)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

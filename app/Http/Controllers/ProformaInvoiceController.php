@@ -162,13 +162,13 @@ class ProformaInvoiceController extends Controller
                     return Carbon::parse($item->periode)->format('F Y') ?? '';
                 })
                 ->addColumn('price_', function ($item) {
-                    return Number::format($item->price, precision: 0) ?? '';
+                    return Number::format($item->price ?? 0, precision: 0) ?? '';
                 })
                 ->addColumn('penalty_', function ($item) {
-                    return Number::format($item->penalty, precision: 0) ?? '';
+                    return Number::format($item->penalty ?? 0, precision: 0) ?? '';
                 })
                 ->addColumn('total_', function ($item) {
-                    return Number::format($item->total, precision: 0) ?? '';
+                    return Number::format($item->total ?? 0, precision: 0) ?? '';
                 })
                 ->rawColumns(['action'])
                 ->make();
@@ -279,26 +279,26 @@ class ProformaInvoiceController extends Controller
                 }
             } else if ($contract->service->type == 'LCT') {
                 $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
-                $fix_monthly_fee = $gen_proforma['fix_monthly_fee']->value;
+                $fix_monthly_fee = $gen_proforma['fix_monthly_fee'];
                 $fmf_qty = 1;
                 $total = 0;
+                $total_ptd = 0;
                 $amount = 0;
                 $qty_ptd = 0;
                 $amount_ptd = 0;
-                //Ambil data PTD nya
                 $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                    ->where('contract_fmf_id', $$gen_proforma['contract_fmf']->id)
+                    ->where('contract_fmf_id', $gen_proforma['contract_fmf']->id)
                     ->whereIn('proforma_invoice_id', $proforma_invoice_old)
                     ->count();
                 $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                    ->where('contract_fmf_id', $$gen_proforma['contract_fmf']->id)
+                    ->where('contract_fmf_id', $gen_proforma['contract_fmf']->id)
                     ->whereIn('proforma_invoice_id', $proforma_invoice_old)
                     ->sum('value');
                 $amount = $fix_monthly_fee * $fmf_qty;
+                $qty_ptd = $fmf_qty_ptd + $fmf_qty;
+                $amount_ptd = $fmf_amount_ptd + $amount;
                 $total += $amount;
-                $qty_ptd += $fmf_qty_ptd + $fmf_qty;
-                $amount_ptd += $fmf_amount_ptd + $amount;
-
+                $total_ptd += $amount_ptd;
                 $proforma_invoice = Proforma_invoice::firstOrCreate([
                     'contract_id' => $request->contract_id,
                     'client_vendor_id' => $contract->client_vendor_id,
@@ -311,17 +311,17 @@ class ProformaInvoiceController extends Controller
                     'type' => $contract->service->type,
                     'status' => $request->status
                 ]);
-                //Simpan FMF nya dulu
-                Proforma_invoice_detail::firstOrCreate([
+                $proforma_invoice->proforma_invoice_detail()->create([
                     'proforma_invoice_id' => $proforma_invoice->id,
                     'contract_fmf_id' => $gen_proforma['contract_fmf']->id,
+                    'item_no' => '',
+                    'service_item' => '',
                     'value' => $gen_proforma['contract_fmf']->value,
                     'qty' => 1,
                     'amount' => $amount,
                     'ptd_qty' => $qty_ptd,
                     'ptd_amount' => $amount_ptd
                 ]);
-                //Baru simpan contract rate nya
                 $unit_lct_id = Unit::where('type', 'LCT')->pluck('id');
                 $daily_report = Daily_report::whereBetween('date', [
                     Carbon::parse($startDate)->format('Y-m-d'),
@@ -330,6 +330,33 @@ class ProformaInvoiceController extends Controller
                     ->whereIn('unit_id', $unit_lct_id)
                     ->get();
                 $trip = $daily_report->count();
+                foreach ($gen_proforma['contract_rate'] as $contractrate) {
+                    $rate_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('qty');
+                    $rate_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('amount');
+                    $amount = $contractrate->rate * $trip;
+                    $qty_ptd = $rate_qty_ptd + $trip;
+                    $amount_ptd = $rate_amount_ptd + $amount;
+                    $proforma_invoice->proforma_invoice_detail()->create([
+                        'proforma_invoice_id' => $proforma_invoice->id,
+                        'contract_rate_id' => $contractrate->id,
+                        'rate' => $contractrate->rate,
+                        'qty' => $trip,
+                        'amount' => $amount,
+                        'ptd_qty' => $qty_ptd,
+                        'ptd_amount' => $amount_ptd
+                    ]);
+                    $total += $amount;
+                    $total_ptd += $amount_ptd;
+                }
+                $proforma_invoice->total = $total;
+                $proforma_invoice->save();
+                $this->check_approval($proforma_invoice, $request->status);
             } else if ($contract->service->type == 'Fuel Truck Rental') {
             } else if ($contract->service->type == 'Explo') {
             }
@@ -361,7 +388,6 @@ class ProformaInvoiceController extends Controller
         $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
         $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
         $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
-        $unit_id = $unit_target->unit_id;
         $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
             ->where('department', 'Equipment')
             ->first();
@@ -375,21 +401,34 @@ class ProformaInvoiceController extends Controller
         $year = $exp_periode[0];
         $month = $exp_periode[1];
         $month_name = $this->convertMonthName($exp_periode[1]);
-        $html = view('proforma_invoice.table-rental-edit', compact(
-            'proforma_invoice',
-            'contract',
-            'contract_rate',
-            'contract_fmf',
-            'unit_target',
-            'approval_process',
-            'year',
-            'month',
-            'month_name',
-            'unit_id'
-        ))->render();
-        if ($contract->type == 'LCT') {
+        if ($contract->service->type == "Unit Rental") {
+            $unit_id = $unit_target->unit_id;
+            $html = view('proforma_invoice.table-rental-edit', compact(
+                'proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'approval_process',
+                'year',
+                'month',
+                'month_name',
+                'unit_id'
+            ))->render();
+        } else if ($contract->service->type == 'LCT') {
             $html = 'proforma_invoice.table-lct-edit';
-        } else if ($contract->type == 'Fuel Truck Rental') {
+            $html = view('proforma_invoice.table-lct-edit', compact(
+                'proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'approval_process',
+                'year',
+                'month',
+                'month_name'
+            ))->render();
+        } else if ($contract->service->type == 'Fuel Truck Rental') {
             $html = 'proforma_invoice.table-fuel-edit';
         }
         return response()->json([
@@ -427,22 +466,21 @@ class ProformaInvoiceController extends Controller
                 'edit_year' => 'required',
                 'edit_month' => 'required'
             ]);
-            $contract = Contract::find($request->edit_contract_id);
+            $contract = Contract::find($proforma_invoice->contract_id);
             $unit_target_id = $proforma_invoice->unit_target_id;
             $unit_target = Unit_target::find($unit_target_id);
-            $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
-            $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
             $unit_id = $proforma_invoice->unit_id;
             $year = $request->edit_year;
             $month = $request->edit_month;
             $start_date = Carbon::create($year, $month, 1)->startOfMonth();
             $end_date = $start_date->copy()->endOfMonth();
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = $startDate->copy()->endOfMonth();
+            $gen_proforma = genProformaInvoice($contract, $year, $month);
             if ($contract->service->type == 'Unit Rental') {
                 $excelRound = function ($value, int $precision = 2) {
                     return round((float) $value, $precision, PHP_ROUND_HALF_UP);
                 };
-                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-                $endDate = $startDate->copy()->endOfMonth();
                 $hariKerja = $startDate->daysInMonth;
                 $totalJamKerja = $hariKerja * 24;
                 $totalBreakdownSeconds = Maintenance::whereYear('date', $year)
@@ -497,15 +535,88 @@ class ProformaInvoiceController extends Controller
                 ];
                 $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
                 $lockProforma_invoice->update($data);
-                $this->check_approval($proforma_invoice, $request->status);
+                $this->check_approval($lockProforma_invoice, $request->status);
             } else if ($contract->service->type == 'LCT') {
+                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+                $fix_monthly_fee = $gen_proforma['fix_monthly_fee'];
+                $fmf_qty = 1;
+                $total = 0;
+                $total_ptd = 0;
+                $amount = 0;
+                $qty_ptd = 0;
+                $amount_ptd = 0;
+                $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $gen_proforma['contract_fmf']->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->count();
+                $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $gen_proforma['contract_fmf']->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->sum('value');
+                $amount = $fix_monthly_fee * $fmf_qty;
+                $qty_ptd = $fmf_qty_ptd + $fmf_qty;
+                $amount_ptd = $fmf_amount_ptd + $amount;
+                $total += $amount;
+                $total_ptd += $amount_ptd;
                 $data = [
-                    'contract_id' => $request->contract_id,
+                    'contract_id' => $proforma_invoice->contract_id,
                     'client_vendor_id' => $contract->client_vendor_id,
                     'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'user_id' => Auth::user()->id,
+                    'user_id' => Auth::id(),
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'total' => $total,
+                    'type' => $contract->service->type,
+                    'status' => $request->status
                 ];
+                $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
+                $lockProforma_invoice->update($data);
+                $lockProforma_invoice->proforma_invoice_detail()->delete();
+                $lockProforma_invoice->proforma_invoice_detail()->create([
+                    'proforma_invoice_id' => $lockProforma_invoice->id,
+                    'contract_fmf_id' => $gen_proforma['contract_fmf']->id,
+                    'value' => $gen_proforma['contract_fmf']->value,
+                    'qty' => 1,
+                    'amount' => $amount,
+                    'ptd_qty' => $qty_ptd,
+                    'ptd_amount' => $amount_ptd
+                ]);
+                $unit_lct_id = Unit::where('type', 'LCT')->pluck('id');
+                $daily_report = Daily_report::whereBetween('date', [
+                    Carbon::parse($startDate)->format('Y-m-d'),
+                    Carbon::parse($endDate)->format('Y-m-d'),
+                ])
+                    ->whereIn('unit_id', $unit_lct_id)
+                    ->get();
+                $trip = $daily_report->count();
+                foreach ($gen_proforma['contract_rate'] as $contractrate) {
+                    $rate_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('qty');
+                    $rate_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('amount');
+                    $amount = $contractrate->rate * $trip;
+                    $qty_ptd = $rate_qty_ptd + $trip;
+                    $amount_ptd = $rate_amount_ptd + $amount;
+                    $lockProforma_invoice->proforma_invoice_detail()->create([
+                        'proforma_invoice_id' => $proforma_invoice->id,
+                        'contract_rate_id' => $contractrate->id,
+                        'rate' => $contractrate->rate,
+                        'qty' => $trip,
+                        'amount' => $amount,
+                        'ptd_qty' => $qty_ptd,
+                        'ptd_amount' => $amount_ptd
+                    ]);
+                    $total += $amount;
+                    $total_ptd += $amount_ptd;
+                }
+                $lockProforma_invoice->total = $total;
+                $lockProforma_invoice->save();
+                $this->check_approval($lockProforma_invoice, $request->status);
             } else if ($contract->service->type == 'Fuel Truck Rental') {
                 $data = [
                     'contract_id' => $request->contract_id,
@@ -539,6 +650,7 @@ class ProformaInvoiceController extends Controller
     {
         DB::beginTransaction();
         try {
+            $proforma_invoice->proforma_invoice_detail()->delete();
             $proforma_invoice->delete();
             DB::commit();
             return response()->json([

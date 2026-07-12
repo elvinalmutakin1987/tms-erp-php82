@@ -22,5 +22,6 @@ return [
     "PASANG",
     "SAK",
     "DAY",
-    "AA"
+    "AA",
+    "TRIP"
 ];

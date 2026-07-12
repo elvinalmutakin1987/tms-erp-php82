@@ -38,6 +38,7 @@ return new class extends Migration
             $table->string('input_method', 20)->nullable();
             $table->text('status')->nullable(); //Status nya > Open, Close
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

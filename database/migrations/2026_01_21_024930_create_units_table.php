@@ -42,6 +42,7 @@ return new class extends Migration
             $table->string('description')->nullable();
             $table->string('status', 30)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Contract_rate extends Model implements Auditable
 {
 
     use \OwenIt\Auditing\Auditable;
     use HasFactory;
+    use SoftDeletes;
 
     protected $guarded = [];
 

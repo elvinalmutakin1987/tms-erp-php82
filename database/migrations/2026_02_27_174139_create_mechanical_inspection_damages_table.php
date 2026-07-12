@@ -20,6 +20,7 @@ return new class extends Migration
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

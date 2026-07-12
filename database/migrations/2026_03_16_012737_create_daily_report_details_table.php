@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('uom_2', 30)->nullable();
             $table->decimal('value_2', 16, 2)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

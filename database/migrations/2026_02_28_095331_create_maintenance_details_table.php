@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('cost', 16, 2)->nullable();
             $table->timestamp('sync_at')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

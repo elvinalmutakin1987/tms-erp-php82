@@ -126,14 +126,15 @@ class ContractController extends Controller
             $contract = Contract::firstOrCreate($data);
             //service rate
             if ($request->item_no) {
-                foreach ($request->item_no as $i => $item) {
+                foreach ($request->service_item as $i => $service_item) {
                     $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
                     $contract->contract_rate()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
-                            'item_no' => $item,
+                            // 'item_no' => $item,
                             'request_token' => $contract->request_token,
-                            'service_item' => $request->service_item[$i],
+                            'service_item' => $service_item,
+                            'unit' => $request->unit_rate[$i],
                             'rate' => $rate,
                             'notes' => $request->note_rates[$i]
                         ],
@@ -142,13 +143,13 @@ class ContractController extends Controller
             }
             //unit rate
             if ($request->unit_id) {
-                foreach ($request->unit_id as $i => $item) {
+                foreach ($request->unit_id as $i => $unit_id) {
                     $target = isset($request->target[$i]) ? $request->target[$i] : 0;
                     $price = isset($request->price[$i]) ? $request->price[$i] : 0;
                     $contract->unit_target()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
-                            'unit_id' => $item,
+                            'unit_id' => $unit_id,
                             'request_token' => $contract->request_token,
                             'target' => $target,
                             'price' => $price
@@ -159,7 +160,7 @@ class ContractController extends Controller
             //fmf
             if ($request->year) {
                 foreach ($request->year as $i => $item) {
-                    $value = isset($request->value[$i]) ? $request->value[$i] : 0;
+                    $value = isset($request->value_fmf[$i]) ? $request->value_fmf[$i] : 0;
                     $contract->contract_fmf()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
@@ -250,35 +251,32 @@ class ContractController extends Controller
             );
             $contract->update($data);
             //service rate
-            $contract->contract_rate()->delete();
             if ($request->item_no) {
-                foreach ($request->item_no as $i => $item) {
+                $contract->contract_rate()->delete();
+                foreach ($request->service_item as $i => $service_item) {
                     $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
                     $contract->contract_rate()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
-                            'item_no' => $item,
                             'request_token' => $contract->request_token,
-                            'service_item' => $request->service_item[$i],
-                            'est_qty_per_month' => $request->est_qty_per_month[$i],
-                            'unit' => $request->unit[$i],
-                            'periode' => $request->periode[$i],
-                            'est_subtotal' => $request->est_subtotal[$i],
-                            'rate' => $rate
+                            'service_item' => $service_item,
+                            'unit' => $request->unit_rate[$i],
+                            'rate' => $rate,
+                            'notes' => $request->note_rates[$i]
                         ]
                     );
                 }
             }
             //unit rate
-            $contract->unit_target()->delete();
             if ($request->unit_id) {
-                foreach ($request->unit_id as $i => $item) {
+                $contract->unit_target()->delete();
+                foreach ($request->unit_id as $i => $unit_id) {
                     $target = isset($request->target[$i]) ? $request->target[$i] : 0;
                     $price = isset($request->price[$i]) ? $request->price[$i] : 0;
                     $contract->unit_target()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
-                            'unit_id' => $item,
+                            'unit_id' => $unit_id,
                             'request_token' => $contract->request_token,
                             'target' => $target,
                             'price' => $price
@@ -287,10 +285,10 @@ class ContractController extends Controller
                 }
             }
             //fmf
-            $contract->contract_fmf()->delete();
             if ($request->year) {
+                $contract->contract_fmf()->delete();
                 foreach ($request->year as $i => $item) {
-                    $value = isset($request->value[$i]) ? $request->value[$i] : 0;
+                    $value = isset($request->value_fmf[$i]) ? $request->value_fmf[$i] : 0;
                     $contract->contract_fmf()->firstOrCreate(
                         [
                             'contract_id' => $contract->id,
