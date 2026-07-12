@@ -1300,7 +1300,7 @@
                     <td class="p-1 align-middle row-number">#</td>
                     <td class="p-1 align-middle">
                         <input type="hidden" id="detail_unit_id_${rowUid}" class="form-control" name="detail_unit_id[]" readonly value="${escapeHtml(detailUnitId)}">
-                        <input type="text" id="unit_name_display_${rowUid}" class="form-control" disabled value="${escapeHtml(unitName)}">
+                        <input type="text" id="unit_name_display_${rowUid}" class="form-control" readonly value="${escapeHtml(unitName)}">
                         <input type="hidden" id="unit_name_${rowUid}" name="unit_name[]" value="${escapeHtml(unitName)}">
                     </td>
                     <td class="p-1 align-middle">

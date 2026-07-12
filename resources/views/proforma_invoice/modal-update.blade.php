@@ -24,7 +24,7 @@
                         </div>
                         <div class="col">
                             <label for="update_unit" class="form-label">Unit</label>
-                            <input type="text" class="form-control" id="update_unit" name="update_unit">
+                            <input type="text" class="form-control" id="update_unit" name="update_unit" readonly>
                         </div>
                     </div>
                     <div class="row mb-2">

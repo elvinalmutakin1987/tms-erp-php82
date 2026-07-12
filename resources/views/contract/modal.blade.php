@@ -54,8 +54,9 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col" style="width:3%">#</th>
-                                        <th scope="col" style="width:15%">Item No.</th>
+                                        {{-- <th scope="col" style="width:15%">Item No.</th> --}}
                                         <th scope="col">Description</th>
+                                        <th scope="col" style="width:10%">Unit</th>
                                         <th scope="col" style="width:20%">Rate (Rp.)</th>
                                         <th scope="col">Notes</th>
                                         <th scope="col" style="width:5%">Action</th>
@@ -66,12 +67,19 @@
                                         <td class="p-1 align-middle">
 
                                         </td>
-                                        <td class="p-1 align-middle">
+                                        {{-- <td class="p-1 align-middle">
                                             <input type="text" class="form-control" id="_item_no" name="_item_no">
-                                        </td>
+                                        </td> --}}
                                         <td class="p-1 align-middle">
                                             <input type="text" class="form-control" id="_description"
                                                 name="_description">
+                                        </td>
+                                        <td class="p-1 align-middle">
+                                            <select class="form-select select-select" id="_unit" name="_unit">
+                                                @foreach ($uom as $d => $value)
+                                                    <option value="{{ $value }}">{{ $value }}</option>
+                                                @endforeach
+                                            </select>
                                         </td>
                                         <td class="p-1 align-middle">
                                             <input type="hidden" class="form-control" id="_rate_t"
@@ -98,15 +106,54 @@
                         </div>
                     </div>
                     <div class="row mb-2">
-                        <div class="col-md-12 mb-2" id="div-target">
+                        <div class="col-md-6 mb-2" id="div-fmf">
+                            <label for="_value" class="form-label">Fix Monthly Fee</label>
+                            <table class="table mb-0 table-bordered" id="tableFmf">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col" style="width:3%">#</th>
+                                        <th scope="col" style="width:41%">Year</th>
+                                        <th scope="col" style="width:41%">Value (Rp.)</th>
+                                        <th scope="col" style="width:5%">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody_tableFmf">
+                                    <tr class="fixed-row">
+                                        <td class="p-1 align-middle">
+
+                                        </td>
+                                        <td class="p-1 align-middle">
+                                            <input type="number" class="form-control" id="_year"
+                                                name="_year">
+                                        </td>
+                                        <td class="p-1 align-middle">
+                                            <input type="hidden" class="form-control" id="fmf_value"
+                                                name="fmf_value">
+                                            <input type="text" class="form-control" id="_fmf_value"
+                                                name="_fmf_value">
+                                        </td>
+                                        <td class="p-1 align-middle">
+                                            <div class="row row-cols-auto g-3">
+                                                <div class="col">
+                                                    <button type="button"
+                                                        class="btn btn-lg btn-primary bx bx-plus mr-1"
+                                                        id="addFmfButton"></button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-6 mb-2" id="div-target">
                             <label for="_value" class="form-label">Unit Rate</label>
                             <table class="table mb-0 table-bordered" id="tableTarget">
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col" style="width:3%">#</th>
-                                        <th scope="col" style="width:25%">Unit</th>
-                                        <th scope="col">Target PA (%)</th>
-                                        <th scope="col" style="width:25%">Price (Rp.)</th>
+                                        <th scope="col" style="width:30%">Unit Rental</th>
+                                        <th scope="col" style="width:30%">Target PA (%)</th>
+                                        <th scope="col" style="width:30%">Price (Rp.)</th>
                                         <th scope="col" style="width:5%">Action</th>
                                     </tr>
                                 </thead>
@@ -145,7 +192,7 @@
                             </table>
                         </div>
                     </div>
-                    <div class="row">
+                    {{-- <div class="row">
                         <div class="col-md-12 mb-2" id="div-fmf">
                             <label for="_value" class="form-label">Fix Monthly Fee</label>
                             <table class="table mb-0 table-bordered" id="tableFmf">
@@ -185,7 +232,7 @@
                                 </tbody>
                             </table>
                         </div>
-                    </div>
+                    </div> --}}
                 </form>
             </div>
             <div class="modal-footer">

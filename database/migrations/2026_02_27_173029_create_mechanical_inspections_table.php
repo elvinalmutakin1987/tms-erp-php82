@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('status', 30)->nullable();
             $table->string('input_method', 20)->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

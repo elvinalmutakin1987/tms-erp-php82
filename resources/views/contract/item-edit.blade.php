@@ -7,12 +7,16 @@
         <td class="p-1 align-middle row-number">
             {{ $loop->iteration }}
         </td>
-        <td class="p-1 align-middle">
+        {{-- <td class="p-1 align-middle">
             <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="{{ $d->item_no }}">
-        </td>
+        </td> --}}
         <td class="p-1 align-middle">
             <input type="text" class="form-control" id="service_item" name="service_item[]" readonly
                 value="{{ $d->service_item }}">
+        </td>
+        <td class="p-1 align-middle">
+            <input type="text" class="form-control" id="unit_rate" name="unit_rate[]" readonly
+                value="{{ $d->unit }}">
         </td>
         <td class="p-1 align-middle">
             <input type="hidden" class="form-control" id="rate" name="rate[]" readonly

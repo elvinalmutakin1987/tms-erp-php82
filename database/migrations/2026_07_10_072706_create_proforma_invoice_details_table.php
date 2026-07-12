@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('proforma_invoice_details', function (Blueprint $table) {
+            $table->id();
             $table->uuid('request_token')->nullable();
             $table->foreignId('proforma_invoice_id')->nullable()->constrained('proforma_invoices')->nullOnDelete();
             $table->foreignId('contract_id')->nullable()->constrained('contracts')->nullOnDelete();

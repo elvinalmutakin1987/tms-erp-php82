@@ -720,170 +720,255 @@
         });
 
         $('.saveButton').off('click.saveProforma').on('click.saveProforma', function() {
-            var formData = new FormData($('#formModal').find('form')[0]);
-            var url = '{{ route('proformainvoice.store') }}';
-            var type = 'POST';
+            const statusValue = $(this).val();
+            const formElement = $('#formModal').find('form')[0];
+            const formData = new FormData(formElement);
 
-            formData.append('status', $(this).val());
+            let url = '{{ route('proformainvoice.store') }}';
 
-            if (proformaInvoiceId != '') {
-                url = '{{ route('proformainvoice.update', ':_id') }}';
-                url = url.replace(':_id', proformaInvoiceId);
+            formData.append('status', statusValue);
+
+            if (proformaInvoiceId !== '') {
+                url = '{{ route('proformainvoice.update', ':_id') }}'
+                    .replace(':_id', proformaInvoiceId);
+
                 formData.append('_method', 'PUT');
             }
 
-            $.ajax({
-                url: url,
-                type: type,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: "success",
-                        timer: 5000,
-                        didOpen: () => {},
-                        willClose: () => {
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formModal form')[0].reset();
+            function submitProformaInvoice() {
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
 
-                            proformaInvoiceId = '';
-                            contractId = '';
-                            unitId = '';
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
 
-                            $('#formModal').modal('hide');
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    enableButton();
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            willClose: function() {
+                                $('#table-data')
+                                    .DataTable()
+                                    .ajax
+                                    .reload(null, false);
 
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage
-                    });
-                }
-            });
+                                $('#formModal form')[0].reset();
+
+                                proformaInvoiceId = '';
+                                contractId = '';
+                                unitId = '';
+
+                                $('#formModal').modal('hide');
+                            }
+                        });
+                    },
+
+                    error: function(xhr, status, error) {
+                        enableButton();
+
+                        const errorMessage =
+                            xhr.responseJSON?.message ?? error;
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
+                    }
+                });
+            }
+
+            if (statusValue === 'Open') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, process it!',
+                    cancelButtonText: 'Cancel'
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        submitProformaInvoice();
+                    } else {
+                        enableButton();
+                    }
+                });
+            } else {
+                submitProformaInvoice();
+            }
         });
 
         $('.saveEditButton').off('click.editProforma').on('click.editProforma', function() {
-            var formData = new FormData($('#formEdit').find('form')[0]);
-            var url = '{{ route('proformainvoice.store') }}';
-            var type = 'POST';
+            const statusValue = $(this).val();
 
-            formData.append('status', $(this).val());
+            const formData = new FormData($('#formEdit').find('form')[0]);
 
-            if (proformaInvoiceId != '') {
-                url = '{{ route('proformainvoice.update', ':_id') }}';
-                url = url.replace(':_id', proformaInvoiceId);
+            let url = '{{ route('proformainvoice.store') }}';
+
+            formData.append('status', statusValue);
+
+            if (proformaInvoiceId !== '') {
+                url = '{{ route('proformainvoice.update', ':_id') }}'
+                    .replace(':_id', proformaInvoiceId);
+
                 formData.append('_method', 'PUT');
             }
 
-            $.ajax({
-                url: url,
-                type: type,
-                data: formData,
-                contentType: false,
-                processData: false,
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: "success",
-                        timer: 5000,
-                        didOpen: () => {},
-                        willClose: () => {
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formEdit form')[0].reset();
+            function submitProformaInvoice() {
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
 
-                            proformaInvoiceId = '';
-                            contractId = '';
-                            unitId = '';
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
 
-                            $('#formEdit').modal('hide');
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    enableButton();
-                    var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            willClose: function() {
+                                $('#table-data')
+                                    .DataTable()
+                                    .ajax
+                                    .reload(null, false);
 
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: errorMessage
-                    });
-                }
-            });
+                                $('#formEdit form')[0].reset();
+
+                                proformaInvoiceId = '';
+                                contractId = '';
+                                unitId = '';
+
+                                $('#formEdit').modal('hide');
+                            }
+                        });
+                    },
+
+                    error: function(xhr, status, error) {
+                        enableButton();
+
+                        const errorMessage =
+                            xhr.responseJSON?.message ?? error;
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
+                    }
+                });
+            }
+
+            if (statusValue === 'Open') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, update it!',
+                    cancelButtonText: 'Cancel'
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        submitProformaInvoice();
+                    } else {
+                        enableButton();
+                    }
+                });
+            } else {
+                submitProformaInvoice();
+            }
         });
 
         $('.saveUpdateButton').off('click.updateProforma').on('click.updateProforma', function() {
-            Swal.fire({
-                title: 'Are you sure?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#5156be',
-                cancelButtonColor: '#fd625e',
-                confirmButtonText: 'Yes, process it!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    var formData = new FormData($('#formUpdate').find('form')[0]);
-                    var url = '{{ route('proformainvoice.store') }}';
-                    var type = 'POST';
+            const statusValue = $(this).val();
+            const formElement = $('#formUpdate').find('form')[0];
+            const formData = new FormData(formElement);
 
-                    formData.append('status', $(this).val());
+            let url = '{{ route('proformainvoice.store') }}';
 
-                    if (proformaInvoiceId != '') {
-                        url = '{{ route('proformainvoice.update_progress', ':_id') }}';
-                        url = url.replace(':_id', proformaInvoiceId);
-                        formData.append('_method', 'PUT');
+            formData.append('status', statusValue);
+
+            if (proformaInvoiceId !== '') {
+                url = '{{ route('proformainvoice.update_progress', ':_id') }}'
+                    .replace(':_id', proformaInvoiceId);
+
+                formData.append('_method', 'PUT');
+            }
+
+            function submitProformaProgress() {
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+
+                            willClose: function() {
+                                $('#table-data')
+                                    .DataTable()
+                                    .ajax
+                                    .reload(null, false);
+
+                                $('#formUpdate form')[0].reset();
+
+                                proformaInvoiceId = '';
+                                contractId = '';
+                                unitId = '';
+
+                                $('#formUpdate').modal('hide');
+                            }
+                        });
+                    },
+
+                    error: function(xhr, status, error) {
+                        enableButton();
+
+                        const errorMessage =
+                            xhr.responseJSON?.message ?? error;
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
                     }
+                });
+            }
 
-                    $.ajax({
-                        url: url,
-                        type: type,
-                        data: formData,
-                        contentType: false,
-                        processData: false,
-                        success: function(response) {
-                            Swal.fire({
-                                title: response.title,
-                                text: response.message,
-                                icon: "success",
-                                timer: 5000,
-                                didOpen: () => {},
-                                willClose: () => {
-                                    $('#table-data').DataTable().ajax.reload(null,
-                                        false);
-                                    $('#formUpdate form')[0].reset();
-
-                                    proformaInvoiceId = '';
-                                    contractId = '';
-                                    unitId = '';
-
-                                    $('#formUpdate').modal('hide');
-                                }
-                            });
-                        },
-                        error: function(xhr, status, error) {
-                            enableButton();
-                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message :
-                                error;
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: errorMessage
-                            });
-                        }
-                    });
-                }
-            });
-
+            if (statusValue === 'Done') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, process it!',
+                    cancelButtonText: 'Cancel'
+                }).then(function(result) {
+                    if (result.isConfirmed) {
+                        submitProformaProgress();
+                    } else {
+                        enableButton();
+                    }
+                });
+            } else {
+                submitProformaProgress();
+            }
         });
 
         $('#cancelButton').off('click.cancelModal').on('click.cancelModal', function() {

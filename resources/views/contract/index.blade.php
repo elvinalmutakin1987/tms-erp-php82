@@ -343,7 +343,7 @@
             $(".datepicker").flatpickr({
                 allowInput: true
             });
-
+            gen_select2();
         });
 
         function delete_(id) {
@@ -660,21 +660,23 @@
 
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
-            var item_no = $("#_item_no").val();
+            // var item_no = $("#_item_no").val();
             var description = $("#_description").val();
             var rate = $("#_rate_t").val();
             var _rate = $("#_rate_t_").val();
+            var unit = $("#_unit").val();
             var notes = $("#_notes").val();
             var newRow = `
                 <tr>
                     <td class="p-1 align-middle row-number">
                         #
                     </td>
-                    <td class="p-1 align-middle">
-                       <input type="text" class="form-control" id="item_no" name="item_no[]" readonly value="${item_no}">
-                    </td>
+                   
                     <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="service_item" name="service_item[]" readonly value="${description}">
+                    </td>
+                     <td class="p-1 align-middle">
+                       <input type="text" class="form-control" id="unit_rate" name="unit_rate[]" readonly value="${unit}">
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="rate" name="rate[]" readonly value="${rate}">

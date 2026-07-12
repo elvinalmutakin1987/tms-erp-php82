@@ -6,6 +6,12 @@
     use App\Models\Approval_status;
     use App\Models\Approval_process;
     use App\Models\Approval_step;
+    use App\Models\Proforma_invoice;
+    use App\Models\Proforma_invoice_detail;
+    use App\Models\Contract;
+    use App\Models\Contract_rate;
+    use App\Models\Contract_fmf;
+    use App\Models\Unit_target;
     use App\Models\Maintenance;
 
     $qrDate = $proforma_invoice->date ? Carbon::parse($proforma_invoice->date)->format('d-m-Y') : '-';
@@ -31,6 +37,15 @@
     $qrImage = QrCode::format('png')->size(150)->margin(1)->generate($qrText);
 
     $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+    $layout = 'potrait';
+    if ($proforma_invoice->contract->service->type === 'Unit Rental') {
+        $layout = 'potrait';
+    } elseif ($proforma_invoice->contract->service->type === 'LCT') {
+        $layout = 'landscape';
+    } elseif ($proforma_invoice->contract->service->type === 'Explosive Material Transport') {
+        $layout = 'landscape';
+    }
 @endphp
 
 <style>
@@ -176,7 +191,7 @@
 
     @media print {
         @page {
-            size: A4 !important;
+            size: A4 {{ $layout }} !important;
             margin: 14px 14px 20px 14px !important;
         }
 
@@ -203,115 +218,110 @@
         }
     }
 </style>
+@if ($proforma_invoice->contract->service->type == 'Unit Rental')
+    <table class="table-p2h">
+        <thead>
+            <tr>
+                <th class="doc-header-wrapper">
+                    <table class="doc-header-table">
+                        <tr>
+                            <td class="logo-cell">
+                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
+                                    style="max-width:120px;height:auto;margin:0 auto;">
+                            </td>
 
-<table class="table-p2h">
-    <thead>
-        <tr>
-            <th class="doc-header-wrapper">
-                <table class="doc-header-table">
-                    <tr>
-                        <td class="logo-cell">
-                            <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                style="max-width:120px;height:auto;margin:0 auto;">
-                        </td>
+                            <td class="title-cell">
+                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
+                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
+                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
+                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
 
-                        <td class="title-cell">
-                            <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
-                            <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
-                            <div class="doc-subtitle">Sangatta - Kutai Timur</div>
-                            <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
-                        </td>
-                    </tr>
-                </table>
-            </th>
-        </tr>
+            <tr>
+                <th class="doc-header-wrapper">
+                    <div class="doc-title" style="padding-top: 15px">
+                        PROFORMA INVOICE
+                    </div>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <table class="table-p2h"
+        style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
+        <tbody>
+            <tr>
+                <td style="padding: 8px;">
+                    <table class="doc-header-vendor" style="padding-bottom: 10px">
+                        <tr>
+                            <td style="width: 50%" class="doc-header-vendor-td">
+                                Client
+                            </td>
+                            <td style="width: 50%" class="doc-header-vendor-td"></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 50%">
+                                <table class="doc-header-detail">
+                                    <tr>
+                                        <td style="width: 30%">Name</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->name ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Address</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->address ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Phone</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->phone ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Email</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->email ?? '' }}</td>
+                                    </tr>
+                                </table>
+                            </td>
 
-        <tr>
-            <th class="doc-header-wrapper">
-                <div class="doc-title" style="padding-top: 15px">
-                    PROFORMA INVOICE
-                </div>
-            </th>
-        </tr>
-    </thead>
-</table>
+                            <td style="width: 50%">
+                                <table class="doc-header-detail">
+                                    <tr>
+                                        <td style="width: 30%">PI. No</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td><b>{{ $proforma_invoice->proforma_no }}</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Date</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($proforma_invoice->date)->locale('id')->translatedFormat('d F Y') }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Reff</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>
 
-<table class="table-p2h" style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
-    <tbody>
-        <tr>
-            <td style="padding: 8px;">
-                <table class="doc-header-vendor" style="padding-bottom: 10px">
-                    <tr>
-                        <td style="width: 50%" class="doc-header-vendor-td">
-                            Client
-                        </td>
-                        <td style="width: 50%" class="doc-header-vendor-td"></td>
-                    </tr>
-                    <tr>
-                        <td style="width: 50%">
-                            <table class="doc-header-detail">
-                                <tr>
-                                    <td style="width: 30%">Name</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>{{ $proforma_invoice->client_vendor->name ?? '' }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="width: 30%">Address</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>{{ $proforma_invoice->client_vendor->address ?? '' }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="width: 30%">Phone</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>{{ $proforma_invoice->client_vendor->phone ?? '' }}</td>
-                                </tr>
-                                <tr>
-                                    <td style="width: 30%">Email</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>{{ $proforma_invoice->client_vendor->email ?? '' }}</td>
-                                </tr>
-                            </table>
-                        </td>
-
-                        <td style="width: 50%">
-                            <table class="doc-header-detail">
-                                <tr>
-                                    <td style="width: 30%">PI. No</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td><b>{{ $proforma_invoice->proforma_no }}</b></td>
-                                </tr>
-                                <tr>
-                                    <td style="width: 30%">Date</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($proforma_invoice->date)->locale('id')->translatedFormat('d F Y') }}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="width: 30%">Reff</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>
-
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="width: 30%">Currency</td>
-                                    <td style="width: 5%; text-align: center">:</td>
-                                    <td>IDR</td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                </table>
-
-                @php
-                    $unit_id = $proforma_invoice->unit_id;
-                    $price = $proforma_invoice->unit_target->price;
-                    $target = $proforma_invoice->unit_target->target;
-                @endphp
-
-                @if ($contract->service->type == 'Unit Rental')
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Currency</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>IDR</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
                     @php
+                        $unit_id = $proforma_invoice->unit_id;
+                        $price = $proforma_invoice->unit_target->price;
+                        $target = $proforma_invoice->unit_target->target;
                         $excelRound = function ($value, int $precision = 2) {
                             return round((float) $value, $precision, PHP_ROUND_HALF_UP);
                         };
@@ -464,76 +474,334 @@
                             </tr>
                         </tbody>
                     </table>
-                @elseif($contract->service->type == 'LCT')
+                </td>
+            </tr>
+        </tbody>
+    </table>
+@elseif($proforma_invoice->contract->service->type == 'LCT')
+    <table class="table-p2h">
+        <thead>
+            <tr>
+                <th class="doc-header-wrapper">
+                    <table class="doc-header-table">
+                        <tr>
+                            <td class="logo-cell">
+                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
+                                    style="max-width:120px;height:auto;margin:0 auto;">
+                            </td>
 
-                @elseif($contract->service->type == 'Fuel Truck Rental')
+                            <td class="title-cell">
+                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
+                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
+                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
+                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr>
+                <th class="doc-header-wrapper">
+                    <div class="doc-title" style="padding-top: 15px">
+                        PROFORMA INVOICE
+                    </div>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <table class="table-p2h"
+        style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
+        <tbody>
+            <tr>
+                <td style="padding: 8px;">
+                    <table class="doc-header-vendor" style="padding-bottom: 10px">
+                        <tr>
+                            <td style="width: 50%" class="doc-header-vendor-td">
+                                Client
+                            </td>
+                            <td style="width: 50%" class="doc-header-vendor-td"></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 50%">
+                                <table class="doc-header-detail">
+                                    <tr>
+                                        <td style="width: 30%">Name</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->name ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Address</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->address ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Phone</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->phone ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Email</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->email ?? '' }}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 50%">
+                                <table class="doc-header-detail">
+                                    <tr>
+                                        <td style="width: 30%">PI. No</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td><b>{{ $proforma_invoice->proforma_no }}</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Date</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($proforma_invoice->date)->locale('id')->translatedFormat('d F Y') }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Reff</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>
 
-                @elseif($contract->service->type == 'Explosive Material Rental')
-                @endif
-            </td>
-        </tr>
-    </tbody>
-</table>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Currency</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>IDR</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 15px">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 5px; vertical-align:middle">No.</th>
+                                <th scope="col">Item</th>
+                                <th scope="col" style="width: 10%; vertical-align:middle">Unit</th>
+                                <th scope="col" style="width: 13%; vertical-align:middle">Rate (IDR)</th>
+                                <th scope="col" style="width: 8%; vertical-align:middle">Qty</th>
+                                <th scope="col" style="width: 13%; vertical-align:middle">Amount (IDR)</th>
+                                <th scope="col" style="width: 8%; vertical-align:middle">Qty PTD</th>
+                                <th scope="col" style="width: 13%; vertical-align:middle">PTD Amount (IDR)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck(
+                                    'id',
+                                );
+                                $contract_fmf = Contract_fmf::where('contract_id', $contract->id)
+                                    ->where('year', $year)
+                                    ->first();
+                                $fix_monthly_fee = $contract_fmf->value;
+                                $fmf_qty = 1;
+                                $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                                    ->where('contract_fmf_id', $contract_fmf->id)
+                                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                                    ->count();
+                                $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                                    ->where('contract_fmf_id', $contract_fmf->id)
+                                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                                    ->sum('value');
+
+                                $total_amount = 0;
+                                $total_amount_ptd = 0;
+                            @endphp
+                            @foreach ($proforma_invoice->proforma_invoice_detail as $proforma_invoice_detail)
+                                @if ($proforma_invoice_detail->contract_rate_id == null && $proforma_invoice_detail->contract_fmf_id != null)
+                                    <tr>
+                                        <td>
+                                            {{ $loop->iteration }}
+                                        </td>
+                                        <td>
+                                            Fix Monthly Fee
+                                        </td>
+                                        <td style="text-align: center">
+                                            Month
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->value ?? 0, precision: 0) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->qty ?? 0, precision: 2) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->amount ?? 0, precision: 0) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->ptd_qty ?? 0, precision: 2) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->ptd_amount ?? 0, precision: 0) }}
+                                        </td>
+                                    </tr>
+                                @else
+                                    <tr>
+                                        <td>
+                                            {{ $loop->iteration }}
+                                        </td>
+                                        <td>
+                                            {{ $proforma_invoice_detail->contract_rate->service_item }}
+                                        </td>
+                                        <td style="text-align: center">
+                                            Trip
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->rate ?? 0, precision: 0) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->qty ?? 0, precision: 2) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->amount ?? 0, precision: 0) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->ptd_qty ?? 0, precision: 2) }}
+                                        </td>
+                                        <td style="text-align: right">
+                                            {{ Number::format($proforma_invoice_detail->ptd_amount ?? 0, precision: 0) }}
+                                        </td>
+                                    </tr>
+                                @endif
+                                @php
+                                    $total_amount += $proforma_invoice_detail->amount;
+                                    $total_amount_ptd += $proforma_invoice_detail->ptd_amount;
+                                @endphp
+                            @endforeach
+                            <tr>
+                                <td colspan="5" style="text-align:right"><b>Total</b></td>
+                                <td style="text-align: right"><b>{{ Number::format($total_amount, precision: 0) }}</b>
+                                </td>
+                                <td></td>
+                                <td style="text-align: right">
+                                    <b>{{ Number::format($total_amount_ptd, precision: 0) }}</b>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+@elseif($proforma_invoice->contract->service->type == 'Explosive Material Transport')
+@endif
 
 @if (!in_array($proforma_invoice->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']))
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" class="avoid-break">
-        <tr>
-            <td style="border: none;" colspan="4">
-                <div>
-                    Sangatta,
-                    {{ \Carbon\Carbon::parse(date('Y-m-d'))->locale('id')->translatedFormat('d F Y') }}
-                </div>
-            </td>
-        </tr>
+    @if ($proforma_invoice->contract->service->type === 'Unit Rental')
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" class="avoid-break">
+            <tr>
+                <td style="border: none;" colspan="4">
+                    <div>
+                        Sangatta,
+                        {{ \Carbon\Carbon::parse(date('Y-m-d'))->locale('id')->translatedFormat('d F Y') }}
+                    </div>
+                </td>
+            </tr>
 
-        <tr>
-            <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
-                <div style="height: 30px;">
-                    Dibuat Oleh,
-                </div>
+            <tr>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Dibuat Oleh,
+                    </div>
 
-                <div style="height: 95px;"></div>
+                    <div style="height: 50px;"></div>
 
-                <div style="min-height: 35px;">
-                    ( {{ $proforma_invoice->user->name ?? '' }} )<br>
-                    PT. Tunas Mitra Sejati
-                </div>
-            </td>
-            <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
-                <div style="height: 30px;">
-                    Diketahui Oleh,
-                </div>
+                    <div style="min-height: 35px;">
+                        ( {{ $proforma_invoice->user->name ?? '' }} )<br>
+                        PT. Tunas Mitra Sejati
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Diketahui Oleh,
+                    </div>
 
-                <div style="height: 95px;"></div>
+                    <div style="height: 50px;"></div>
 
-                <div style="min-height: 35px;">
-                    User
-                </div>
-            </td>
-            <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
-                <div style="height: 30px;">
+                    <div style="min-height: 35px;">
+                        User
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
 
-                </div>
+                    </div>
 
-                <div style="height: 95px;"></div>
+                    <div style="height: 50px;"></div>
 
-                <div style="min-height: 35px;">
-                    Team Dewatering
-                </div>
-            </td>
-            <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
-                <div style="height: 30px;">
-                    Disetujui Oleh,
-                </div>
+                    <div style="min-height: 35px;">
+                        Team Dewatering
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Disetujui Oleh,
+                    </div>
 
-                <div style="height: 95px;"></div>
+                    <div style="height: 50px;"></div>
 
-                <div style="min-height: 35px;">
-                    Custodian
-                </div>
-            </td>
-        </tr>
-    </table>
+                    <div style="min-height: 35px;">
+                        Custodian
+                    </div>
+                </td>
+            </tr>
+        </table>
+    @elseif($proforma_invoice->contract->service->type === 'LCT')
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" class="avoid-break">
+            <tr>
+                <td style="border: none;" colspan="4">
+                    <div>
+                        Sangatta,
+                        {{ \Carbon\Carbon::parse(date('Y-m-d'))->locale('id')->translatedFormat('d F Y') }}
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Dibuat Oleh,
+                    </div>
+
+                    <div style="height: 50px;"></div>
+
+                    <div style="min-height: 35px;">
+                        ( {{ $proforma_invoice->user->name ?? '' }} )<br>
+                        PT. Tunas Mitra Sejati
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Diketahui Oleh,
+                    </div>
+
+                    <div style="height: 50px;"></div>
+
+                    <div style="min-height: 35px;">
+                        Drill Blast Department
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Disetujui Oleh,
+                    </div>
+
+                    <div style="height: 50px;"></div>
+
+                    <div style="min-height: 35px;">
+                        Purchasing
+                    </div>
+                </td>
+            </tr>
+        </table>
+    @elseif($proforma_invoice->contract->service->type === 'Explosive Material Transport')
+    @endif
 @endif
 
 <script type="text/php">

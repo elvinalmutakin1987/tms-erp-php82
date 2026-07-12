@@ -2,8 +2,9 @@
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
-            <th scope="col">Item No.</th>
+            {{-- <th scope="col">Item No.</th> --}}
             <th scope="col">Description</th>
+            <th scope="col">Unit</th>
             <th scope="col">Rate</th>
             <th scope="col">Notes</th>
         </tr>
@@ -13,8 +14,9 @@
             @foreach ($service_item as $d)
                 <tr>
                     <td class="p-1 align-middle">{{ $loop->iteration }}</td>
-                    <td class="p-1 align-middle">{{ $d->item_no }}</td>
+                    {{-- <td class="p-1 align-middle">{{ $d->item_no }}</td> --}}
                     <td class="p-1 align-middle">{{ $d->item_des }}</td>
+                    <td class="p-1 align-middle">{{ $d->unit }}</td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" id="service_item_id{{ $d->id }}"
                             name="service_item_id[]" value="{{ $d->id }}">

@@ -60,7 +60,6 @@ class Proforma_invoice extends Model implements Auditable
         });
     }
 
-
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class)->withDefault(['username' => null]);
@@ -94,5 +93,10 @@ class Proforma_invoice extends Model implements Auditable
     public function unit_target(): BelongsTo
     {
         return $this->belongsTo(Unit_target::class);
+    }
+
+    public function proforma_invoice_detail(): HasMany
+    {
+        return $this->hasMany(Proforma_invoice_detail::class);
     }
 }
