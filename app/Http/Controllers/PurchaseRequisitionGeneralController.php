@@ -209,19 +209,32 @@ class PurchaseRequisitionGeneralController extends Controller
             );
             $purchase_requisition = Purchase_requisition::firstOrCreate($data);
             if ($request->has('description')) {
-                foreach ($request->description as $i => $item) {
-                    $purchase_requisition->purchase_requisition_detail()->create(
-                        [
+                if ($request->filled('description')) {
+                    $details = [];
+                    $tax = (float) data_get($system_setting, 'tax', 0);
+                    foreach ($request->input('description', []) as $i => $description) {
+                        if (blank($description)) {
+                            continue;
+                        }
+                        $details[] = [
                             'request_token' => $purchase_requisition->request_token,
-                            'description' => $item,
-                            'uom' => $request->uom[$i],
-                            'qty' => $request->qty[$i],
-                            'price' => $request->price[$i],
-                            'discount_item' => $request->discount_item[$i],
-                            'tax' => $system_setting['tax'],
-                            'amount' => $request->amount[$i]
-                        ]
-                    );
+                            'description'   => $description,
+                            'uom'           => $request->input("uom.$i"),
+                            'qty'           => (float) $request->input("qty.$i", 0),
+                            'price'         => (float) $request->input("price.$i", 0),
+                            'discount_item' => (float) $request->input(
+                                "discount_item.$i",
+                                0
+                            ),
+                            'tax'           => $tax,
+                            'amount'        => (float) $request->input("amount.$i", 0),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $purchase_requisition
+                            ->purchase_requisition_detail()
+                            ->createMany($details);
+                    }
                 }
             }
 
@@ -316,19 +329,32 @@ class PurchaseRequisitionGeneralController extends Controller
             $lockPurchase_requisition->update($data);
             $purchase_requisition->purchase_requisition_detail()->delete();
             if ($request->has('description')) {
-                foreach ($request->description as $i => $item) {
-                    $purchase_requisition->purchase_requisition_detail()->create(
-                        [
+                if ($request->filled('description')) {
+                    $details = [];
+                    $tax = (float) data_get($system_setting, 'tax', 0);
+                    foreach ($request->input('description', []) as $i => $description) {
+                        if (blank($description)) {
+                            continue;
+                        }
+                        $details[] = [
                             'request_token' => $purchase_requisition->request_token,
-                            'description' => $item,
-                            'uom' => $request->uom[$i],
-                            'qty' => $request->qty[$i],
-                            'price' => $request->price[$i],
-                            'discount_item' => $request->discount_item[$i],
-                            'tax' => $system_setting['tax'],
-                            'amount' => $request->amount[$i]
-                        ]
-                    );
+                            'description'   => $description,
+                            'uom'           => $request->input("uom.$i"),
+                            'qty'           => (float) $request->input("qty.$i", 0),
+                            'price'         => (float) $request->input("price.$i", 0),
+                            'discount_item' => (float) $request->input(
+                                "discount_item.$i",
+                                0
+                            ),
+                            'tax'           => $tax,
+                            'amount'        => (float) $request->input("amount.$i", 0),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $purchase_requisition
+                            ->purchase_requisition_detail()
+                            ->createMany($details);
+                    }
                 }
             }
             /**
@@ -430,7 +456,13 @@ class PurchaseRequisitionGeneralController extends Controller
             $department = config('department');
             $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
             $system_setting = config('system_setting');
-            $html = view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'uom', 'department', 'system_setting'))->render();
+            $html = view($view, compact(
+                'purchase_requisition',
+                'purchase_requisition_detail',
+                'uom',
+                'department',
+                'system_setting'
+            ))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -449,10 +481,22 @@ class PurchaseRequisitionGeneralController extends Controller
      */
     public function print(Request $request, Purchase_requisition $purchase_requisition)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
-        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
-        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_flow = Approval_flow::where(
+            'approvable_model',
+            'App\Models\Purchase_requisition'
+        )->first();
+        $approval_step = $approval_flow ? Approval_step::where(
+            'approval_flow_id',
+            $approval_flow->id
+        )->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where(
+            'approval_flow_id',
+            $approval_flow->id
+        )->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where(
+            'approval_flow_id',
+            $approval_flow->id
+        )->get() : null;
         $system_setting = config('system_setting');
         $pdf = Pdf::loadView('purchase_requisition_general.print', [
             'purchase_requisition' => $purchase_requisition,
@@ -476,7 +520,12 @@ class PurchaseRequisitionGeneralController extends Controller
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        if (in_array($purchase_requisition->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+        if (in_array($purchase_requisition->status, [
+            'Approved',
+            'Approval',
+            'Received',
+            'Done'
+        ], true)) {
             $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
                 'Nomor PO : ' . $purchase_requisition->order_no . "\n" .
                 'Tanggal : ' . Carbon::parse($purchase_requisition->date)->format('d-m-Y') . "\n" .
@@ -541,10 +590,22 @@ class PurchaseRequisitionGeneralController extends Controller
 
     public function export_pdf(Request $request, Purchase_requisition $purchase_requisition)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')->first();
-        $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
-        $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
-        $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_flow = Approval_flow::where(
+            'approvable_model',
+            'App\Models\Purchase_requisition'
+        )->first();
+        $approval_step = $approval_flow  ? Approval_step::where(
+            'approval_flow_id',
+            $approval_flow->id
+        )->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow  ? Approval_process::where(
+            'approval_flow_id',
+            $approval_flow->id
+        )->get() : null;
+        $approval_status = $approval_flow  ? Approval_status::where(
+            'approval_flow_id',
+            $approval_flow->id
+        )->get() : null;
         $system_setting = config('system_setting');
         $pdf = Pdf::loadView('purchase_requisition_general.print', [
             'purchase_requisition' => $purchase_requisition,
@@ -568,7 +629,12 @@ class PurchaseRequisitionGeneralController extends Controller
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        if (in_array($purchase_requisition->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+        if (in_array($purchase_requisition->status, [
+            'Approved',
+            'Approval',
+            'Received',
+            'Done'
+        ], true)) {
             $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
                 'Nomor PO : ' . $purchase_requisition->order_no . "\n" .
                 'Tanggal : ' . Carbon::parse($purchase_requisition->date)->format('d-m-Y') . "\n" .
@@ -635,13 +701,10 @@ class PurchaseRequisitionGeneralController extends Controller
         try {
             $purchase_requisition = Purchase_requisition::find($pr_id);
             $purchase_requisition_detail = $purchase_requisition->purchase_requisition_detail;
-            // $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')
-            //     ->where('department', $purchase_requisition->department)
-            //     ->first();
-            // $approval_process = Approval_process::where('approval_flow_id', $approval_flow->id)
-            //     ->where('approvable_id', $purchase_requisition->id)
-            //     ->get();
-            $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_requisition')
+            $approval_flow = Approval_flow::where(
+                'approvable_model',
+                'App\Models\Purchase_requisition'
+            )
                 ->where('department', $purchase_requisition->department)
                 ->first();
 
@@ -651,7 +714,11 @@ class PurchaseRequisitionGeneralController extends Controller
                 ->get()
                 : null;
             $view = 'purchase_requisition_general.detail';
-            return response()->view($view, compact('purchase_requisition', 'purchase_requisition_detail', 'approval_process'), 200);
+            return response()->view($view, compact(
+                'purchase_requisition',
+                'purchase_requisition_detail',
+                'approval_process'
+            ), 200);
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => false,

@@ -158,18 +158,29 @@ class P2hController extends Controller
                 ]
             );
             $p2h = P2h::firstOrCreate($data);
-            if ($request->has('inspection_item')) {
-                foreach ($request->inspection_item as $i => $item) {
-                    $p2h->p2h_detail()->create(
-                        [
-                            'request_token' => $p2h->request_token,
-                            'inspection_item' => $item,
-                            'inspection_group' => $request->inspection_group[$i],
-                            'check' => (int) ($request->check[$item][$request->inspection_group[$i]] ?? 0),
-                            'defect_listed' => $request->defect_listed[$i],
-                            'action_taken' => $request->action_taken[$i]
-                        ]
-                    );
+            if ($request->filled('inspection_item')) {
+                $details = [];
+                $checks = $request->input('check', []);
+                foreach ($request->input('inspection_item', []) as $i => $inspectionItem) {
+                    $inspectionGroup = $request->input("inspection_group.$i");
+                    if (blank($inspectionItem) || blank($inspectionGroup)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token'    => $p2h->request_token,
+                        'inspection_item'  => $inspectionItem,
+                        'inspection_group' => $inspectionGroup,
+                        'check'            => (int) data_get(
+                            $checks,
+                            "{$inspectionItem}.{$inspectionGroup}",
+                            0
+                        ),
+                        'defect_listed'    => $request->input("defect_listed.$i"),
+                        'action_taken'     => $request->input("action_taken.$i"),
+                    ];
+                }
+                if (!empty($details)) {
+                    $p2h->p2h_detail()->createMany($details);
                 }
             }
             DB::commit();
@@ -224,7 +235,6 @@ class P2hController extends Controller
                 'date' => 'required',
                 'driver' => 'required',
                 'km_start' => 'required',
-                // 'km_finish' => 'required',
             ]);
             $data = array_merge(
                 $request->only(
@@ -242,18 +252,27 @@ class P2hController extends Controller
             $lockP2h = P2h::where('id', $p2h->id)->lockForUpdate()->first();
             $lockP2h->update($data);
             $p2h->p2h_detail()->delete();
-            if ($request->has('inspection_item')) {
-                foreach ($request->inspection_item as $key => $item) {
-                    $p2h->p2h_detail()->create(
-                        [
-                            'request_token' => $p2h->request_token,
-                            'inspection_item' => $item,
-                            'inspection_group' => $request->inspection_group[$key],
-                            'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
-                            'defect_listed' => $request->defect_listed[$key],
-                            'action_taken' => $request->action_taken[$key]
-                        ]
-                    );
+            if ($request->filled('inspection_item')) {
+                $details = [];
+                $checks = $request->input('check', []);
+                foreach ($request->input('inspection_item', []) as $key => $inspectionItem) {
+                    $inspectionGroup = $request->input("inspection_group.$key");
+                    if (blank($inspectionItem) || blank($inspectionGroup)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token'    => $p2h->request_token,
+                        'inspection_item'  => $inspectionItem,
+                        'inspection_group' => $inspectionGroup,
+                        'check'            => (int) (
+                            $checks[$inspectionItem][$inspectionGroup] ?? 0
+                        ),
+                        'defect_listed'    => $request->input("defect_listed.$key"),
+                        'action_taken'     => $request->input("action_taken.$key"),
+                    ];
+                }
+                if (!empty($details)) {
+                    $p2h->p2h_detail()->createMany($details);
                 }
             }
             DB::commit();

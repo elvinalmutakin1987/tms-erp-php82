@@ -81,8 +81,6 @@ class UnitController extends Controller
         try {
             $request->validate([
                 'vehicle_no' => 'required|unique:units,vehicle_no',
-                // 'location_id' => 'required',
-                // 'type' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method'));
             Unit::firstOrCreate($data);
@@ -131,8 +129,6 @@ class UnitController extends Controller
         try {
             $request->validate([
                 'vehicle_no' => 'required|unique:units,vehicle_no,' . $unit->id . ',id',
-                // 'location_id' => 'required',
-                // 'type' => 'required',
             ]);
             $data = array_merge($request->except('_token', '_method', 'request_token'));
             $unit->update($data);

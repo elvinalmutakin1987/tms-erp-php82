@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('number', 30)->nullable();
             $table->string('report_no', 30)->nullable();
             $table->string('type', 30)->nullable();
+            $table->string('service_type', 100)->nullable();
             $table->date('date')->nullable();
             $table->string('shift', 20)->nullable();
             $table->decimal('km_start', 16, 2)->nullable();

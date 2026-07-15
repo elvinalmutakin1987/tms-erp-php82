@@ -139,13 +139,14 @@ class DailyReportController extends Controller
                 ->rawColumns(['action'])
                 ->make();
         }
+        $service_type = config('servicetype');
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
             'sub-module' => 'Daily Report',
             'route-sub-module' => 'dailyreport.index',
         ];
-        return view('daily_report.index', compact('breadcrum'));
+        return view('daily_report.index', compact('breadcrum', 'service_type'));
     }
 
     /**
@@ -181,7 +182,6 @@ class DailyReportController extends Controller
                 $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
                     ? countTime($depart_trip_1, $berthing_trip_1)
                     : null;
-
 
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
@@ -224,32 +224,38 @@ class DailyReportController extends Controller
                 'load' => $request->load,
                 'refule_km' => $request->refule_km,
                 'refule_liter' => $request->refule_liter,
-                // 'refule_water' => $request->refule_water,
                 'refule_mechine' => $request->refule_mechine,
                 'refule_genset' => $request->refule_genset,
                 'refule_type' => $request->refule_type,
                 'request_token' => $request->request_token,
                 'input_method' => 'Web',
                 'type' => $type,
+                'service_type' => $request->service_type,
                 'duration_trip_1' => $duration_trip_1,
                 'duration_trip_2' => $duration_trip_2,
                 'remarks' => $request->remarks,
             ];
             $daily_report = Daily_report::firstOrCreate($data);
-            if ($request->has('detail_unit_id')) {
-                foreach ($request->detail_unit_id as $key => $item) {
-                    $daily_report->daily_report_detail()->create(
-                        [
-                            'request_token' => $daily_report->request_token,
-                            'unit_id' => $request->detail_unit_id[$key],
-                            'daily_report_id' => $daily_report->id,
-                            'item' => $request->item[$key],
-                            'uom_1' => $request->uom_1[$key],
-                            'value_1' => $request->value_1[$key],
-                            'uom_2' => $request->uom_2[$key],
-                            'value_2' => $request->value_2[$key]
-                        ]
-                    );
+            if ($request->filled('detail_unit_id')) {
+                $details = [];
+                foreach ($request->input('detail_unit_id', []) as $key => $unitId) {
+                    if (blank($unitId)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token' => $daily_report->request_token,
+                        'unit_id'       => $unitId,
+                        'item'          => $request->input("item.$key"),
+                        'uom_1'         => $request->input("uom_1.$key"),
+                        'value_1'       => (float) $request->input("value_1.$key", 0),
+                        'uom_2'         => $request->input("uom_2.$key"),
+                        'value_2'       => (float) $request->input("value_2.$key", 0),
+                    ];
+                }
+                if ($details !== []) {
+                    $daily_report
+                        ->daily_report_detail()
+                        ->createMany($details);
                 }
             }
             DB::commit();
@@ -316,7 +322,6 @@ class DailyReportController extends Controller
                     ? countTime($depart_trip_1, $berthing_trip_1)
                     : null;
 
-
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
 
@@ -358,13 +363,12 @@ class DailyReportController extends Controller
                 'load' => $request->load,
                 'refule_km' => $request->refule_km,
                 'refule_liter' => $request->refule_liter,
-                // 'refule_water' => $request->refule_water,
                 'refule_mechine' => $request->refule_mechine,
                 'refule_genset' => $request->refule_genset,
                 'refule_type' => $request->refule_type,
-                'request_token' => $request->request_token,
                 'input_method' => 'Web',
                 'type' => $type,
+                'service_type' => $request->service_type,
                 'duration_trip_1' => $duration_trip_1,
                 'duration_trip_2' => $duration_trip_2,
                 'remarks' => $request->remarks,
@@ -372,20 +376,26 @@ class DailyReportController extends Controller
             $lockDaily_report = Daily_report::where('id', $daily_report->id)->lockForUpdate()->first();
             $lockDaily_report->update($data);
             $daily_report->daily_report_detail()->delete();
-            if ($request->has('detail_unit_id')) {
-                foreach ($request->detail_unit_id as $key => $item) {
-                    $daily_report->daily_report_detail()->create(
-                        [
-                            'request_token' => $daily_report->request_token,
-                            'unit_id' => $request->detail_unit_id[$key],
-                            'daily_report_id' => $daily_report->id,
-                            'item' => $request->item[$key],
-                            'uom_1' => $request->uom_1[$key],
-                            'value_1' => $request->value_1[$key],
-                            'uom_2' => $request->uom_2[$key],
-                            'value_2' => $request->value_2[$key]
-                        ]
-                    );
+            if ($request->filled('detail_unit_id')) {
+                $details = [];
+                foreach ($request->input('detail_unit_id', []) as $key => $unitId) {
+                    if (blank($unitId)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token' => $daily_report->request_token,
+                        'unit_id'       => $unitId,
+                        'item'          => $request->input("item.$key"),
+                        'uom_1'         => $request->input("uom_1.$key"),
+                        'value_1'       => $request->input("value_1.$key", 0),
+                        'uom_2'         => $request->input("uom_2.$key"),
+                        'value_2'       => $request->input("value_2.$key", 0),
+                    ];
+                }
+                if (!empty($details)) {
+                    $daily_report
+                        ->daily_report_detail()
+                        ->createMany($details);
                 }
             }
             DB::commit();

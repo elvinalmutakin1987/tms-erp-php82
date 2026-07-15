@@ -87,15 +87,22 @@ class ServiceController extends Controller
             );
             $service = Service::firstOrCreate($data);
             if ($request->item_no) {
-                foreach ($request->item_no as $key => $item_no) {
-                    $detail[] = [
-                        'request_token' => $service->request_token,
-                        'service_id' => $service->id,
-                        'item_no' => $item_no,
-                        'item_des' => $request->item_des[$key],
-                    ];
+                if ($request->filled('item_no')) {
+                    $details = [];
+                    foreach ($request->input('item_no', []) as $key => $itemNo) {
+                        if (blank($itemNo)) {
+                            continue;
+                        }
+                        $details[] = [
+                            'request_token' => $service->request_token,
+                            'item_no'       => $itemNo,
+                            'item_des'      => $request->input("item_des.$key"),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $service->service_item()->createMany($details);
+                    }
                 }
-                $service->service_item()->createMany($detail);
             }
             DB::commit();
             return response()->json([
@@ -157,14 +164,22 @@ class ServiceController extends Controller
             ));
             $service->update($data);
             if ($request->item_no) {
-                foreach ($request->item_no as $key => $item_no) {
-                    $detail[] = [
-                        'service_id' => $service->id,
-                        'item_no' => $request->item_no[$key],
-                        'item_des' => $request->item_des[$key],
-                    ];
+                if ($request->filled('item_no')) {
+                    $details = [];
+                    foreach ($request->input('item_no', []) as $key => $itemNo) {
+                        if (blank($itemNo)) {
+                            continue;
+                        }
+                        $details[] = [
+                            'item_no'  => $itemNo,
+                            'item_des' => $request->input("item_des.$key"),
+                        ];
+                    }
+                    $service->service_item()->delete();
+                    if ($details !== []) {
+                        $service->service_item()->createMany($details);
+                    }
                 }
-                $service->service_item()->sync($detail);
             }
             DB::commit();
             return response()->json([

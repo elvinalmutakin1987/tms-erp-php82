@@ -330,29 +330,58 @@ class ProformaInvoiceController extends Controller
                     ->whereIn('unit_id', $unit_lct_id)
                     ->get();
                 $trip = $daily_report->count();
-                foreach ($gen_proforma['contract_rate'] as $contractrate) {
-                    $rate_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                        ->where('contract_rate_id', $contractrate->id)
-                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                        ->sum('qty');
-                    $rate_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                        ->where('contract_rate_id', $contractrate->id)
-                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                        ->sum('amount');
-                    $amount = $contractrate->rate * $trip;
-                    $qty_ptd = $rate_qty_ptd + $trip;
-                    $amount_ptd = $rate_amount_ptd + $amount;
+                // foreach ($gen_proforma['contract_rate'] as $contractrate) {
+                //     $rate_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                //         ->where('contract_rate_id', $contractrate->id)
+                //         ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                //         ->sum('qty');
+                //     $rate_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                //         ->where('contract_rate_id', $contractrate->id)
+                //         ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                //         ->sum('amount');
+                //     $amount = $contractrate->rate * $trip;
+                //     $qty_ptd = $rate_qty_ptd + $trip;
+                //     $amount_ptd = $rate_amount_ptd + $amount;
+                //     $proforma_invoice->proforma_invoice_detail()->create([
+                //         'proforma_invoice_id' => $proforma_invoice->id,
+                //         'contract_rate_id' => $contractrate->id,
+                //         'rate' => $contractrate->rate,
+                //         'qty' => $trip,
+                //         'amount' => $amount,
+                //         'ptd_qty' => $qty_ptd,
+                //         'ptd_amount' => $amount_ptd
+                //     ]);
+                //     $total += $amount;
+                //     $total_ptd += $amount_ptd;
+                // }
+                $contractRates = data_get($gen_proforma, 'contract_rate', []);
+                foreach ($contractRates as $contractRate) {
+                    if (!$contractRate || blank($contractRate->id)) {
+                        continue;
+                    }
+                    $tripQty = (float) ($trip ?? 0);
+                    $rate    = (float) ($contractRate->rate ?? 0);
+                    $previousTotal = Proforma_invoice_detail::query()
+                        ->where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractRate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old ?? [])
+                        ->selectRaw('COALESCE(SUM(qty), 0) as total_qty')
+                        ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
+                        ->first();
+                    $amount    = $rate * $tripQty;
+                    $qtyPtd    = (float) $previousTotal->total_qty + $tripQty;
+                    $amountPtd = (float) $previousTotal->total_amount + $amount;
                     $proforma_invoice->proforma_invoice_detail()->create([
-                        'proforma_invoice_id' => $proforma_invoice->id,
-                        'contract_rate_id' => $contractrate->id,
-                        'rate' => $contractrate->rate,
-                        'qty' => $trip,
-                        'amount' => $amount,
-                        'ptd_qty' => $qty_ptd,
-                        'ptd_amount' => $amount_ptd
+                        'contract_id'     => $contract->id,
+                        'contract_rate_id' => $contractRate->id,
+                        'rate'             => $rate,
+                        'qty'              => $tripQty,
+                        'amount'           => $amount,
+                        'ptd_qty'          => $qtyPtd,
+                        'ptd_amount'       => $amountPtd,
                     ]);
-                    $total += $amount;
-                    $total_ptd += $amount_ptd;
+                    $total     = ($total ?? 0) + $amount;
+                    $total_ptd = ($total_ptd ?? 0) + $amountPtd;
                 }
                 $proforma_invoice->total = $total;
                 $proforma_invoice->save();
@@ -614,9 +643,6 @@ class ProformaInvoiceController extends Controller
                     $total += $amount;
                     $total_ptd += $amount_ptd;
                 }
-                $lockProforma_invoice->total = $total;
-                $lockProforma_invoice->save();
-                $this->check_approval($lockProforma_invoice, $request->status);
             } else if ($contract->service->type == 'Fuel Truck Rental') {
                 $data = [
                     'contract_id' => $request->contract_id,
@@ -705,6 +731,12 @@ class ProformaInvoiceController extends Controller
                 $view = 'proforma_invoice.table-lct-add';
             } else if ($contract->service->type == 'Fuel Truck Rental') {
                 $view = 'proforma_invoice.table-fuel-add';
+            } else if ($contract->service->type == 'Explosive Material Transport') {
+                $view = 'proforma_invoice.table-explo-add';
+            } else if ($contract->service->type == 'Pallet') {
+                $view = 'proforma_invoice.table-pallet-add';
+            } else if ($contract->service->type == 'Dry Hire') {
+                $view = 'proforma_invoice.table-dryhire-add';
             }
             /**
              * Check contract id sudah dibuatkan proforma invoice di bulan ini atau belum

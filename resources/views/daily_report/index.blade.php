@@ -78,7 +78,9 @@
                                         <th width="10">No</th>
                                         <th>Report Number</th>
                                         <th>Date</th>
+                                        <th>Shift</th>
                                         <th>Unit</th>
+                                        <th>Operator</th>
                                         <th>Type</th>
                                         <th>Total KM</th>
                                         <th>Duration</th>
@@ -168,25 +170,53 @@
                         searchable: true
                     },
                     {
+                        data: 'shift',
+                        name: 'shift',
+                        orderable: true,
+                        searchable: true,
+                        render: function(data) {
+                            if (data == 'Day') {
+                                return '<span class="badge bg-primary" style="font-size: 13px">' +
+                                    data + '</span>';
+                            }
+
+                            return '<span class="badge bg-dark" style="font-size: 13px">' +
+                                data +
+                                '</span>';
+                        }
+                    },
+                    {
                         data: 'unit',
                         name: 'unit',
                         orderable: true,
                         searchable: true
                     },
                     {
-                        data: 'type',
-                        name: 'type',
+                        data: 'operator',
+                        name: 'operator',
                         orderable: true,
-                        searchable: true,
-                        render: function(data) {
-                            if (data == 'LCT') {
-                                return '<span class="badge bg-success" style="font-size: 13px">' +
-                                    data + '</span>';
-                            }
+                        searchable: true
+                    },
+                    // {
+                    //     data: 'type',
+                    //     name: 'type',
+                    //     orderable: true,
+                    //     searchable: true,
+                    //     render: function(data) {
+                    //         if (data == 'LCT') {
+                    //             return '<span class="badge bg-success" style="font-size: 13px">' +
+                    //                 data + '</span>';
+                    //         }
 
-                            return '<span class="badge bg-info" style="font-size: 13px">' + data +
-                                '</span>';
-                        }
+                    //         return '<span class="badge bg-info" style="font-size: 13px">' + data +
+                    //             '</span>';
+                    //     }
+                    // },
+                    {
+                        data: 'service_type',
+                        name: 'service_type',
+                        orderable: true,
+                        searchable: true
                     },
                     {
                         data: 'total_km_duration',
@@ -245,6 +275,8 @@
                         type: 'GET',
                         success: function(response) {
                             $("#date").val(response.data.date);
+                            $("#service_type").val(response.data.service_type).trigger(
+                                'change.select2');
                             $("#shift").val(response.data.shift).trigger('change.select2');
                         },
                         error: function() {

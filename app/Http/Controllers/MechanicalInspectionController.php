@@ -158,18 +158,29 @@ class MechanicalInspectionController extends Controller
                 ]
             );
             $mechanical_inspection = Mechanical_inspection::firstOrCreate($data);
-            if ($request->has('inspection_item')) {
-                foreach ($request->inspection_item as $key => $item) {
-                    $mechanical_inspection->mechanical_inspection_detail()->create(
-                        [
-                            'request_token' => $mechanical_inspection->request_token,
-                            'inspection_item' => $item,
-                            'inspection_group' => $request->inspection_group[$key],
-                            'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
-                            'remarks' => $request->remarks[$key],
-                            'inspected_by' => $request->inspected_by[$key]
-                        ]
-                    );
+            if ($request->filled('inspection_item')) {
+                $details = [];
+                $checks = $request->input('check', []);
+                foreach ($request->input('inspection_item', []) as $key => $inspectionItem) {
+                    $inspectionGroup = $request->input("inspection_group.$key");
+                    if (blank($inspectionItem) || blank($inspectionGroup)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token'    => $mechanical_inspection->request_token,
+                        'inspection_item'  => $inspectionItem,
+                        'inspection_group' => $inspectionGroup,
+                        'check'            => (int) (
+                            $checks[$inspectionItem][$inspectionGroup] ?? 0
+                        ),
+                        'remarks'          => $request->input("remarks.$key"),
+                        'inspected_by'     => $request->input("inspected_by.$key"),
+                    ];
+                }
+                if (!empty($details)) {
+                    $mechanical_inspection
+                        ->mechanical_inspection_detail()
+                        ->createMany($details);
                 }
             }
             DB::commit();
@@ -238,18 +249,31 @@ class MechanicalInspectionController extends Controller
             $lockMechanical_inspection = Mechanical_inspection::where('id', $mechanical_inspection->id)->lockForUpdate()->first();
             $lockMechanical_inspection->lockForUpdate($data);
             $mechanical_inspection->mechanical_inspection_detail()->delete();
-            if ($request->has('inspection_item')) {
-                foreach ($request->inspection_item as $key => $item) {
-                    $mechanical_inspection->mechanical_inspection_detail()->create(
-                        [
-                            'request_token' => $mechanical_inspection->request_token,
-                            'inspection_item' => $item,
-                            'inspection_group' => $request->inspection_group[$key],
-                            'check' => (int) ($request->check[$item][$request->inspection_group[$key]] ?? 0),
-                            'remarks' => $request->remarks[$key],
-                            'inspected_by' => $request->inspected_by[$key]
-                        ]
-                    );
+            if ($request->filled('inspection_item')) {
+                $details = [];
+                $checks = $request->input('check', []);
+                foreach ($request->input('inspection_item', []) as $key => $inspectionItem) {
+                    $inspectionGroup = $request->input("inspection_group.$key");
+                    if (blank($inspectionItem) || blank($inspectionGroup)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token'    => $mechanical_inspection->request_token,
+                        'inspection_item'  => $inspectionItem,
+                        'inspection_group' => $inspectionGroup,
+                        'check'            => (int) data_get(
+                            $checks,
+                            "{$inspectionItem}.{$inspectionGroup}",
+                            0
+                        ),
+                        'remarks'          => $request->input("remarks.$key"),
+                        'inspected_by'     => $request->input("inspected_by.$key"),
+                    ];
+                }
+                if (!empty($details)) {
+                    $mechanical_inspection
+                        ->mechanical_inspection_detail()
+                        ->createMany($details);
                 }
             }
             DB::commit();

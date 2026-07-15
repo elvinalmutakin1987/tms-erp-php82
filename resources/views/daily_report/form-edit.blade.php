@@ -248,7 +248,7 @@
             $('#_km_total').val(
                 numbro(total).format({
                     thousandSeparated: true,
-                    mantissa: 0
+                    mantissa: 1
                 })
             );
         }
