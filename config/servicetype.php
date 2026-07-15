@@ -2,13 +2,11 @@
 
 return [
     'Transportation',
-    // 'Dry Hire Service',
-    // 'Rehabilitation - Reclamation',
-    // 'Coal Mining - Contractor',
-    // 'Man Power',
+    'Dry Hire',
     'Explosive Material Transport',
     'Unit Rental',
     'Fuel Truck Rental',
     'LCT',
+    'Pallet',
     'Survey',
 ];

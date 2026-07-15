@@ -54,10 +54,10 @@
                                 <thead class="table-dark">
                                     <tr>
                                         <th scope="col" style="width:3%">#</th>
-                                        {{-- <th scope="col" style="width:15%">Item No.</th> --}}
                                         <th scope="col">Description</th>
-                                        <th scope="col" style="width:10%">Unit</th>
-                                        <th scope="col" style="width:20%">Rate (Rp.)</th>
+                                        <th scope="col" style="width:15%">Unit</th>
+                                        <th scope="col" style="width:15%" class="text-end">Rate (Rp.)</th>
+                                        <th scope="col" style="width:15%">Item</th>
                                         <th scope="col">Notes</th>
                                         <th scope="col" style="width:5%">Action</th>
                                     </tr>
@@ -67,9 +67,6 @@
                                         <td class="p-1 align-middle">
 
                                         </td>
-                                        {{-- <td class="p-1 align-middle">
-                                            <input type="text" class="form-control" id="_item_no" name="_item_no">
-                                        </td> --}}
                                         <td class="p-1 align-middle">
                                             <input type="text" class="form-control" id="_description"
                                                 name="_description">
@@ -81,11 +78,20 @@
                                                 @endforeach
                                             </select>
                                         </td>
-                                        <td class="p-1 align-middle">
+                                        <td class="p-1 align-middle text-end">
                                             <input type="hidden" class="form-control" id="_rate_t"
                                                 name="_rate_t">
-                                            <input type="text" class="form-control" id="_rate_t_"
+                                            <input type="text" class="form-control text-end" id="_rate_t_"
                                                 name="_rate_t_">
+                                        </td>
+                                        <td class="p-1 align-middle">
+                                            <select class="form-select select-select" id="_item" name="_item">
+                                                <option value="ANSOL">ANSOL</option>
+                                                <option value="AN">AN</option>
+                                                <option value="Pupuk">Pupuk</option>
+                                                <option value="Access.">Access.</option>
+                                                <option value="Used Fuel">Used Fuel</option>
+                                            </select>
                                         </td>
                                         <td class="p-1 align-middle">
                                             <input type="text" class="form-control" id="_notes"
@@ -113,7 +119,7 @@
                                     <tr>
                                         <th scope="col" style="width:3%">#</th>
                                         <th scope="col" style="width:41%">Year</th>
-                                        <th scope="col" style="width:41%">Value (Rp.)</th>
+                                        <th scope="col" style="width:41%" class="text-end">Value (Rp.)</th>
                                         <th scope="col" style="width:5%">Action</th>
                                     </tr>
                                 </thead>
@@ -126,10 +132,10 @@
                                             <input type="number" class="form-control" id="_year"
                                                 name="_year">
                                         </td>
-                                        <td class="p-1 align-middle">
+                                        <td class="p-1 align-middle text-end">
                                             <input type="hidden" class="form-control" id="fmf_value"
                                                 name="fmf_value">
-                                            <input type="text" class="form-control" id="_fmf_value"
+                                            <input type="text" class="form-control text-end" id="_fmf_value"
                                                 name="_fmf_value">
                                         </td>
                                         <td class="p-1 align-middle">
@@ -152,8 +158,8 @@
                                     <tr>
                                         <th scope="col" style="width:3%">#</th>
                                         <th scope="col" style="width:30%">Unit Rental</th>
-                                        <th scope="col" style="width:30%">Target PA (%)</th>
-                                        <th scope="col" style="width:30%">Price (Rp.)</th>
+                                        <th scope="col" style="width:30%" class="text-end">Target PA (%)</th>
+                                        <th scope="col" style="width:30%" class="text-end">Price (Rp.)</th>
                                         <th scope="col" style="width:5%">Action</th>
                                     </tr>
                                 </thead>
@@ -166,16 +172,16 @@
                                             <select class="form-select select-select" id="unit" name="unit">
                                             </select>
                                         </td>
-                                        <td class="p-1 align-middle">
+                                        <td class="p-1 align-middle text-end">
                                             <input type="hidden" class="form-control" id="target_"
                                                 name="target_">
-                                            <input type="text" class="form-control" id="_target_"
+                                            <input type="text" class="form-control text-end" id="_target_"
                                                 name="_target_">
                                         </td>
-                                        <td class="p-1 align-middle">
+                                        <td class="p-1 align-middle text-end">
                                             <input type="hidden" class="form-control" id="price_"
                                                 name="price_">
-                                            <input type="text" class="form-control" id="_price_"
+                                            <input type="text" class="form-control text-end" id="_price_"
                                                 name="_price_">
                                         </td>
                                         <td class="p-1 align-middle" style="width:2%">

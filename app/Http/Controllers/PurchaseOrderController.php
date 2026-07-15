@@ -225,44 +225,71 @@ class PurchaseOrderController extends Controller
             );
             $purchase_order = Purchase_order::firstOrCreate($data);
             if ($type == 'Equipment') {
-                if ($request->has('maintenance_item_id')) {
-                    foreach ($request->maintenance_item_id as $i => $item) {
-                        $mro_item = Mro_item::find($request->mro_item_id[$i]);
-                        $type_ = $mro_item?->type ?? 'Good';
-                        $purchase_order->purchase_order_detail()->create(
-                            [
-                                'request_token' => $purchase_order->request_token,
-                                'maintenance_item_id' => $item,
-                                'mro_item_id' => $request->mro_item_id[$i],
-                                'type' => $type_,
-                                'desc_vendor' => $request->desc_vendor[$i],
-                                'uom' => $request->uom[$i],
-                                'qty' => $request->qty[$i],
-                                'price' => $request->price[$i],
-                                'discount_item' => $request->discount_item[$i],
-                                // 'tax' => $system_setting['tax'],
-                                'amount' => $request->amount[$i],
-                            ]
-                        );
+                if ($request->filled('maintenance_item_id')) {
+                    $mroItemIds = collect($request->input('mro_item_id', []))
+                        ->filter()
+                        ->unique()
+                        ->values();
+                    $mroItemTypes = Mro_item::query()
+                        ->whereIn('id', $mroItemIds)
+                        ->pluck('type', 'id');
+                    $details = [];
+                    foreach (
+                        $request->input('maintenance_item_id', [])
+                        as $i => $maintenanceItemId
+                    ) {
+                        if (blank($maintenanceItemId)) {
+                            continue;
+                        }
+                        $mroItemId = $request->input("mro_item_id.$i");
+                        $details[] = [
+                            'request_token'       => $purchase_order->request_token,
+                            'maintenance_item_id' => $maintenanceItemId,
+                            'mro_item_id'         => $mroItemId,
+                            'type'                => $mroItemTypes->get($mroItemId, 'Good'),
+                            'desc_vendor'         => $request->input("desc_vendor.$i"),
+                            'uom'                 => $request->input("uom.$i"),
+                            'qty'                 => $request->input("qty.$i", 0),
+                            'price'               => $request->input("price.$i", 0),
+                            'discount_item'       => $request->input(
+                                "discount_item.$i",
+                                0
+                            ),
+                            'amount'              => $request->input("amount.$i", 0),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $purchase_order
+                            ->purchase_order_detail()
+                            ->createMany($details);
                     }
                 }
             } else {
-                if ($request->has('description')) {
-                    foreach ($request->description as $i => $item) {
-                        $purchase_order->purchase_order_detail()->create(
-                            [
-                                'request_token' => $purchase_order->request_token,
-                                'type' => $request->type[$i],
-                                'description' => $item,
-                                'desc_vendor' => $request->desc_vendor[$i],
-                                'uom' => $request->uom[$i],
-                                'qty' => $request->qty[$i],
-                                'price' => $request->price[$i],
-                                'discount_item' => $request->discount_item[$i],
-                                // 'tax' => $system_setting['tax'],
-                                'amount' => $request->amount[$i]
-                            ]
-                        );
+                if ($request->filled('description')) {
+                    $details = [];
+                    foreach ($request->input('description', []) as $i => $description) {
+                        if (blank($description)) {
+                            continue;
+                        }
+                        $details[] = [
+                            'request_token' => $purchase_order->request_token,
+                            'type'          => $request->input("type.$i"),
+                            'description'   => $description,
+                            'desc_vendor'   => $request->input("desc_vendor.$i"),
+                            'uom'           => $request->input("uom.$i"),
+                            'qty'           => (float) $request->input("qty.$i", 0),
+                            'price'         => (float) $request->input("price.$i", 0),
+                            'discount_item' => (float) $request->input(
+                                "discount_item.$i",
+                                0
+                            ),
+                            'amount'        => (float) $request->input("amount.$i", 0),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $purchase_order
+                            ->purchase_order_detail()
+                            ->createMany($details);
                     }
                 }
             }

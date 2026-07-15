@@ -180,12 +180,6 @@ class MaintenanceController extends Controller
             $request->validate([
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
-                // 'client_vendor_id' => ['required', 'not_in:All'],
-                // 'hour_meter' => 'required',
-                // 'km_hm' => 'required',
-                // 'start' => 'required',
-                // 'finish' => 'required',
-                // 'work_duration' => 'required'
             ]);
             $data = [
                 'unit_id' => $request->unit_id,
@@ -203,14 +197,23 @@ class MaintenanceController extends Controller
                 'status' => $request->status
             ];
             $maintenance = Maintenance::firstOrCreate($data);
-            foreach ($request->maintenance_item_id as $key => $item) {
-                $maintenance->maintenance_detail()->create(
-                    [
-                        'request_token' => $maintenance->request_token,
-                        'maintenance_item_id' => $request->maintenance_item_id[$key],
-                        'action' => $request->action[$key],
-                    ]
-                );
+            if ($request->filled('maintenance_item_id')) {
+                $details = [];
+                foreach ($request->input('maintenance_item_id', []) as $key => $maintenanceItemId) {
+                    if (blank($maintenanceItemId)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token'       => $maintenance->request_token,
+                        'maintenance_item_id' => $maintenanceItemId,
+                        'action'              => $request->input("action.$key"),
+                    ];
+                }
+                if ($details !== []) {
+                    $maintenance
+                        ->maintenance_detail()
+                        ->createMany($details);
+                }
             }
             DB::commit();
             return response()->json([
@@ -262,12 +265,6 @@ class MaintenanceController extends Controller
             $request->validate([
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
-                // 'client_vendor_id' => ['required', 'not_in:All'],    
-                // 'hour_meter' => 'required',
-                // 'km_hm' => 'required',
-                // 'start' => 'required',
-                // 'finish' => 'required',
-                // 'work_duration' => 'required'
             ]);
             $data = [
                 'unit_id' => $request->unit_id,
@@ -286,15 +283,20 @@ class MaintenanceController extends Controller
             $lockMaintenance = Maintenance::where('id', $maintenance->id)->lockForUpdate()->first();
             $lockMaintenance->update($data);
             $maintenance->maintenance_detail()->delete();
-            if ($request->maintenance_item_id) {
-                foreach ($request->maintenance_item_id as $key => $item) {
-                    $maintenance->maintenance_detail()->create(
-                        [
-                            'maintenance_item_id' => $item,
-                            'request_token' => $maintenance->request_token,
-                            'action' => $request->action[$key]
-                        ]
-                    );
+            if ($request->filled('maintenance_item_id')) {
+                $details = [];
+                foreach ($request->input('maintenance_item_id', []) as $key => $maintenanceItemId) {
+                    if (blank($maintenanceItemId)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'maintenance_item_id' => $maintenanceItemId,
+                        'request_token'       => $maintenance->request_token,
+                        'action'              => $request->input("action.$key"),
+                    ];
+                }
+                if (!empty($details)) {
+                    $maintenance->maintenance_detail()->createMany($details);
                 }
             }
             DB::commit();

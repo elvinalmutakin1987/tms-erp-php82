@@ -98,17 +98,22 @@ class ApprovalFlowController extends Controller
                 ]
             );
             $approval_flow = Approval_flow::firstOrCreate($data);
-            if ($request->user_id) {
-                foreach ($request->user_id as $key => $user_id) {
+            if ($request->filled('user_id')) {
+                $detail = [];
+                foreach ($request->input('user_id', []) as $key => $userId) {
+                    if (blank($userId)) {
+                        continue;
+                    }
                     $detail[] = [
                         'request_token' => $approval_flow->request_token,
-                        'approval_flow_id' => $approval_flow->id,
-                        'user_id' => $user_id,
-                        'action' => $request->action[$key],
-                        'order' => $request->order[$key],
+                        'user_id' => $userId,
+                        'action' => $request->input("action.$key"),
+                        'order' => $request->input("order.$key", 0),
                     ];
                 }
-                $approval_flow->approval_step()->createMany($detail);
+                if (!empty($detail)) {
+                    $approval_flow->approval_step()->createMany($detail);
+                }
             }
             DB::commit();
             return response()->json([
@@ -173,17 +178,25 @@ class ApprovalFlowController extends Controller
                 'approvable_model'
             ));
             $approval_flow->update($data);
-            if ($request->user_id) {
-                foreach ($request->user_id as $key => $user_id) {
+            if ($request->filled('user_id')) {
+                $detail = [];
+                foreach ($request->input('user_id', []) as $key => $userId) {
+                    $action = $request->input("action.$key");
+                    $order  = $request->input("order.$key", 0);
+                    if (blank($userId)) {
+                        continue;
+                    }
                     $detail[] = [
                         'request_token' => $approval_flow->request_token,
-                        'approval_flow_id' => $approval_flow->id,
-                        'user_id' => $request->user_id[$key],
-                        'action' => $request->action[$key],
-                        'order' => $request->order[$key],
+                        'user_id' => $userId,
+                        'action' => $action,
+                        'order'  => $order,
                     ];
                 }
-                $approval_flow->approval_step()->sync($detail);
+                $approval_flow->approval_step()->delete();
+                if (!empty($detail)) {
+                    $approval_flow->approval_step()->createMany($detail);
+                }
             }
             DB::commit();
             return response()->json([

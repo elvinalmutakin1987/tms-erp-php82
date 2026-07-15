@@ -75,13 +75,14 @@ class ContractController extends Controller
                 ->make();
         }
         $uom = config('uom');
+        $servicetype = config('servicetype');
         $breadcrum = [
             'module' => 'Master Data',
             'route-module' => null,
             'sub-module' => 'Contract',
             'route-sub-module' => 'contract.index',
         ];
-        return view('contract.index', compact('breadcrum', 'uom'));
+        return view('contract.index', compact('breadcrum', 'uom', 'servicetype'));
     }
 
     /**
@@ -124,51 +125,48 @@ class ContractController extends Controller
             );
 
             $contract = Contract::firstOrCreate($data);
-            //service rate
-            if ($request->item_no) {
-                foreach ($request->service_item as $i => $service_item) {
-                    $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
-                    $contract->contract_rate()->firstOrCreate(
-                        [
-                            'contract_id' => $contract->id,
-                            // 'item_no' => $item,
-                            'request_token' => $contract->request_token,
-                            'service_item' => $service_item,
-                            'unit' => $request->unit_rate[$i],
-                            'rate' => $rate,
-                            'notes' => $request->note_rates[$i]
-                        ],
-                    );
+            // Service rate
+            if ($request->filled('service_item')) {
+                foreach ($request->input('service_item', []) as $i => $serviceItem) {
+                    if (blank($serviceItem)) {
+                        continue;
+                    }
+                    $contract->contract_rate()->create([
+                        'request_token' => $contract->request_token,
+                        'service_item' => $serviceItem,
+                        'unit' => $request->input("unit_rate.$i"),
+                        'type' => $request->input("rate_item.$i"),
+                        'rate' => $request->input("rate.$i", 0),
+                        'notes' => $request->input("note_rates.$i"),
+                    ]);
                 }
             }
-            //unit rate
-            if ($request->unit_id) {
-                foreach ($request->unit_id as $i => $unit_id) {
-                    $target = isset($request->target[$i]) ? $request->target[$i] : 0;
-                    $price = isset($request->price[$i]) ? $request->price[$i] : 0;
-                    $contract->unit_target()->firstOrCreate(
-                        [
-                            'contract_id' => $contract->id,
-                            'unit_id' => $unit_id,
-                            'request_token' => $contract->request_token,
-                            'target' => $target,
-                            'price' => $price
-                        ],
-                    );
+            // Unit rate
+            if ($request->filled('unit_id')) {
+                foreach ($request->input('unit_id', []) as $i => $unitId) {
+                    if (blank($unitId)) {
+                        continue;
+                    }
+                    $contract->unit_target()->create([
+                        'unit_id' => $unitId,
+                        'request_token' => $contract->request_token,
+                        'target' => $request->input("target.$i", 0),
+                        'price' => $request->input("price.$i", 0),
+                    ]);
                 }
             }
-            //fmf
-            if ($request->year) {
-                foreach ($request->year as $i => $item) {
-                    $value = isset($request->value_fmf[$i]) ? $request->value_fmf[$i] : 0;
-                    $contract->contract_fmf()->firstOrCreate(
-                        [
-                            'contract_id' => $contract->id,
-                            'year' => $item,
-                            'request_token' => $contract->request_token,
-                            'value' => $value,
-                        ],
-                    );
+
+            // FMF
+            if ($request->filled('year')) {
+                foreach ($request->input('year', []) as $i => $year) {
+                    if (blank($year)) {
+                        continue;
+                    }
+                    $contract->contract_fmf()->create([
+                        'year' => $year,
+                        'request_token' => $contract->request_token,
+                        'value' => $request->input("value_fmf.$i", 0),
+                    ]);
                 }
             }
             DB::commit();
@@ -251,52 +249,46 @@ class ContractController extends Controller
             );
             $contract->update($data);
             //service rate
-            if ($request->item_no) {
+            if ($request->filled('service_item')) {
                 $contract->contract_rate()->delete();
-                foreach ($request->service_item as $i => $service_item) {
-                    $rate = isset($request->rate[$i]) ? $request->rate[$i] : 0;
-                    $contract->contract_rate()->firstOrCreate(
-                        [
-                            'contract_id' => $contract->id,
-                            'request_token' => $contract->request_token,
-                            'service_item' => $service_item,
-                            'unit' => $request->unit_rate[$i],
-                            'rate' => $rate,
-                            'notes' => $request->note_rates[$i]
-                        ]
-                    );
+                foreach ($request->input('service_item', []) as $i => $serviceItem) {
+                    $contract->contract_rate()->create([
+                        'request_token' => $contract->request_token,
+                        'service_item' => $serviceItem,
+                        'unit' => $request->input("unit_rate.$i"),
+                        'type' => $request->input("rate_item.$i"),
+                        'rate' => $request->input("rate.$i", 0),
+                        'notes' => $request->input("note_rates.$i"),
+                    ]);
                 }
             }
-            //unit rate
-            if ($request->unit_id) {
+            // Unit rate
+            if ($request->filled('unit_id')) {
                 $contract->unit_target()->delete();
-                foreach ($request->unit_id as $i => $unit_id) {
-                    $target = isset($request->target[$i]) ? $request->target[$i] : 0;
-                    $price = isset($request->price[$i]) ? $request->price[$i] : 0;
-                    $contract->unit_target()->firstOrCreate(
-                        [
-                            'contract_id' => $contract->id,
-                            'unit_id' => $unit_id,
-                            'request_token' => $contract->request_token,
-                            'target' => $target,
-                            'price' => $price
-                        ]
-                    );
+                foreach ($request->input('unit_id', []) as $i => $unitId) {
+                    if (blank($unitId)) {
+                        continue;
+                    }
+                    $contract->unit_target()->create([
+                        'unit_id' => $unitId,
+                        'request_token' => $contract->request_token,
+                        'target' => $request->input("target.$i", 0),
+                        'price' => $request->input("price.$i", 0),
+                    ]);
                 }
             }
-            //fmf
-            if ($request->year) {
+            // FMF
+            if ($request->filled('year')) {
                 $contract->contract_fmf()->delete();
-                foreach ($request->year as $i => $item) {
-                    $value = isset($request->value_fmf[$i]) ? $request->value_fmf[$i] : 0;
-                    $contract->contract_fmf()->firstOrCreate(
-                        [
-                            'contract_id' => $contract->id,
-                            'year' => $item,
-                            'request_token' => $contract->request_token,
-                            'value' => $value,
-                        ]
-                    );
+                foreach ($request->input('year', []) as $i => $year) {
+                    if (blank($year)) {
+                        continue;
+                    }
+                    $contract->contract_fmf()->create([
+                        'year' => $year,
+                        'request_token' => $contract->request_token,
+                        'value' => $request->input("value_fmf.$i", 0),
+                    ]);
                 }
             }
             DB::commit();

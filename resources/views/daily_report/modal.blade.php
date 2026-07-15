@@ -26,6 +26,14 @@
                                 <option value="Night">Night</option>
                             </select>
                         </div>
+                        <div class="col">
+                            <label for="service_type" class="form-label">Service Type</label>
+                            <select class="form-select select-select" id="service_type" name="service_type">
+                                @foreach ($service_type as $d => $value)
+                                    <option value="{{ $value }}">{{ $value }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div id="div-form">
 

@@ -660,11 +660,11 @@
 
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
-            // var item_no = $("#_item_no").val();
             var description = $("#_description").val();
             var rate = $("#_rate_t").val();
             var _rate = $("#_rate_t_").val();
             var unit = $("#_unit").val();
+            var item = $("#_item").val();
             var notes = $("#_notes").val();
             var newRow = `
                 <tr>
@@ -675,12 +675,15 @@
                     <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="service_item" name="service_item[]" readonly value="${description}">
                     </td>
-                     <td class="p-1 align-middle">
+                    <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="unit_rate" name="unit_rate[]" readonly value="${unit}">
                     </td>
-                    <td class="p-1 align-middle">
+                    <td class="p-1 align-middle text-end">
                        <input type="hidden" class="form-control" id="rate" name="rate[]" readonly value="${rate}">
-                       <input type="text" class="form-control" id="_rate" name="_rate[]" readonly value="${_rate}">
+                       <input type="text" class="form-control text-end" id="_rate" name="_rate[]" readonly value="${_rate}">
+                    </td>
+                    <td class="p-1 align-middle">
+                       <input type="text" class="form-control" id="rate_item" name="rate_item[]" readonly value="${unit}">
                     </td>
                      <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="note_rates" name="note_rates[]" readonly value="${notes}">
@@ -721,13 +724,13 @@
                        <input type="hidden" class="form-control" id="unit_id" name="unit_id[]" readonly value="${unit_id}">
                        <input type="text" class="form-control" id="unit_name" name="unit_name[]" readonly value="${unit_name}">
                     </td>
-                    <td class="p-1 align-middle">
+                    <td class="p-1 align-middle text-end">
                        <input type="hidden" class="form-control" id="target" name="target[]" readonly value="${target}">
-                       <input type="text" class="form-control" id="_target" name="_target[]" readonly value="${_target}">
+                       <input type="text" class="form-control text-end" id="_target" name="_target[]" readonly value="${_target}">
                     </td>
-                    <td class="p-1 align-middle">
+                    <td class="p-1 align-middle text-end">
                        <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${price}">
-                       <input type="text" class="form-control" id="_price" name="_price[]" readonly value="${_price}">
+                       <input type="text" class="form-control text-end" id="_price" name="_price[]" readonly value="${_price}">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">
@@ -761,9 +764,9 @@
                     <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="year" name="year[]" readonly value="${year}">
                     </td>
-                    <td class="p-1 align-middle">
+                    <td class="p-1 align-middle text-end">
                        <input type="hidden" class="form-control" id="value_fmf" name="value_fmf[]" readonly value="${fmf_value}">
-                       <input type="text" class="form-control" id="_value_fmf" name="_value_fmf[]" readonly value="${_fmf_value}">
+                       <input type="text" class="form-control text-end" id="_value_fmf" name="_value_fmf[]" readonly value="${_fmf_value}">
                     </td>
                     <td class="text-center p-1 align-middle">
                         <div class="row row-cols-auto g-3">

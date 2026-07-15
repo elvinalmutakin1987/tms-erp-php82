@@ -1,6 +1,9 @@
 <?php
 
 return [
+    "TRIP",
+    "TON",
+    "TANK",
     "PCS",
     "UNIT",
     "BOX",
@@ -23,5 +26,4 @@ return [
     "SAK",
     "DAY",
     "AA",
-    "TRIP"
 ];
