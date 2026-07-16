@@ -17,12 +17,12 @@
                     @csrf
                     <input type="hidden" name="request_token" id="request_token">
                     <div class="row mb-4">
-                        <div class="col">
+                        <div class="col-3">
                             <label for="year" class="form-label">Year</label>
                             <input type="number" class="form-control" id="year" name="year"
                                 value="{{ now()->year }}">
                         </div>
-                        <div class="col">
+                        <div class="col-3">
                             <label for="month" class="form-label">Month</label>
                             <select class="form-select select-select" id="month" name="month">
                                 @foreach (range(1, 12) as $m)
@@ -32,12 +32,14 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col">
+                        <div class="col-6">
                             <label for="contract_id" class="form-label">Contract</label>
                             <select class="form-select select-select" id="contract_id" name="contract_id">
                                 <option value=""></option>
                                 @foreach ($contract as $d)
-                                    <option value="{{ $d->id }}">{{ $d->contract_no }}</option>
+                                    <option value="{{ $d->id }}">
+                                        {{ $d->contract_no . ' - ' . $d->service->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </div>

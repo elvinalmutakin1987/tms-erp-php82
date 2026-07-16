@@ -201,7 +201,6 @@
                         $('#value').val(response.data.value);
                         $('#notes').val(response.data.notes);
                         $('#request_token').val(response.data.request_token);
-
                         /*
                          * Select client
                          * */
@@ -209,49 +208,39 @@
                         const clientVendorText = response.client_vendor ? response.client_vendor
                             .name :
                             ``;
-
                         const $clientVendor = $("#client_vendor_id");
-
                         if (clientVendorId) {
                             const optionExists = $clientVendor.find('option').filter(
                                 function() {
                                     return String(this.value) === String(clientVendorId);
                                 }).length > 0;
-
                             if (!optionExists) {
                                 const newOption = new Option(clientVendorText, clientVendorId,
                                     true, true);
                                 $clientVendor.append(newOption);
                             }
-
                             $clientVendor.val(clientVendorId).trigger('change.select2');
                         }
                         /* End */
-
                         /*
                          * Select service
                          * */
                         const serviceId = response.data.service_id;
                         const serviceText = response.service ? response.service.name : null;
-
                         const $service = $("#service_id");
-
                         if (serviceId) {
                             const optionExists = $service.find('option').filter(
                                 function() {
                                     return String(this.value) === String(serviceId);
                                 }).length > 0;
-
                             if (!optionExists) {
                                 const newOption = new Option(serviceText, serviceId, true,
                                     true);
                                 $service.append(newOption);
                             }
-
                             $service.val(serviceId).trigger('change.select2');
                         }
                         /* End */
-
                         var newRow = $(response.html_item);
                         var newRow1 = $(response.html_target);
                         var newRow2 = $(response.html_fmf);
@@ -479,7 +468,6 @@
                 .empty()
                 .trigger('change');
             $('#request_token').val("");
-            // $('#client_vendor_id').val(null).trigger('change');
         });
 
         $('#cancelButton').on('click', function() {
@@ -496,8 +484,6 @@
                 const $el = $(this);
                 $el.select2({
                         theme: "bootstrap-5",
-                        // dropdownParent: $(
-                        //     '#formModal'),
                         width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
                             'style'),
                         selectOnClose: false,
@@ -683,7 +669,7 @@
                        <input type="text" class="form-control text-end" id="_rate" name="_rate[]" readonly value="${_rate}">
                     </td>
                     <td class="p-1 align-middle">
-                       <input type="text" class="form-control" id="rate_item" name="rate_item[]" readonly value="${unit}">
+                       <input type="text" class="form-control" id="rate_item" name="rate_item[]" readonly value="${item}">
                     </td>
                      <td class="p-1 align-middle">
                        <input type="text" class="form-control" id="note_rates" name="note_rates[]" readonly value="${notes}">
@@ -787,33 +773,27 @@
 
         $("#tableTarget").on("click", ".delete-row", function() {
             $(this).closest("tr").remove();
-
             if ($(this).hasClass('fixed-row')) {
                 return;
             }
-
             $(this).remove();
             renumberRows('target');
         });
 
         $("#tableItem").on("click", ".delete-row", function() {
             $(this).closest("tr").remove();
-
             if ($(this).hasClass('fixed-row')) {
                 return;
             }
-
             $(this).remove();
             renumberRows('item');
         });
 
         $("#tableFmf").on("click", ".delete-row", function() {
             $(this).closest("tr").remove();
-
             if ($(this).hasClass('fixed-row')) {
                 return;
             }
-
             $(this).remove();
             renumberRows('fmf');
         });
@@ -847,19 +827,14 @@
 
         function initClientVendorSelect2() {
             const $client_vendor = $('#client_vendor_id');
-
             if (!$client_vendor.length) {
                 return;
             }
-
             const selectedValue = $client_vendor.val();
-
             if ($client_vendor.hasClass('select2-hidden-accessible')) {
                 $client_vendor.select2('destroy');
             }
-
             $client_vendor.off('.clientVendor');
-
             $client_vendor.select2({
                 theme: "bootstrap-5",
                 dropdownParent: $('#formModal'),
@@ -920,19 +895,14 @@
 
         function initClientTopSelect2() {
             const $client = $('#client');
-
             if (!$client.length) {
                 return;
             }
-
             const selectedValue = $client.val();
-
             if ($client.hasClass('select2-hidden-accessible')) {
                 $client.select2('destroy');
             }
-
             $client.off('.client');
-
             $client.select2({
                 theme: "bootstrap-5",
                 width: $('#client').data('width') ? $('#client').data('width') : (
@@ -970,22 +940,6 @@
             if (selectedValue) {
                 $client.val(selectedValue).trigger('change.select2');
             }
-
-            // $client.on('select2:open.client', function() {
-            //     setTimeout(function() {
-            //         const search = document.querySelector(
-            //             '.select2-container--open .select2-search__field'
-            //         );
-
-            //         if (search) {
-            //             search.focus({
-            //                 preventScroll: true
-            //             });
-            //         }
-
-            //         $('.select2-container--open').css('z-index', 1056);
-            //     }, 0);
-            // });
         }
 
         function initUnitSelect2() {
@@ -1039,23 +993,19 @@
                     $('.select2-container--open').css('z-index', 1056);
                 }, 0);
             });
-
             if (selectedValue) {
                 $unit.val(selectedValue).trigger('change.select2');
             }
-
             $unit.on('select2:open.unit', function() {
                 setTimeout(function() {
                     const search = document.querySelector(
                         '.select2-container--open .select2-search__field'
                     );
-
                     if (search) {
                         search.focus({
                             preventScroll: true
                         });
                     }
-
                     $('.select2-container--open').css('z-index', 1056);
                 }, 0);
             });

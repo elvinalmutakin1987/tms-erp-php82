@@ -35,7 +35,6 @@ class MechanicalInspectionController extends Controller
                 $mechanical_inspection = $mechanical_inspection->where('date', '<=', request()->date_end);
             }
             $mechanical_inspection = $mechanical_inspection->orderBy('date', 'desc')->get();
-
             $user = Auth::user();
             $permissionNames = [
                 'mechanical_inspection.edit',
@@ -59,7 +58,7 @@ class MechanicalInspectionController extends Controller
 
             return DataTables::of($mechanical_inspection)
                 ->addIndexColumn()
-                ->addColumn('action', function ($item) {
+                ->addColumn('action', function ($item) use ($canAccess) {
                     $button = '
                         <div class="col">
                             <div class="dropdown">
@@ -86,14 +85,25 @@ class MechanicalInspectionController extends Controller
                     ';
                     /**
                      * Tombol Edit:
-                     * - hanya muncul jika status Draft
-                     * - hanya untuk superadmin atau user dengan permission purchase_requisition_general.edit
                      */
-                    if (($item->status === 'Draft' && $canAccess('mechanicalinspection.edit')) || Auth::user()->hasRole('superadmin')) {
+                    if ($canAccess('mechanicalinspection.edit') || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
                                 <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
                                     Edit
+                                </a>
+                            </li>
+                        ';
+                    }
+
+                    /**
+                     * Tombol Hapus:
+                     */
+                    if ($canAccess('mechanicalinspection.delete') || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
+                                    Delete
                                 </a>
                             </li>
                         ';

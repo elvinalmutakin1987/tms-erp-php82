@@ -231,18 +231,18 @@ class PurchaseRequisitionController extends Controller
                             continue;
                         }
                         $details[] = [
-                            'request_token'       => $purchase_requisition->request_token,
+                            'request_token' => $purchase_requisition->request_token,
                             'maintenance_item_id' => $maintenanceItemId,
-                            'mro_item_id'         => $request->input("mro_item_id.$i"),
-                            'uom'                 => $request->input("uom.$i"),
-                            'qty'                 => (float) $request->input("qty.$i", 0),
-                            'price'               => (float) $request->input("price.$i", 0),
-                            'discount_item'       => (float) $request->input(
+                            'mro_item_id' => $request->input("mro_item_id.$i"),
+                            'uom' => $request->input("uom.$i"),
+                            'qty' => (float) $request->input("qty.$i", 0),
+                            'price' => (float) $request->input("price.$i", 0),
+                            'discount_item' => (float) $request->input(
                                 "discount_item.$i",
                                 0
                             ),
-                            'tax'                 => $tax,
-                            'amount'              => (float) $request->input("amount.$i", 0),
+                            'tax' => $tax,
+                            'amount' => (float) $request->input("amount.$i", 0),
                         ];
                     }
                     if ($details !== []) {
@@ -345,37 +345,35 @@ class PurchaseRequisitionController extends Controller
             $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
             $lockPurchase_requisition->update($data);
             $purchase_requisition->purchase_requisition_detail()->delete();
-            if ($request->has('maintenance_item_id')) {
-                if ($request->filled('maintenance_item_id')) {
-                    $details = [];
-                    $tax = (float) data_get($system_setting, 'tax', 0);
-                    foreach (
-                        $request->input('maintenance_item_id', [])
-                        as $i => $maintenanceItemId
-                    ) {
-                        if (blank($maintenanceItemId)) {
-                            continue;
-                        }
-                        $details[] = [
-                            'request_token'       => $purchase_requisition->request_token,
-                            'maintenance_item_id' => $maintenanceItemId,
-                            'mro_item_id'         => $request->input("mro_item_id.$i"),
-                            'uom'                 => $request->input("uom.$i"),
-                            'qty'                 => (float) $request->input("qty.$i", 0),
-                            'price'               => (float) $request->input("price.$i", 0),
-                            'discount_item'       => (float) $request->input(
-                                "discount_item.$i",
-                                0
-                            ),
-                            'tax'                 => $tax,
-                            'amount'              => (float) $request->input("amount.$i", 0),
-                        ];
+            if ($request->filled('maintenance_item_id')) {
+                $details = [];
+                $tax = (float) data_get($system_setting, 'tax', 0);
+                foreach (
+                    $request->input('maintenance_item_id', [])
+                    as $i => $maintenanceItemId
+                ) {
+                    if (blank($maintenanceItemId)) {
+                        continue;
                     }
-                    if ($details !== []) {
-                        $purchase_requisition
-                            ->purchase_requisition_detail()
-                            ->createMany($details);
-                    }
+                    $details[] = [
+                        'request_token' => $purchase_requisition->request_token,
+                        'maintenance_item_id' => $maintenanceItemId,
+                        'mro_item_id' => $request->input("mro_item_id.$i"),
+                        'uom' => $request->input("uom.$i"),
+                        'qty' => (float) $request->input("qty.$i", 0),
+                        'price' => (float) $request->input("price.$i", 0),
+                        'discount_item' => (float) $request->input(
+                            "discount_item.$i",
+                            0
+                        ),
+                        'tax' => $tax,
+                        'amount' => (float) $request->input("amount.$i", 0),
+                    ];
+                }
+                if ($details !== []) {
+                    $purchase_requisition
+                        ->purchase_requisition_detail()
+                        ->createMany($details);
                 }
             }
             /**
