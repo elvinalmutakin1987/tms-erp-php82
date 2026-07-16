@@ -208,33 +208,31 @@ class PurchaseRequisitionGeneralController extends Controller
                 ]
             );
             $purchase_requisition = Purchase_requisition::firstOrCreate($data);
-            if ($request->has('description')) {
-                if ($request->filled('description')) {
-                    $details = [];
-                    $tax = (float) data_get($system_setting, 'tax', 0);
-                    foreach ($request->input('description', []) as $i => $description) {
-                        if (blank($description)) {
-                            continue;
-                        }
-                        $details[] = [
-                            'request_token' => $purchase_requisition->request_token,
-                            'description'   => $description,
-                            'uom'           => $request->input("uom.$i"),
-                            'qty'           => (float) $request->input("qty.$i", 0),
-                            'price'         => (float) $request->input("price.$i", 0),
-                            'discount_item' => (float) $request->input(
-                                "discount_item.$i",
-                                0
-                            ),
-                            'tax'           => $tax,
-                            'amount'        => (float) $request->input("amount.$i", 0),
-                        ];
+            if ($request->filled('description')) {
+                $details = [];
+                $tax = (float) data_get($system_setting, 'tax', 0);
+                foreach ($request->input('description', []) as $i => $description) {
+                    if (blank($description)) {
+                        continue;
                     }
-                    if ($details !== []) {
-                        $purchase_requisition
-                            ->purchase_requisition_detail()
-                            ->createMany($details);
-                    }
+                    $details[] = [
+                        'request_token' => $purchase_requisition->request_token,
+                        'description' => $description,
+                        'uom' => $request->input("uom.$i"),
+                        'qty' => (float) $request->input("qty.$i", 0),
+                        'price' => (float) $request->input("price.$i", 0),
+                        'discount_item' => (float) $request->input(
+                            "discount_item.$i",
+                            0
+                        ),
+                        'tax' => $tax,
+                        'amount' => (float) $request->input("amount.$i", 0),
+                    ];
+                }
+                if ($details !== []) {
+                    $purchase_requisition
+                        ->purchase_requisition_detail()
+                        ->createMany($details);
                 }
             }
 
@@ -328,33 +326,31 @@ class PurchaseRequisitionGeneralController extends Controller
             $lockPurchase_requisition = Purchase_requisition::where('id', $purchase_requisition->id)->lockForUpdate()->first();
             $lockPurchase_requisition->update($data);
             $purchase_requisition->purchase_requisition_detail()->delete();
-            if ($request->has('description')) {
-                if ($request->filled('description')) {
-                    $details = [];
-                    $tax = (float) data_get($system_setting, 'tax', 0);
-                    foreach ($request->input('description', []) as $i => $description) {
-                        if (blank($description)) {
-                            continue;
-                        }
-                        $details[] = [
-                            'request_token' => $purchase_requisition->request_token,
-                            'description'   => $description,
-                            'uom'           => $request->input("uom.$i"),
-                            'qty'           => (float) $request->input("qty.$i", 0),
-                            'price'         => (float) $request->input("price.$i", 0),
-                            'discount_item' => (float) $request->input(
-                                "discount_item.$i",
-                                0
-                            ),
-                            'tax'           => $tax,
-                            'amount'        => (float) $request->input("amount.$i", 0),
-                        ];
+            if ($request->filled('description')) {
+                $details = [];
+                $tax = (float) data_get($system_setting, 'tax', 0);
+                foreach ($request->input('description', []) as $i => $description) {
+                    if (blank($description)) {
+                        continue;
                     }
-                    if ($details !== []) {
-                        $purchase_requisition
-                            ->purchase_requisition_detail()
-                            ->createMany($details);
-                    }
+                    $details[] = [
+                        'request_token' => $purchase_requisition->request_token,
+                        'description' => $description,
+                        'uom' => $request->input("uom.$i"),
+                        'qty' => (float) $request->input("qty.$i", 0),
+                        'price' => (float) $request->input("price.$i", 0),
+                        'discount_item' => (float) $request->input(
+                            "discount_item.$i",
+                            0
+                        ),
+                        'tax' => $tax,
+                        'amount' => (float) $request->input("amount.$i", 0),
+                    ];
+                }
+                if ($details !== []) {
+                    $purchase_requisition
+                        ->purchase_requisition_detail()
+                        ->createMany($details);
                 }
             }
             /**

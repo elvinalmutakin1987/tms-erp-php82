@@ -198,47 +198,6 @@
                             </table>
                         </div>
                     </div>
-                    {{-- <div class="row">
-                        <div class="col-md-12 mb-2" id="div-fmf">
-                            <label for="_value" class="form-label">Fix Monthly Fee</label>
-                            <table class="table mb-0 table-bordered" id="tableFmf">
-                                <thead class="table-dark">
-                                    <tr>
-                                        <th scope="col" style="width:3%">#</th>
-                                        <th scope="col">Year</th>
-                                        <th scope="col" style="width:25%">Value (Rp.)</th>
-                                        <th scope="col" style="width:5%">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tbody_tableFmf">
-                                    <tr class="fixed-row">
-                                        <td class="p-1 align-middle">
-
-                                        </td>
-                                        <td class="p-1 align-middle">
-                                            <input type="number" class="form-control" id="_year"
-                                                name="_year">
-                                        </td>
-                                        <td class="p-1 align-middle">
-                                            <input type="hidden" class="form-control" id="fmf_value"
-                                                name="fmf_value">
-                                            <input type="text" class="form-control" id="_fmf_value"
-                                                name="_fmf_value">
-                                        </td>
-                                        <td class="p-1 align-middle">
-                                            <div class="row row-cols-auto g-3">
-                                                <div class="col">
-                                                    <button type="button"
-                                                        class="btn btn-lg btn-primary bx bx-plus mr-1"
-                                                        id="addFmfButton"></button>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div> --}}
                 </form>
             </div>
             <div class="modal-footer">

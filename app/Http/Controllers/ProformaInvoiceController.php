@@ -356,6 +356,7 @@ class ProformaInvoiceController extends Controller
                     $qtyPtd = (float) $previousTotal->total_qty + $tripQty;
                     $amountPtd = (float) $previousTotal->total_amount + $amount;
                     $proforma_invoice->proforma_invoice_detail()->create([
+                        'request_token' => $contract->request_token,
                         'contract_id' => $contract->id,
                         'contract_rate_id' => $contractRate->id,
                         'rate' => $rate,
@@ -430,6 +431,7 @@ class ProformaInvoiceController extends Controller
                     $proforma_invoice->proforma_invoice_detail()->create([
                         'contract_id' => $contract->id,
                         'contract_rate_id' => $contractrate->id,
+                        'request_token' => $contract->request_token,
                         'rate' => $rate,
                         'qty' => $qty,
                         'amount' => $amount,
@@ -440,7 +442,51 @@ class ProformaInvoiceController extends Controller
                 $proforma_invoice->total = $total_amount;
                 $proforma_invoice->save();
                 $this->check_approval($proforma_invoice, $request->status);
-            } else if ($contract->service->type == 'Explo') {
+            } else if ($contract->service->type == 'Pallet') {
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+                $total = 0;
+                $proforma_invoice = Proforma_invoice::firstOrCreate([
+                    'contract_id' => $request->contract_id,
+                    'client_vendor_id' => $contract->client_vendor_id,
+                    'request_token' => $request->request_token,
+                    'user_id' => Auth::id(),
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'type' => $contract->service->type,
+                    'status' => $request->status
+                ]);
+                $total = 0;
+                if ($request->filled('service_item')) {
+                    $details = [];
+                    foreach (
+                        $request->input('service_item', [])
+                        as $i => $serviceItem
+                    ) {
+                        if (blank($serviceItem)) {
+                            continue;
+                        }
+                        $total += (float) (float) $request->input("amount.$i", 0);
+                        $details[] = [
+                            'request_token' => $proforma_invoice->request_token,
+                            'contract_id' => $contract->id,
+                            'service_item' => $serviceItem,
+                            'unit_id' => $request->input("unit_id.$i"),
+                            'qty' => (float) $request->input("qty.$i", 0),
+                            'rate' => (float) $request->input("rate.$i", 0),
+                            'amount' => (float) $request->input("amount.$i", 0),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $proforma_invoice
+                            ->proforma_invoice_detail()
+                            ->createMany($details);
+                    }
+                }
+                $proforma_invoice->total = $total;
+                $proforma_invoice->save();
+                $this->check_approval($proforma_invoice, $request->status);
             }
             DB::commit();
             return response()->json([
@@ -521,6 +567,22 @@ class ProformaInvoiceController extends Controller
                 'year',
                 'month',
                 'month_name'
+            ))->render();
+        } else if ($contract->service->type == 'Pallet') {
+            $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+            $unit_target = Unit_target::where('contract_id', $contract->id)->get();
+            $html = view('proforma_invoice.table-pallet-edit', compact(
+                'proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'approval_process',
+                'year',
+                'month',
+                'month_name',
+                'unit_target',
+                'contract_rate'
             ))->render();
         }
         return response()->json([
@@ -647,6 +709,7 @@ class ProformaInvoiceController extends Controller
                 $total += $amount;
                 $total_ptd += $amount_ptd;
                 $data = [
+                    'request_token' => $contract->request_token,
                     'user_id' => Auth::id(),
                     'periode_start' => $start_date,
                     'periode_finish' => $end_date,
@@ -688,6 +751,7 @@ class ProformaInvoiceController extends Controller
                     $qty_ptd = $rate_qty_ptd + $trip;
                     $amount_ptd = $rate_amount_ptd + $amount;
                     $lockProforma_invoice->proforma_invoice_detail()->create([
+                        'request_token' => $contract->request_token,
                         'proforma_invoice_id' => $proforma_invoice->id,
                         'contract_rate_id' => $contractrate->id,
                         'rate' => $contractrate->rate,
@@ -757,6 +821,7 @@ class ProformaInvoiceController extends Controller
                     $total_amount += $amount;
                     $total_amount_ptd += $amount_ptd;
                     $lockProforma_invoice->proforma_invoice_detail()->create([
+                        'request_token' => $contract->request_token,
                         'contract_id' => $contract->id,
                         'contract_rate_id' => $contractrate->id,
                         'rate' => $rate,
@@ -769,7 +834,51 @@ class ProformaInvoiceController extends Controller
                 $lockProforma_invoice->total = $total_amount;
                 $lockProforma_invoice->save();
                 $this->check_approval($lockProforma_invoice, $request->status);
-            } else if ($contract->service->type == 'Explo') {
+            } else if ($contract->service->type == 'Pallet') {
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+                $total = 0;
+                $data = [
+                    'user_id' => Auth::id(),
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'type' => $contract->service->type,
+                    'status' => $request->status
+                ];
+                $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
+                $lockProforma_invoice->update($data);
+                $lockProforma_invoice->proforma_invoice_detail()->delete();
+                $total = 0;
+                if ($request->filled('service_item')) {
+                    $details = [];
+                    foreach (
+                        $request->input('service_item', [])
+                        as $i => $serviceItem
+                    ) {
+                        if (blank($serviceItem)) {
+                            continue;
+                        }
+                        $total += (float) (float) $request->input("amount.$i", 0);
+                        $details[] = [
+                            'contract_id' => $contract->id,
+                            'request_token' => $proforma_invoice->request_token,
+                            'service_item' => $serviceItem,
+                            'unit_id' => $request->input("unit_id.$i"),
+                            'qty' => (float) $request->input("qty.$i", 0),
+                            'rate' => (float) $request->input("rate.$i", 0),
+                            'amount' => (float) $request->input("amount.$i", 0),
+                        ];
+                    }
+                    if ($details !== []) {
+                        $proforma_invoice
+                            ->proforma_invoice_detail()
+                            ->createMany($details);
+                    }
+                }
+                $lockProforma_invoice->total = $total;
+                $lockProforma_invoice->save();
+                $this->check_approval($lockProforma_invoice, $request->status);
             }
             DB::commit();
             return response()->json([
@@ -844,18 +953,55 @@ class ProformaInvoiceController extends Controller
                     }
                 })
                 ->preview();
-            $view = 'proforma_invoice.table-rental-add';
-            if ($contract->service->type == 'LCT') {
-                $view = 'proforma_invoice.table-lct-add';
+            $html = '';
+            if ($contract->service->type == 'Unit Rental') {
+                $html = view('proforma_invoice.table-rental-add', compact(
+                    'data',
+                    'contract',
+                    'year',
+                    'month'
+                ))->render();
+            } else if ($contract->service->type == 'LCT') {
+                $html = view('proforma_invoice.table-lct-add', compact(
+                    'data',
+                    'contract',
+                    'year',
+                    'month'
+                ))->render();
             } else if ($contract->service->type == 'Fuel Truck Rental') {
-                $view = 'proforma_invoice.table-fuel-add';
+                $html = view('proforma_invoice.table-fuel-add', compact(
+                    'data',
+                    'contract',
+                    'year',
+                    'month'
+                ))->render();
             } else if ($contract->service->type == 'Explosive Material Transport') {
-                $view = 'proforma_invoice.table-explo-add';
+                $html = view('proforma_invoice.table-explo-add', compact(
+                    'data',
+                    'contract',
+                    'year',
+                    'month'
+                ))->render();
             } else if ($contract->service->type == 'Pallet') {
-                $view = 'proforma_invoice.table-pallet-add';
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->get();
+                $html = view('proforma_invoice.table-pallet-add', compact(
+                    'data',
+                    'contract',
+                    'year',
+                    'month',
+                    'contract_rate',
+                    'unit_target'
+                ))->render();
             } else if ($contract->service->type == 'Dry Hire') {
-                $view = 'proforma_invoice.table-dryhire-add';
+                $html = view('proforma_invoice.table-dryhire-add', compact(
+                    'data',
+                    'contract',
+                    'year',
+                    'month'
+                ))->render();
             }
+
             /**
              * Check contract id sudah dibuatkan proforma invoice di bulan ini atau belum
              */
@@ -863,12 +1009,6 @@ class ProformaInvoiceController extends Controller
             if (checkProformaInvoice($contract, $year, $month)) {
                 $doc_status = 1;
             }
-            $html = view($view, compact(
-                'data',
-                'contract',
-                'year',
-                'month'
-            ))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,

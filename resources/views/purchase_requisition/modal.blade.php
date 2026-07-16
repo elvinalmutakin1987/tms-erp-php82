@@ -27,11 +27,6 @@
                             <label for="date" class="form-label">Date</label>
                             <input type="text" class="form-control datepicker" id="date" name="date">
                         </div>
-                        {{-- <div class="col">
-                            <label for="maintenance_id" class="form-label">Maintenance No.</label>
-                            <select class="form-select select-select" id="maintenance_id" name="maintenance_id">
-                            </select>
-                        </div> --}}
                         <div class="col">
                             <label for="urgency" class="form-label">Abbreviation</label>
                             <select class="form-select select-select" id="urgency" name="urgency">

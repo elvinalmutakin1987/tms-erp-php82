@@ -479,6 +479,7 @@
                     title: "Oops...",
                     text: "Proforma Invoice on this periode already created!"
                 });
+                proformaInvoiceId = '';
                 $('#div-table').html('');
                 return false;
             }
@@ -514,12 +515,13 @@
                                 title: "Oops...",
                                 text: "Proforma Invoice on this periode already created!"
                             });
-
+                            proformaInvoiceId = '';
                             $('#div-table').html('');
                             return false;
                         }
 
                         $('#div-table').html(response.html);
+                        gen_select_pallet();
 
                         $('#modal-header').html(
                             'Add Proforma Invoice -&nbsp;<b>' + response.proforma_prev_no +
@@ -1054,6 +1056,32 @@
                 saveButton.disabled = false;
                 saveUpdateButton.disabled = false;
             }
+        }
+
+        function gen_select_pallet() {
+            $('.select-pallet').each(function() {
+                const $el = $(this);
+
+                // Hindari Select2 diinisialisasi dua kali
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.select2({
+                    theme: 'bootstrap-5',
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ?
+                        $el.data('width') : ($el.hasClass('w-100') ? '100%' : 'style'),
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0
+                }).on('select2:close', function() {
+                    $(this).blur();
+
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                });
+            });
         }
     </script>
     <!--app JS-->

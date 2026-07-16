@@ -13,6 +13,7 @@ use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Number;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Permission;
 
 class P2hController extends Controller
 {
@@ -33,60 +34,113 @@ class P2hController extends Controller
                 $p2h = $p2h->where('date', '<=', request()->date_end);
             }
             $p2h = $p2h->orderBy('date', 'desc')->get();
+            $user = Auth::user();
+            $permissionNames = [
+                'p2h.edit',
+                'p2h.delete',
+            ];
+            $guardName = config('auth.defaults.guard', 'web');
+            $existingPermissions = Permission::query()
+                ->whereIn('name', $permissionNames)
+                ->where('guard_name', $guardName)
+                ->pluck('name')
+                ->flip();
+            $canAccess = function (string $permission) use ($user, $existingPermissions) {
+                if ($user->hasRole('superadmin')) {
+                    return true;
+                }
+                if (! $existingPermissions->has($permission)) {
+                    return false;
+                }
+                return $user->hasPermissionTo($permission);
+            };
             return DataTables::of($p2h)
                 ->addIndexColumn()
-                ->addColumn('action', function ($item) {
-                    $button = '
-                    <div class="col">
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                aria-expanded="false">Action</button>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item exportPdfButton" href="' . route('p2h.export_pdf', $item->id) . '">Export PDF</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item printButton" href="' . route('p2h.print', $item->id) . '" target="_blank">Print</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                                    data-id="' . $item->id . '">Detail</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                                    data-id="' . $item->id . '">Edit</a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    ';
-
-                    /**
-                     * user superadmin dan yang punya akses edit aja baru bisa muncul
-                     */
-                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h')):
-                    //     $button .= '<li>
+                ->addColumn('action', function ($item) use ($canAccess) {
+                    // $button = '
+                    // <div class="col">
+                    //     <div class="dropdown">
+                    //         <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    //             aria-expanded="false">Action</button>
+                    //         <ul class="dropdown-menu">
+                    //             <li>
+                    //                 <a class="dropdown-item exportPdfButton" href="' . route('p2h.export_pdf', $item->id) . '">Export PDF</a>
+                    //             </li>
+                    //             <li>
+                    //                 <a class="dropdown-item printButton" href="' . route('p2h.print', $item->id) . '" target="_blank">Print</a>
+                    //             </li>
+                    //             <li>
+                    //                 <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
+                    //                 data-id="' . $item->id . '">Detail</a>
+                    //             </li>
+                    //             <li>
                     //                 <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
                     //                 data-id="' . $item->id . '">Edit</a>
-                    //             </li>';
-                    // endif;
-
-                    /**
-                     * user superadmin dan yang punya akses delete aja baru bisa muncul
-                     */
-                    // if (Auth::user()->hasRole('superadmin') || Auth::user()->hasPermissionTo('p2h')):
-                    //     $button .= '<li>
+                    //             </li>
+                    //             <li>
                     //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                    //             </li>';
-                    // endif;
-
-                    // $button .= '</ul>
+                    //             </li>
+                    //         </ul>
                     //     </div>
                     // </div>
                     // ';
+                    // return $button;
+
+                    $button = '
+                        <div class="col">
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Action
+                                </button>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item exportPdfButton" href="' . route('p2h.export_pdf', $item->id) . '">
+                                            Export PDF
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item printButton" href="' . route('p2h.print', $item->id) . '" target="_blank">
+                                            Print
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail" data-id="' . $item->id . '">
+                                            Detail
+                                        </a>
+                                    </li>
+                    ';
+                    /**
+                     * Tombol Edit:
+                     */
+                    if ($canAccess('p2h.edit') || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
+                                    Edit
+                                </a>
+                            </li>
+                        ';
+                    }
+
+                    /**
+                     * Tombol Hapus:
+                     */
+                    if ($canAccess('p2h.delete') || Auth::user()->hasRole('superadmin')) {
+                        $button .= '
+                            <li>
+                                <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
+                                    Delete
+                                </a>
+                            </li>
+                        ';
+                    }
+
+                    $button .= '
+                                </ul>
+                            </div>
+                        </div>
+                    ';
                     return $button;
                 })
                 ->addColumn('unit', function ($item) {
@@ -140,7 +194,7 @@ class P2hController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
                 'driver' => 'required',
-                'km_start' => 'required',
+                // 'km_start' => 'required',
                 // 'km_finish' => 'required',
             ]);
             $data = array_merge(
@@ -234,7 +288,6 @@ class P2hController extends Controller
                 'unit_id' => ['required', 'not_in:All'],
                 'date' => 'required',
                 'driver' => 'required',
-                'km_start' => 'required',
             ]);
             $data = array_merge(
                 $request->only(
