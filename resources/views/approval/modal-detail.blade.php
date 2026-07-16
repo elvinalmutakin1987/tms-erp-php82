@@ -5,7 +5,6 @@
             <div class="modal-header" id="modal-detail-header">
             </div>
             <div class="modal-body" id="modal-detail-body">
-
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-1">
@@ -13,7 +12,6 @@
                         value="Approve">
                         Approve
                     </button>
-
                     <button type="button" class="btn btn-danger saveButton" id="rejectButton" name="status"
                         value="Reject">
                         Reject

@@ -21,11 +21,20 @@ class Maintenance extends Model implements Auditable
     protected static function booted()
     {
         static::creating(function ($maintenance) {
-            $presenter = new DatePrefixPresenter('Y/m', '/');
-            $maintenance->maintenance_no = running_number()
+            // $presenter = new DatePrefixPresenter('Y/m', '/');
+            // $maintenance->maintenance_no = running_number()
+            //     ->type('main')
+            //     ->formatter($presenter)
+            //     ->generate();
+            $generatedNumber = running_number()
                 ->type('main')
-                ->formatter($presenter)
                 ->generate();
+            $number = (int) preg_replace('/\D/', '', $generatedNumber);
+            $maintenance->maintenance_no = sprintf(
+                '%s-%05d',
+                now()->format('Y'),
+                $number
+            );
         });
     }
 

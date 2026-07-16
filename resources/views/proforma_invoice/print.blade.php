@@ -13,6 +13,8 @@
     use App\Models\Contract_fmf;
     use App\Models\Unit_target;
     use App\Models\Maintenance;
+    use App\Models\Daily_report;
+    use App\Models\Daily_report_detail;
 
     $qrDate = $proforma_invoice->date ? Carbon::parse($proforma_invoice->date)->format('d-m-Y') : '-';
 
@@ -544,6 +546,11 @@
                                         <td style="width: 5%; text-align: center">:</td>
                                         <td>{{ $proforma_invoice->client_vendor->email ?? '' }}</td>
                                     </tr>
+                                    <tr>
+                                        <td style="width: 30%">Contract No.</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td><b>{{ $contract->contract_no ?? '' }}</b></td>
+                                    </tr>
                                 </table>
                             </td>
                             <td style="width: 50%">
@@ -577,7 +584,8 @@
                         </tr>
                     </table>
 
-                    <table style="width: 100%; border-collapse: separate; border-spacing: 0; font-size: 15px">
+                    <table
+                        style="border: 1px double #000; border-collapse: collapse; border-spacing: 1px; width: 100%;">
                         <thead>
                             <tr>
                                 <th scope="col" style="width: 5px; vertical-align:middle">No.</th>
@@ -616,7 +624,7 @@
                             @foreach ($proforma_invoice->proforma_invoice_detail as $proforma_invoice_detail)
                                 @if ($proforma_invoice_detail->contract_rate_id == null && $proforma_invoice_detail->contract_fmf_id != null)
                                     <tr>
-                                        <td>
+                                        <td style="text-align:center">
                                             {{ $loop->iteration }}
                                         </td>
                                         <td>
@@ -643,7 +651,7 @@
                                     </tr>
                                 @else
                                     <tr>
-                                        <td>
+                                        <td style="text-align:center">
                                             {{ $loop->iteration }}
                                         </td>
                                         <td>
@@ -690,6 +698,230 @@
         </tbody>
     </table>
 @elseif($proforma_invoice->contract->service->type == 'Explosive Material Transport')
+    <table class="table-p2h">
+        <thead>
+            <tr>
+                <th class="doc-header-wrapper">
+                    <table class="doc-header-table">
+                        <tr>
+                            <td class="logo-cell">
+                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
+                                    style="max-width:120px;height:auto;margin:0 auto;">
+                            </td>
+
+                            <td class="title-cell">
+                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
+                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
+                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
+                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
+                            </td>
+                        </tr>
+                    </table>
+                </th>
+            </tr>
+            <tr>
+                <th class="doc-header-wrapper">
+                    <div class="doc-title" style="padding-top: 15px">
+                        PROFORMA INVOICE
+                    </div>
+                </th>
+            </tr>
+        </thead>
+    </table>
+    <table class="table-p2h"
+        style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
+        <tbody>
+            <tr>
+                <td style="padding: 8px;">
+                    <table class="doc-header-vendor" style="padding-bottom: 10px">
+                        <tr>
+                            <td style="width: 50%" class="doc-header-vendor-td">
+                                Client
+                            </td>
+                            <td style="width: 50%" class="doc-header-vendor-td"></td>
+                        </tr>
+                        <tr>
+                            <td style="width: 50%">
+                                <table class="doc-header-detail">
+                                    <tr>
+                                        <td style="width: 30%">Name</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->name ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Address</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->address ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Phone</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->phone ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Email</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>{{ $proforma_invoice->client_vendor->email ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Contract No.</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td><b>{{ $contract->contract_no ?? '' }}</b></td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width: 50%">
+                                <table class="doc-header-detail">
+                                    <tr>
+                                        <td style="width: 30%">PI. No</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td><b>{{ $proforma_invoice->proforma_no }}</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Date</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>
+                                            {{ \Carbon\Carbon::parse($proforma_invoice->date)->locale('id')->translatedFormat('d F Y') }}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Reff</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>
+
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Currency</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td>IDR</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table
+                        style="border: 1px double #000; border-collapse: collapse; border-spacing: 1px; width: 100%;">
+                        <thead>
+                            <tr>
+                                <th scope="col" style="width: 5px; vertical-align:middle">No.</th>
+                                <th scope="col">Item</th>
+                                <th scope="col" style="width: 10%; vertical-align:middle">Unit</th>
+                                <th scope="col" style="width: 13%; vertical-align:middle">Rate (IDR)</th>
+                                <th scope="col" style="width: 8%; vertical-align:middle">Qty</th>
+                                <th scope="col" style="width: 13%; vertical-align:middle">Amount (IDR)</th>
+                                <th scope="col" style="width: 8%; vertical-align:middle">Qty PTD</th>
+                                <th scope="col" style="width: 13%; vertical-align:middle">PTD Amount (IDR)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+                                $endDate = $startDate->copy()->endOfMonth();
+                                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                                $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+                                // $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck(
+                                //     'id',
+                                // );
+                                $inputPeriod = Carbon::createFromFormat('Y-m', sprintf('%04d-%02d', $year, $month));
+                                $startPeriod = $inputPeriod->copy()->startOfYear()->format('Y-m');
+                                $endPeriod = $inputPeriod->copy()->subMonth()->format('Y-m');
+                                $proforma_invoice_old = Proforma_invoice::query()
+                                    ->where('contract_id', $contract->id)
+                                    ->whereBetween('periode', [$startPeriod, $endPeriod])
+                                    ->pluck('id');
+                                $daily_report = Daily_report::whereBetween('date', [
+                                    Carbon::parse($startDate)->format('Y-m-d'),
+                                    Carbon::parse($endDate)->format('Y-m-d'),
+                                ])
+                                    ->where('service_type', 'LCT')
+                                    ->pluck('id');
+                                $total_amount = 0;
+                                $total_amount_ptd = 0;
+                            @endphp
+                            @foreach ($contract_rate as $contractrate)
+                                @php
+                                    $qty = 0;
+                                    $amount = 0;
+                                    if ($contractrate->type == 'AN') {
+                                        $total_an = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                                            ->whereIn('unit_id', $unit_target)
+                                            ->where('item', 'AN')
+                                            ->sum('value_2');
+                                        $total_pupuk = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                                            ->whereIn('unit_id', $unit_target)
+                                            ->where('item', 'Pupuk')
+                                            ->sum('value_2');
+                                        $qty = $total_an + $total_pupuk;
+                                    } elseif ($contractrate->type == 'ANSOL') {
+                                        $total_ansol = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                                            ->whereIn('unit_id', $unit_target)
+                                            ->where('item', 'ANSOL')
+                                            ->sum('value_1');
+                                        $qty = $total_ansol;
+                                    }
+                                    $amount = $contractrate->rate * $qty;
+                                    $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                                        ->where('contract_rate_id', $contractrate->id)
+                                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                                        ->where('deleted_at', null)
+                                        ->sum('qty');
+                                    $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                                        ->where('contract_rate_id', $contractrate->id)
+                                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                                        ->where('deleted_at', null)
+                                        ->sum('amount');
+                                    $qty_ptd = $qty_ptd + $qty;
+                                    $amount_ptd = $amount_ptd + $amount;
+                                @endphp
+
+                                <tr>
+                                    <td style="text-align:center">
+                                        {{ $loop->iteration }}
+                                    </td>
+                                    <td>
+                                        {{ $contractrate->service_item }}
+                                    </td>
+                                    <td style="text-align: center">
+                                        {{ $contractrate->unit }}
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ Number::format($contractrate->rate, precision: 0) }}
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ Number::format($qty, precision: 2) }}
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ Number::format($amount, precision: 0) }}
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ Number::format($qty_ptd, precision: 2) }}
+                                    </td>
+                                    <td style="text-align: right">
+                                        {{ Number::format($amount_ptd, precision: 0) }}
+                                    </td>
+                                </tr>
+                                @php
+                                    $total_amount += $amount;
+                                    $total_amount_ptd += $amount_ptd;
+                                @endphp
+                            @endforeach
+                            <tr>
+                                <td colspan="5" style="text-align:right"><b>Total</b></td>
+                                <td style="text-align: right"><b>{{ Number::format($total_amount, precision: 0) }}</b>
+                                </td>
+                                <td></td>
+                                <td style="text-align: right">
+                                    <b>{{ Number::format($total_amount_ptd, precision: 0) }}</b>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 @endif
 
 @if (!in_array($proforma_invoice->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']))
@@ -801,6 +1033,53 @@
             </tr>
         </table>
     @elseif($proforma_invoice->contract->service->type === 'Explosive Material Transport')
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" class="avoid-break">
+            <tr>
+                <td style="border: none;" colspan="4">
+                    <div>
+                        Sangatta,
+                        {{ \Carbon\Carbon::parse(date('Y-m-d'))->locale('id')->translatedFormat('d F Y') }}
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Dibuat Oleh,
+                    </div>
+
+                    <div style="height: 50px;"></div>
+
+                    <div style="min-height: 35px;">
+                        ( {{ $proforma_invoice->user->name ?? '' }} )<br>
+                        PT. Tunas Mitra Sejati
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Diketahui Oleh,
+                    </div>
+
+                    <div style="height: 50px;"></div>
+
+                    <div style="min-height: 35px;">
+                        Drill Blast Department
+                    </div>
+                </td>
+                <td style="border: none; text-align: center; padding: 10px; vertical-align: top;">
+                    <div style="height: 30px;">
+                        Disetujui Oleh,
+                    </div>
+
+                    <div style="height: 50px;"></div>
+
+                    <div style="min-height: 35px;">
+                        Purchasing
+                    </div>
+                </td>
+            </tr>
+        </table>
     @endif
 @endif
 

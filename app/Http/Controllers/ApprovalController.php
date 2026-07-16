@@ -57,14 +57,41 @@ class ApprovalController extends Controller
                                 aria-expanded="false">Action</button>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                                    data-id="' . $item->approvable_id . '" data-model="' . str_replace('App\\Models\\', '', $item->approval_flow->approvable_model) . '" data-procid="' . $item->id . '">Detail</a>
+                                    <a
+                                        class="dropdown-item detailButton"
+                                        href="javascript:void(0)"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#formDetail"
+                                        data-id="' . $item->approvable_id . '"
+                                        data-model="' . str_replace(
+                        'App\\Models\\',
+                        '',
+                        $item->approval_flow->approvable_model
+                    ) . '"
+                                        data-procid="' . $item->id . '"
+                                    >
+                                        Detail
+                                    </a>
                                 </li>
+
                                 <li>
-                                    <a class="dropdown-item" href="#" onclick="approve(\'' . $item->id . '\')">Approve</a>
+                                    <a
+                                        class="dropdown-item approveButton"
+                                        href="javascript:void(0)"
+                                        data-id="' . $item->id . '"
+                                    >
+                                        Approve
+                                    </a>
                                 </li>
+
                                 <li>
-                                    <a class="dropdown-item" href="#" onclick="reject(\'' . $item->id . '\')">Reject</a>
+                                    <a
+                                        class="dropdown-item rejectButton"
+                                        href="javascript:void(0)"
+                                        data-id="' . $item->id . '"
+                                    >
+                                        Reject
+                                    </a>
                                 </li>
                             </ul>
                         </div>

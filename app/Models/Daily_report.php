@@ -21,11 +21,15 @@ class Daily_report extends Model implements Auditable
     protected static function booted()
     {
         static::creating(function ($daily_report) {
-            $presenter = new DatePrefixPresenter('Y/m', '/');
-            $daily_report->report_no = running_number()
+            $generatedNumber = running_number()
                 ->type('rep')
-                ->formatter($presenter)
                 ->generate();
+            $number = (int) preg_replace('/\D/', '', $generatedNumber);
+            $daily_report->report_no = sprintf(
+                '%s-%05d',
+                now()->format('Y'),
+                $number
+            );
         });
     }
 

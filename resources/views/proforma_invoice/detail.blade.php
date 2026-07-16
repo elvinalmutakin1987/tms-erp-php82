@@ -14,6 +14,7 @@
     use App\Models\Unit;
     use App\Models\Maintenance;
     use App\Models\Daily_report;
+    use App\Models\Daily_report_detail;
 @endphp
 @if ($contract->service->type == 'Unit Rental')
     @php
@@ -97,18 +98,15 @@
                 <th scope="col" style="width: 20%" colspan="2">Amount</th>
             </tr>
         </thead>
-
         <tbody>
             <tr>
                 <td class="p-1">
                     <b>{{ $contract->contract_no }}</b>
                 </td>
-
                 <td class="p-1">
                     {{ $unit_target->unit->description }}
                     (<b>{{ $unit_target->unit->vehicle_no }}</b>)
                 </td>
-
                 <td class="p-1" width="10px"></td>
                 <td class="p-1"></td>
             </tr>
@@ -117,7 +115,6 @@
                 <td class="p-1">
                     (Rate IDR {{ Number::format($price, precision: 0) }})
                 </td>
-
                 <td class="p-1">
                     Periode
                     <b>
@@ -126,31 +123,26 @@
                         {{ $endDate->locale('id')->translatedFormat('d F Y') }}
                     </b>
                 </td>
-
                 <td class="p-1" width="10px"></td>
                 <td class="p-1"></td>
             </tr>
 
             <tr>
                 <td class="p-1"></td>
-
                 <td class="p-1">
                     1. Target PA &nbsp;&nbsp; {{ Number::format($target, precision: 2) }}%
                 </td>
-
                 <td class="p-1" width="10px"></td>
                 <td class="p-1"></td>
             </tr>
 
             <tr>
                 <td class="p-1"></td>
-
                 <td class="p-1">
                     2. Actual Hari Kerja {{ $hariKerja }} <br>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ({{ $hariKerja }} hari @ Rp.
                     {{ Number::format($price, precision: 0) }})
                 </td>
-
                 <td class="p-1" width="10px">IDR</td>
                 <td class="p-1" style="text-align: right">
                     {{ Number::format($price, precision: 0) }}
@@ -159,34 +151,27 @@
 
             <tr>
                 <td class="p-1"></td>
-
                 <td class="p-1">
                     3. Aktual PA <br>
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Jam Tersedia {{ $hariKerja }} x 24 Jam =
                     {{ Number::format($totalJamKerja, precision: 0) }} Jam
                     <br>
-
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Breakdown =
                     <b>{{ Number::format($total_breakdown, precision: 2) }}</b> Jam
                     <br>
-
                     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PA =
                     {{ Number::format($pa, precision: 2) }}%
                 </td>
-
                 <td class="p-1" width="10px"></td>
                 <td class="p-1"></td>
             </tr>
 
             <tr>
                 <td class="p-1"></td>
-
                 <td class="p-1">
                     4. Penalty / Potongan Breakdown (PA)
                 </td>
-
                 <td class="p-1" width="10px">IDR</td>
-
                 <td class="p-1" style="text-align: right">
                     {{ Number::format($penalty, precision: 0) }}
                 </td>
@@ -194,13 +179,10 @@
 
             <tr>
                 <td class="p-1"></td>
-
                 <td class="p-1">
                     5. Total Payment
                 </td>
-
                 <td class="p-1" width="10px">IDR</td>
-
                 <td class="p-1" style="text-align: right">
                     {{ Number::format($total_payment, precision: 0) }}
                 </td>
@@ -379,9 +361,169 @@
             </tr>
         </tbody>
     </table>
-@elseif($contract->service->type == 'Fuel Truck Rental')
+@elseif($contract->service->type == 'Explosive Material Transport')
+    @php
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+    @endphp
+    <h6 class="mb-2" style="display: inline-block;">
+        <table style="width:100%">
+            <tr>
+                <td>Client</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->client_vendor)->name }}
+                </td>
+            </tr>
+            <tr>
+                <td>Contract Type</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                </td>
+            </tr>
+            <tr>
+                <td>Progress Claim</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($startDate)->format('F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Starting Date</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($startDate)->format('d F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Closing Date</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($endDate)->format('d F Y') }}
+                </td>
+            </tr>
+        </table>
+    </h6>
 
-@elseif($contract->service->type == 'Explosive Material Rental')
+    <table class="table tableItem">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" style="width: 5px">No.</th>
+                <th scope="col">Item</th>
+                <th scope="col" style="width: 8%">Unit</th>
+                <th scope="col" style="width: 15%" class="text-end">Rate (IDR)</th>
+                <th scope="col" style="width: 8%" class="text-end">Qty</th>
+                <th scope="col" style="width: 15%" class="text-end">Amount (IDR)</th>
+                <th scope="col" style="width: 8%" class="text-end">Qty (PTD)</th>
+                <th scope="col" style="width: 15%" class="text-end">PTD Amount (IDR)</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @php
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+                // $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+                $inputPeriod = Carbon::createFromFormat('Y-m', sprintf('%04d-%02d', $year, $month));
+                $startPeriod = $inputPeriod->copy()->startOfYear()->format('Y-m');
+                $endPeriod = $inputPeriod->copy()->subMonth()->format('Y-m');
+                $proforma_invoice_old = Proforma_invoice::query()
+                    ->where('contract_id', $contract->id)
+                    ->whereBetween('periode', [$startPeriod, $endPeriod])
+                    ->pluck('id');
+                $daily_report = Daily_report::whereBetween('date', [
+                    Carbon::parse($startDate)->format('Y-m-d'),
+                    Carbon::parse($endDate)->format('Y-m-d'),
+                ])
+                    ->where('service_type', 'LCT')
+                    ->pluck('id');
+                $total_amount = 0;
+                $total_amount_ptd = 0;
+            @endphp
+
+            @foreach ($contract_rate as $contractrate)
+                @php
+                    $qty = 0;
+                    $amount = 0;
+                    if ($contractrate->type == 'AN') {
+                        $total_an = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'AN')
+                            ->sum('value_2');
+                        $total_pupuk = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'Pupuk')
+                            ->sum('value_2');
+                        $qty = $total_an + $total_pupuk;
+                    } elseif ($contractrate->type == 'ANSOL') {
+                        $total_ansol = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'ANSOL')
+                            ->sum('value_1');
+                        $qty = $total_ansol;
+                    }
+                    $amount = $contractrate->rate * $qty;
+                    $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->where('deleted_at', null)
+                        ->sum('qty');
+                    $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->where('deleted_at', null)
+                        ->sum('amount');
+                    $qty_ptd = $qty_ptd + $qty;
+                    $amount_ptd = $amount_ptd + $amount;
+                @endphp
+
+                <tr>
+                    <td>
+                        {{ $loop->iteration }}
+                    </td>
+                    <td>
+                        {{ $contractrate->service_item }}
+                    </td>
+                    <td>
+                        {{ $contractrate->unit }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($contractrate->rate, precision: 0) }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($qty, precision: 2) }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($amount, precision: 0) }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($qty_ptd, precision: 2) }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($amount_ptd, precision: 0) }}
+                    </td>
+                </tr>
+                @php
+                    $total_amount += $amount;
+                    $total_amount_ptd += $amount_ptd;
+                @endphp
+            @endforeach
+            {{-- end --}}
+            <tr>
+                <td colspan="5" class="text-end">
+                    <b>TOTAL</b>
+                </td>
+                <td class="text-end">
+                    <b>{{ Number::format($total_amount, precision: 0) }}</b>
+                </td>
+                <td></td>
+                <td class="text-end">
+                    <b>{{ Number::format($total_amount_ptd, precision: 0) }}</b>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 @endif
 
 
