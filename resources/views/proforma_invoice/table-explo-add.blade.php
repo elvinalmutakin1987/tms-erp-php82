@@ -2,7 +2,7 @@
     use App\Models\Maintenance;
     use App\Models\Contract_rate;
     use App\Models\Contract_fmf;
-    use App\Models\Contract_unit;
+    use App\Models\Unit_target;
     use App\Models\Daily_report;
     use App\Models\Daily_report_detail;
     use App\Models\Proforma_invoice;
@@ -13,7 +13,6 @@
 
     $startDate = Carbon::create($year, $month, 1)->startOfMonth();
     $endDate = $startDate->copy()->endOfMonth();
-
 @endphp
 
 <h6 class="mb-2" style="display: inline-block;">
@@ -73,33 +72,90 @@
     <tbody>
         @php
             $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
-            $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+            $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+            // $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+            $inputPeriod = Carbon::createFromFormat('Y-m', sprintf('%04d-%02d', $year, $month));
+            $startPeriod = $inputPeriod->copy()->startOfYear()->format('Y-m');
+            $endPeriod = $inputPeriod->copy()->subMonth()->format('Y-m');
+            $proforma_invoice_old = Proforma_invoice::query()
+                ->where('contract_id', $contract->id)
+                ->whereBetween('periode', [$startPeriod, $endPeriod])
+                ->pluck('id');
             $daily_report = Daily_report::whereBetween('date', [
                 Carbon::parse($startDate)->format('Y-m-d'),
                 Carbon::parse($endDate)->format('Y-m-d'),
             ])
                 ->where('service_type', 'LCT')
-                ->get();
-            $total_an = Daily_report_detail::where('daily_report_id', $daily_report->id)
-                ->where('item', 'AN')
-                ->sum('value_1');
-            $total_pupuk = Daily_report_detail::where('daily_report_id', $daily_report->id)
-                ->where('item', 'Pupuk')
-                ->sum('value_1');
-
-            $trip = $daily_report->count();
+                ->pluck('id');
+            $total_amount = 0;
+            $total_amount_ptd = 0;
         @endphp
 
         @foreach ($contract_rate as $contractrate)
             @php
+                $qty = 0;
+                $amount = 0;
+                if ($contractrate->type == 'AN') {
+                    $total_an = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                        ->whereIn('unit_id', $unit_target)
+                        ->where('item', 'AN')
+                        ->sum('value_2');
+                    $total_pupuk = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                        ->whereIn('unit_id', $unit_target)
+                        ->where('item', 'Pupuk')
+                        ->sum('value_2');
+                    $qty = $total_an + $total_pupuk;
+                } elseif ($contractrate->type == 'ANSOL') {
+                    $total_ansol = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                        ->whereIn('unit_id', $unit_target)
+                        ->where('item', 'ANSOL')
+                        ->sum('value_1');
+                    $qty = $total_ansol;
+                }
+                $amount = $contractrate->rate * $qty;
                 $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
                     ->where('contract_rate_id', $contractrate->id)
                     ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->where('deleted_at', null)
                     ->sum('qty');
                 $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
                     ->where('contract_rate_id', $contractrate->id)
                     ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->where('deleted_at', null)
                     ->sum('amount');
+                $qty_ptd = $qty_ptd + $qty;
+                $amount_ptd = $amount_ptd + $amount;
+            @endphp
+
+            <tr>
+                <td>
+                    {{ $loop->iteration }}
+                </td>
+                <td>
+                    {{ $contractrate->service_item }}
+                </td>
+                <td>
+                    {{ $contractrate->unit }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($contractrate->rate, precision: 0) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($qty, precision: 2) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($amount, precision: 0) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($qty_ptd, precision: 2) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($amount_ptd, precision: 0) }}
+                </td>
+            </tr>
+            @php
+                $total_amount += $amount;
+                $total_amount_ptd += $amount_ptd;
             @endphp
         @endforeach
         {{-- end --}}

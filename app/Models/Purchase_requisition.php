@@ -21,11 +21,20 @@ class Purchase_requisition extends Model implements Auditable
     protected static function booted()
     {
         static::creating(function ($purchase_requisition) {
-            $presenter = new DatePrefixPresenter('Y/m', '/');
-            $purchase_requisition->requisition_no = running_number()
+            // $presenter = new DatePrefixPresenter('Y/m', '/');
+            // $purchase_requisition->requisition_no = running_number()
+            //     ->type('pr')
+            //     ->formatter($presenter)
+            //     ->generate();
+            $generatedNumber = running_number()
                 ->type('pr')
-                ->formatter($presenter)
                 ->generate();
+            $number = (int) preg_replace('/\D/', '', $generatedNumber);
+            $purchase_requisition->requisition_no = sprintf(
+                '%s-%05d',
+                now()->format('Y'),
+                $number
+            );
         });
     }
 

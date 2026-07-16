@@ -5,6 +5,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <style>
+        #formDetail .swal2-container {
+            z-index: 2000 !important;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -235,6 +240,22 @@
             $('#modal-detail-body').html("");
         });
 
+        $(document).on('click', '.approveButton', function(event) {
+            event.preventDefault();
+            approve($(this).data('id'));
+        });
+
+        $(document).on('click', '.approveButton', function(event) {
+            event.preventDefault();
+            approve($(this).data('id'));
+        });
+
+        $(document).on('click', '.rejectButton', function(event) {
+            event.preventDefault();
+            const id = $(this).data('id');
+            reject(id);
+        });
+
         function gen_select2() {
             $('.select-select').each(function() {
                 const $el = $(this);
@@ -308,55 +329,153 @@
             });
         }
 
+        // function reject(id) {
+        //     Swal.fire({
+        //         title: 'Are you sure?',
+        //         text: "You are about to reject this item.",
+        //         icon: 'warning',
+        //         input: 'text',
+        //         inputPlaceholder: 'Enter reject reason',
+        //         inputValidator: (value) => {
+        //             if (!value) {
+        //                 return 'Reason is required!';
+        //             }
+        //         },
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#3085d6',
+        //         cancelButtonColor: '#d33',
+        //         confirmButtonText: 'Yes, reject it!'
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             let url = '{{ route('approval.reject', ':_id') }}';
+        //             url = url.replace(':_id', id);
+        //             $.ajax({
+        //                 url: url,
+        //                 type: 'PUT',
+        //                 data: {
+        //                     _token: '{{ csrf_token() }}',
+        //                     reason: result.value
+        //                 },
+        //                 success: function(response) {
+        //                     Swal.fire(
+        //                         response.title,
+        //                         response.message,
+        //                         'success'
+        //                     );
+
+        //                     $('#table-data').DataTable().ajax.reload(null, false);
+        //                     $('#formDetail').modal('hide');
+        //                     $('#modal-detail-body').html("");
+        //                 },
+        //                 error: function(xhr, status, error) {
+        //                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+        //                     Swal.fire({
+        //                         icon: "error",
+        //                         title: "Oops...",
+        //                         text: errorMessage,
+        //                     });
+        //                 }
+        //             });
+        //         }
+        //     });
+        // }
         function reject(id) {
+            const detailModal = document.getElementById('formDetail');
+
+            const isDetailModalOpen =
+                detailModal &&
+                detailModal.classList.contains('show');
+
+            // Jika dipanggil dari modal, target ke modal.
+            // Jika dipanggil dari tabel, target ke body.
+            const swalTarget = isDetailModalOpen ?
+                detailModal :
+                document.body;
+
             Swal.fire({
+                target: swalTarget,
                 title: 'Are you sure?',
-                text: "You are about to reject this item.",
+                text: 'You are about to reject this item.',
                 icon: 'warning',
-                input: 'text',
+                input: 'textarea',
                 inputPlaceholder: 'Enter reject reason',
-                inputValidator: (value) => {
-                    if (!value) {
-                        return 'Reason is required!';
-                    }
+                inputAttributes: {
+                    autocomplete: 'off',
+                    rows: 4
                 },
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, reject it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let url = '{{ route('approval.reject', ':_id') }}';
-                    url = url.replace(':_id', id);
-                    $.ajax({
-                        url: url,
-                        type: 'PUT',
-                        data: {
-                            _token: '{{ csrf_token() }}',
-                            reason: result.value
-                        },
-                        success: function(response) {
-                            Swal.fire(
-                                response.title,
-                                response.message,
-                                'success'
-                            );
+                confirmButtonText: 'Yes, reject it!',
+                cancelButtonText: 'Cancel',
+                returnFocus: false,
 
-                            $('#table-data').DataTable().ajax.reload(null, false);
-                            $('#formDetail').modal('hide');
-                            $('#modal-detail-body').html("");
-                        },
-                        error: function(xhr, status, error) {
-                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                didOpen: () => {
+                    const input = Swal.getInput();
 
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: errorMessage,
-                            });
-                        }
-                    });
+                    if (input) {
+                        input.disabled = false;
+                        input.removeAttribute('readonly');
+                        input.focus();
+                    }
+                },
+
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return 'Reason is required!';
+                    }
                 }
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    return;
+                }
+
+                let url = '{{ route('approval.reject', ':_id') }}';
+                url = url.replace(':_id', id);
+
+                $.ajax({
+                    url: url,
+                    type: 'PUT',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        reason: result.value.trim()
+                    },
+
+                    success: function(response) {
+                        Swal.fire({
+                            target: swalTarget,
+                            icon: 'success',
+                            title: response.title,
+                            text: response.message,
+                            returnFocus: false
+                        }).then(() => {
+                            $('#table-data')
+                                .DataTable()
+                                .ajax
+                                .reload(null, false);
+
+                            // Hanya tutup modal jika reject dilakukan dari modal detail.
+                            if (isDetailModalOpen) {
+                                $('#formDetail').modal('hide');
+                                $('#modal-detail-body').html('');
+                            }
+                        });
+                    },
+
+                    error: function(xhr, status, error) {
+                        const errorMessage =
+                            xhr.responseJSON?.message ?? error;
+
+                        Swal.fire({
+                            target: swalTarget,
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage,
+                            returnFocus: false
+                        });
+                    }
+                });
             });
         }
     </script>

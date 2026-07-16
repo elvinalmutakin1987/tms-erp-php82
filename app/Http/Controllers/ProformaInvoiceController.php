@@ -10,6 +10,7 @@ use App\Models\Contract;
 use App\Models\Contract_fmf;
 use App\Models\Contract_rate;
 use App\Models\Daily_report;
+use App\Models\Daily_report_detail;
 use App\Models\Maintenance;
 use App\Models\Proforma_invoice;
 use App\Models\Proforma_invoice_detail;
@@ -50,6 +51,13 @@ class ProformaInvoiceController extends Controller
                     $proforma_invoice = $proforma_invoice->where('periode', request()->year . "-" . request()->month);
                 } else {
                     $proforma_invoice = $proforma_invoice->where('periode', 'like', request()->year . '-%');
+                }
+            }
+            if (request()->month != 'All') {
+                if (request()->year != 'All') {
+                    $proforma_invoice = $proforma_invoice->where('periode', request()->year . "-" . request()->month);
+                } else {
+                    $proforma_invoice = $proforma_invoice->where('periode', 'like', '%-' . request()->month);
                 }
             }
             $proforma_invoice = $proforma_invoice->orderBy('id', 'desc')->get();
@@ -330,30 +338,6 @@ class ProformaInvoiceController extends Controller
                     ->whereIn('unit_id', $unit_lct_id)
                     ->get();
                 $trip = $daily_report->count();
-                // foreach ($gen_proforma['contract_rate'] as $contractrate) {
-                //     $rate_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                //         ->where('contract_rate_id', $contractrate->id)
-                //         ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                //         ->sum('qty');
-                //     $rate_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                //         ->where('contract_rate_id', $contractrate->id)
-                //         ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                //         ->sum('amount');
-                //     $amount = $contractrate->rate * $trip;
-                //     $qty_ptd = $rate_qty_ptd + $trip;
-                //     $amount_ptd = $rate_amount_ptd + $amount;
-                //     $proforma_invoice->proforma_invoice_detail()->create([
-                //         'proforma_invoice_id' => $proforma_invoice->id,
-                //         'contract_rate_id' => $contractrate->id,
-                //         'rate' => $contractrate->rate,
-                //         'qty' => $trip,
-                //         'amount' => $amount,
-                //         'ptd_qty' => $qty_ptd,
-                //         'ptd_amount' => $amount_ptd
-                //     ]);
-                //     $total += $amount;
-                //     $total_ptd += $amount_ptd;
-                // }
                 $contractRates = data_get($gen_proforma, 'contract_rate', []);
                 foreach ($contractRates as $contractRate) {
                     if (!$contractRate || blank($contractRate->id)) {
@@ -368,25 +352,94 @@ class ProformaInvoiceController extends Controller
                         ->selectRaw('COALESCE(SUM(qty), 0) as total_qty')
                         ->selectRaw('COALESCE(SUM(amount), 0) as total_amount')
                         ->first();
-                    $amount    = $rate * $tripQty;
-                    $qtyPtd    = (float) $previousTotal->total_qty + $tripQty;
+                    $amount = $rate * $tripQty;
+                    $qtyPtd = (float) $previousTotal->total_qty + $tripQty;
                     $amountPtd = (float) $previousTotal->total_amount + $amount;
                     $proforma_invoice->proforma_invoice_detail()->create([
-                        'contract_id'     => $contract->id,
+                        'contract_id' => $contract->id,
                         'contract_rate_id' => $contractRate->id,
-                        'rate'             => $rate,
-                        'qty'              => $tripQty,
-                        'amount'           => $amount,
-                        'ptd_qty'          => $qtyPtd,
-                        'ptd_amount'       => $amountPtd,
+                        'rate' => $rate,
+                        'qty' => $tripQty,
+                        'amount' => $amount,
+                        'ptd_qty' => $qtyPtd,
+                        'ptd_amount' => $amountPtd,
                     ]);
-                    $total     = ($total ?? 0) + $amount;
+                    $total = ($total ?? 0) + $amount;
                     $total_ptd = ($total_ptd ?? 0) + $amountPtd;
                 }
                 $proforma_invoice->total = $total;
                 $proforma_invoice->save();
                 $this->check_approval($proforma_invoice, $request->status);
-            } else if ($contract->service->type == 'Fuel Truck Rental') {
+            } else if ($contract->service->type == 'Explosive Material Transport') {
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+                $daily_report = Daily_report::whereBetween('date', [
+                    Carbon::parse($startDate)->format('Y-m-d'),
+                    Carbon::parse($endDate)->format('Y-m-d'),
+                ])
+                    ->where('service_type', 'LCT')
+                    ->pluck('id');
+                $total_amount = 0;
+                $total_amount_ptd = 0;
+                $proforma_invoice = Proforma_invoice::firstOrCreate([
+                    'contract_id' => $request->contract_id,
+                    'client_vendor_id' => $contract->client_vendor_id,
+                    'request_token' => $request->request_token,
+                    'user_id' => Auth::id(),
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'type' => $contract->service->type,
+                    'status' => $request->status
+                ]);
+                foreach ($contract_rate as $contractrate) {
+                    $qty = 0;
+                    $amount = 0;
+                    $rate = (float) ($contractrate->rate ?? 0);
+                    if ($contractrate->type == 'AN') {
+                        $total_an = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'AN')
+                            ->sum('value_2');
+                        $total_pupuk = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'Pupuk')
+                            ->sum('value_2');
+                        $qty = $total_an + $total_pupuk;
+                    } elseif ($contractrate->type == 'ANSOL') {
+                        $total_ansol = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'ANSOL')
+                            ->sum('value_1');
+                        $qty = $total_ansol;
+                    }
+                    $amount = $contractrate->rate * $qty;
+                    $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('qty');
+                    $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('amount');
+                    $qty_ptd = (float) $qty_ptd + $qty;
+                    $amount_ptd = (float) $amount_ptd + $amount;
+                    $total_amount += $amount;
+                    $total_amount_ptd += $amount_ptd;
+                    $proforma_invoice->proforma_invoice_detail()->create([
+                        'contract_id' => $contract->id,
+                        'contract_rate_id' => $contractrate->id,
+                        'rate' => $rate,
+                        'qty' => $qty,
+                        'amount' => $amount,
+                        'ptd_qty' => $qty_ptd,
+                        'ptd_amount' => $amount_ptd,
+                    ]);
+                }
+                $proforma_invoice->total = $total_amount;
+                $proforma_invoice->save();
+                $this->check_approval($proforma_invoice, $request->status);
             } else if ($contract->service->type == 'Explo') {
             }
             DB::commit();
@@ -430,6 +483,7 @@ class ProformaInvoiceController extends Controller
         $year = $exp_periode[0];
         $month = $exp_periode[1];
         $month_name = $this->convertMonthName($exp_periode[1]);
+        $html = '';
         if ($contract->service->type == "Unit Rental") {
             $unit_id = $unit_target->unit_id;
             $html = view('proforma_invoice.table-rental-edit', compact(
@@ -445,7 +499,6 @@ class ProformaInvoiceController extends Controller
                 'unit_id'
             ))->render();
         } else if ($contract->service->type == 'LCT') {
-            $html = 'proforma_invoice.table-lct-edit';
             $html = view('proforma_invoice.table-lct-edit', compact(
                 'proforma_invoice',
                 'contract',
@@ -457,8 +510,18 @@ class ProformaInvoiceController extends Controller
                 'month',
                 'month_name'
             ))->render();
-        } else if ($contract->service->type == 'Fuel Truck Rental') {
-            $html = 'proforma_invoice.table-fuel-edit';
+        } else if ($contract->service->type == 'Explosive Material Transport') {
+            $html = view('proforma_invoice.table-explo-edit', compact(
+                'proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'approval_process',
+                'year',
+                'month',
+                'month_name'
+            ))->render();
         }
         return response()->json([
             'success' => true,
@@ -543,10 +606,6 @@ class ProformaInvoiceController extends Controller
                 $total_payment = max(0, min($price, $total_payment));
                 $total_payment = $excelRound($total_payment, 2);
                 $data = [
-                    'contract_id' => $contract->id,
-                    'unit_target_id' => $unit_target_id,
-                    'client_vendor_id' => $contract->client_vendor_id,
-                    'request_token' => $request->request_token,
                     'user_id' => Auth::id(),
                     'unit_id' => $unit_id,
                     'periode_start' => $start_date,
@@ -588,9 +647,6 @@ class ProformaInvoiceController extends Controller
                 $total += $amount;
                 $total_ptd += $amount_ptd;
                 $data = [
-                    'contract_id' => $proforma_invoice->contract_id,
-                    'client_vendor_id' => $contract->client_vendor_id,
-                    'request_token' => $request->request_token,
                     'user_id' => Auth::id(),
                     'periode_start' => $start_date,
                     'periode_finish' => $end_date,
@@ -643,14 +699,76 @@ class ProformaInvoiceController extends Controller
                     $total += $amount;
                     $total_ptd += $amount_ptd;
                 }
-            } else if ($contract->service->type == 'Fuel Truck Rental') {
+            } else if ($contract->service->type == 'Explosive Material Transport') {
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
+                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+                $daily_report = Daily_report::whereBetween('date', [
+                    Carbon::parse($startDate)->format('Y-m-d'),
+                    Carbon::parse($endDate)->format('Y-m-d'),
+                ])
+                    ->where('service_type', 'LCT')
+                    ->pluck('id');
+                $total_amount = 0;
+                $total_amount_ptd = 0;
                 $data = [
-                    'contract_id' => $request->contract_id,
-                    'client_vendor_id' => $contract->client_vendor_id,
-                    'request_token' => $request->request_token,
-                    'input_method' => 'Web',
-                    'user_id' => Auth::user()->id,
+                    'user_id' => Auth::id(),
+                    'periode_start' => $start_date,
+                    'periode_finish' => $end_date,
+                    'periode' => Carbon::parse("$year-$month")->format('Y-m'),
+                    'type' => $contract->service->type,
+                    'status' => $request->status
                 ];
+                $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
+                $lockProforma_invoice->update($data);
+                $lockProforma_invoice->proforma_invoice_detail()->delete();
+                foreach ($contract_rate as $contractrate) {
+                    $qty = 0;
+                    $amount = 0;
+                    $rate = (float) ($contractrate->rate ?? 0);
+                    if ($contractrate->type == 'AN') {
+                        $total_an = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'AN')
+                            ->sum('value_2');
+                        $total_pupuk = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'Pupuk')
+                            ->sum('value_2');
+                        $qty = $total_an + $total_pupuk;
+                    } elseif ($contractrate->type == 'ANSOL') {
+                        $total_ansol = Daily_report_detail::whereIn('daily_report_id', $daily_report)
+                            ->whereIn('unit_id', $unit_target)
+                            ->where('item', 'ANSOL')
+                            ->sum('value_1');
+                        $qty = $total_ansol;
+                    }
+                    $amount = $contractrate->rate * $qty;
+                    $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('qty');
+                    $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('amount');
+                    $qty_ptd = (float) $qty_ptd + $qty;
+                    $amount_ptd = (float) $amount_ptd + $amount;
+                    $total_amount += $amount;
+                    $total_amount_ptd += $amount_ptd;
+                    $lockProforma_invoice->proforma_invoice_detail()->create([
+                        'contract_id' => $contract->id,
+                        'contract_rate_id' => $contractrate->id,
+                        'rate' => $rate,
+                        'qty' => $qty,
+                        'amount' => $amount,
+                        'ptd_qty' => $qty_ptd,
+                        'ptd_amount' => $amount_ptd,
+                    ]);
+                }
+                $lockProforma_invoice->total = $total_amount;
+                $lockProforma_invoice->save();
+                $this->check_approval($lockProforma_invoice, $request->status);
             } else if ($contract->service->type == 'Explo') {
             }
             DB::commit();

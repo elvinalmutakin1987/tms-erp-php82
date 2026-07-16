@@ -35,8 +35,7 @@ class DailyReportController extends Controller
             if (request()->date_end != '') {
                 $daily_report = $daily_report->where('date', '<=', request()->date_end);
             }
-            $daily_report = $daily_report->orderBy('date', 'desc')
-                ->orderBy('id', 'desc')
+            $daily_report = $daily_report->orderBy('id', 'desc')
                 ->get();
             $user = Auth::user();
             $permissionNames = [
