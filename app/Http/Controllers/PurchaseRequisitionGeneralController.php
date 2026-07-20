@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
+use App\Services\ApprovalService;
 
 class PurchaseRequisitionGeneralController extends Controller
 {
@@ -29,10 +30,10 @@ class PurchaseRequisitionGeneralController extends Controller
     {
         if (request()->ajax()) {
             $purchase_requisition = Purchase_requisition::query();
-            if (request()->status != 'All') {
+            if (request()->status != 'All' && request()->status != '') {
                 $purchase_requisition = $purchase_requisition->where('status', request()->status);
             }
-            if (request()->department != 'All') {
+            if (request()->department != 'All' && request()->department != '') {
                 $purchase_requisition = $purchase_requisition->where('department', request()->department);
             }
             if (request()->date_start != '') {
@@ -178,7 +179,7 @@ class PurchaseRequisitionGeneralController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -242,12 +243,12 @@ class PurchaseRequisitionGeneralController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_requisition';
-            if (checkHasApproval($model, $request->department)) {
+            if ($approval_service->checkHasApproval($model, $request->department)) {
                 if ($request->status == 'Open') {
                     $purchase_requisition->status = 'Approval';
                     $purchase_requisition->save();
-                    $approval_flow_id = getApprovalFlowId($model, $request->department);
-                    createApprovalProcess($approval_flow_id, $purchase_requisition->id);
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $request->department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $purchase_requisition->id);
                 }
             } else {
                 if ($request->status == 'Open') {
@@ -296,7 +297,7 @@ class PurchaseRequisitionGeneralController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Purchase_requisition $purchase_requisition)
+    public function update(Request $request, Purchase_requisition $purchase_requisition, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -359,12 +360,12 @@ class PurchaseRequisitionGeneralController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_requisition';
-            if (checkHasApproval($model, $request->department)) {
+            if ($approval_service->checkHasApproval($model, $request->department)) {
                 if ($request->status == 'Open') {
                     $purchase_requisition->status = 'Approval';
                     $purchase_requisition->save();
-                    $approval_flow_id = getApprovalFlowId($model, $request->department);
-                    createApprovalProcess($approval_flow_id, $purchase_requisition->id);
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $request->department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $purchase_requisition->id);
                 }
             } else {
                 if ($request->status == 'Open') {

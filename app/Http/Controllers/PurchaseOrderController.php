@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
+use App\Services\ApprovalService;
 
 class PurchaseOrderController extends Controller
 {
@@ -38,7 +39,7 @@ class PurchaseOrderController extends Controller
     {
         if (request()->ajax()) {
             $purchase_order = Purchase_order::query();
-            if (request()->status != 'All') {
+            if (request()->status != 'All' && request()->status != '') {
                 $purchase_order = $purchase_order->where('status', request()->status);
             }
             if (request()->date_start != '') {
@@ -189,7 +190,7 @@ class PurchaseOrderController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -243,19 +244,19 @@ class PurchaseOrderController extends Controller
                         }
                         $mroItemId = $request->input("mro_item_id.$i");
                         $details[] = [
-                            'request_token'       => $purchase_order->request_token,
+                            'request_token' => $purchase_order->request_token,
                             'maintenance_item_id' => $maintenanceItemId,
-                            'mro_item_id'         => $mroItemId,
-                            'type'                => $mroItemTypes->get($mroItemId, 'Good'),
-                            'desc_vendor'         => $request->input("desc_vendor.$i"),
-                            'uom'                 => $request->input("uom.$i"),
-                            'qty'                 => $request->input("qty.$i", 0),
-                            'price'               => $request->input("price.$i", 0),
-                            'discount_item'       => $request->input(
+                            'mro_item_id' => $mroItemId,
+                            'type' => $mroItemTypes->get($mroItemId, 'Good'),
+                            'desc_vendor' => $request->input("desc_vendor.$i"),
+                            'uom' => $request->input("uom.$i"),
+                            'qty' => $request->input("qty.$i", 0),
+                            'price' => $request->input("price.$i", 0),
+                            'discount_item' => $request->input(
                                 "discount_item.$i",
                                 0
                             ),
-                            'amount'              => $request->input("amount.$i", 0),
+                            'amount' => $request->input("amount.$i", 0),
                         ];
                     }
                     if ($details !== []) {
@@ -273,17 +274,17 @@ class PurchaseOrderController extends Controller
                         }
                         $details[] = [
                             'request_token' => $purchase_order->request_token,
-                            'type'          => $request->input("type.$i"),
-                            'description'   => $description,
-                            'desc_vendor'   => $request->input("desc_vendor.$i"),
-                            'uom'           => $request->input("uom.$i"),
-                            'qty'           => (float) $request->input("qty.$i", 0),
-                            'price'         => (float) $request->input("price.$i", 0),
+                            'type' => $request->input("type.$i"),
+                            'description' => $description,
+                            'desc_vendor' => $request->input("desc_vendor.$i"),
+                            'uom' => $request->input("uom.$i"),
+                            'qty' => (float) $request->input("qty.$i", 0),
+                            'price' => (float) $request->input("price.$i", 0),
                             'discount_item' => (float) $request->input(
                                 "discount_item.$i",
                                 0
                             ),
-                            'amount'        => (float) $request->input("amount.$i", 0),
+                            'amount' => (float) $request->input("amount.$i", 0),
                         ];
                     }
                     if ($details !== []) {
@@ -318,12 +319,12 @@ class PurchaseOrderController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_order';
-            if (checkHasApproval($model, $department)) {
+            if ($approval_service->checkHasApproval($model, $department)) {
                 if ($request->status == 'Open') {
                     $purchase_order->status = 'Approval';
                     $purchase_order->save();
-                    $approval_flow_id = getApprovalFlowId($model, $department);
-                    createApprovalProcess($approval_flow_id, $purchase_order->id);
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $purchase_order->id);
                 }
             } else {
                 if ($request->status == 'Open') {
@@ -395,7 +396,7 @@ class PurchaseOrderController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Purchase_order $purchase_order)
+    public function update(Request $request, Purchase_order $purchase_order, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -504,12 +505,12 @@ class PurchaseOrderController extends Controller
              * Nanti kalo approval beres baru jadi Open
              */
             $model = 'App\Models\Purchase_order';
-            if (checkHasApproval($model, $department)) {
+            if ($approval_service->checkHasApproval($model, $department)) {
                 if ($request->status == 'Open') {
                     $purchase_order->status = 'Approval';
                     $purchase_order->save();
-                    $approval_flow_id = getApprovalFlowId($model, $department);
-                    createApprovalProcess($approval_flow_id, $purchase_order->id);
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $purchase_order->id);
                 }
             } else {
                 if ($request->status == 'Open') {

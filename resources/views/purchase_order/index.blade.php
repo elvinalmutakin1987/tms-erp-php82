@@ -501,13 +501,13 @@
                         });
                     },
                     error: function(xhr, status, error) {
+                        enableButton();
                         const errorMessage = xhr.responseJSON?.message || error;
                         Swal.fire({
                             icon: 'error',
                             title: 'Oops...',
                             text: errorMessage,
                         });
-                        enableButton();
                     }
                 });
             };

@@ -30,6 +30,8 @@ use Carbon\Carbon;
 use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Spatie\Permission\Models\Permission;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Services\ProformaInvoiceService;
+use App\Services\ApprovalService;
 
 class ProformaInvoiceController extends Controller
 {
@@ -40,7 +42,7 @@ class ProformaInvoiceController extends Controller
     {
         if (request()->ajax()) {
             $proforma_invoice = Proforma_invoice::query();
-            if (request()->status != 'All') {
+            if (request()->status != 'All' && request()->status != '') {
                 $proforma_invoice = $proforma_invoice->where('status', request()->status);
             }
             if (request()->unit_id != '') {
@@ -202,7 +204,7 @@ class ProformaInvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ProformaInvoiceService $proforma_invoice_service)
     {
         DB::beginTransaction();
         try {
@@ -219,14 +221,14 @@ class ProformaInvoiceController extends Controller
             $month = $request->month;
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = $startDate->copy()->endOfMonth();
-            if (checkProformaInvoice($contract, $year, $month)) {
+            if ($proforma_invoice_service->checkProformaInvoice($contract, $year, $month)) {
                 return response()->json([
                     'success' => false,
                     'title' => 'Oops...',
                     'message' => 'Proforma Invoice on this periode already created.!'
                 ], 200);
             }
-            $gen_proforma = genProformaInvoice($contract, $year, $month);
+            $gen_proforma = $proforma_invoice_service->genProformaInvoice($contract, $year, $month);
             $start_date = Carbon::create($year, $month, 1)->startOfMonth();
             $end_date = $start_date->copy()->endOfMonth();
             if ($contract->service->type == 'Unit Rental') {
@@ -611,7 +613,7 @@ class ProformaInvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Proforma_invoice $proforma_invoice)
+    public function update(Request $request, Proforma_invoice $proforma_invoice, ProformaInvoiceService $proforma_invoice_service)
     {
         DB::beginTransaction();
         try {
@@ -630,7 +632,7 @@ class ProformaInvoiceController extends Controller
             $end_date = $start_date->copy()->endOfMonth();
             $startDate = Carbon::create($year, $month, 1)->startOfMonth();
             $endDate = $startDate->copy()->endOfMonth();
-            $gen_proforma = genProformaInvoice($contract, $year, $month);
+            $gen_proforma = $proforma_invoice_service->genProformaInvoice($contract, $year, $month);
             if ($contract->service->type == 'Unit Rental') {
                 $excelRound = function ($value, int $precision = 2) {
                     return round((float) $value, $precision, PHP_ROUND_HALF_UP);
@@ -923,13 +925,13 @@ class ProformaInvoiceController extends Controller
     /**
      * Ngambil tabel add
      */
-    public function get_table_add(Request $request)
+    public function get_table_add(Request $request, ProformaInvoiceService $proforma_invoice_service)
     {
         try {
             $contract = Contract::find($request->contract_id);
             $month = $request->month;
             $year = $request->year;
-            $data = genProformaInvoice($contract, $year, $month);
+            $data = $proforma_invoice_service->genProformaInvoice($contract, $year, $month);
             $kodeDokumen = 'P-INV';
             $year_no = date('y');
             $month_no = date('m');
@@ -1006,7 +1008,7 @@ class ProformaInvoiceController extends Controller
              * Check contract id sudah dibuatkan proforma invoice di bulan ini atau belum
              */
             $doc_status = 0;
-            if (checkProformaInvoice($contract, $year, $month)) {
+            if ($proforma_invoice_service->checkProformaInvoice($contract, $year, $month)) {
                 $doc_status = 1;
             }
             return response()->json([
@@ -1052,16 +1054,16 @@ class ProformaInvoiceController extends Controller
         }
     }
 
-    public function check_approval(Proforma_invoice $proforma_invoice, string $status)
+    public function check_approval(Proforma_invoice $proforma_invoice, string $status, ApprovalService $approval_service)
     {
         $model = 'App\Models\Proforma_invoice';
         $department = 'Equipment';
-        if (checkHasApproval($model, $department)) {
+        if ($approval_service->checkHasApproval($model, $department)) {
             if ($status == 'Open') {
                 $proforma_invoice->status = 'Approval';
                 $proforma_invoice->save();
-                $approval_flow_id = getApprovalFlowId($model, $department);
-                createApprovalProcess($approval_flow_id, $proforma_invoice->id);
+                $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                $approval_service->createApprovalProcess($approval_flow_id, $proforma_invoice->id);
             }
         } else {
             if ($status == 'Open') {
@@ -1071,13 +1073,13 @@ class ProformaInvoiceController extends Controller
         }
     }
 
-    public function check_proforma_invoice(Request $request)
+    public function check_proforma_invoice(Request $request, ProformaInvoiceService $proforma_invoice_service)
     {
         $contract = Contract::find($request->contract_id);
         $year = $request->year;
         $month = $request->month;
         return response()->json([
-            'status' => checkProformaInvoice($contract, $year, $month)
+            'status' => $proforma_invoice_service->checkProformaInvoice($contract, $year, $month)
         ], 200);
     }
 
@@ -1359,7 +1361,7 @@ class ProformaInvoiceController extends Controller
     /*
     * Update progress proforma invoice
     */
-    public function update_progress(Request $request, Proforma_invoice $proforma_invoice)
+    public function update_progress(Request $request, Proforma_invoice $proforma_invoice, ProformaInvoiceService $proforma_invoice_service)
     {
         DB::beginTransaction();
         try {
@@ -1379,7 +1381,7 @@ class ProformaInvoiceController extends Controller
             $lockProforma_invoice->status = $request->status;
             $lockProforma_invoice->save();
             if ($request->status == 'Done') {
-                genInvoiceFromProforma($lockProforma_invoice);
+                $proforma_invoice_service->genInvoiceFromProforma($lockProforma_invoice);
             }
             DB::commit();
             return response()->json([

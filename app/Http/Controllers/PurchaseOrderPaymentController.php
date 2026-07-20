@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Permission\Models\Permission;
+use App\Services\ApprovalService;
 
 class PurchaseOrderPaymentController extends Controller
 {
@@ -35,10 +36,10 @@ class PurchaseOrderPaymentController extends Controller
         if (request()->ajax()) {
             $purchase_order_payment = Purchase_order_payment::query()
                 ->with('purchase_order');
-            if (request()->status != 'All') {
+            if (request()->status != 'All' && request()->status != '') {
                 $purchase_order_payment->where('status', request()->status);
             }
-            if (request()->vendor != 'All') {
+            if (request()->vendor != 'All' && request()->vendor != '') {
                 $purchase_order_payment->whereHas('purchase_order', function ($query) {
                     $query->where('client_vendor_id', request()->vendor);
                 });
@@ -172,7 +173,7 @@ class PurchaseOrderPaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -224,12 +225,12 @@ class PurchaseOrderPaymentController extends Controller
              */
             $model = 'App\Models\Purchase_order_payment';
             $department = 'Finanace';
-            if (checkHasApproval($model, $department)) {
+            if ($approval_service->checkHasApproval($model, $department)) {
                 if ($request->status == 'Open') {
                     $purchase_order_payment->status = 'Approval';
                     $purchase_order_payment->save();
-                    $approval_flow_id = getApprovalFlowId($model, $department);
-                    createApprovalProcess($approval_flow_id, $purchase_order_payment->id);
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $purchase_order_payment->id);
                 }
             } else {
                 if ($request->status == 'Open') {
@@ -315,7 +316,7 @@ class PurchaseOrderPaymentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Purchase_order_payment $purchase_order_payment)
+    public function update(Request $request, Purchase_order_payment $purchase_order_payment, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -373,12 +374,12 @@ class PurchaseOrderPaymentController extends Controller
              */
             $model = 'App\Models\Purchase_order_payment';
             $department = 'Finanace';
-            if (checkHasApproval($model, $department)) {
+            if ($approval_service->checkHasApproval($model, $department)) {
                 if ($request->status == 'Open') {
                     $purchase_order_payment->status = 'Approval';
                     $purchase_order_payment->save();
-                    $approval_flow_id = getApprovalFlowId($model, $department);
-                    createApprovalProcess($approval_flow_id, $purchase_order_payment->id);
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $purchase_order_payment->id);
                 }
             } else {
                 if ($request->status == 'Open') {

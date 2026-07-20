@@ -457,6 +457,7 @@
                             icon: 'success',
                             timer: 5000,
                             willClose: () => {
+                                enableButton();
                                 $('#table-data').DataTable().ajax.reload(null, false);
                                 form.reset();
                                 requisitionId = '';
@@ -465,6 +466,7 @@
                         });
                     },
                     error: function(xhr, status, error) {
+                        enableButton();
                         const errorMessage = xhr.responseJSON?.message || error;
                         Swal.fire({
                             icon: 'error',

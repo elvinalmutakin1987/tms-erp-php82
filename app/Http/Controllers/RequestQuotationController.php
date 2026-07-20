@@ -28,10 +28,10 @@ class RequestQuotationController extends Controller
     {
         if (request()->ajax()) {
             $purchase_requisition = Purchase_requisition::query();
-            if (request()->department != 'All') {
+            if (request()->department != 'All' && request()->department != '') {
                 $purchase_requisition = $purchase_requisition->where('department', request()->department);
             }
-            if (request()->status != 'All') {
+            if (request()->status != 'All' && request()->status != '') {
                 if (request()->status == 'Open') {
                     $purchase_requisition = $purchase_requisition
                         ->whereIn('status', ['Approved', 'Received'])

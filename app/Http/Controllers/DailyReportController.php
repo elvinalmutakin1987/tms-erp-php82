@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Spatie\Permission\Models\Permission;
+use App\Services\TimeCountService;
+
 
 class DailyReportController extends Controller
 {
@@ -159,7 +161,7 @@ class DailyReportController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, TimeCountService $time_count_service)
     {
         DB::beginTransaction();
         try {
@@ -179,14 +181,14 @@ class DailyReportController extends Controller
                 $depart_trip_1 = $request->trip_1_departed_at;
 
                 $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
-                    ? countTime($depart_trip_1, $berthing_trip_1)
+                    ? $time_count_service->countTime($depart_trip_1, $berthing_trip_1)
                     : null;
 
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
 
                 $duration_trip_2 = $request->filled('trip_2_berthing_at') && $request->filled('trip_2_departed_at')
-                    ? countTime($depart_trip_2, $berthing_trip_2)
+                    ? $time_count_service->countTime($depart_trip_2, $berthing_trip_2)
                     : null;
             } else {
                 $request->validate([
@@ -243,12 +245,12 @@ class DailyReportController extends Controller
                     }
                     $details[] = [
                         'request_token' => $daily_report->request_token,
-                        'unit_id'       => $unitId,
-                        'item'          => $request->input("item.$key"),
-                        'uom_1'         => $request->input("uom_1.$key"),
-                        'value_1'       => (float) $request->input("value_1.$key", 0),
-                        'uom_2'         => $request->input("uom_2.$key"),
-                        'value_2'       => (float) $request->input("value_2.$key", 0),
+                        'unit_id' => $unitId,
+                        'item' => $request->input("item.$key"),
+                        'uom_1' => $request->input("uom_1.$key"),
+                        'value_1' => (float) $request->input("value_1.$key", 0),
+                        'uom_2' => $request->input("uom_2.$key"),
+                        'value_2' => (float) $request->input("value_2.$key", 0),
                     ];
                 }
                 if ($details !== []) {
@@ -298,7 +300,7 @@ class DailyReportController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Daily_report $daily_report)
+    public function update(Request $request, Daily_report $daily_report, TimeCountService $time_count_service)
     {
         DB::beginTransaction();
         try {
@@ -318,14 +320,14 @@ class DailyReportController extends Controller
                 $depart_trip_1 = $request->trip_1_departed_at;
 
                 $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
-                    ? countTime($depart_trip_1, $berthing_trip_1)
+                    ? $time_count_service->countTime($depart_trip_1, $berthing_trip_1)
                     : null;
 
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
 
                 $duration_trip_2 = $request->filled('trip_2_berthing_at') && $request->filled('trip_2_departed_at')
-                    ? countTime($depart_trip_2, $berthing_trip_2)
+                    ? $time_count_service->countTime($depart_trip_2, $berthing_trip_2)
                     : null;
             } else {
                 $request->validate([
@@ -383,12 +385,12 @@ class DailyReportController extends Controller
                     }
                     $details[] = [
                         'request_token' => $daily_report->request_token,
-                        'unit_id'       => $unitId,
-                        'item'          => $request->input("item.$key"),
-                        'uom_1'         => $request->input("uom_1.$key"),
-                        'value_1'       => $request->input("value_1.$key", 0),
-                        'uom_2'         => $request->input("uom_2.$key"),
-                        'value_2'       => $request->input("value_2.$key", 0),
+                        'unit_id' => $unitId,
+                        'item' => $request->input("item.$key"),
+                        'uom_1' => $request->input("uom_1.$key"),
+                        'value_1' => $request->input("value_1.$key", 0),
+                        'uom_2' => $request->input("uom_2.$key"),
+                        'value_2' => $request->input("value_2.$key", 0),
                     ];
                 }
                 if (!empty($details)) {

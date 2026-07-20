@@ -26,6 +26,7 @@ use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Services\ApprovalService;
 
 class ApprovalController extends Controller
 {
@@ -273,12 +274,12 @@ class ApprovalController extends Controller
         }
     }
 
-    public function approve(Approval_process $approval_process)
+    public function approve(Approval_process $approval_process, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
-            approve($approval_process);
-            nextStep($approval_process);
+            $approval_service->approve($approval_process);
+            $approval_service->nextStep($approval_process);
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -295,7 +296,7 @@ class ApprovalController extends Controller
         }
     }
 
-    public function reject(Approval_process $approval_process)
+    public function reject(Approval_process $approval_process, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
