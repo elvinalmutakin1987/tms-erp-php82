@@ -347,30 +347,106 @@
                 $('#table-data').DataTable().draw();
             });
 
+            // $('#vendor').select2({
+            //     theme: "bootstrap-5",
+            //     width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
+            //         'w-100') ? '100%' : 'style'),
+            //     placeholder: 'All Vendor',
+            //     allowClear: true,
+            //     selectOnClose: false,
+            //     minimumResultsForSearch: 0,
+            //     ajax: {
+            //         url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
+            //         dataType: 'json',
+            //         delay: 250,
+            //         data: function(params) {
+            //             return {
+            //                 term: params.term || '',
+            //                 page: params.page || 1
+            //             };
+            //         },
+            //         processResults: function(data) {
+            //             return {
+            //                 results: data.results || data
+            //             };
+            //         },
+            //         cache: true
+            //     }
+            // }).on('change', function() {
+            //     $('#table-data').DataTable().draw();
+            // });
+
             $('#vendor').select2({
-                theme: "bootstrap-5",
-                width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
-                    'w-100') ? '100%' : 'style'),
+                theme: 'bootstrap-5',
+                width: '100%',
                 placeholder: 'All Vendor',
                 allowClear: true,
                 selectOnClose: false,
                 minimumResultsForSearch: 0,
+
                 ajax: {
                     url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
                     dataType: 'json',
                     delay: 250,
+                    cache: true,
+
                     data: function(params) {
                         return {
                             term: params.term || '',
                             page: params.page || 1
                         };
                     },
-                    processResults: function(data) {
+
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        /*
+                         * Mendukung beberapa bentuk response:
+                         *
+                         * 1. Select2:
+                         *    {
+                         *      results: [],
+                         *      pagination: { more: true }
+                         *    }
+                         *
+                         * 2. Laravel paginator:
+                         *    {
+                         *      data: [],
+                         *      current_page: 1,
+                         *      last_page: 5
+                         *    }
+                         */
+
+                        const results = data.results || data.data || [];
+
+                        let hasMore = false;
+
+                        if (data.pagination && typeof data.pagination.more !== 'undefined') {
+                            hasMore = data.pagination.more;
+                        } else if (
+                            typeof data.current_page !== 'undefined' &&
+                            typeof data.last_page !== 'undefined'
+                        ) {
+                            hasMore = Number(data.current_page) < Number(data.last_page);
+                        } else if (typeof data.has_more !== 'undefined') {
+                            hasMore = Boolean(data.has_more);
+                        }
+
                         return {
-                            results: data.results || data
+                            results: results,
+                            pagination: {
+                                more: hasMore
+                            }
                         };
                     },
-                    cache: true
+
+                    error: function(xhr, status, error) {
+                        console.error('Gagal mengambil data vendor:', {
+                            status: status,
+                            error: error,
+                            response: xhr.responseText
+                        });
+                    }
                 }
             }).on('change', function() {
                 $('#table-data').DataTable().draw();

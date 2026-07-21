@@ -13,12 +13,12 @@
     use Carbon\Carbon;
 @endphp
 
+@php
+    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+    $endDate = $startDate->copy()->endOfMonth();
+@endphp
+
 @if ($contract->service->type == 'Unit Rental')
-    @php
-        $unit_id = $proforma_invoice->unit_id;
-        $price = $proforma_invoice->unit_target->price;
-        $target = $proforma_invoice->unit_target->target;
-    @endphp
     <h6 class="mb-2" style="display: inline-block;">
         <table style="width:100%">
             <tr>
@@ -212,10 +212,6 @@
         </tbody>
     </table>
 @elseif($contract->service->type == 'LCT')
-    @php
-        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-        $endDate = $startDate->copy()->endOfMonth();
-    @endphp
     <h6 class="mb-2" style="display: inline-block;">
         <table style="width:100%">
             <tr>
@@ -391,10 +387,6 @@
         </tbody>
     </table>
 @elseif($contract->service->type == 'Explosive Material Transport')
-    @php
-        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-        $endDate = $startDate->copy()->endOfMonth();
-    @endphp
     <h6 class="mb-2" style="display: inline-block;">
         <table style="width:100%">
             <tr>
@@ -402,6 +394,13 @@
                 <td style="width:5px">:</td>
                 <td>
                     &nbsp;&nbsp;&nbsp;{{ optional($contract->client_vendor)->name }}
+                </td>
+            </tr>
+            <tr>
+                <td>Contract No.</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ $contract->contract_no }}
                 </td>
             </tr>
             <tr>
@@ -549,6 +548,109 @@
                 <td></td>
                 <td class="text-end">
                     <b>{{ Number::format($total_amount_ptd, precision: 0) }}</b>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+@elseif($contract->service->type == 'Pallet')
+    <h6 class="mb-2" style="display: inline-block;">
+        <table style="width:100%">
+            <tr>
+                <td>Client</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->client_vendor)->name }}
+                </td>
+            </tr>
+            <tr>
+                <td>Contract No.</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ $contract->contract_no }}
+                </td>
+            </tr>
+            <tr>
+                <td>Contract Type</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                </td>
+            </tr>
+            <tr>
+                <td>Progress Claim</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($startDate)->format('F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Starting Date</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($startDate)->format('d F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Closing Date</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($endDate)->format('d F Y') }}
+                </td>
+            </tr>
+        </table>
+    </h6>
+
+    <table class="table tableItem">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" style="width: 5px">No.</th>
+                <th scope="col">Item</th>
+                <th scope="col" style="width: 10%">Unit</th>
+                <th scope="col" style="width: 15%" class="text-end">Rate</th>
+                <th scope="col" style="width: 10%" class="text-end">Qty</th>
+                <th scope="col" style="width: 15%" class="text-end">Amount</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @php
+                $total = 0;
+            @endphp
+            @foreach ($proforma_invoice->proforma_invoice_detail as $d)
+                @php
+                    $unit = Unit::find($d->unit_id);
+                @endphp
+                <tr>
+                    <td>
+                        {{ $loop->iteration }}
+                    </td>
+                    <td>
+                        {{ $d->service_item }}
+                    </td>
+                    <td>
+                        {{ $unit->vehicle_no }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($d->rate ?? 0, precision: 0) }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($d->qty ?? 0, precision: 2) }}
+                    </td>
+                    <td class="text-end">
+                        {{ Number::format($d->amount ?? 0, precision: 0) }}
+                    </td>
+                </tr>
+                @php
+                    $total += $d->amount ?? 0;
+                @endphp
+            @endforeach
+            {{-- end --}}
+            <tr>
+                <td colspan="5" class="text-end">
+                    <b>TOTAL</b>
+                </td>
+                <td class="text-end">
+                    <b>{{ Number::format($total, precision: 0) }}</b>
                 </td>
             </tr>
         </tbody>

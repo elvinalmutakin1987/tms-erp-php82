@@ -266,6 +266,8 @@
                         const vendorText = response.vendor ? response.vendor.name :
                             ``;
 
+                        const poTax = response.data.tax;
+
                         const $vendor = $("#client_vendor_id");
 
                         initClientVendorSelect2(false);
@@ -282,7 +284,7 @@
 
                             $vendor.val(vendorId).trigger('change.select2');
 
-                            loadClientVendorTaxable(vendorId);
+                            loadClientVendorTaxable(vendorId, poTax);
                         }
                         /* End */
 
@@ -675,6 +677,7 @@
             $("#grand_total").val('');
             $("#grand_total_").val('');
             window.poState.taxable = null;
+            $('#check_tax').prop('checked', false);
         });
 
         $('#formMonitoring').on('hidden.bs.modal', function() {
@@ -816,10 +819,11 @@
             });
         }
 
-        function loadClientVendorTaxable(vendorId) {
+        function loadClientVendorTaxable(vendorId, poTax) {
             if (!vendorId) {
                 window.poState.taxable = null;
-                $("#text-tax").text("Tax");
+                $('#check_tax').prop('checked', false);
+                $(document).trigger('po:taxableChanged');
                 initItemTableAfterAjax();
                 return;
             }
@@ -833,11 +837,27 @@
                 success: function(response) {
                     window.poState.taxable = response.data.taxable;
 
-                    $("#text-tax").text(`Tax (${window.poState.taxable})`);
+                    $('#check_tax').prop(
+                        'checked',
+                        window.poState.taxable === 'PKP'
+                    );
 
+                    const taxValue = parseFloat(poTax) || 0;
+                    if (taxValue === 0) {
+                        window.poState.taxable = 'Non PKP';
+                        $('#check_tax').prop('checked', false);
+                    } else {
+                        window.poState.taxable = 'PKP';
+                        $('#check_tax').prop('checked', true);
+                    }
+
+                    $(document).trigger('po:taxableChanged');
                     initItemTableAfterAjax();
                 },
                 error: function(xhr, status, error) {
+                    window.poState.taxable = null;
+                    $('#check_tax').prop('checked', false);
+                    $(document).trigger('po:taxableChanged');
                     console.error('Error get vendor taxable:', error);
                 }
             });
@@ -988,6 +1008,11 @@
                 }, 0);
             });
 
+            $vendor.on('select2:clear.clientVendor', function() {
+                window.poState.taxable = null;
+                $('#check_tax').prop('checked', false);
+            });
+
             $vendor.on('change.clientVendor', function() {
                 const vendorId = $(this).val();
                 loadClientVendorTaxable(vendorId);
@@ -1004,6 +1029,18 @@
         $('#formModal').off('shown.bs.modal.select2PO').on('shown.bs.modal.select2PO', function() {
             initPurchaseRequisitionSelect2();
             initClientVendorSelect2(false);
+        });
+
+        $(document).on('change', '#check_tax', function() {
+            window.poState = window.poState || {};
+            let isChecked = $(this).is(':checked');
+            if (isChecked) {
+                window.poState.taxable = 'PKP';
+            } else {
+                window.poState.taxable = 'Non PKP';
+            }
+            console.log('Taxable:', window.poState.taxable);
+            $(document).trigger('po:taxableChanged');
         });
     </script>
     <!--app JS-->

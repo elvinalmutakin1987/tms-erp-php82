@@ -162,14 +162,18 @@
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b id='text-tax'>Tax
-                    ({{ $purchase_order->client_vendor->taxable }})</b>
+            <td scope="col" colspan="8" class="text-end p-1 align-middle">
+                <input class="form-check-input" type="checkbox" value="" id="check_tax" name="check_tax"
+                    {{ (int) $purchase_order->tax !== 0 ? 'checked' : '' }}> &nbsp;
+                <b>Tax</b>
+                {{-- <b id='text-tax'>Tax
+                    ({{ $purchase_order->client_vendor->taxable }})</b> --}}
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="tax" name="tax" readonly
-                    value="{{ $purchase_order?->tax ?? 0 }}">
+                    value="{{ (int) $purchase_order?->tax !== 0 ? $purchase_order->tax : 0 }}">
                 <input type="text" class="form-control" id="tax_" name="tax_" readonly
-                    value="{{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}"
+                    value="{{ (int) $purchase_order?->tax !== 0 ? Number::format($purchase_order->tax, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
@@ -191,7 +195,8 @@
 
 <script>
     (() => {
-        window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
+        // window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
+
         const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
@@ -540,7 +545,6 @@
             let grandTotal = 0;
 
             if (total > 0) {
-                // tax = tax_ / 100 * total;
                 if (window.poState.taxable == 'PKP') {
                     tax = tax_ / 100 * total;
                 }
@@ -572,6 +576,12 @@
             }) : 0);
         }
 
+        $(document)
+            .off('po:taxableChanged.tableItem')
+            .on('po:taxableChanged.tableItem', function() {
+                calculateTotal();
+            });
+
         window.initPurchaseOrderItemTable = function() {
             renumberRows();
             calculateTotal();
@@ -579,5 +589,6 @@
         };
 
         window.initPurchaseOrderItemTable();
+
     })();
 </script>

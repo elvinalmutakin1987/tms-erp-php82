@@ -204,7 +204,7 @@ class ProformaInvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, ProformaInvoiceService $proforma_invoice_service)
+    public function store(Request $request, ProformaInvoiceService $proforma_invoice_service, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -285,7 +285,7 @@ class ProformaInvoiceController extends Controller
                         'type' => $contract->service->type,
                         'status' => $request->status
                     ]);
-                    $this->check_approval($proforma_invoice, $request->status);
+                    $this->check_approval($proforma_invoice, $request->status, $approval_service);
                 }
             } else if ($contract->service->type == 'LCT') {
                 $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
@@ -372,7 +372,7 @@ class ProformaInvoiceController extends Controller
                 }
                 $proforma_invoice->total = $total;
                 $proforma_invoice->save();
-                $this->check_approval($proforma_invoice, $request->status);
+                $this->check_approval($proforma_invoice, $request->status, $approval_service);
             } else if ($contract->service->type == 'Explosive Material Transport') {
                 $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
                 $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
@@ -443,7 +443,7 @@ class ProformaInvoiceController extends Controller
                 }
                 $proforma_invoice->total = $total_amount;
                 $proforma_invoice->save();
-                $this->check_approval($proforma_invoice, $request->status);
+                $this->check_approval($proforma_invoice, $request->status, $approval_service);
             } else if ($contract->service->type == 'Pallet') {
                 $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
                 $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
@@ -488,7 +488,7 @@ class ProformaInvoiceController extends Controller
                 }
                 $proforma_invoice->total = $total;
                 $proforma_invoice->save();
-                $this->check_approval($proforma_invoice, $request->status);
+                $this->check_approval($proforma_invoice, $request->status, $approval_service);
             }
             DB::commit();
             return response()->json([
@@ -613,7 +613,7 @@ class ProformaInvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Proforma_invoice $proforma_invoice, ProformaInvoiceService $proforma_invoice_service)
+    public function update(Request $request, Proforma_invoice $proforma_invoice, ProformaInvoiceService $proforma_invoice_service, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
@@ -687,7 +687,7 @@ class ProformaInvoiceController extends Controller
                 ];
                 $lockProforma_invoice = Proforma_invoice::where('id', $proforma_invoice->id)->lockForUpdate()->first();
                 $lockProforma_invoice->update($data);
-                $this->check_approval($lockProforma_invoice, $request->status);
+                $this->check_approval($lockProforma_invoice, $request->status, $approval_service);
             } else if ($contract->service->type == 'LCT') {
                 $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
                 $fix_monthly_fee = $gen_proforma['fix_monthly_fee'];
@@ -835,7 +835,7 @@ class ProformaInvoiceController extends Controller
                 }
                 $lockProforma_invoice->total = $total_amount;
                 $lockProforma_invoice->save();
-                $this->check_approval($lockProforma_invoice, $request->status);
+                $this->check_approval($lockProforma_invoice, $request->status, $approval_service);
             } else if ($contract->service->type == 'Pallet') {
                 $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
                 $unit_target = Unit_target::where('contract_id', $contract->id)->pluck('unit_id');
@@ -880,7 +880,7 @@ class ProformaInvoiceController extends Controller
                 }
                 $lockProforma_invoice->total = $total;
                 $lockProforma_invoice->save();
-                $this->check_approval($lockProforma_invoice, $request->status);
+                $this->check_approval($lockProforma_invoice, $request->status, $approval_service);
             }
             DB::commit();
             return response()->json([

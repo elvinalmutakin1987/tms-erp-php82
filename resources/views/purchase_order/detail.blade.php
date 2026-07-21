@@ -101,7 +101,7 @@
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="6"><b>Tax
-                                ({{ $purchase_order->client_vendor->taxable }})</b></td>
+                                ({{ (int) $purchase_order?->tax === 0 ? 'Non PKP' : 'PKP' }})</b></td>
                         <td style="text-align:right">
                             {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}
                         </td>
@@ -163,9 +163,9 @@
                     </tr>
                     <tr>
                         <td style="text-align:right" colspan="7"><b>Tax
-                                ({{ $purchase_order->client_vendor->taxable }})</b></td>
+                                ({{ (int) $purchase_order?->tax === 0 ? 'Non PKP' : 'PKP' }})</b></td>
                         <td style="text-align:right">
-                            {{ $purchase_order->tax ? Number::format($purchase_order->tax, precision: 0) : 0 }}
+                            {{ (int) $purchase_order->tax === 0 ? Number::format($purchase_order->tax, precision: 0) : 0 }}
                         </td>
                     </tr>
                     <tr>
