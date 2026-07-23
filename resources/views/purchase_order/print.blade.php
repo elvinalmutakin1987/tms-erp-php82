@@ -407,7 +407,7 @@
                             <tfoot>
                                 @if (($purchase_order->client_vendor->taxable ?? '') == 'PKP')
                                     <tr>
-                                        <td colspan="5" rowspan="3"
+                                        <td colspan="5" rowspan="4"
                                             style="text-align: left; border: 1px solid #000;">
                                             Notes: <br>
                                             {!! nl2br(e($purchase_order->notes)) !!}
@@ -419,6 +419,16 @@
 
                                         <td style="text-align: right; border: 1px solid #000;">
                                             {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td style="text-align: left; border: 1px solid #000;">
+                                            <b>Discount</b>
+                                        </td>
+
+                                        <td style="text-align: right; border: 1px solid #000;">
+                                            {{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : '' }}
                                         </td>
                                     </tr>
 
@@ -638,7 +648,7 @@
                         <tfoot>
                             @if (($purchase_order->client_vendor->taxable ?? '') == 'PKP')
                                 <tr>
-                                    <td colspan="5" rowspan="3"
+                                    <td colspan="5" rowspan="4"
                                         style="text-align: left; border: 1px solid #000;">
                                         Notes: <br>
                                         {!! nl2br(e($purchase_order->notes)) !!}
@@ -650,6 +660,16 @@
 
                                     <td style="text-align: right; border: 1px solid #000;">
                                         {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td style="text-align: left; border: 1px solid #000;">
+                                        <b>Discount</b>
+                                    </td>
+
+                                    <td style="text-align: right; border: 1px solid #000;">
+                                        {{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : '' }}
                                     </td>
                                 </tr>
 

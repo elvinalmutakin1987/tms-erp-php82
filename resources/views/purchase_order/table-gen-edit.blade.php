@@ -165,7 +165,7 @@
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="discount" name="discount" readonly
                     value="{{ $purchase_order?->discount ?? 0 }}">
-                <input type="text" class="form-control" id="discount_" name="discount_" readonly
+                <input type="text" class="form-control" id="discount_" name="discount_"
                     value="{{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
@@ -200,7 +200,7 @@
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="grand_total" name="grand_total" readonly
                     value="{{ $purchase_order?->grand_total ?? 0 }}">
-                <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
+                <input type="text" class="form-control" id="grand_total_" name="grand_total_"
                     value="{{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
@@ -283,6 +283,7 @@
         const $qty = $('#_qty_');
         const $price = $('#_price_');
         const $discount_item = $('#_discount_item_');
+        const $discount = $('#discount_');
 
         let isFmt = false;
         let userDecSep = null;
@@ -459,6 +460,15 @@
             calculateAmount();
         });
 
+        $discount.off('.genPOInput').on('keydown.genPOInput', function(e) {
+            textKeyDown(e);
+        });
+
+        $discount.on('input.genPOInput', function(e) {
+            textInput('discount', e);
+            calculateTotal();
+        });
+
         $('#addItemButton').off('click.genPOAdd').on('click.genPOAdd', function() {
             const tbody = $('#tableItem > tbody');
 
@@ -605,25 +615,29 @@
 
         function calculateTotal() {
             let total = 0;
-            let discount = 0;
+            let total_disc = 0;
+            // let discount = 0;
 
             $('input[name="amount[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0;
             });
 
-            $('input[name="discount_item[]"]').each(function() {
-                discount += parseFloat($(this).val()) || 0;
-            });
+            // $('input[name="discount_item[]"]').each(function() {
+            //     discount += parseFloat($(this).val()) || 0;
+            // });
+            let discount = parseFloat($('#discount').val()) || 0;
 
             let tax = 0;
             let grandTotal = 0;
 
             if (total > 0) {
+                total_disc = total - discount;
                 if (window.poState.taxable == 'PKP') {
-                    tax = tax_ / 100 * total;
+                    tax = tax_ / 100 * total_disc;
                 }
-
-                grandTotal = total + tax;
+                grandTotal = total_disc + tax;
+            } else {
+                discount = 0;
             }
 
             $('#total').val(total || 0);

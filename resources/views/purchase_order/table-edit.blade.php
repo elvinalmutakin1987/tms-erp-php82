@@ -155,7 +155,7 @@
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="discount" name="discount" readonly
                     value="{{ $purchase_order?->discount ?? 0 }}">
-                <input type="text" class="form-control" id="discount_" name="discount_" readonly
+                <input type="text" class="form-control" id="discount_" name="discount_"
                     value="{{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : 0 }}"
                     style="text-align: right;">
             </td>
@@ -271,6 +271,7 @@
         const $qty = $('#_qty_');
         const $price = $('#_price_');
         const $discount_item = $('#_discount_item_');
+        const $discount = $('#discount_');
 
         let isFmt = false;
         let userDecSep = null;
@@ -396,6 +397,15 @@
         $discount_item.on('input', function(e) {
             textInput("_discount_item", e);
             calculateAmount();
+        });
+
+        $discount.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $discount.on('input', function(e) {
+            textInput("discount", e);
+            calculateTotal();
         });
 
         $('#addItemButton').on('click', function() {
@@ -531,24 +541,27 @@
 
         function calculateTotal() {
             let total = 0;
-            let discount = 0;
+            let total_disc = 0;
+            // let discount = 0;
 
             $('input[name="amount[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0;
             });
 
-            $('input[name="discount_item[]"]').each(function() {
-                discount += parseFloat($(this).val()) || 0;
-            });
+            // $('input[name="discount_item[]"]').each(function() {
+            //     discount += parseFloat($(this).val()) || 0;
+            // });
+            let discount = parseFloat($('#discount').val()) || 0;
 
             let tax = 0;
             let grandTotal = 0;
 
             if (total > 0) {
+                total_disc = total - discount;
                 if (window.poState.taxable == 'PKP') {
-                    tax = tax_ / 100 * total;
+                    tax = tax_ / 100 * total_disc;
                 }
-                grandTotal = total + tax;
+                grandTotal = total_disc + tax;
             }
 
             $("#total").val(total || 0);

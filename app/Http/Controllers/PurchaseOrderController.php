@@ -201,7 +201,8 @@ class PurchaseOrderController extends Controller
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             $type = $purchase_requisition?->type ?? 'General';
-            $department = $purchase_requisition?->department ?? 'Equipment';
+            // $department = $purchase_requisition?->department ?? 'Procurement';
+            $department = 'Procurement';
             $system_setting = config('system_setting');
             $data = array_merge(
                 $request->only([
@@ -406,7 +407,8 @@ class PurchaseOrderController extends Controller
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             $type = $purchase_requisition?->type ?? 'General';
-            $department = $purchase_requisition?->department ?? 'Equipment';
+            // $department = $purchase_requisition?->department ?? 'Procurement';
+            $department = 'Procurement';
             $system_setting = config('system_setting');
             $data = array_merge(
                 $request->only([
