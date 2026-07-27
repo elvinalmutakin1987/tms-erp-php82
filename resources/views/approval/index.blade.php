@@ -329,57 +329,6 @@
             });
         }
 
-        // function reject(id) {
-        //     Swal.fire({
-        //         title: 'Are you sure?',
-        //         text: "You are about to reject this item.",
-        //         icon: 'warning',
-        //         input: 'text',
-        //         inputPlaceholder: 'Enter reject reason',
-        //         inputValidator: (value) => {
-        //             if (!value) {
-        //                 return 'Reason is required!';
-        //             }
-        //         },
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#3085d6',
-        //         cancelButtonColor: '#d33',
-        //         confirmButtonText: 'Yes, reject it!'
-        //     }).then((result) => {
-        //         if (result.isConfirmed) {
-        //             let url = '{{ route('approval.reject', ':_id') }}';
-        //             url = url.replace(':_id', id);
-        //             $.ajax({
-        //                 url: url,
-        //                 type: 'PUT',
-        //                 data: {
-        //                     _token: '{{ csrf_token() }}',
-        //                     reason: result.value
-        //                 },
-        //                 success: function(response) {
-        //                     Swal.fire(
-        //                         response.title,
-        //                         response.message,
-        //                         'success'
-        //                     );
-
-        //                     $('#table-data').DataTable().ajax.reload(null, false);
-        //                     $('#formDetail').modal('hide');
-        //                     $('#modal-detail-body').html("");
-        //                 },
-        //                 error: function(xhr, status, error) {
-        //                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-
-        //                     Swal.fire({
-        //                         icon: "error",
-        //                         title: "Oops...",
-        //                         text: errorMessage,
-        //                     });
-        //                 }
-        //             });
-        //         }
-        //     });
-        // }
         function reject(id) {
             const detailModal = document.getElementById('formDetail');
 

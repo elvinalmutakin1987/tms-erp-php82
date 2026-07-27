@@ -893,7 +893,7 @@ class PurchaseOrderController extends Controller
             ->replace(['/', '\\'], '-')
             ->toString();
 
-        return $pdf->stream("report-{$safeFilename}.pdf");
+        return $pdf->stream("{$safeFilename}.pdf");
     }
 
     /**
