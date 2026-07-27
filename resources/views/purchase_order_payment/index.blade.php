@@ -6,6 +6,24 @@
     <link rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+
+    <style>
+        /*
+                 * Select2 dropdown scrolling.
+                 * The dropdown is appended outside the original <select>, so the rule
+                 * must target the Select2 result container rather than #vendor itself.
+                 */
+        .select2-container--bootstrap-5 .select2-results__options,
+        .select2-container .select2-results__options {
+            max-height: 300px !important;
+            overflow-y: auto !important;
+            overscroll-behavior: contain;
+        }
+
+        .select2-container--open {
+            z-index: 1060;
+        }
+    </style>
 @endsection
 
 @section('content')
@@ -125,7 +143,7 @@
                         d.status = $('#_status').val();
                         d.date_start = $('#date_start').val();
                         d.date_end = $('#date_end').val();
-                        d.vendor = $('#vendor').val();
+                        d.vendor = $('#vendor').val() || 'All';
                     }
                 },
                 "columns": [{
@@ -240,7 +258,7 @@
                         if (poId) {
                             const optionExists = $purchase_order.find('option').filter(
                                 function() {
-                                    return String(this.value) === String($purchase_order);
+                                    return String(this.value) === String(poId);
                                 }).length > 0;
 
                             if (!optionExists) {
@@ -347,34 +365,7 @@
                 $('#table-data').DataTable().draw();
             });
 
-            $('#vendor').select2({
-                theme: "bootstrap-5",
-                width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
-                    'w-100') ? '100%' : 'style'),
-                placeholder: 'All Vendor',
-                allowClear: true,
-                selectOnClose: false,
-                minimumResultsForSearch: 0,
-                ajax: {
-                    url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data) {
-                        return {
-                            results: data.results || data
-                        };
-                    },
-                    cache: true
-                }
-            }).on('change', function() {
-                $('#table-data').DataTable().draw();
-            });
+            initVendorSelect2();
 
             gen_select2();
         });
@@ -574,6 +565,135 @@
             $('#formDetail').modal('hide');
             $('#modal-detail-body').html("");
         });
+
+        /**
+         * Initialize the vendor filter with Select2 AJAX pagination.
+         *
+         * Supported response formats:
+         * 1. Select2:
+         *    {
+         *      results: [{ id: 1, text: "Vendor A" }],
+         *      pagination: { more: true }
+         *    }
+         *
+         * 2. Laravel paginator:
+         *    {
+         *      data: [{ id: 1, name: "Vendor A" }],
+         *      current_page: 1,
+         *      last_page: 4,
+         *      next_page_url: "..."
+         *    }
+         */
+        function initVendorSelect2() {
+            const $vendor = $('#vendor');
+
+            if (!$vendor.length) {
+                return;
+            }
+
+            if ($vendor.hasClass('select2-hidden-accessible')) {
+                $vendor.select2('destroy');
+            }
+
+            $vendor.off('.vendorFilter');
+
+            $vendor.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'All Vendor',
+                allowClear: true,
+                selectOnClose: false,
+                minimumResultsForSearch: 0,
+                ajax: {
+                    url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        const rawResults = Array.isArray(data) ?
+                            data :
+                            (data.results || data.data || []);
+
+                        const results = rawResults
+                            .map(function(item) {
+                                if (typeof item === 'string' || typeof item === 'number') {
+                                    return {
+                                        id: item,
+                                        text: String(item)
+                                    };
+                                }
+
+                                return {
+                                    ...item,
+                                    id: item.id ?? item.value,
+                                    text: item.text ?? item.name ?? item.vendor_name ?? item.vendor ?? ''
+                                };
+                            })
+                            .filter(function(item) {
+                                return item.id !== undefined &&
+                                    item.id !== null &&
+                                    item.text !== '';
+                            });
+
+                        let hasMorePages = false;
+
+                        if (data && data.pagination &&
+                            typeof data.pagination.more !== 'undefined') {
+                            hasMorePages = Boolean(data.pagination.more);
+                        } else if (data && typeof data.next_page_url !== 'undefined') {
+                            hasMorePages = Boolean(data.next_page_url);
+                        } else if (data && data.current_page && data.last_page) {
+                            hasMorePages =
+                                Number(data.current_page) < Number(data.last_page);
+                        } else if (data && data.meta &&
+                            data.meta.current_page && data.meta.last_page) {
+                            hasMorePages =
+                                Number(data.meta.current_page) <
+                                Number(data.meta.last_page);
+                        } else if (data && data.links &&
+                            typeof data.links.next !== 'undefined') {
+                            hasMorePages = Boolean(data.links.next);
+                        }
+
+                        return {
+                            results: results,
+                            pagination: {
+                                more: hasMorePages
+                            }
+                        };
+                    },
+                    cache: true
+                }
+            });
+
+            $vendor.on('select2:open.vendorFilter', function() {
+                setTimeout(function() {
+                    const $openContainer = $('.select2-container--open');
+                    const $results = $openContainer.find('.select2-results__options');
+                    const $search = $openContainer.find('.select2-search__field');
+
+                    $results.css({
+                        'max-height': '300px',
+                        'overflow-y': 'auto'
+                    });
+
+                    if ($search.length) {
+                        $search.trigger('focus');
+                    }
+                }, 0);
+            });
+
+            $vendor.on('change.vendorFilter', function() {
+                $('#table-data').DataTable().draw();
+            });
+        }
 
         function gen_select2() {
             $('.select-select')

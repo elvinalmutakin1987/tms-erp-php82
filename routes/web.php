@@ -9,6 +9,7 @@ use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\ApprovalFlowController;
+use App\Http\Controllers\CICController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\UnitController;
@@ -774,4 +775,11 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('invoice', InvoiceController::class)
         ->middleware('role_or_permission:superadmin|invoice')
         ->names('invoice');
+
+    /**
+     * Routenya CIC
+     */
+    Route::resource('cic', CICController::class)
+        ->middleware('role_or_permission:superadmin|cic')
+        ->names('cic');
 });
