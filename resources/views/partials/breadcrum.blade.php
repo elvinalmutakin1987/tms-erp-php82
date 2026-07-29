@@ -24,6 +24,16 @@
                         @endif
                     </li>
                 @endif
+                @if (isset($breadcrum['sub-sub-module']))
+                    <li class="breadcrumb-item" aria-current="page">
+                        @if ($breadcrum['route-sub-sub-module'])
+                            <a
+                                href="{{ route($breadcrum['route-sub-sub-module']) }}">{{ $breadcrum['sub-sub-module'] }}</a>
+                        @else
+                            {{ $breadcrum['sub-sub-module'] }}
+                        @endif
+                    </li>
+                @endif
             </ol>
         </nav>
     </div>

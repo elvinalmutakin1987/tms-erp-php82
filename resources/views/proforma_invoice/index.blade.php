@@ -93,8 +93,6 @@
                                         <th>Type</th>
                                         <th>Periode</th>
                                         <th>Total</th>
-                                        {{-- <th>Penalty</th>
-                                        <th>Grand Total</th> --}}
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -952,7 +950,7 @@
                 });
             }
 
-            if (statusValue === 'Done') {
+            if (statusValue === 'Done' || statusValue === 'CIC Approval') {
                 Swal.fire({
                     title: 'Are you sure?',
                     icon: 'warning',

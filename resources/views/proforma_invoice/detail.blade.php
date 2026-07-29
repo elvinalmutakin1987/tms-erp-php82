@@ -625,8 +625,6 @@
     </table>
 @endif
 
-
-
 @empty(!$approval_process)
     <table style="border-collapse:separate; border-spacing:0;">
         <tr>

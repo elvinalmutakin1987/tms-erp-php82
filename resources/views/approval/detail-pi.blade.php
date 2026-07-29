@@ -74,7 +74,7 @@
         $totalJamKerja = $hariKerja * 24;
         $totalBreakdownSeconds = Maintenance::whereYear('date', $year)
             ->whereMonth('date', $month)
-            ->where('unit_id', $unit_id)
+            ->where('unit_id', $unit_target->unit_id)
             ->where('status', '!=', 'Draft')
             ->selectRaw('COALESCE(SUM(TIME_TO_SEC(work_duration)), 0) as total_seconds')
             ->value('total_seconds');
@@ -433,7 +433,6 @@
             </tr>
         </table>
     </h6>
-
     <table class="table tableItem">
         <thead class="table-dark">
             <tr>
@@ -599,7 +598,6 @@
             </tr>
         </table>
     </h6>
-
     <table class="table tableItem">
         <thead class="table-dark">
             <tr>

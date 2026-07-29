@@ -42,15 +42,15 @@
     $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
 
     $layout = 'potrait';
-    if ($proforma_invoice->contract->service->type === 'Unit Rental') {
-        $layout = 'potrait';
-    } elseif ($proforma_invoice->contract->service->type === 'LCT') {
-        $layout = 'landscape';
-    } elseif ($proforma_invoice->contract->service->type === 'Explosive Material Transport') {
-        $layout = 'landscape';
-    } elseif ($proforma_invoice->contract->service->type === 'Pallet') {
-        $layout = 'landscape';
-    }
+    // if ($proforma_invoice->contract->service->type === 'Unit Rental') {
+    //     $layout = 'potrait';
+    // } elseif ($proforma_invoice->contract->service->type === 'LCT') {
+    //     $layout = 'landscape';
+    // } elseif ($proforma_invoice->contract->service->type === 'Explosive Material Transport') {
+    //     $layout = 'landscape';
+    // } elseif ($proforma_invoice->contract->service->type === 'Pallet') {
+    //     $layout = 'landscape';
+    // }
 @endphp
 
 <style>
@@ -62,7 +62,7 @@
         font-family: "Times New Roman", Times, serif;
         margin: 0;
         padding: 0;
-        font-size: 12pt;
+        font-size: 12px;
         color: #000;
     }
 
@@ -289,6 +289,11 @@
                                         <td style="width: 30%">Email</td>
                                         <td style="width: 5%; text-align: center">:</td>
                                         <td>{{ $proforma_invoice->client_vendor->email ?? '' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="width: 30%">Contract No.</td>
+                                        <td style="width: 5%; text-align: center">:</td>
+                                        <td><b>{{ $contract->contract_no ?? '' }}</b></td>
                                     </tr>
                                 </table>
                             </td>
@@ -956,7 +961,6 @@
             </tr>
         </thead>
     </table>
-
     <table class="table-p2h"
         style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
         <tbody>

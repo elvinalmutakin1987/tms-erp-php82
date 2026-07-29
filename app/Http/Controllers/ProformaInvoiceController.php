@@ -1193,7 +1193,7 @@ class ProformaInvoiceController extends Controller
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        if (in_array($proforma_invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+        if (in_array($proforma_invoice->status, ['Approved', 'CIC Approval', 'Invoicing', 'Done'], true)) {
             $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
                 'Nomor Proforma Invoice : ' . $proforma_invoice->proforma_no . "\n" .
                 'Tanggal : ' . Carbon::parse($proforma_invoice->date)->format('d-m-Y') . "\n" .

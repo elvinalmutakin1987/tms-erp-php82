@@ -119,10 +119,6 @@ class PermissionController extends Controller
                 'name' => $request->name,
             ];
             $permission->update($data);
-            $roles = Role::all();
-            foreach ($roles as $role) {
-                $role->syncPermissions(Permission::all()->pluck('id')->toArray());
-            }
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -145,12 +141,11 @@ class PermissionController extends Controller
     {
         DB::beginTransaction();
         try {
-            $permission->delete();
-            $roles = Role::all();
-            foreach ($roles as $role) {
-                $role->syncPermissions(Permission::all()->pluck('id')->toArray());
+            $permission->load('roles');
+            foreach ($permission->roles as $role) {
+                $role->revokePermissionTo($permission);
             }
-            DB::commit();
+            $permission->delete();
             return response()->json([
                 'success' => true,
                 'title' => 'Deleted!',
