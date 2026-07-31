@@ -24,9 +24,9 @@
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal"
                                         data-title="Add Proforma Invoice"><i class='bx bxs-plus-square'></i>New</a>
-                                    <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
+                                    {{-- <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formBulkModal"
-                                        data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a>
+                                        data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a> --}}
                                 </div>
                             </div>
                             <div class="row align-items-center">
@@ -41,6 +41,7 @@
                                         <option value="Draft">Draft</option>
                                         <option value="Approval">Approval</option>
                                         <option value="Approved">Approved</option>
+                                        <option value="CIC Approval">CIC Approval</option>
                                         <option value="Cancel">Cancel</option>
                                         <option value="Done">Done</option>
                                     </select>

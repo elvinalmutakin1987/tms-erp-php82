@@ -1,3 +1,24 @@
+ @php
+     use App\Models\Approval_flow;
+     use App\Models\Approval_process;
+     use App\Models\Approval_status;
+     use App\Models\Approval_step;
+     use App\Models\Contract;
+     use App\Models\Contract_fmf;
+     use App\Models\Contract_rate;
+     use App\Models\Proforma_invoice;
+     use App\Models\Purchase_order;
+     use App\Models\Purchase_order_payment;
+     use App\Models\Purchase_requisition;
+     use App\Models\Request_quotation;
+     use App\Models\Unit_target;
+
+     $approval_process = Approval_process::where('user_id', Auth::user()->id)
+         ->where('action', 'Open')
+         ->orderBy('id', 'desc')
+         ->count();
+ @endphp
+
  <!--sidebar wrapper -->
  <div class="sidebar-wrapper" data-simplebar="true">
      <div class="sidebar-header">
@@ -361,7 +382,17 @@
                      <div class="parent-icon">
                          <i class="bx bx-file"></i>
                      </div>
-                     <div class="menu-title">Approval</div>
+                     <div class="menu-title d-inline-flex align-items-center gap-2">
+                         <span>Approval</span>
+
+                         <span id="badge-approval-process">
+                             @if ($approval_process > 0)
+                                 <span class="badge bg-success" style="font-size: 13px;">
+                                     {{ $approval_process }}
+                                 </span>
+                             @endif
+                         </span>
+                     </div>
                  </a>
              </li>
          @endif

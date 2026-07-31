@@ -34,7 +34,7 @@ class Proforma_invoice extends Model implements Auditable
             } else {
                 $periode = now();
             }
-            $year = $periode->format('Y');
+            $year = $periode->format('y');
             $month = $periode->format('m');
             $proforma_invoice->proforma_no = running_number()
                 ->type('pro-inv')
@@ -98,5 +98,15 @@ class Proforma_invoice extends Model implements Auditable
     public function proforma_invoice_detail(): HasMany
     {
         return $this->hasMany(Proforma_invoice_detail::class);
+    }
+
+    public function invoice(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function invoice_proforma_invoice(): HasMany
+    {
+        return $this->hasMany(Invoice_proforma_invoice::class);
     }
 }

@@ -281,10 +281,15 @@ class ApprovalController extends Controller
             $approval_service->approve($approval_process);
             $approval_service->nextStep($approval_process);
             DB::commit();
+            $approval_total = Approval_process::where('user_id', Auth::user()->id)
+                ->where('action', 'Open')
+                ->orderBy('id', 'desc')
+                ->count();
             return response()->json([
                 'success' => true,
                 'title' => 'Saved!',
-                'message' => 'Data approved!'
+                'message' => 'Data approved!',
+                'approval_total' => $approval_total
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -302,10 +307,15 @@ class ApprovalController extends Controller
         try {
             rejected($approval_process);
             DB::commit();
+            $approval_total = Approval_process::where('user_id', Auth::user()->id)
+                ->where('action', 'Open')
+                ->orderBy('id', 'desc')
+                ->count();
             return response()->json([
                 'success' => true,
                 'title' => 'Saved!',
-                'message' => 'Data rejected!'
+                'message' => 'Data rejected!',
+                'approval_total' => $approval_total
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();

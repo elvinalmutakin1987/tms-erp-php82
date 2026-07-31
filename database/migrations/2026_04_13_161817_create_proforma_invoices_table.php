@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignId('contract_fmf_id')->nullable()->constrained('contract_fmfs')->nullOnDelete();
             $table->foreignId('unit_target_id')->nullable()->constrained('unit_targets')->nullOnDelete();
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
+            $table->foreignId('invoice_id')->nullable()->constrained('invoices')->nullOnDelete();
             $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('generate_no', 30)->nullable();
             $table->string('proforma_no', 30)->nullable();
@@ -51,6 +52,7 @@ return new class extends Migration
             $table->date('prof_inv_app_date')->nullable(); //Proforma Inv approved
             $table->date('cic_request_date')->nullable(); //Minta cic
             $table->date('cic_created_date')->nullable(); //Pembuatan CIC
+            $table->date('cic_received_date')->nullable(); //Terima CIC
             $table->date('inv_date')->nullable(); //Terima CIC
             $table->date('inv_create_date')->nullable(); //Tgl INV
             $table->date('cic_send_date')->nullable(); //Kirim CIC ke KPC
@@ -58,7 +60,10 @@ return new class extends Migration
             $table->date('cic_pick_up_date')->nullable(); //CIC diambil TMS
             $table->date('inv_send_date')->nullable(); //Inv Terima CIC
             //------------------------------------------------------------
-            $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
+            $table->text('cic_path')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
+            $table->text('real_name')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
+            $table->string('cic_number', 30)->nullable(); //CIC Numbernya
+            $table->string('status', 30)->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();

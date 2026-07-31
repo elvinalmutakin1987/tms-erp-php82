@@ -9,6 +9,7 @@ use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -22,22 +23,22 @@ class Invoice extends Model implements Auditable
 
     protected static function booted(): void
     {
-        static::creating(function ($proforma_invoice) {
-            if (!empty($proforma_invoice->proforma_no)) {
+        static::creating(function ($invoice) {
+            if (!empty($invoice->invoice_no)) {
                 return;
             }
-            $kodeDokumen = 'P-INV';
-            if (!empty($proforma_invoice->periode)) {
-                $periode = Carbon::createFromFormat('Y-m', $proforma_invoice->periode);
-            } elseif (!empty($proforma_invoice->periode_start)) {
-                $periode = Carbon::parse($proforma_invoice->periode_start);
+            $kodeDokumen = 'INV';
+            if (!empty($invoice->periode)) {
+                $periode = Carbon::createFromFormat('Y-m', $invoice->periode);
+            } elseif (!empty($invoice->periode_start)) {
+                $periode = Carbon::parse($invoice->periode_start);
             } else {
                 $periode = now();
             }
-            $year = $periode->format('Y');
+            $year = $periode->format('y');
             $month = $periode->format('m');
-            $proforma_invoice->proforma_no = running_number()
-                ->type('pro-inv')
+            $invoice->invoice_no = running_number()
+                ->type('inv')
                 ->formatter(new class($kodeDokumen, $year, $month) implements Presenter {
                     public function __construct(
                         private string $kodeDokumen,
@@ -94,5 +95,20 @@ class Invoice extends Model implements Auditable
     public function unit_target(): BelongsTo
     {
         return $this->belongsTo(Unit_target::class);
+    }
+
+    public function proforma_invoice(): HasMany
+    {
+        return $this->hasMany(Proforma_invoice::class);
+    }
+
+    public function invoice_proforma_invoice(): HasMany
+    {
+        return $this->hasMany(Invoice_proforma_invoice::class);
+    }
+
+    public function invoice_detail(): HasMany
+    {
+        return $this->hasMany(Invoice_detail::class);
     }
 }

@@ -1372,12 +1372,6 @@ class ProformaInvoiceController extends Controller
             if ($request->ops_received_date) $lockProforma_invoice->ops_received_date = $request->ops_received_date;
             if ($request->prof_inv_app_date) $lockProforma_invoice->prof_inv_app_date = $request->prof_inv_app_date;
             if ($request->cic_request_date) $lockProforma_invoice->cic_request_date = $request->cic_request_date;
-            if ($request->cic_created_date) $lockProforma_invoice->cic_created_date = $request->cic_created_date;
-            if ($request->inv_date) $lockProforma_invoice->inv_date = $request->inv_date;
-            if ($request->cic_send_date) $lockProforma_invoice->cic_send_date = $request->cic_send_date;
-            if ($request->cic_ready_to_pick_date) $lockProforma_invoice->cic_ready_to_pick_date = $request->cic_ready_to_pick_date;
-            if ($request->cic_pick_up_date) $lockProforma_invoice->cic_pick_up_date = $request->cic_pick_up_date;
-            if ($request->inv_send_date) $lockProforma_invoice->inv_send_date = $request->inv_send_date;
             $lockProforma_invoice->status = $request->status;
             $lockProforma_invoice->save();
             if ($request->status == 'Done') {

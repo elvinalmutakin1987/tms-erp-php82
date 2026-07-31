@@ -421,25 +421,6 @@
                     &nbsp;&nbsp;&nbsp;{{ Carbon::parse($endDate)->format('d F Y') }}
                 </td>
             </tr>
-            <tr>
-                <td>Status</td>
-                <td style="width:5px"> &nbsp;&nbsp;&nbsp;:</td>
-                <td>
-                    &nbsp;&nbsp;
-                    @if ($proforma_invoice->status == 'Done')
-                        <span class="badge bg-success" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
-                    @elseif($proforma_invoice->status == 'Approval')
-                        <span class="badge bg-info" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
-                    @elseif($proforma_invoice->status == 'Open')
-                        <span class="badge bg-primary" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
-                    @elseif($proforma_invoice->status == 'Approved' || $proforma_invoice->status == 'Received')
-                        <span class="badge bg-warning" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
-                    @else
-                        <span class="badge bg-secondary"
-                            style="font-size: 13px">{{ $proforma_invoice->status }}</span>
-                    @endif
-                </td>
-            </tr>
         </table>
     </h6>
     <table class="table tableItem">
@@ -718,7 +699,6 @@
     </table>
 @endempty
 
-
 <table style="border-collapse:separate; border-spacing:0;">
     <tr>
         <td style="vertical-align: top" colspan="3">
@@ -776,11 +756,74 @@
     </tr>
     <tr>
         <td style="vertical-align: top">
-            CIC Request Date
+            Minta CIC
         </td>
         <td> &nbsp;:&nbsp;</td>
         <td>
             {{ $proforma_invoice->cic_request_date ? Carbon::parse($proforma_invoice->cic_request_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            Pembuatan CIC
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->cic_created_date ? Carbon::parse($proforma_invoice->cic_created_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            Tanggal Invoice
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->inv_date ? Carbon::parse($proforma_invoice->inv_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            Pembuatan Invoice
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->inv_create_date ? Carbon::parse($proforma_invoice->inv_create_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            Kirim CIC Ke KPC
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->cic_send_date ? Carbon::parse($proforma_invoice->cic_send_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            Informasi CIC Bisa Diambil
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->cic_ready_to_pick_date ? Carbon::parse($proforma_invoice->cic_ready_to_pick_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            CIC Diambil TMS
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->cic_pick_up_date ? Carbon::parse($proforma_invoice->cic_pick_up_date)->translatedFormat('d F Y') : '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
+            Invoice Terima KPC
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            {{ $proforma_invoice->inv_send_date ? Carbon::parse($proforma_invoice->inv_send_date)->translatedFormat('d F Y') : '-' }}
         </td>
     </tr>
 </table>

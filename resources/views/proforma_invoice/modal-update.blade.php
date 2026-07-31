@@ -69,7 +69,7 @@
                     <button type="button" class="btn btn-primary saveUpdateButton" id="saveUpdateButton1"
                         name="status" value="Approved">Save</button>
                     <button type="button" class="btn btn-success saveUpdateButton" id="saveUpdateButton2"
-                        name="status" value="CIC ">Proceed to Invoice</button>
+                        name="status" value="CIC Approval">Proceed to Invoice</button>
                     <button type="button" class="btn btn-light" id="cancelUpdateButton">Cancel</button>
                 </div>
             </div>

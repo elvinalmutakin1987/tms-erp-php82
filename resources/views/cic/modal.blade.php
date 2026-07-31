@@ -1,0 +1,67 @@
+<style>
+    #formModal .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(100vh - 160px);
+        scroll-behavior: auto;
+    }
+</style>
+
+<!-- search modal -->
+<div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-header">
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data" onsubmit="disableButton()">
+                    @csrf
+                    <input type="hidden" name="request_token" id="request_token">
+                    <div class="row mb-4">
+                        <div class="col-3">
+                            <label for="year" class="form-label">Year</label>
+                            <input type="number" class="form-control" id="year" name="year"
+                                value="{{ now()->year }}">
+                        </div>
+                        <div class="col-3">
+                            <label for="month" class="form-label">Month</label>
+                            <select class="form-select select-select" id="month" name="month">
+                                @foreach (range(1, 12) as $m)
+                                    <option value="{{ $m }}" {{ $m == date('n') ? 'selected' : '' }}>
+                                        {{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="contract_id" class="form-label">Contract</label>
+                            <select class="form-select select-select" id="contract_id" name="contract_id">
+                                <option value=""></option>
+                                @foreach ($contract as $d)
+                                    <option value="{{ $d->id }}">
+                                        {{ $d->contract_no . ' - ' . $d->service->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col" id="div-table">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <div class="d-md-flex d-grid align-items-center gap-1">
+                    <button type="button" class="btn btn-secondary saveButton" id="saveButton1" name="status"
+                        value="Draft">Draft</button>
+                    <button type="button" class="btn btn-success saveButton" id="saveButton2" name="status"
+                        value="Open">Save</button>
+                    <button type="button" class="btn btn-light" id="cancelButton">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end search modal -->

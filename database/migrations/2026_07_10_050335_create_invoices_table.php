@@ -24,7 +24,7 @@ return new class extends Migration
             $table->foreignId('unit_id')->nullable()->constrained('units')->nullOnDelete();
             $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('generate_no', 30)->nullable();
-            $table->string('proforma_no', 30)->nullable();
+            $table->string('invoice_no', 30)->nullable();
             $table->date('date')->nullable();
             $table->string('periode')->nullable();
             $table->date('periode_start')->nullable();
@@ -36,6 +36,9 @@ return new class extends Migration
             $table->decimal('breakdown', 16, 2)->nullable();
             $table->decimal('pa', 16, 2)->nullable();
             $table->decimal('penalty', 16, 2)->nullable();
+            $table->decimal('tax', 16, 2)->nullable(); //Tax nya
+            $table->decimal('ppn', 16, 2)->nullable();
+            $table->decimal('dpp', 16, 2)->nullable();
             $table->decimal('total', 16, 2)->nullable();
             $table->decimal('km_awal', 16, 2)->nullable();
             $table->decimal('km_akhir', 16, 2)->nullable();
@@ -52,6 +55,7 @@ return new class extends Migration
             $table->date('prof_inv_app_date')->nullable(); //Proforma Inv approved
             $table->date('cic_request_date')->nullable(); //Minta cic
             $table->date('cic_created_date')->nullable(); //Pembuatan CIC
+            $table->date('cic_received_date')->nullable(); //Terima CIC
             $table->date('inv_date')->nullable(); //Terima CIC
             $table->date('inv_create_date')->nullable(); //Tgl INV
             $table->date('cic_send_date')->nullable(); //Kirim CIC ke KPC
@@ -59,6 +63,9 @@ return new class extends Migration
             $table->date('cic_pick_up_date')->nullable(); //CIC diambil TMS
             $table->date('inv_send_date')->nullable(); //Inv Terima CIC
             //------------------------------------------------------------
+            $table->text('invoice_path')->nullable();
+            $table->text('real_name')->nullable();
+            $table->string('cic_number')->nullable(); //Buat cic numbernya, diambil dari proforma invoice
             $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
