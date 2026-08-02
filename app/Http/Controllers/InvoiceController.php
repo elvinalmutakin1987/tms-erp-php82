@@ -152,9 +152,6 @@ class InvoiceController extends Controller
                 ->addColumn('unit', function ($item) {
                     return $item->unit?->vehicle_no ?? '';
                 })
-                ->addColumn('proforma_no', function ($item) {
-                    return $item->proforma_invoice->proforma_no ?? '';
-                })
                 ->addColumn('contract_no', function ($item) {
                     return $item->contract->contract_no ?? '';
                 })
@@ -180,8 +177,10 @@ class InvoiceController extends Controller
         $breadcrum = [
             'module' => 'Finance',
             'route-module' => null,
-            'sub-module' => 'Invoice',
-            'route-sub-module' => 'invoice.index'
+            'sub-module' => 'Sales',
+            'route-sub-module' => null,
+            'sub-sub-module' => 'Invoice',
+            'route-sub-sub-module' => 'invoice.index'
         ];
         return view('invoice.index', compact('breadcrum', 'contract'));
     }

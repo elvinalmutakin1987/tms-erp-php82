@@ -40,6 +40,7 @@ return new class extends Migration
             $table->decimal('ppn', 16, 2)->nullable();
             $table->decimal('dpp', 16, 2)->nullable();
             $table->decimal('total', 16, 2)->nullable();
+            $table->decimal('grand_total', 16, 2)->nullable();
             $table->decimal('km_awal', 16, 2)->nullable();
             $table->decimal('km_akhir', 16, 2)->nullable();
             $table->timestamp('approval_at')->nullable();

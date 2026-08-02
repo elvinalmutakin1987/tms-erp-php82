@@ -231,7 +231,7 @@ class ProformaInvoiceController extends Controller
             $gen_proforma = $proforma_invoice_service->genProformaInvoice($contract, $year, $month);
             $start_date = Carbon::create($year, $month, 1)->startOfMonth();
             $end_date = $start_date->copy()->endOfMonth();
-            if ($contract->service->type == 'Unit Rental') {
+            if ($contract->service->type == 'Unit Rental' || $contract->service->type == 'Fuel Truck Rental') {
                 foreach ($gen_proforma['unit_target'] as $unittarget) {
                     $hariKerja = $startDate->daysInMonth;
                     $totalJamKerja = $hariKerja * 24;
@@ -434,6 +434,7 @@ class ProformaInvoiceController extends Controller
                         'contract_id' => $contract->id,
                         'contract_rate_id' => $contractrate->id,
                         'request_token' => $contract->request_token,
+                        'service_item' => $contractrate->service_item,
                         'rate' => $rate,
                         'qty' => $qty,
                         'amount' => $amount,

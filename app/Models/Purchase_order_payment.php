@@ -21,7 +21,7 @@ class Purchase_order_payment extends Model implements Auditable
     protected static function booted()
     {
         static::creating(function ($purchase_order_payment) {
-            $presenter = new DatePrefixPresenter('Y/m', '/');
+            $presenter = new DatePrefixPresenter('y/m', '/');
             $purchase_order_payment->payment_no = running_number()
                 ->type('po-payment')
                 ->formatter($presenter)

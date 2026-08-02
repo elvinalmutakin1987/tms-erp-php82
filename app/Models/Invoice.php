@@ -97,9 +97,9 @@ class Invoice extends Model implements Auditable
         return $this->belongsTo(Unit_target::class);
     }
 
-    public function proforma_invoice(): HasMany
+    public function proforma_invoice(): BelongsTo
     {
-        return $this->hasMany(Proforma_invoice::class);
+        return $this->belongsTo(Proforma_invoice::class);
     }
 
     public function invoice_proforma_invoice(): HasMany

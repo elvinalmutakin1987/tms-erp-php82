@@ -49,7 +49,7 @@
                                         <th width="10">No</th>
                                         <th>Client</th>
                                         <th>Contract Number</th>
-                                        <th>Type</th>
+                                        <th>Service</th>
                                         <th>Start Date</th>
                                         <th>End Date</th>
                                         <th>Status</th>

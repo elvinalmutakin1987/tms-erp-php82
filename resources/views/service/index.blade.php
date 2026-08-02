@@ -46,8 +46,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>Type</th>
                                         <th>Name</th>
+                                        <th>Type</th>
                                         <th width="20">Action</th>
                                     </tr>
                                 </thead>
@@ -108,14 +108,14 @@
                         targets: '_all'
                     },
                     {
-                        data: 'type',
-                        name: 'type',
+                        data: 'name',
+                        name: 'name',
                         orderable: true,
                         searchable: true,
                     },
                     {
-                        data: 'name',
-                        name: 'name',
+                        data: 'type',
+                        name: 'type',
                         orderable: true,
                         searchable: true,
                     },

@@ -776,6 +776,19 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|invoice')
         ->names('invoice');
 
+    Route::get('invoice-print/{invoice}', [InvoiceController::class, 'print'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.print');
+
+    Route::get('invoice-export-pdf/{invoice}', [InvoiceController::class, 'export_pdf'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.export_pdf');
+
+    Route::get('invoice-get-detail/{invoice}', [InvoiceController::class, 'get_detail'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.get_detail');
+
+
     /**
      * Routenya CIC
      */
@@ -798,4 +811,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('cic-destroy-file/{proforma_invoice}', [CICController::class, 'destroy_file'])
         ->middleware('role_or_permission:superadmin|cic.update_progress')
         ->name('cic.destroy_file');
+
+    Route::get('cic-generate-invoice', [CICController::class, 'generate_invoice'])
+        ->middleware('role_or_permission:superadmin|cic.generate_invoice')
+        ->name('cic.generate_invoice');
+
+    Route::post('cic-generate-invoice', [CICController::class, 'store_generate_invoice'])
+        ->middleware('role_or_permission:superadmin|cic.store_generate_invoice')
+        ->name('cic.store_generate_invoice');
 });

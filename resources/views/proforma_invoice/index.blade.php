@@ -19,7 +19,17 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <div class="row align-items-center mb-2">
+                            {{-- <div class="row align-items-center mb-2">
+                                <div class="col">
+                                    <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
+                                        data-bs-toggle="modal" data-bs-target="#formModal"
+                                        data-title="Add Proforma Invoice"><i class='bx bxs-plus-square'></i>New</a>
+                                    <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
+                                        data-bs-toggle="modal" data-bs-target="#formBulkModal"
+                                        data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a>
+                                </div>
+                            </div> --}}
+                            <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal"
@@ -28,8 +38,6 @@
                                         data-bs-toggle="modal" data-bs-target="#formBulkModal"
                                         data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a> --}}
                                 </div>
-                            </div>
-                            <div class="row align-items-center">
                                 <div class="col">
                                     <select class="form-select select-top" id="unit" name="unit">
                                         <option value=""></option>
@@ -88,8 +96,8 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>PI Number</th>
-                                        <th>Contract Number</th>
+                                        <th>PI No.</th>
+                                        <th>Contract No.</th>
                                         <th>Unit</th>
                                         <th>Type</th>
                                         <th>Periode</th>
@@ -235,6 +243,9 @@
                                     data + '</span>';
                             } else if (data == 'Cancel') {
                                 return '<span class="badge bg-danger" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Invoicing') {
+                                return '<span class="badge bg-dark" style="font-size: 13px">' +
                                     data + '</span>';
                             } else {
                                 return '<span class="badge bg-secondary" style="font-size: 13px">' +

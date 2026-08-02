@@ -308,7 +308,6 @@ class CICController extends Controller
                 $lockProforma_invoice->cic_path = $directory . '/' . $filename;
                 $lockProforma_invoice->real_name = $realname;
             }
-
             $invoice = Invoice::where('id', $lockProforma_invoice->invoice_id)->lockForUpdate()->first();
             if ($invoice) {
                 if ($request->cut_off_date) $invoice->cut_off_date = $request->cut_off_date;
@@ -422,12 +421,20 @@ class CICController extends Controller
      * generate invoice per proforma invoice
      * 1 proforma invoice : 1 invoice
      */
-    public function create_invoice(Request $request, $proforma_invoice_id)
+    public function create_invoice(Request $request, $proforma_invoice_id, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {
+            $excelRound = function ($value, int $precision = 2) {
+                return round((float) $value, $precision, PHP_ROUND_HALF_UP);
+            };
+            $department = 'Finance';
             $proforma_invoice = Proforma_invoice::find($proforma_invoice_id);
             $proforma_invoice_detail = Proforma_invoice_detail::where('proforma_invoice_id', $proforma_invoice->id)->get();
+            $total = $proforma_invoice->total;
+            $dpp = $excelRound((11 / 12) * $total, 2);
+            $ppn = $excelRound((12 / 100) * $dpp, 2);
+            $grand_total = $total + $ppn;
             $invoice = Invoice::create([
                 'request_token' => (string) Str::uuid(),
                 'user_id' => Auth::user()->id,
@@ -449,7 +456,10 @@ class CICController extends Controller
                 'breakdown' => $proforma_invoice->breakdown,
                 'pa' => $proforma_invoice->pa,
                 'penalty' => $proforma_invoice->penalty,
-                'total' => $proforma_invoice->total,
+                'tax' => $ppn,
+                'dpp' => $dpp,
+                'total' => $total,
+                'grand_total' => $grand_total,
                 'km_awal' => $proforma_invoice->km_awal,
                 'km_akhir' => $proforma_invoice->km_akhir,
                 'type' => $proforma_invoice->type,
@@ -470,6 +480,7 @@ class CICController extends Controller
                 'status' => $request->status
             ]);
             $proforma_invoice->invoice_id = $invoice->id;
+            $proforma_invoice->status = 'Invoicing';
             $proforma_invoice->save();
             foreach ($proforma_invoice_detail as $d) {
                 Invoice_detail::create([
@@ -496,10 +507,31 @@ class CICController extends Controller
                     'ptd_amount' => $d->ptd_amount
                 ]);
             }
+
             Invoice_proforma_invoice::create([
                 'invoice_id' => $invoice->id,
                 'proforma_invoice_id' => $proforma_invoice_id
             ]);
+
+            /**
+             * Buat check ada approvalnya gak
+             * Kalo ada statusnya jadi Approval.
+             * Nanti kalo approval beres baru jadi Open
+             */
+            $model = 'App\Models\Invoice';
+            if ($approval_service->checkHasApproval($model, $department)) {
+                if ($request->status == 'Open') {
+                    $invoice->status = 'Approval';
+                    $invoice->save();
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $invoice->id);
+                }
+            } else {
+                if ($request->status == 'Open') {
+                    $invoice->status = 'Approved';
+                    $invoice->save();
+                }
+            }
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -520,6 +552,19 @@ class CICController extends Controller
     {
         DB::beginTransaction();
         try {
+            $year = $request->year;
+            $month = $request->month;
+            $contract = Contract::where('status', 'Active')->get();
+            $html = view('cic.table-generate', compact(
+                'contract',
+                'year',
+                'month'
+            ))->render();
+            return response()->json([
+                'success' => true,
+                'message' => 'Data showed',
+                'html' => $html
+            ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -533,7 +578,6 @@ class CICController extends Controller
     /**
      * export file
      */
-
     public function export_file(Request $request, Proforma_invoice $proforma_invoice)
     {
         try {
@@ -560,6 +604,337 @@ class CICController extends Controller
             return redirect()
                 ->route('purchaseorder.index')
                 ->with('error', 'Failed to open file.');
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy_file(Proforma_invoice $proforma_invoice)
+    {
+        DB::beginTransaction();
+        try {
+            $filePath = $proforma_invoice->cic_path;
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $proforma_invoice->cic_path = null;
+            $proforma_invoice->save();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Simpan generate invoice
+     */
+    public function store_generate_invoice(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $excelRound = function ($value, int $precision = 2) {
+                return round((float) $value, $precision, PHP_ROUND_HALF_UP);
+            };
+            $year = $request->year;
+            $month = $request->month;
+            $periode = Carbon::parse("$year-$month")->format('Y-m');
+            $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+            $endDate = $startDate->copy()->endOfMonth();
+            $contract = Contract::where('status', 'Active')->get();
+            foreach ($contract as $cont) {
+                if ($cont->service->type === 'Unit Rental' || $cont->service->type === 'Fuel Truck Rental') {
+                    //Dibuat invoice per proforma invoice
+                    $proforma_invoice = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->get();
+                    foreach ($proforma_invoice as $pi) {
+                        $is_already_create = Invoice_proforma_invoice::where('proforma_invoice_id', $pi->id)->exists();
+                        if ($is_already_create) {
+                            $lockProforma_invoice = Proforma_invoice::where('id', $pi->id)->lockForUpdate()->first();
+                            $total = $pi->total;
+                            $dpp = $excelRound((11 / 12) * $total, 2);
+                            $ppn = $excelRound((12 / 100) * $dpp, 2);
+                            $grand_total = $total + $ppn;
+                            $invoice = Invoice::create([
+                                'request_token' => (string) Str::uuid(),
+                                'user_id' => Auth::user()->id,
+                                'client_vendor_id' => $cont->client_vendor_id,
+                                'contract_id' => $cont->id,
+                                'proforma_invoice_id' => $pi->id,
+                                'date' => Carbon::now()->format('Y-m-d'),
+                                'periode' => $periode,
+                                'periode_start' => $startDate,
+                                'periode_finish' => $endDate,
+                                'dpp' => $dpp,
+                                'ppn' => $ppn,
+                                'tax' => $ppn,
+                                'total' => $total,
+                                'grand_total' => $grand_total,
+                                'status' => $request->status
+                            ]);
+                            $lockProforma_invoice->invoice_id = $invoice->id;
+                            $lockProforma_invoice->save();
+                            Invoice_proforma_invoice::create([
+                                'invoice_id' => $invoice->id,
+                                'proforma_invoice_id' => $pi->id
+                            ]);
+                        }
+                    }
+                } elseif ($cont->service->type === 'Explosive Material Transport') {
+                    //Dibuat invoice dari beberapa proforma invoice
+                    $contract_rate = Contract_rate::where('contract_id', $cont->id)->get();
+                    $proforma_invoice = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->get();
+                    $proforma_invoice_id = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->pluck('id');
+                    $total = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->sum('total');
+                    $dpp = $excelRound((11 / 12) * $total, 2);
+                    $ppn = $excelRound((12 / 100) * $dpp, 2);
+                    $grand_total = $total + $ppn;
+
+                    if ($proforma_invoice->count() > 0) {
+                        $invoice = Invoice::firstOrCreate([
+                            'request_token' => (string) Str::uuid(),
+                            'user_id' => Auth::user()->id,
+                            'client_vendor_id' => $cont->client_vendor_id,
+                            'contract_id' => $cont->id,
+                            'proforma_invoice_id' => $pi->id,
+                            'date' => Carbon::now()->format('Y-m-d'),
+                            'periode' => $periode,
+                            'periode_start' => $startDate,
+                            'periode_finish' => $endDate,
+                            'dpp' => $dpp,
+                            'ppn' => $ppn,
+                            'tax' => $ppn,
+                            'total' => $total,
+                            'grand_total' => $grand_total,
+                            'status' => $request->status
+                        ]);
+
+                        foreach ($contract_rate as $rate) {
+                            $qty = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('qty');
+                            $amount = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('sum');
+                            $ptd_qty = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('ptd_qty');
+                            $ptd_amount = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('ptd_amount');
+
+                            $invoice->invoice_detail()->create([
+                                'contract_id' => $cont->id,
+                                'contract_rate_id' => $rate->id,
+                                'service_item' => $rate->service_item,
+                                'unit' => $rate->unit,
+                                'rate' => $rate->rate,
+                                'type' => $rate->type,
+                                'qty' => $qty,
+                                'amount' => $amount,
+                                'ptd_qty' => $ptd_qty,
+                                'ptd_amount' => $ptd_amount
+                            ]);
+                        }
+
+                        foreach ($proforma_invoice as $pi) {
+                            Invoice_proforma_invoice::create([
+                                'invoice_id' => $invoice->id,
+                                'proforma_invoice_id' => $pi->id
+                            ]);
+                        }
+
+                        Proforma_invoice::whereIn('id', $proforma_invoice_id)
+                            ->update([
+                                'invoice_id' => $invoice->id
+                            ]);
+                    }
+                } elseif ($cont->service->type === 'LCT') {
+                    //Dibuat invoice dari beberapa proforma invoice
+                    $contract_rate = Contract_rate::where('contract_id', $cont->id)->get();
+                    $proforma_invoice = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->get();
+                    $proforma_invoice_id = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->pluck('id');
+                    $total = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->sum('total');
+                    $dpp = $excelRound((11 / 12) * $total, 2);
+                    $ppn = $excelRound((12 / 100) * $dpp, 2);
+                    $grand_total = $total + $ppn;
+                    if ($proforma_invoice->count() > 0) {
+                        $invoice = Invoice::firstOrCreate([
+                            'request_token' => (string) Str::uuid(),
+                            'user_id' => Auth::user()->id,
+                            'client_vendor_id' => $cont->client_vendor_id,
+                            'contract_id' => $cont->id,
+                            'proforma_invoice_id' => $pi->id,
+                            'date' => Carbon::now()->format('Y-m-d'),
+                            'periode' => $periode,
+                            'periode_start' => $startDate,
+                            'periode_finish' => $endDate,
+                            'dpp' => $dpp,
+                            'ppn' => $ppn,
+                            'tax' => $ppn,
+                            'total' => $total,
+                            'grand_total' => $grand_total,
+                            'status' => $request->status
+                        ]);
+                        foreach ($contract_rate as $rate) {
+                            $qty = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('qty');
+                            $amount = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('sum');
+                            $ptd_qty = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('ptd_qty');
+                            $ptd_amount = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_id', $cont->id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('ptd_amount');
+                            $invoice->invoice_detail()->create([
+                                'contract_id' => $cont->id,
+                                'contract_rate_id' => $rate->id,
+                                'service_item' => $rate->service_item,
+                                'unit' => $rate->unit,
+                                'rate' => $rate->rate,
+                                'type' => $rate->type,
+                                'qty' => $qty,
+                                'amount' => $amount,
+                                'ptd_qty' => $ptd_qty,
+                                'ptd_amount' => $ptd_amount
+                            ]);
+                        }
+                        foreach ($proforma_invoice as $pi) {
+                            Invoice_proforma_invoice::create([
+                                'invoice_id' => $invoice->id,
+                                'proforma_invoice_id' => $pi->id
+                            ]);
+                        }
+
+                        Proforma_invoice::whereIn('id', $proforma_invoice_id)
+                            ->update([
+                                'invoice_id' => $invoice->id
+                            ]);
+                    }
+                } elseif ($cont->service->type === 'Pallet') {
+                    $proforma_invoice = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->get();
+                    $proforma_invoice_id = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->where('invoice_id', null)
+                        ->pluck('id');
+                    $proforma_invoice_detail = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                        ->get();
+                    $total = Proforma_invoice::where('contract_id', $cont->id)
+                        ->where('periode', $periode)
+                        ->sum('total');
+                    $dpp = $excelRound((11 / 12) * $total, 2);
+                    $ppn = $excelRound((12 / 100) * $dpp, 2);
+                    $grand_total = $total + $ppn;
+                    if ($proforma_invoice->count() > 0) {
+                        $invoice = Invoice::firstOrCreate([
+                            'request_token' => (string) Str::uuid(),
+                            'user_id' => Auth::user()->id,
+                            'client_vendor_id' => $cont->client_vendor_id,
+                            'contract_id' => $cont->id,
+                            'date' => Carbon::now()->format('Y-m-d'),
+                            'periode' => $periode,
+                            'periode_start' => $startDate,
+                            'periode_finish' => $endDate,
+                            'dpp' => $dpp,
+                            'ppn' => $ppn,
+                            'tax' => $ppn,
+                            'total' => $total,
+                            'grand_total' => $grand_total,
+                            'status' => $request->status
+                        ]);
+
+                        $groupedDetails = $proforma_invoice_detail->groupBy(function ($detail) {
+                            return json_encode([
+                                $detail->service_item,
+                                $detail->unit_id,
+                            ]);
+                        });
+
+                        foreach ($groupedDetails as $details) {
+                            $firstDetail = $details->first();
+                            $invoice->invoice_detail()->create([
+                                'contract_id' => $cont->id,
+                                'contract_rate_id' => $firstDetail->contract_rate_id ?? $rate->id,
+                                'service_item' => $firstDetail->service_item,
+                                'unit_id' => $firstDetail->unit_id,
+                                'unit' => $firstDetail->unit ?? $rate->unit,
+                                'rate' => $firstDetail->rate ?? $rate->rate,
+                                'type' => $firstDetail->type ?? $rate->type,
+                                'qty' => $details->sum('qty'),
+                                'amount' => $details->sum('amount'),
+                                'ptd_qty' => $firstDetail->ptd_qty,
+                                'ptd_amount' => $firstDetail->ptd_amount,
+                            ]);
+                        }
+
+                        foreach ($proforma_invoice as $pi) {
+                            Invoice_proforma_invoice::create([
+                                'invoice_id' => $invoice->id,
+                                'proforma_invoice_id' => $pi->id
+                            ]);
+                        }
+
+                        Proforma_invoice::whereIn('id', $proforma_invoice_id)
+                            ->update([
+                                'invoice_id' => $invoice->id
+                            ]);
+                    }
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
         }
     }
 }

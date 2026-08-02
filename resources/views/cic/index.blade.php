@@ -20,7 +20,12 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="row align-items-center">
-                                <div class="col-3">
+                                <div class="col">
+                                    <a href="javascript:;" id="generateInvoiceButton" class="btn btn-success mb-3 mb-lg-0"
+                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Generate Invoice"><i
+                                            class='bx bx-file'></i>Generate Invoice</a>
+                                </div>
+                                <div class="col">
                                     <select class="form-select select-top" id="_status" name="_status">
                                         <option value="All">All Status</option>
                                         <option value="Draft">Draft</option>
@@ -32,19 +37,15 @@
                                         <option value="Done">Done</option>
                                     </select>
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
                                     <input type="text" class="form-control datepicker" id="date_start" name="date_start"
                                         placeholder="Start Date">
                                 </div>
-                                <div class="col-2">
+                                <div class="col">
                                     <input type="text" class="form-control datepicker" id="date_end" name="date_end"
                                         placeholder="End Date">
                                 </div>
-                                <div class="col-3">
-                                    <a href="javascript:;" id="generateInvoiceButton" class="btn btn-success mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formBulkModal"
-                                        data-title="Generate Invoice"><i class='bx bx-file'></i>Generate Invoice</a>
-                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -59,7 +60,7 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th width="10">No</th>
-                                        <th>PI No</th>
+                                        <th>PI No.</th>
                                         <th>INV No.</th>
                                         <th>Contract No.</th>
                                         <th>Periode</th>
@@ -99,6 +100,8 @@
 
     <script>
         const saveButton = document.getElementById('saveButton');
+        const saveCreateButton1 = document.getElementById('saveCreateButton1');
+        const saveCreateButton2 = document.getElementById('saveCreateButton2');
         const saveUpdateButton1 = document.getElementById('saveUpdateButton1');
         const saveUpdateButton2 = document.getElementById('saveUpdateButton2');
         const saveUpdateButton3 = document.getElementById('saveUpdateButton3');
@@ -200,6 +203,9 @@
                             } else if (data == 'Cancel') {
                                 return '<span class="badge bg-danger" style="font-size: 13px">' +
                                     data + '</span>';
+                            } else if (data == 'Invoicing') {
+                                return '<span class="badge bg-dark" style="font-size: 13px">' +
+                                    data + '</span>';
                             } else {
                                 return '<span class="badge bg-secondary" style="font-size: 13px">' +
                                     data + '</span>';
@@ -236,6 +242,11 @@
                 $('#table-data').DataTable().draw();
             });
 
+            gen_select2();
+        });
+
+        $('#generateInvoiceButton').on('click', function() {
+            loadGenerateInvoice();
         });
 
         $('.saveButton').on('click', function() {
@@ -302,7 +313,21 @@
             var button = $('#openModalButton');
             var title = button.data('title');
             $('#formModal form')[0].reset();
-            $('#modal-header').text(title);
+            $('#modal-header').text("Generate Invoice");
+            $.ajax({
+                url: '{{ route('gen_request_token') }}',
+                type: 'GET',
+                success: function(response) {
+                    $('#request_token').val(response.data);
+                },
+                error: function(xhr, status, error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: error
+                    });
+                }
+            });
         });
 
         $('#formModal').on('hidden.bs.modal', function() {
@@ -342,6 +367,18 @@
             $('#formCreate').modal('hide');
         });
 
+        $(document)
+            .off('change.loadTable', '#month')
+            .on('change.loadTable', '#month', function() {
+                loadGenerateInvoice();
+            });
+
+        $(document)
+            .off('input.loadTable change.loadTable', '#year')
+            .on('input.loadTable change.loadTable', '#year', function() {
+                loadGenerateInvoice();
+            });
+
         $(document).off('click.detailButton').on('click.detailButton', '.detailButton', function() {
             $('#modal-detail-header').text('Detail Proforma Invoice');
 
@@ -367,15 +404,6 @@
 
         $(document).off('click.updateButton').on('click.updateButton', '.updateButton', function() {
             proformaInvoiceId = $(this).data('id');
-            // let status_ = $(this).data('status');
-
-            // if (invoiceId_ === null) {
-            //     saveUpdateButton2.classList.remove('d-none');
-            //     saveUpdateButton3.classList.add('d-none');
-            // } else {
-            //     saveUpdateButton3.classList.remove('d-none');
-            //     saveUpdateButton2.classList.add('d-none');
-            // }
             $('#modal-update-header').text('Update Progress');
             $('#id').val(proformaInvoiceId);
 
@@ -476,46 +504,234 @@
             });
         });
 
+        function gen_select2() {
+            $('.select-select').each(function() {
+                const $el = $(this);
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.select2({
+                    theme: "bootstrap-5",
+                    dropdownParent: $('#formModal'),
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style'),
+                    selectOnClose: false,
+                    minimumResultsForSearch: 0,
+                    placeholder: $el.attr('id') === 'month' ? 'Choose Month' : '',
+                    allowClear: $el.attr('id') === 'month'
+                }).on('select2:close', function() {
+                    $(this).blur();
+
+                    if (document.activeElement) {
+                        document.activeElement.blur();
+                    }
+                });
+            });
+        }
+
+        // function create_invoice(id) {
+        //     Swal.fire({
+        //         title: 'Are you sure?',
+        //         icon: 'info',
+        //         showCancelButton: true,
+        //         confirmButtonColor: '#5156be',
+        //         cancelButtonColor: '#fd625e',
+        //         confirmButtonText: 'Yes, Create it!',
+        //         cancelButtonText: 'Cancel'
+        //     }).then((result) => {
+        //         if (result.isConfirmed) {
+        //             let url = '{{ route('cic.create_invoice', ':_id') }}';
+        //             url = url.replace(':_id', id);
+
+        //             $.ajax({
+        //                 url: url,
+        //                 type: 'POST',
+        //                 data: {
+        //                     id: id,
+        //                     _token: '{{ csrf_token() }}'
+        //                 },
+        //                 success: function(response) {
+        //                     Swal.fire({
+        //                         title: "Invoice Created!",
+        //                         text: response.message,
+        //                         icon: "success",
+        //                         timer: 5000,
+        //                         didOpen: () => {},
+        //                         willClose: () => {
+        //                             $('#table-data').DataTable().ajax.reload(null, false);
+        //                         }
+        //                     });
+        //                 },
+        //                 error: function(xhr, status, error) {
+        //                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+
+        //                     Swal.fire({
+        //                         icon: "error",
+        //                         title: "Oops...",
+        //                         text: errorMessage
+        //                     });
+        //                 }
+        //             });
+        //         }
+        //     });
+        // }
+
         function create_invoice(id) {
             Swal.fire({
-                title: 'Are you sure?',
+                title: 'Create Invoice',
+                text: 'Choose Save or Draft.',
                 icon: 'info',
+
+                showDenyButton: true,
+                showCancelButton: true,
+
+                confirmButtonColor: '#198754',
+                denyButtonColor: '#f1b44c',
+                cancelButtonColor: '#fd625e',
+
+                confirmButtonText: 'Save',
+                denyButtonText: 'Draft',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                let submitType = null;
+
+                if (result.isConfirmed) {
+                    submitType = 'Open';
+                } else if (result.isDenied) {
+                    submitType = 'Draft';
+                } else {
+                    return;
+                }
+
+                let url = '{{ route('cic.create_invoice', ':_id') }}';
+                url = url.replace(':_id', id);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        status: submitType,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: submitType === 'Draft' ?
+                                'Invoice Draft Saved!' : 'Invoice Saved!',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+                            willClose: () => {
+                                $('#table-data')
+                                    .DataTable()
+                                    .ajax
+                                    .reload(null, false);
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON?.message ?? error;
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
+                    }
+                });
+            });
+        }
+
+        let loadTableTimer = null;
+
+        async function loadGenerateInvoice() {
+            var year = $('#year').val();
+            var month = $('#month').val();
+
+            if (year === '' || month === '') {
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: "Choose year & month!"
+                });
+                $('#div-table').html('');
+                return false;
+            }
+
+            $('#div-table').html(`
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually-hidden">Loading...</span>
+            `);
+
+            clearTimeout(loadTableTimer);
+
+            loadTableTimer = setTimeout(function() {
+                const url = '{{ route('cic.generate_invoice') }}';
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    data: {
+                        year: year,
+                        month: month
+                    },
+                    success: function(response) {
+                        $('#div-table').html(response.html);
+
+                        $('#modal-header').html('Generate Invoice');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:', error);
+
+                        $('#div-table').html(`
+                            <div class="alert alert-danger mb-0">
+                                Failed to load data.
+                            </div>
+                        `);
+                    }
+                });
+            }, 500);
+        }
+
+        function delete_file(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#5156be',
                 cancelButtonColor: '#fd625e',
-                confirmButtonText: 'Yes, Create it!',
+                confirmButtonText: 'Yes, Delete it!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('cic.create_invoice', ':_id') }}';
+                    let url = '{{ route('cic.destroy_file', ':_id') }}';
                     url = url.replace(':_id', id);
-
                     $.ajax({
                         url: url,
-                        type: 'POST',
+                        type: 'DELETE',
                         data: {
                             id: id,
                             _token: '{{ csrf_token() }}'
                         },
                         success: function(response) {
                             Swal.fire({
-                                title: "Invoice Created!",
+                                title: "Deleted!",
                                 text: response.message,
                                 icon: "success",
                                 timer: 5000,
                                 didOpen: () => {},
                                 willClose: () => {
-                                    $('#table-data').DataTable().ajax.reload(null, false);
+                                    $('#div-file').html("");
                                 }
                             });
                         },
                         error: function(xhr, status, error) {
                             var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-
                             Swal.fire({
                                 icon: "error",
                                 title: "Oops...",
-                                text: errorMessage
+                                text: errorMessage,
                             });
                         }
                     });
@@ -524,13 +740,21 @@
         }
 
         function disableButton() {
-            saveButton1.disabled = true;
-            saveButton2.disabled = true;
+            saveCreateButton1.disabled = true;
+            saveCreateButton2.disabled = true;
+
+            saveUpdateButton1.disabled = true;
+            saveUpdateButton2.disabled = true;
+            saveUpdateButton3.disabled = true;
         }
 
         function enableButton() {
-            saveButton1.disabled = false;
-            saveButton2.disabled = false;
+            saveCreateButton1.disabled = false;
+            saveCreateButton2.disabled = false;
+
+            saveUpdateButton1.disabled = false;
+            saveUpdateButton2.disabled = false;
+            saveUpdateButton3.disabled = false;
         }
     </script>
     <!--app JS-->
