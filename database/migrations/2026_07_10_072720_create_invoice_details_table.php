@@ -30,6 +30,7 @@ return new class extends Migration
             $table->decimal('target', 16, 2)->nullable();
             $table->decimal('price', 16, 2)->nullable();
             $table->decimal('qty', 16, 2)->nullable();
+            $table->decimal('discount_item', 16, 2)->nullable();
             $table->decimal('amount', 16, 2)->nullable();
             $table->decimal('ptd_qty', 16, 2)->nullable();
             $table->decimal('ptd_amount', 16, 2)->nullable();

@@ -19,24 +19,12 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            {{-- <div class="row align-items-center mb-2">
-                                <div class="col">
-                                    <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formModal"
-                                        data-title="Add Proforma Invoice"><i class='bx bxs-plus-square'></i>New</a>
-                                    <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formBulkModal"
-                                        data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a>
-                                </div>
-                            </div> --}}
+
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
                                         data-bs-toggle="modal" data-bs-target="#formModal"
                                         data-title="Add Proforma Invoice"><i class='bx bxs-plus-square'></i>New</a>
-                                    {{-- <a href="javascript:;" id="openModalButton" class="btn btn-info mb-3 mb-lg-0"
-                                        data-bs-toggle="modal" data-bs-target="#formBulkModal"
-                                        data-title="Add Requisition"><i class='bx bx-list-plus'></i>Bulk Generate</a> --}}
                                 </div>
                                 <div class="col">
                                     <select class="form-select select-top" id="_status" name="_status">
@@ -92,8 +80,9 @@
                                     <tr>
                                         <th width="10">No</th>
                                         <th>Invoice No.</th>
+                                        <th>Client</th>
                                         <th>Periode</th>
-                                        <th>Total</th>
+                                        <th>Grand Total</th>
                                         <th>Status</th>
                                         <th width="20">Action</th>
                                     </tr>
@@ -110,7 +99,9 @@
         </div>
     </div>
     <!--end page wrapper -->
-    @include('invoice.modal', $contract)
+    @include('invoice.modal')
+
+    @include('invoice.modal-detail')
 
     @include('invoice.modal-edit')
 
@@ -128,10 +119,11 @@
         const saveButton = document.getElementById('saveButton');
         const saveUpdateButton = document.getElementById('saveUpdateButton');
 
-        var proformaInvoiceId = '';
-        var contractId = '';
-        var unitId = '';
-
+        var invoiceId = '';
+        window.invoiceState = {
+            taxable: null,
+            termofpayment: null
+        };
         $(document).ready(function() {
             var ajax = '{{ url()->current() }}';
 
@@ -174,14 +166,20 @@
                         searchable: true
                     },
                     {
+                        data: 'client',
+                        name: 'client',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
                         data: 'periode_',
                         name: 'periode_',
                         orderable: true,
                         searchable: true
                     },
                     {
-                        data: 'total',
-                        name: 'total',
+                        data: 'grand_total',
+                        name: 'grand_total',
                         orderable: true,
                         searchable: true,
                         className: 'text-end',
@@ -236,12 +234,14 @@
             });
 
             initTopStatusSelect2();
-            initUnitTopSelect2();
             gen_select2();
+
+            // #client_vendor_id diinisialisasi ketika modal sudah tampil.
+            // Ini mencegah konflik dengan select2-custom.js dan ukuran dropdown modal.
         });
 
         function initTopStatusSelect2() {
-            $('.select-top').not('#unit').each(function() {
+            $('.select-top').each(function() {
                 const $el = $(this);
 
                 if ($el.hasClass('select2-hidden-accessible')) {
@@ -260,205 +260,320 @@
             });
         }
 
-        function initUnitTopSelect2() {
-            const $unit = $('#unit');
+        function gen_select2() {
+            $('.select-select')
+                .not('#client_vendor_id')
+                .each(function() {
+                    const $el = $(this);
 
-            if (!$unit.length) {
+                    if ($el.hasClass('select2-hidden-accessible')) {
+                        $el.select2('destroy');
+                    }
+
+                    $el.select2({
+                        theme: "bootstrap-5",
+                        dropdownParent: $('#formModal'),
+                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                            'style'),
+                        selectOnClose: false,
+                        minimumResultsForSearch: 0,
+                        placeholder: $el.attr('id') === 'client_vendor_id' ? 'Choose Client' : '',
+                        allowClear: $el.attr('id') === 'client_vendor_id'
+                    }).on('select2:close', function() {
+                        $(this).blur();
+
+                        if (document.activeElement) {
+                            document.activeElement.blur();
+                        }
+                    });
+
+                });
+        }
+
+        function normalizeClientVendorResponse(response) {
+            function findArray(value, depth = 0) {
+                if (depth > 5 || value === null || value === undefined) {
+                    return [];
+                }
+
+                if (Array.isArray(value)) {
+                    return value;
+                }
+
+                if (typeof value !== 'object') {
+                    return [];
+                }
+
+                const preferredKeys = [
+                    'results', 'data', 'items', 'clients', 'vendors',
+                    'client_vendors', 'clientVendors', 'rows'
+                ];
+
+                for (const key of preferredKeys) {
+                    if (Object.prototype.hasOwnProperty.call(value, key)) {
+                        const found = findArray(value[key], depth + 1);
+                        if (found.length) {
+                            return found;
+                        }
+                    }
+                }
+
+                for (const child of Object.values(value)) {
+                    const found = findArray(child, depth + 1);
+                    if (found.length) {
+                        return found;
+                    }
+                }
+
+                return [];
+            }
+
+            return findArray(response)
+                .map(function(item) {
+                    if (item === null || item === undefined) {
+                        return null;
+                    }
+
+                    if (typeof item !== 'object') {
+                        return {
+                            id: String(item),
+                            text: String(item)
+                        };
+                    }
+
+                    const id = item.id ??
+                        item.value ??
+                        item.client_vendor_id ??
+                        item.vendor_id ??
+                        item.client_id ??
+                        item.code;
+
+                    const text = item.text ??
+                        item.label ??
+                        item.name ??
+                        item.client_vendor ??
+                        item.client_vendor_name ??
+                        item.client_name ??
+                        item.vendor_name ??
+                        item.company_name ??
+                        item.description;
+
+                    if (id === null || id === undefined || text === null || text === undefined) {
+                        console.warn('Baris get_client_vendor tidak dapat dipetakan:', item);
+                        return null;
+                    }
+
+                    return {
+                        id: String(id),
+                        text: String(text),
+                        raw: item
+                    };
+                })
+                .filter(Boolean);
+        }
+
+        function initClientVendorSelect2(triggerTaxable = true) {
+            const $modal = $('#formModal');
+            const $client = $modal.find('select#client_vendor_id').first();
+
+            if (!$client.length) {
+                console.error('#client_vendor_id tidak ditemukan di dalam #formModal.');
                 return;
             }
 
-            if ($unit.hasClass('select2-hidden-accessible')) {
-                $unit.select2('destroy');
+            if (typeof $.fn.select2 !== 'function') {
+                console.error('Library Select2 belum termuat.');
+                return;
             }
 
-            $unit.off('.unitTop');
+            let taxableTimer = null;
 
-            $unit.select2({
-                theme: "bootstrap-5",
-                width: $unit.data('width') ? $unit.data('width') : ($unit.hasClass('w-100') ? '100%' : 'style'),
-                placeholder: 'All Unit',
+            // Pisahkan field ini dari initializer Select2 global.
+            $client.removeClass('select-select');
+            $client.off('.clientVendor');
+
+            if ($client.hasClass('select2-hidden-accessible')) {
+                $client.select2('destroy');
+            }
+
+            $client
+                .prop('disabled', false)
+                .removeAttr('disabled multiple data-close-on-select data-select-on-close')
+                .prop('multiple', false)
+                .removeData('closeOnSelect')
+                .removeData('selectOnClose');
+
+            $client.select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                dropdownParent: $modal,
+                placeholder: 'Choose Client',
                 allowClear: true,
+                closeOnSelect: true,
                 selectOnClose: false,
-                minimumInputLength: 0,
-                ajax: {
-                    url: '{{ route('proformainvoice.get_unit_all') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data, params) {
-                        params.page = params.page || 1;
-
-                        return {
-                            results: data.results,
-                            pagination: {
-                                more: data.pagination ? data.pagination.more : false
-                            }
-                        };
-                    },
-                    cache: true
-                }
+                minimumResultsForSearch: 0
             });
 
-            $unit.val(null).trigger('change.select2');
-
-            $unit.on('select2:open.unitTop', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                }, 0);
+            $client.on('select2:open.clientVendor', function() {
+                $('.select2-container--open').css('z-index', 1060);
             });
 
-            $unit.on('change.unitTop', function() {
-                $('#table-data').DataTable().draw();
-            });
-        }
+            $client.on('select2:select.clientVendor', function(event) {
+                const selected = event.params?.data;
+                const clientId = selected?.id ?? $client.val();
 
-        function closeTopSelect2BeforeModal() {
-            const topSelects = ['#unit', '#_status'];
-
-            topSelects.forEach(function(selector) {
-                const $el = $(selector);
-
-                if ($el.length && $el.hasClass('select2-hidden-accessible')) {
-                    $el.select2('close');
-                }
-            });
-        }
-
-        function gen_select2() {
-            $('.select-select').each(function() {
-                const $el = $(this);
-
-                if ($el.attr('id') === 'unit_id') {
+                if (!clientId || !triggerTaxable) {
                     return;
                 }
 
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.select2('destroy');
-                }
-
-                $el.select2({
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0,
-                    placeholder: $el.attr('id') === 'contract_id' ? 'Choose Contract' : '',
-                    allowClear: $el.attr('id') === 'contract_id'
-                }).on('select2:close', function() {
-                    $(this).blur();
-
-                    if (document.activeElement) {
-                        document.activeElement.blur();
+                clearTimeout(taxableTimer);
+                taxableTimer = setTimeout(function() {
+                    if (typeof window.loadClientVendorTaxable === 'function') {
+                        window.loadClientVendorTaxable(clientId);
+                    } else if (typeof loadClientVendorTaxable === 'function') {
+                        loadClientVendorTaxable(clientId);
+                    } else {
+                        console.warn('loadClientVendorTaxable() tidak ditemukan.');
                     }
-                });
+                }, 100);
+            });
 
-                if ($el.attr('id') === 'contract_id') {
-                    $el.val(null).trigger('change.select2');
+            $client.on('select2:clear.clientVendor', function() {
+                clearTimeout(taxableTimer);
+                window.invoiceState = window.invoiceState || {};
+                window.invoiceState.taxable = null;
+                $('#check_tax').prop('checked', false);
+            });
+        }
+
+        function loadClientVendorTaxable(clientId, invoiceTax) {
+            if (!clientId) {
+                window.invoiceState.taxable = null;
+                $('#check_tax').prop('checked', false);
+                $(document).trigger('invoice:taxableChanged');
+                return;
+            }
+
+            let url = '{{ route('invoice.get_client_vendor_by_id', ':_id') }}';
+            url = url.replace(':_id', clientId);
+
+            $.ajax({
+                url: url,
+                type: 'GET',
+                success: function(response) {
+                    window.invoiceState.taxable = response.data.taxable;
+
+                    $('#check_tax').prop(
+                        'checked',
+                        window.invoiceState.taxable === 'PKP'
+                    );
+
+                    const taxValue = parseFloat(invoiceTax) || 0;
+                    if (taxValue === 0) {
+                        window.poState.taxable = 'Non PKP';
+                        $('#check_tax').prop('checked', false);
+                    } else {
+                        window.poState.taxable = 'PKP';
+                        $('#check_tax').prop('checked', true);
+                    }
+
+                    $(document).trigger('po:taxableChanged');
+                    initItemTableAfterAjax();
+                },
+                error: function(xhr, status, error) {
+                    window.poState.taxable = null;
+                    $('#check_tax').prop('checked', false);
+                    $(document).trigger('invoice:taxableChanged');
+                    console.error('Error get vendor taxable:', error);
                 }
             });
         }
 
-        function initUnitSelect2() {
-            const $unit = $('#unit_id');
+        function loadClientVendorSelect2(triggerTaxable = false) {
+            const $modal = $('#formModal');
+            const $client = $modal.find('select#client_vendor_id').first();
+            const endpoint = @json(route('invoice.get_client_vendor'));
 
-            if (!$unit.length) {
-                return;
+            if (!$client.length) {
+                console.error('#client_vendor_id tidak ditemukan saat modal dibuka.');
+                return $.Deferred().reject().promise();
             }
 
-            const selectedValue = $unit.val();
+            // Cegah initializer global mengambil alih sebelum request selesai.
+            $client.removeClass('select-select');
 
-            if ($unit.hasClass('select2-hidden-accessible')) {
-                $unit.select2('destroy');
+            if ($client.hasClass('select2-hidden-accessible')) {
+                $client.select2('destroy');
             }
 
-            $unit.off('.unitModal');
+            $client
+                .prop('disabled', true)
+                .empty()
+                .append(new Option('Loading client...', '', true, false));
 
-            $unit.select2({
-                theme: "bootstrap-5",
-                dropdownParent: $('#formModal'),
-                width: $unit.data('width') ? $unit.data('width') : ($unit.hasClass('w-100') ? '100%' : 'style'),
-                placeholder: 'Choose Unit',
-                allowClear: true,
-                selectOnClose: false,
-                minimumInputLength: 0,
-                ajax: {
-                    url: '{{ route('proformainvoice.get_unit_all') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data, params) {
-                        params.page = params.page || 1;
+            console.debug('Request get_client_vendor:', endpoint);
 
-                        return {
-                            results: data.results,
-                            pagination: {
-                                more: data.pagination ? data.pagination.more : false
-                            }
-                        };
-                    },
-                    cache: true
+            return $.ajax({
+                url: endpoint,
+                method: 'GET',
+                dataType: 'json',
+                cache: false,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                data: {
+                    term: '',
+                    q: '',
+                    search: '',
+                    page: 1
                 }
-            });
+            }).done(function(response) {
+                console.debug('Response get_client_vendor:', response);
 
-            if (selectedValue) {
-                $unit.val(selectedValue).trigger('change.select2');
-            }
+                const items = normalizeClientVendorResponse(response);
+                $client.empty().append(new Option('', '', false, false));
 
-            $unit.on('select2:open.unitModal', function() {
-                setTimeout(function() {
-                    const search = document.querySelector(
-                        '.select2-container--open .select2-search__field');
+                items.forEach(function(item) {
+                    const option = new Option(item.text, item.id, false, false);
+                    $(option).data('raw', item.raw || item);
+                    $client.append(option);
+                });
 
-                    if (search) {
-                        search.focus({
-                            preventScroll: true
-                        });
-                    }
+                if (!items.length) {
+                    console.error(
+                        'Endpoint berhasil dipanggil, tetapi tidak ada data yang dapat dipetakan.',
+                        response
+                    );
+                    $client.append(new Option('No client data found', '', false, false));
+                }
 
-                    $('.select2-container--open').css('z-index', 1056);
-                }, 0);
-            });
+                initClientVendorSelect2(triggerTaxable);
+                $client.val(null).trigger('change.select2');
 
-            $unit.on('change.unitModal', function() {
-                unitId = $(this).val();
+                console.debug('Jumlah client yang dimuat:', items.length);
+            }).fail(function(xhr, status, error) {
+                console.error('Request get_client_vendor gagal:', {
+                    url: endpoint,
+                    httpStatus: xhr.status,
+                    status: status,
+                    error: error,
+                    contentType: xhr.getResponseHeader('Content-Type'),
+                    response: xhr.responseText
+                });
+
+                $client
+                    .empty()
+                    .append(new Option('Failed to load client', '', false, false))
+                    .prop('disabled', true);
             });
         }
 
         let loadTableTimer = null;
 
-        async function loadProformaInvoiceTable() {
-            var contractId = $('#contract_id').val();
+        async function loadInvoiceTable() {
             var year = $('#year').val();
             var month = $('#month').val();
-
-            if (!contractId) {
-                $('#div-table').html('');
-                return false;
-            }
-
-            const isAvailable = await checkProformaInvoice();
-
-            if (isAvailable) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: "Proforma Invoice on this periode already created!"
-                });
-                proformaInvoiceId = '';
-                $('#div-table').html('');
-                return false;
-            }
 
             $('#div-table').html(`
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
@@ -468,173 +583,152 @@
             clearTimeout(loadTableTimer);
 
             loadTableTimer = setTimeout(function() {
-                const isEdit = proformaInvoiceId != '';
+                const isEdit = invoiceId != '';
 
                 const url = isEdit ?
-                    '{{ route('proformainvoice.get_table_edit', ':_id') }}'.replace(':_id',
-                        proformaInvoiceId) :
-                    '{{ route('proformainvoice.get_table_add') }}';
+                    '{{ route('invoice.get_table_edit', ':_id') }}'.replace(':_id',
+                        invoiceId) :
+                    '{{ route('invoice.get_table_add') }}';
 
                 $.ajax({
                     url: url,
                     type: 'GET',
                     data: {
-                        proforma_invoice_id: proformaInvoiceId,
-                        contract_id: contractId,
+                        invoice_id: invoiceId,
                         year: year,
                         month: month
                     },
                     success: function(response) {
-                        if (response.doc_status == 1) {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: "Proforma Invoice on this periode already created!"
-                            });
-                            proformaInvoiceId = '';
-                            $('#div-table').html('');
-                            return false;
-                        }
-
                         $('#div-table').html(response.html);
-                        gen_select_pallet();
 
-                        $('#modal-header').html(
-                            'Add Proforma Invoice -&nbsp;<b>' + response.proforma_prev_no +
-                            '</b>'
-                        );
+                        const titleText = isEdit ? 'Edit Invoice' : 'Add Invoice';
+                        const number = isEdit ? response.invoice_no : response
+                            .invoice_prev_no;
+
+                        $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:', error);
 
                         $('#div-table').html(`
-                    <div class="alert alert-danger mb-0">
-                        Failed to load data.
-                    </div>
-                `);
+                            <div class="alert alert-danger mb-0">
+                                Failed to load data.
+                            </div>
+                        `);
                     }
                 });
             }, 500);
         }
 
-        function checkProformaInvoice() {
-            var contractId = $('#contract_id').val();
-            var year = $('#year').val();
-            var month = $('#month').val();
-            return $.ajax({
-                    url: '{{ route('proformainvoice.check_proforma_invoice') }}',
-                    type: 'GET',
-                    data: {
-                        contract_id: contractId,
-                        year: year,
-                        month: month
-                    }
-                })
-                .then(function(response) {
-                    if (response.status == true) {
-                        return true;
-                    }
-                    return false;
-                })
-                .catch(function(xhr) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Oops...",
-                        text: xhr.responseJSON?.message || 'Failed to check proforma invoice.'
-                    });
-
-                    return false;
-                });
-        }
-
         $(document)
-            .off('change.loadTable', '#contract_id, #month')
-            .on('change.loadTable', '#contract_id, #month', function() {
-                loadProformaInvoiceTable();
+            .off('change.loadTable', '#month')
+            .on('change.loadTable', '#month', function() {
+                loadInvoiceTable();
             });
 
         $(document)
             .off('input.loadTable change.loadTable', '#year')
             .on('input.loadTable change.loadTable', '#year', function() {
-                loadProformaInvoiceTable();
+                loadInvoiceTable();
             });
 
         $('#formModal').off('show.bs.modal.mainModal').on('show.bs.modal.mainModal', function(event) {
-            closeTopSelect2BeforeModal();
-
-            var button = $(event.relatedTarget);
-            var title = button.data('title') || 'Add Proforma Invoice';
-
-            $('#formModal form')[0].reset();
+            var button = $('#openModalButton');
+            var title = button.data('title');
             $('#modal-header').text(title);
-            if (proformaInvoiceId === '') {
+
+            $("#div-table").html(`
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    <span class="visually">Loading...</span>
+                    `);
+            setTimeout(function() {
+                const isEdit = invoiceId != '';
+                const url = isEdit ?
+                    '{{ route('invoice.get_table_edit', ':_id') }}'.replace(':_id',
+                        invoiceId) :
+                    '{{ route('invoice.get_table_add') }}';
                 $.ajax({
-                    url: '{{ route('gen_request_token') }}',
+                    url: url,
+                    data: {
+                        invoice_id: invoiceId
+                    },
                     type: 'GET',
                     success: function(response) {
-                        $('#request_token').val(response.data);
+                        $("#div-table").html(response.html);
+
+                        setTimeout(function() {
+                            if (typeof window.initInvoiceItemTable ===
+                                'function') {
+                                window.initInvoiceItemTable();
+                            }
+                        }, 0);
+
+                        const titleText = isEdit ? 'Edit Invoice' : 'Add Invoice';
+                        const number = isEdit ? response.invoice_no : response
+                            .invoice_prev_no;
+
+                        $('#modal-header').html(titleText + ' -&nbsp;<b>' + number + '</b>');
                     },
                     error: function(xhr, status, error) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Oops...",
-                            text: error
-                        });
+                        console.error('Error:', error);
                     }
                 });
-            }
-        });
 
-        $('#formModal').off('shown.bs.modal.select2Modal').on('shown.bs.modal.select2Modal', function() {
-            gen_select2();
-            initUnitSelect2();
-
-            $('#contract_id').val(null).trigger('change.select2');
-            $('#unit_id').val(null).trigger('change.select2');
-            $('#div-table').html('');
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
+            }, 500);
         });
 
         $('#formModal').off('hidden.bs.modal.mainModal').on('hidden.bs.modal.mainModal', function() {
-            proformaInvoiceId = '';
-            contractId = '';
-            unitId = '';
+            const $client = $('#client_vendor_id');
 
-            $("#request_token").val("");
-            $("#div-table").html("");
+            $client
+                .val(null)
+                .empty()
+                .trigger('change.select2');
 
-            $("#contract_id").val(null).trigger('change.select2');
-            $("#unit_id").val(null).trigger('change.select2');
-
-            closeTopSelect2BeforeModal();
+            window.invoiceState = window.invoiceState || {};
+            window.invoiceState.taxable = null;
+            $('#check_tax').prop('checked', false);
         });
 
         $('#formUpdate').off('hidden.bs.modal.mainModal').on('hidden.bs.modal.mainModal', function() {
-            proformaInvoiceId = '';
+            invoiceId = '';
             contractId = '';
-            unitId = '';
         });
 
         $(document).off('click.editButton').on('click.editButton', '.editButton', function() {
-            proformaInvoiceId = $(this).data('id');
+            invoiceId = $(this).data('id');
 
             $('#modal-edit-header').text('Edit Proforma Invoice');
-            $('#id').val(proformaInvoiceId);
+            $('#id').val(invoiceId);
 
-            let url = '{{ route('proformainvoice.show', ':_id') }}';
-            url = url.replace(':_id', proformaInvoiceId);
+            let url = '{{ route('invoice.show', ':_id') }}';
+            url = url.replace(':_id', invoiceId);
 
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
                     $('#modal-edit-header').html(
-                        'Edit Proforma Invoice -&nbsp;<b>' + response.proforma_no + '</b>'
+                        'Edit Proforma Invoice -&nbsp;<b>' + response.invoice_no + '</b>'
                     );
-                    $("#edit_contract_id").val(response.contract_id);
-                    $("#edit_contract_no").val(response.contract_no);
-                    $("#edit_year").val(response.year);
-                    $("#edit_month").val(response.month);
-                    $("#edit_month_name").val(response.month_name);
+                    $("#client_vendor_id").val(response.data.client_vendor_id).trigger('change');
+                    $("#date").val(response.data.date);
                     $('#div-table-edit').html(response.html);
                 },
                 error: function() {
@@ -644,9 +738,12 @@
         });
 
         $(document).off('click.detailButton').on('click.detailButton', '.detailButton', function() {
-            $('#modal-detail-header').text('Detail Proforma Invoice');
-
-            let url = '{{ route('proformainvoice.get_detail', ':_id') }}';
+            $('#modal-detail-header').text('Detail Invoice');
+            $('#modal-detail-body').html(`
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span class="visually-hidden">Loading...</span>
+            `);
+            let url = '{{ route('invoice.get_detail', ':_id') }}';
             url = url.replace(':_id', $(this).data('id'));
 
             $.ajax({
@@ -656,7 +753,7 @@
                     const encodedJson = xhr.getResponseHeader('X-Json-Data');
                     const jsonData = JSON.parse(atob(encodedJson));
                     $('#modal-detail-header').html(
-                        'Detail Proforma Invoice -&nbsp;<b>' + jsonData.proforma_no + '</b>'
+                        'Detail Invoice -&nbsp;<b>' + jsonData.invoice_no + '</b>'
                     );
                     $('#modal-detail-body').html(response);
                 },
@@ -702,13 +799,13 @@
             const formElement = $('#formModal').find('form')[0];
             const formData = new FormData(formElement);
 
-            let url = '{{ route('proformainvoice.store') }}';
+            let url = '{{ route('invoice.store') }}';
 
             formData.append('status', statusValue);
 
-            if (proformaInvoiceId !== '') {
-                url = '{{ route('proformainvoice.update', ':_id') }}'
-                    .replace(':_id', proformaInvoiceId);
+            if (invoiceId !== '') {
+                url = '{{ route('invoice.update', ':_id') }}'
+                    .replace(':_id', invoiceId);
 
                 formData.append('_method', 'PUT');
             }
@@ -720,7 +817,6 @@
                     data: formData,
                     contentType: false,
                     processData: false,
-
                     success: function(response) {
                         Swal.fire({
                             title: response.title,
@@ -736,9 +832,7 @@
 
                                 $('#formModal form')[0].reset();
 
-                                proformaInvoiceId = '';
-                                contractId = '';
-                                unitId = '';
+                                invoiceId = '';
 
                                 $('#formModal').modal('hide');
                             }
@@ -768,90 +862,6 @@
                     confirmButtonColor: '#5156be',
                     cancelButtonColor: '#fd625e',
                     confirmButtonText: 'Yes, process it!',
-                    cancelButtonText: 'Cancel'
-                }).then(function(result) {
-                    if (result.isConfirmed) {
-                        submitProformaInvoice();
-                    } else {
-                        enableButton();
-                    }
-                });
-            } else {
-                submitProformaInvoice();
-            }
-        });
-
-        $('.saveEditButton').off('click.editProforma').on('click.editProforma', function() {
-            const statusValue = $(this).val();
-
-            const formData = new FormData($('#formEdit').find('form')[0]);
-
-            let url = '{{ route('proformainvoice.store') }}';
-
-            formData.append('status', statusValue);
-
-            if (proformaInvoiceId !== '') {
-                url = '{{ route('proformainvoice.update', ':_id') }}'
-                    .replace(':_id', proformaInvoiceId);
-
-                formData.append('_method', 'PUT');
-            }
-
-            function submitProformaInvoice() {
-                $.ajax({
-                    url: url,
-                    type: 'POST',
-                    data: formData,
-                    contentType: false,
-                    processData: false,
-
-                    success: function(response) {
-                        Swal.fire({
-                            title: response.title,
-                            text: response.message,
-                            icon: 'success',
-                            timer: 5000,
-
-                            willClose: function() {
-                                $('#table-data')
-                                    .DataTable()
-                                    .ajax
-                                    .reload(null, false);
-
-                                $('#formEdit form')[0].reset();
-
-                                proformaInvoiceId = '';
-                                contractId = '';
-                                unitId = '';
-
-                                $('#formEdit').modal('hide');
-                            }
-                        });
-                    },
-
-                    error: function(xhr, status, error) {
-                        enableButton();
-
-                        const errorMessage =
-                            xhr.responseJSON?.message ?? error;
-
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Oops...',
-                            text: errorMessage
-                        });
-                    }
-                });
-            }
-
-            if (statusValue === 'Open') {
-                Swal.fire({
-                    title: 'Are you sure?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#5156be',
-                    cancelButtonColor: '#fd625e',
-                    confirmButtonText: 'Yes, update it!',
                     cancelButtonText: 'Cancel'
                 }).then(function(result) {
                     if (result.isConfirmed) {
@@ -957,20 +967,8 @@
             $('#formDetail').modal('hide');
         });
 
-        $('#cancelEditButton').off('click.cancelEdit').on('click.cancelEdit', function() {
-            $('#formEdit').modal('hide');
-        });
-
         $('#cancelUpdateButton').off('click.cancelUpdate').on('click.cancelUpdate', function() {
             $('#formUpdate').modal('hide');
-        });
-
-        $("#_year").on('change', function() {
-            $('#table-data').DataTable().draw();
-        });
-
-        $("#_month").on('change', function() {
-            $('#table-data').DataTable().draw();
         });
 
         function delete_(id) {
@@ -984,7 +982,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('proformainvoice.destroy', ':_id') }}';
+                    let url = '{{ route('invoice.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
 
                     $.ajax({
@@ -1002,7 +1000,8 @@
                                 timer: 5000,
                                 didOpen: () => {},
                                 willClose: () => {
-                                    $('#table-data').DataTable().ajax.reload(null, false);
+                                    $('#table-data').DataTable().ajax.reload(null,
+                                        false);
                                 }
                             });
                         },
@@ -1034,31 +1033,21 @@
             }
         }
 
-        function gen_select_pallet() {
-            $('.select-pallet').each(function() {
-                const $el = $(this);
+        $('#formModal').off('shown.bs.modal.select2Invoice').on('shown.bs.modal.select2Invoice', function() {
+            loadClientVendorSelect2(false);
+        });
 
-                // Hindari Select2 diinisialisasi dua kali
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.select2('destroy');
-                }
-
-                $el.select2({
-                    theme: 'bootstrap-5',
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ?
-                        $el.data('width') : ($el.hasClass('w-100') ? '100%' : 'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0
-                }).on('select2:close', function() {
-                    $(this).blur();
-
-                    if (document.activeElement) {
-                        document.activeElement.blur();
-                    }
-                });
-            });
-        }
+        $(document).on('change', '#check_tax', function() {
+            window.invoiceState = window.invoiceState || {};
+            let isChecked = $(this).is(':checked');
+            if (isChecked) {
+                window.invoiceState.taxable = 'PKP';
+            } else {
+                window.invoiceState.taxable = 'Non PKP';
+            }
+            console.log('Taxable:', window.invoiceState.taxable);
+            $(document).trigger('invoice:taxableChanged');
+        });
     </script>
     <!--app JS-->
 @endsection

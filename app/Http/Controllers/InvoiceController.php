@@ -6,6 +6,7 @@ use App\Models\Approval_flow;
 use App\Models\Approval_process;
 use App\Models\Approval_status;
 use App\Models\Approval_step;
+use App\Models\Client_vendor;
 use App\Models\Contract;
 use App\Models\Contract_fmf;
 use App\Models\Contract_rate;
@@ -16,6 +17,9 @@ use App\Models\Purchase_requisition;
 use App\Models\Unit;
 use App\Models\Unit_target;
 use App\Models\Invoice;
+use App\Models\Invoice_proforma_invoice;
+use App\Models\Service;
+use App\Models\Service_item;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -25,10 +29,12 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use CleaniqueCoders\RunningNumber\Presenters\DatePrefixPresenter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Spatie\Permission\Models\Permission;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Services\ApprovalService;
 
 class InvoiceController extends Controller
 {
@@ -42,8 +48,12 @@ class InvoiceController extends Controller
             if (request()->status != 'All') {
                 $invoice = $invoice->where('status', request()->status);
             }
-            if (request()->unit_id != '') {
-                $invoice = $invoice->where('unit_id', request()->unit_id);
+            if (request()->month != 'All') {
+                if (request()->year != 'All') {
+                    $invoice = $invoice->where('periode', request()->year . "-" . request()->month);
+                } else {
+                    $invoice = $invoice->where('periode', 'like', '%-' . request()->month);
+                }
             }
             if (request()->year != 'All') {
                 if (request()->month != 'All') {
@@ -105,10 +115,10 @@ class InvoiceController extends Controller
                      * - hanya muncul jika status Draft
                      * - hanya untuk superadmin atau user dengan permission proforma_invoice.edit
                      */
-                    if (($item->status === 'Draft' && $canAccess('invoice.edit')) || Auth::user()->hasRole('superadmin')) {
+                    if (($item->contract_id === null && $item->status === 'Draft' && $canAccess('invoice.edit')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
-                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formEdit" data-id="' . $item->id . '">
+                                <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal" data-id="' . $item->id . '">
                                     Edit
                                 </a>
                             </li>
@@ -149,11 +159,11 @@ class InvoiceController extends Controller
                     ';
                     return $button;
                 })
-                ->addColumn('unit', function ($item) {
-                    return $item->unit?->vehicle_no ?? '';
-                })
                 ->addColumn('contract_no', function ($item) {
                     return $item->contract->contract_no ?? '';
+                })
+                ->addColumn('client', function ($item) {
+                    return $item->client_vendor->name ?? '';
                 })
                 ->addColumn('type', function ($item) {
                     return $item->contract->service->type ?? '';
@@ -161,19 +171,16 @@ class InvoiceController extends Controller
                 ->addColumn('periode_', function ($item) {
                     return Carbon::parse($item->periode)->format('F Y') ?? '';
                 })
-                ->addColumn('price_', function ($item) {
-                    return Number::format($item->price, precision: 0) ?? '';
-                })
                 ->addColumn('penalty_', function ($item) {
-                    return Number::format($item->penalty, precision: 0) ?? '';
+                    return Number::format($item?->penalty ?? 0, precision: 0) ?? '';
                 })
                 ->addColumn('total_', function ($item) {
-                    return Number::format($item->total, precision: 0) ?? '';
+                    return Number::format($item?->total ?? 0, precision: 0) ?? '';
                 })
                 ->rawColumns(['action'])
                 ->make();
         }
-        $contract = Contract::where('status', 'Active')->get();
+        $system_setting = config('system_setting');
         $breadcrum = [
             'module' => 'Finance',
             'route-module' => null,
@@ -182,7 +189,7 @@ class InvoiceController extends Controller
             'sub-sub-module' => 'Invoice',
             'route-sub-sub-module' => 'invoice.index'
         ];
-        return view('invoice.index', compact('breadcrum', 'contract'));
+        return view('invoice.index', compact('breadcrum', 'system_setting'));
     }
 
     /**
@@ -196,9 +203,105 @@ class InvoiceController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, ApprovalService $approval_service)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'date' => 'required',
+                'client_vendor_id' => 'required',
+                'invoice_path' => 'file|mimes:pdf,doc,docx|max:2048',
+            ]);
+            $department = 'Finance';
+            $system_setting = config('system_setting');
+            $data = array_merge(
+                $request->only([
+                    'client_vendor_id',
+                    'date',
+                    'due_date',
+                    'notes',
+                    'total',
+                    'tax',
+                    'grand_total',
+                    'status',
+                    'discount'
+                ]),
+                [
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web',
+                    'user_id' => Auth::user()->id,
+                    'payment_status' => 'Unpaid'
+                ]
+            );
+            $invoice = Invoice::firstOrCreate($data);
+            $invoice->periode = Carbon::parse($invoice->date)->format('Y-m');
+            $invoice->save();
+            if ($request->filled('service')) {
+                $details = [];
+                foreach ($request->input('service', []) as $i => $service_item) {
+                    if (blank($service_item)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'request_token' => $invoice->request_token,
+                        'service_item' => $service_item,
+                        'qty' => (float) $request->input("qty.$i", 0),
+                        'price' => (float) $request->input("price.$i", 0),
+                        'amount' => (float) $request->input("amount.$i", 0),
+                    ];
+                }
+                if ($details !== []) {
+                    $invoice
+                        ->invoice_detail()
+                        ->createMany($details);
+                }
+            }
+
+            if ($request->has('invoice_path')) {
+                $file = $request->file('invoice_path');
+                $realname = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $directory = "invoice_path";
+                $filename = Str::random(24) . "." . $extension;
+                $file->storeAs($directory, $filename);
+                $invoice->invoice_path = $directory . '/' . $filename;
+                $invoice->real_name = $realname;
+                $invoice->save();
+            }
+
+            /**
+             * Buat check ada approvalnya gak
+             * Kalo ada statusnya jadi Approval.
+             * Nanti kalo approval beres baru jadi Open
+             */
+            $model = 'App\Models\Invoice';
+            if ($approval_service->checkHasApproval($model, $department)) {
+                if ($request->status == 'Open') {
+                    $invoice->status = 'Approval';
+                    $invoice->save();
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $invoice->id);
+                }
+            } else {
+                if ($request->status == 'Open') {
+                    $invoice->status = 'Approved';
+                    $invoice->save();
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -206,7 +309,15 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        //
+        $invoice_detail = $invoice->invoice_detail;
+        $client = Client_vendor::find($invoice->client_vendor_id);
+        return response()->json([
+            'success' => true,
+            'message' => 'Data showed',
+            'data' => $invoice,
+            'invoice_detail' => $invoice_detail,
+            'client' => $client
+        ], 200);
     }
 
     /**
@@ -220,9 +331,109 @@ class InvoiceController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Invoice $invoice)
+    public function update(Request $request, Invoice $invoice, ApprovalService $approval_service)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $request->validate([
+                'date' => 'required',
+                'client_vendor_id' => 'required',
+                'invoice_path' => 'file|mimes:pdf,doc,docx|max:2048',
+            ]);
+            $department = 'Finance';
+            $system_setting = config('system_setting');
+            $data = array_merge(
+                $request->only([
+                    'client_vendor_id',
+                    'date',
+                    'notes',
+                    'total',
+                    'tax',
+                    'grand_total',
+                    'status',
+                    'discount'
+                ]),
+                [
+                    'request_token' => $request->request_token,
+                    'input_method' => 'Web',
+                    'user_id' => Auth::user()->id,
+                    'payment_status' => 'Unpaid'
+                ]
+            );
+            $lockInvoice = Invoice::where('id', $invoice->id)->lockForUpdate()->first();
+            $lockInvoice->update($data);
+            $lockInvoice->invoice_detail()->delete();
+            $lockInvoice->periode = Carbon::parse($lockInvoice->date)->format('Y-m');
+            if ($request->filled('service')) {
+                $details = [];
+                foreach ($request->input('service', []) as $i => $service_item) {
+                    if (blank($service_item)) {
+                        continue;
+                    }
+                    $details[] = [
+                        'service_item' => $service_item,
+                        'qty' => (float) $request->input("qty.$i", 0),
+                        'price' => (float) $request->input("price.$i", 0),
+                        'amount' => (float) $request->input("amount.$i", 0),
+                    ];
+                }
+                if ($details !== []) {
+                    $lockInvoice
+                        ->invoice_detail()
+                        ->createMany($details);
+                }
+            }
+
+            if ($request->has('invoice_path')) {
+                $filePath = $lockInvoice->invoice_path;
+                if ($filePath && Storage::disk('public')->exists($filePath)) {
+                    Storage::disk('public')->delete($filePath);
+                }
+
+                $file = $request->file('invoice_path');
+                $realname = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $directory = "invoice_path";
+                $filename = Str::random(24) . "." . $extension;
+                $file->storeAs($directory, $filename);
+                $lockInvoice->invoice_path = $directory . '/' . $filename;
+                $lockInvoice->real_name = $realname;
+                $lockInvoice->save();
+            }
+
+            /**
+             * Buat check ada approvalnya gak
+             * Kalo ada statusnya jadi Approval.
+             * Nanti kalo approval beres baru jadi Open
+             */
+            $model = 'App\Models\Invoice';
+            if ($approval_service->checkHasApproval($model, $department)) {
+                if ($request->status == 'Open') {
+                    $lockInvoice->status = 'Approval';
+                    $lockInvoice->save();
+                    $approval_flow_id = $approval_service->getApprovalFlowId($model, $department);
+                    $approval_service->createApprovalProcess($approval_flow_id, $invoice->id);
+                }
+            } else {
+                if ($request->status == 'Open') {
+                    $lockInvoice->status = 'Approved';
+                    $lockInvoice->save();
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'title' => 'Opps..',
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**
@@ -230,6 +441,440 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        DB::beginTransaction();
+        try {
+            Proforma_invoice::where('invoice_id', $invoice->id)
+                ->update([
+                    'invoice_id' => null
+                ]);
+            Invoice_proforma_invoice::where('invoice_id', $invoice->id)
+                ->delete();
+            $invoice->delete();
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * ngeprint
+     */
+    public function print(Request $request, Invoice $invoice)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')->first();
+        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $proforma_invoice_id = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->pluck('proforma_invoice_id');
+        $proforma_invoice = Proforma_invoice::whereIn('id', $proforma_invoice_id)->get();
+        $contract = Contract::find($invoice->contract_id);
+        $contract_rate = Contract_rate::where('contract_id', $invoice->contract_id)->get();
+        $contract_fmf = Contract_fmf::where('contract_id', $invoice->contract_id)->get();
+        $unit_target = Unit_target::where('contract_id', $invoice->contract_id)->get();
+        $periode = $invoice->periode;
+        $exp_periode = explode("-", $periode);
+        $year = $exp_periode[0];
+        $month = $exp_periode[1];
+        $system_setting = config('system_setting');
+        $pdf = Pdf::loadView('invoice.print', [
+            'invoice' => $invoice,
+            'proforma_invoice' => $proforma_invoice,
+            'proforma_invoice_id' => $proforma_invoice_id,
+            'contract' => $contract,
+            'contract_rate' => $contract_rate,
+            'contract_fmf' => $contract_fmf,
+            'unit_target' => $unit_target,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting,
+            'year' => $year,
+            'month' => $month
+        ])->setPaper('a4', 'portrait');
+
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
+
+        $width  = $canvas->get_width();
+        $height = $canvas->get_height();
+
+        // if (in_array($invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+        //     $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+        //         'Nomor Invoice : ' . $invoice->proforma_no . "\n" .
+        //         'Tanggal : ' . Carbon::parse($invoice->date)->format('d-m-Y') . "\n" .
+        //         'Client : ' . optional($invoice->client_vendor)->name . "\n" .
+        //         'Total : ' . Number::format($invoice?->total ?? 0, 0) . "\n" .
+        //         'Telah disetujui secara digital.';
+
+        //     $qrImage = QrCode::format('png')
+        //         ->size(150)
+        //         ->margin(1)
+        //         ->generate($qrText);
+
+        //     $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+        //     // Posisi QR Code di atas page number
+        //     $qrSize = 55;
+        //     $qrX = $width - 120;
+        //     $qrY = $height - 100;
+
+        //     $canvas->image(
+        //         $qrBase64,
+        //         $qrX,
+        //         $qrY,
+        //         $qrSize,
+        //         $qrSize
+        //     );
+        // }
+        // $canvas->page_text(
+        //     $width - 120,
+        //     $height - 35,
+        //     "Page {PAGE_NUM} of {PAGE_COUNT}",
+        //     $fontNormal,
+        //     10,
+        //     [0, 0, 0]
+        // );
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
+        if (in_array($invoice->status, $status, true)) {
+            $size = 48;
+            $text = $invoice->status;
+
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
+        $safeFilename = Str::of($invoice->invoice_no)
+            ->replace(['/', '\\'], '-')
+            ->toString();
+
+        return $pdf->stream("{$safeFilename}.pdf");
+    }
+
+    /**
+     * export pdf
+     */
+
+    public function export_pdf(Request $request, Invoice $invoice)
+    {
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')->first();
+        $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
+        $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
+        $proforma_invoice_id = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->pluck('proforma_invoice_id');
+        $proforma_invoice = Proforma_invoice::whereIn('id', $proforma_invoice_id)->get();
+        $contract = Contract::find($invoice->contract_id);
+        $contract_rate = Contract_rate::where('contract_id', $invoice->contract_id)->get();
+        $contract_fmf = Contract_fmf::where('contract_id', $invoice->contract_id)->get();
+        $unit_target = Unit_target::where('contract_id', $invoice->contract_id)->get();
+        $periode = $invoice->periode;
+        $exp_periode = explode("-", $periode);
+        $year = $exp_periode[0];
+        $month = $exp_periode[1];
+        $system_setting = config('system_setting');
+        $pdf = Pdf::loadView('invoice.print', [
+            'invoice' => $invoice,
+            'proforma_invoice' => $proforma_invoice,
+            'proforma_invoice_id' => $proforma_invoice_id,
+            'contract' => $contract,
+            'contract_rate' => $contract_rate,
+            'contract_fmf' => $contract_fmf,
+            'unit_target' => $unit_target,
+            'approval_flow' => $approval_flow,
+            'approval_step' => $approval_step,
+            'approval_process' => $approval_process,
+            'approval_status' => $approval_status,
+            'system_setting' => $system_setting,
+            'year' => $year,
+            'month' => $month
+        ])->setPaper('a4', 'portrait');
+
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        $canvas = $dompdf->getCanvas();
+        $fontMetrics = $dompdf->getFontMetrics();
+
+        $fontNormal = $fontMetrics->getFont('Helvetica', 'normal');
+        $fontBold = $fontMetrics->getFont('Helvetica', 'bold');
+
+        $width  = $canvas->get_width();
+        $height = $canvas->get_height();
+
+        // if (in_array($invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
+        //     $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
+        //         'Nomor Invoice : ' . $invoice->proforma_no . "\n" .
+        //         'Tanggal : ' . Carbon::parse($invoice->date)->format('d-m-Y') . "\n" .
+        //         'Client : ' . optional($invoice->client_vendor)->name . "\n" .
+        //         'Total : ' . Number::format($invoice?->total ?? 0, 0) . "\n" .
+        //         'Telah disetujui secara digital.';
+
+        //     $qrImage = QrCode::format('png')
+        //         ->size(150)
+        //         ->margin(1)
+        //         ->generate($qrText);
+
+        //     $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
+
+        //     // Posisi QR Code di atas page number
+        //     $qrSize = 55;
+        //     $qrX = $width - 120;
+        //     $qrY = $height - 100;
+
+        //     $canvas->image(
+        //         $qrBase64,
+        //         $qrX,
+        //         $qrY,
+        //         $qrSize,
+        //         $qrSize
+        //     );
+        // }
+        // $canvas->page_text(
+        //     $width - 120,
+        //     $height - 35,
+        //     "Page {PAGE_NUM} of {PAGE_COUNT}",
+        //     $fontNormal,
+        //     10,
+        //     [0, 0, 0]
+        // );
+        $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
+        if (in_array($invoice->status, $status, true)) {
+            $size = 48;
+            $text = $invoice->status;
+
+            $x = ($width / 2) - 100;
+            $y = $height / 2 - 350;
+
+            $canvas->text(
+                $x,
+                $y,
+                $text,
+                $fontBold,
+                $size,
+                [0.6, 0.6, 0.6]
+            );
+        }
+        $safeFilename = Str::of($invoice->invoice_no)
+            ->replace(['/', '\\'], '-')
+            ->toString();
+        return $pdf->download("{$safeFilename}.pdf");
+    }
+
+    /**
+     * ngambil detail purchase requisition
+     */
+    public function get_detail(Request $request, $invoice_id)
+    {
+        try {
+            $invoice = Invoice::find($invoice_id);
+            $invoice_proforma_invoice = Invoice_proforma_invoice::where('invoice_id', $invoice_id)->get();
+            $proforma_invoice_id = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->pluck('proforma_invoice_id');
+            $proforma_invoice = Proforma_invoice::whereIn('id', $proforma_invoice_id)->get() ?? collect([]);
+            $contract = Contract::find($invoice->contract_id) ?? collect([]);
+            $contract_rate = Contract_rate::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+            $contract_fmf = Contract_fmf::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+            $unit_target = Unit_target::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+            $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Invoice')
+                ->where('department', 'Finance')
+                ->first();
+            $approval_process = $approval_flow
+                ? Approval_process::where('approval_flow_id', $approval_flow->id)
+                ->where('approvable_id', $invoice->id)
+                ->get()
+                : null;
+            $periode = $invoice->periode;
+            $exp_periode = explode("-", $periode);
+            $year = $exp_periode[0];
+            $month = $exp_periode[1];
+            $view = 'invoice.detail';
+            $json_data = [
+                'invoice_no' => $invoice->invoice_no,
+            ];
+            return response()->view($view, compact(
+                'invoice',
+                'proforma_invoice',
+                'proforma_invoice_id',
+                'invoice_proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'approval_process',
+                'year',
+                'month'
+            ), 200)->header('X-Json-Data', base64_encode(json_encode($json_data)));
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil data vendor
+     */
+    public function get_client_vendor(Request $request)
+    {
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $client_vendor = Client_vendor::selectRaw("id, name as text")
+                ->where('type', 'Client')
+                ->where('name', 'like', '%' . $term . '%')
+                ->orderBy('name')->simplePaginate(10);
+            $total_count = count($client_vendor);
+            $morePages = true;
+            $pagination_obj = json_encode($client_vendor);
+            if (empty($client_vendor->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $client_vendor->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
+        }
+    }
+
+    /**
+     * Ngambil data service
+     */
+    public function get_service(Request $request)
+    {
+        if ($request->ajax()) {
+            $term = trim($request->term);
+            $service_item = Service::selectRaw("id, name as text")
+                ->where('name', 'like', '%' . $term . '%')
+                ->orderBy('name')->simplePaginate(10);
+            $total_count = count($service_item);
+            $morePages = true;
+            $pagination_obj = json_encode($service_item);
+            if (empty($service_item->nextPageUrl())) {
+                $morePages = false;
+            }
+            $result = [
+                "results" => $service_item->items(),
+                "pagination" => [
+                    "more" => $morePages
+                ],
+                "total_count" => $total_count
+            ];
+            return response()->json($result);
+        }
+    }
+
+    /**
+     * Ngambil tabel list invoice
+     */
+    public function get_table_add(Request $request, Invoice $invoice)
+    {
+        try {
+            $client_vendor = Client_vendor::find($request->client_vendor_id);
+            $taxable = $client_vendor?->taxable ?? 'PKP';
+            $view = 'invoice.table-add';
+            $system_setting = config('system_setting');
+            $year = Carbon::parse(now())->format('Y');
+            $month = Carbon::parse(now())->format('m');
+            $kodeDokumen = 'INV';
+            $invoice_prev_no =  running_number()
+                ->type('inv')
+                ->formatter(new class($kodeDokumen, $year, $month) implements Presenter {
+                    public function __construct(
+                        private string $kodeDokumen,
+                        private string $year,
+                        private string $month
+                    ) {}
+
+                    public function format(string $type, int $number): string
+                    {
+                        return sprintf(
+                            '%s/%s/%s-%03d',
+                            $this->kodeDokumen,
+                            $this->year,
+                            $this->month,
+                            $number
+                        );
+                    }
+                })
+                ->preview();
+            $html = view($view, compact('system_setting', 'taxable'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'invoice_prev_no' => $invoice_prev_no,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Ngambil tabel edit invoice
+     */
+    public function get_table_edit(Request $request, Invoice $invoice)
+    {
+        try {
+            $view = 'invoice.table-edit';
+            $system_setting = config('system_setting');
+            $invoice_detail = $invoice->invoice_detail;
+            $html = view($view, compact('invoice', 'invoice_detail', 'system_setting'))->render();
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'invoice_no' => $invoice->invoice_no,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * ngambil detail client vendor
+     */
+    public function get_client_vendor_by_id(Request $request, Client_vendor $client_vendor)
+    {
+        try {
+            return response()->json([
+                'success' => true,
+                'data' => $client_vendor,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 }

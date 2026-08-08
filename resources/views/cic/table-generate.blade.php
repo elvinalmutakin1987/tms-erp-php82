@@ -40,21 +40,52 @@
     <tbody>
         @foreach ($contract as $cont)
             @php
-                $proforma_invoice = Proforma_invoice::where('contract_id', $cont->id)
+                $proformaInvoices = Proforma_invoice::where('contract_id', $cont->id)
                     ->where('periode', $periode)
                     ->get();
 
-                $invoices = Invoice::whereIn('id', $proforma_invoice->pluck('invoice_id')->filter())
+                $invoices = Invoice::whereIn('id', $proformaInvoices->pluck('invoice_id')->filter())
                     ->get()
                     ->keyBy('id');
 
-                $jumlahBaris = max($proforma_invoice->count(), 1);
+                /*
+                 * Menambahkan data invoice ke setiap proforma,
+                 * kemudian mengurutkan agar invoice_no yang sama berdekatan.
+                 *
+                 * Proforma tanpa invoice dibuat unik supaya tidak digabung
+                 * menjadi satu cell "Not Available".
+                 */
+                $rows = $proformaInvoices
+                    ->map(function ($pi, $index) use ($invoices) {
+                        $invoice = $pi->invoice_id ? $invoices->get($pi->invoice_id) : null;
+
+                        return [
+                            'pi' => $pi,
+                            'invoice' => $invoice,
+                            'invoice_key' => $invoice ? 'invoice-' . $invoice->invoice_no : 'empty-' . $index,
+                        ];
+                    })
+                    ->sortBy(function ($row) {
+                        return $row['invoice'] ? '0-' . $row['invoice']->invoice_no : '1-' . $row['pi']->proforma_no;
+                    })
+                    ->values();
+
+                /*
+                 * Menghitung jumlah rowspan untuk setiap invoice.
+                 */
+                $invoiceRowspans = $rows->groupBy('invoice_key')->map(fn($group) => $group->count());
+
+                $renderedInvoices = [];
+
+                $jumlahBaris = max($rows->count(), 1);
             @endphp
 
-            @if ($proforma_invoice->isNotEmpty())
-                @foreach ($proforma_invoice as $index => $pi)
+            @if ($rows->isNotEmpty())
+                @foreach ($rows as $index => $row)
                     @php
-                        $invoice = $pi->invoice_id ? $invoices->get($pi->invoice_id) : null;
+                        $pi = $row['pi'];
+                        $invoice = $row['invoice'];
+                        $invoiceKey = $row['invoice_key'];
                     @endphp
 
                     <tr>
@@ -72,7 +103,6 @@
 
                         <td>
                             @if ($pi->cic_number)
-                                {{-- {{ $pi->cic_number }} --}}
                                 <a href="{{ route('cic.export_file', $pi->id) }}" target="_blank">
                                     {{ $pi->cic_number }}
                                 </a>
@@ -83,15 +113,21 @@
                             @endif
                         </td>
 
-                        <td>
-                            @if ($invoice)
-                                {{ $invoice->invoice_no }}
-                            @else
-                                <span class="text-danger opacity-75">
-                                    Not Available.
-                                </span>
-                            @endif
-                        </td>
+                        @if (!in_array($invoiceKey, $renderedInvoices, true))
+                            @php
+                                $renderedInvoices[] = $invoiceKey;
+                            @endphp
+
+                            <td rowspan="{{ $invoiceRowspans->get($invoiceKey, 1) }}" class="align-top">
+                                @if ($invoice)
+                                    {{ $invoice->invoice_no }}
+                                @else
+                                    <span class="text-danger opacity-75">
+                                        Not Available.
+                                    </span>
+                                @endif
+                            </td>
+                        @endif
                     </tr>
                 @endforeach
             @else

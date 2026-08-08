@@ -63,6 +63,8 @@
                                         <th>PI No.</th>
                                         <th>INV No.</th>
                                         <th>Contract No.</th>
+                                        <th>CIC Number</th>
+                                        <th>Type</th>
                                         <th>Periode</th>
                                         <th>Total</th>
                                         <th>Status</th>
@@ -104,7 +106,7 @@
         const saveCreateButton2 = document.getElementById('saveCreateButton2');
         const saveUpdateButton1 = document.getElementById('saveUpdateButton1');
         const saveUpdateButton2 = document.getElementById('saveUpdateButton2');
-        const saveUpdateButton3 = document.getElementById('saveUpdateButton3');
+        // const saveUpdateButton3 = document.getElementById('saveUpdateButton3');
 
         var proformaInvoiceId = '';
         var contractId = '';
@@ -160,6 +162,18 @@
                     {
                         data: 'contract_no',
                         name: 'contract_no',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'cic_number',
+                        name: 'cic_number',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'type',
+                        name: 'type',
                         orderable: true,
                         searchable: true
                     },
@@ -256,8 +270,8 @@
             const formData = new FormData(form);
             formData.append('status', status);
             let type = 'POST';
-            url = '{{ route('invoicereceipt.update', ':_id') }}'.replace(':_id', orderId);
-            formData.append('_method', 'PUT');
+            url = '{{ route('cic.store_generate_invoice') }}';
+            formData.append('_method', 'POST');
             const submitForm = () => {
                 $.ajax({
                     url,
@@ -274,7 +288,6 @@
                             willClose: () => {
                                 $('#table-data').DataTable().ajax.reload(null, false);
                                 form.reset();
-                                orderId = '';
                                 $('#formModal').modal('hide');
                             }
                         });
@@ -301,7 +314,6 @@
                     confirmButtonText: 'Yes, Save it!',
                     cancelButtonText: 'Cancel'
                 }).then((result) => {
-                    // if (result.isConfirmed) submitForm();
                     result.isConfirmed ? submitForm() : enableButton();
                 });
             } else {
@@ -332,8 +344,9 @@
 
         $('#formModal').on('hidden.bs.modal', function() {
             proformaInvoiceId = '';
-            contractId = '';
-            unitId = '';
+            const currentMonth = new Date().getMonth() + 1;
+            $('#month').val(currentMonth).trigger('change');
+            $('#div-table').html('');
             enableButton();
         });
 
@@ -531,53 +544,6 @@
             });
         }
 
-        // function create_invoice(id) {
-        //     Swal.fire({
-        //         title: 'Are you sure?',
-        //         icon: 'info',
-        //         showCancelButton: true,
-        //         confirmButtonColor: '#5156be',
-        //         cancelButtonColor: '#fd625e',
-        //         confirmButtonText: 'Yes, Create it!',
-        //         cancelButtonText: 'Cancel'
-        //     }).then((result) => {
-        //         if (result.isConfirmed) {
-        //             let url = '{{ route('cic.create_invoice', ':_id') }}';
-        //             url = url.replace(':_id', id);
-
-        //             $.ajax({
-        //                 url: url,
-        //                 type: 'POST',
-        //                 data: {
-        //                     id: id,
-        //                     _token: '{{ csrf_token() }}'
-        //                 },
-        //                 success: function(response) {
-        //                     Swal.fire({
-        //                         title: "Invoice Created!",
-        //                         text: response.message,
-        //                         icon: "success",
-        //                         timer: 5000,
-        //                         didOpen: () => {},
-        //                         willClose: () => {
-        //                             $('#table-data').DataTable().ajax.reload(null, false);
-        //                         }
-        //                     });
-        //                 },
-        //                 error: function(xhr, status, error) {
-        //                     var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
-
-        //                     Swal.fire({
-        //                         icon: "error",
-        //                         title: "Oops...",
-        //                         text: errorMessage
-        //                     });
-        //                 }
-        //             });
-        //         }
-        //     });
-        // }
-
         function create_invoice(id) {
             Swal.fire({
                 title: 'Create Invoice',
@@ -745,7 +711,7 @@
 
             saveUpdateButton1.disabled = true;
             saveUpdateButton2.disabled = true;
-            saveUpdateButton3.disabled = true;
+            // saveUpdateButton3.disabled = true;
         }
 
         function enableButton() {
@@ -754,7 +720,7 @@
 
             saveUpdateButton1.disabled = false;
             saveUpdateButton2.disabled = false;
-            saveUpdateButton3.disabled = false;
+            // saveUpdateButton3.disabled = false;
         }
     </script>
     <!--app JS-->

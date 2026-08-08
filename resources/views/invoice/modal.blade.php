@@ -1,1 +1,70 @@
+<style>
+    /* #formModal .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(100vh - 160px);
+        scroll-behavior: auto;
+    } */
+</style>
 
+<!-- search modal -->
+<div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
+    <div class="modal-dialog modal-fullscreen modal-dialog-scrollable modal-fullscreen-md-down">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-header">
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data" onsubmit="disableButton()">
+                    @csrf
+                    <input type="hidden" name="request_token" id="request_token">
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label for="client_vendor_id" class="form-label">Client</label>
+                            <select class="form-select select-select" id="client_vendor_id" name="client_vendor_id">
+                            </select>
+                        </div>
+                        <div class="col">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="text" class="form-control datepicker" id="date" name="date">
+                        </div>
+                        {{-- <div class="col">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="text" class="form-control datepicker" id="due_date" name="due_date">
+                        </div> --}}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2" required></textarea>
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col" id="div-table">
+
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label for="invoice_path" class="form-label">Attachment</label>
+                            <input class="form-control" type="file" id="invoice_path" name="invoice_path">
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col" id="div-file">
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="d-md-flex d-grid align-items-center gap-1">
+                    <button type="button" class="btn btn-secondary saveButton" id="saveButton1" name="status"
+                        value="Draft">Draft</button>
+                    <button type="button" class="btn btn-success saveButton" id="saveButton2" name="status"
+                        value="Open">Save</button>
+                    <button type="button" class="btn btn-light" id="cancelButton">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end search modal -->

@@ -788,6 +788,25 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|invoice')
         ->name('invoice.get_detail');
 
+    Route::get('invoice-get-client-vendor', [InvoiceController::class, 'get_client_vendor'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.get_client_vendor');
+
+    Route::get('invoice-get-service-item', [InvoiceController::class, 'get_service'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.get_service');
+
+    Route::get('invoice-load-table-add', [InvoiceController::class, 'get_table_add'])
+        ->middleware('role_or_permission:superadmin|maintenance')
+        ->name('invoice.get_table_add');
+
+    Route::get('invoice-load-table-edit/{invoice}', [InvoiceController::class, 'get_table_edit'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.get_table_edit');
+
+    Route::get('invoice-get-client-vendor-by-id/{client_vendor}', [InvoiceController::class, 'get_client_vendor_by_id'])
+        ->middleware('role_or_permission:superadmin|purchase_order')
+        ->name('invoice.get_client_vendor_by_id');
 
     /**
      * Routenya CIC
@@ -816,7 +835,47 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|cic.generate_invoice')
         ->name('cic.generate_invoice');
 
-    Route::post('cic-generate-invoice', [CICController::class, 'store_generate_invoice'])
+    Route::post('cic-store-generate-invoice', [CICController::class, 'store_generate_invoice'])
         ->middleware('role_or_permission:superadmin|cic.store_generate_invoice')
         ->name('cic.store_generate_invoice');
+
+    /**
+     * Routenya Invoice Payment
+     */
+    Route::resource('invoicepayment', InvoiceController::class)
+        ->parameters(['invoicepayment' => 'invoice_payment'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->names('invoicepayment');
+
+    Route::get('invoicepayment-get-client-vendor', [InvoiceController::class, 'get_client_vendor'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.get_client_vendor');
+
+    Route::get('invoicepayment-get-purchase-order', [InvoiceController::class, 'get_purchase_order'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.get_purchase_order');
+
+    Route::get('invoicepayment-get-prev-no', [InvoiceController::class, 'get_prev_no'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.get_prev_no');
+
+    Route::get('invoicepayment-print/{invoice_payment}', [InvoiceController::class, 'print'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.print');
+
+    Route::get('invoicepayment-export-pdf/{invoice_payment}', [InvoiceController::class, 'export_pdf'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.export_pdf');
+
+    Route::get('invoicepayment-get-detail/{invoice_payment}', [InvoiceController::class, 'get_detail'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.get_detail');
+
+    Route::get('invoicepayment-export-file/{invoice_payment}', [InvoiceController::class, 'export_file'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.export_file');
+
+    Route::delete('invoicepayment-destroy-file/{invoice_payment}', [InvoiceController::class, 'destroy_file'])
+        ->middleware('role_or_permission:superadmin|invoice_payment')
+        ->name('invoicepayment.destroy_file');
 });

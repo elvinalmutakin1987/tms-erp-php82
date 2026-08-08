@@ -133,8 +133,6 @@
                         name="status" value="Save">Save</button>
                     <button type="button" class="btn btn-success saveUpdateButton" id="saveUpdateButton2"
                         name="status" value="Done">Done</button>
-                    {{-- <button type="button" class="btn btn-success saveUpdateButton" id="saveUpdateButton3"
-                        name="status" value="CIC Approval">Proceed to Invoice</button> --}}
                     <button type="button" class="btn btn-light" id="cancelUpdateButton">Cancel</button>
                 </div>
             </div>

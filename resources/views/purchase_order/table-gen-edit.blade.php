@@ -105,28 +105,28 @@
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="qty[]" readonly
-                            value="{{ $d->qty }}">
+                            value="{{ $d?->qty ?? 0 }}">
                         <input type="text" class="form-control" name="__qty[]" readonly
                             value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}"
                             style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="price[]" readonly
-                            value="{{ $d->price }}">
+                            value="{{ $d?->price ?? 0 }}">
                         <input type="text" class="form-control" name="__price[]" readonly
                             value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}"
                             style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="discount_item[]" readonly
-                            value="{{ $d->discount_item }}">
+                            value="{{ $d?->discount_item ?? 0 }}">
                         <input type="text" class="form-control" name="__discount_item[]" readonly
                             value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}"
                             style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" name="amount[]" readonly
-                            value="{{ $d->amount }}">
+                            value="{{ $d?->amount ?? 0 }}">
                         <input type="text" class="form-control" name="__amount[]" readonly
                             value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}"
                             style="text-align: right;">

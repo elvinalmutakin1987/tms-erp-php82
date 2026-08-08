@@ -19,6 +19,11 @@
 @endphp
 
 @if ($contract->service->type == 'Unit Rental')
+    @php
+        $unit_id = $proforma_invoice->unit_id;
+        $price = $proforma_invoice->unit_target?->price ?? 0;
+        $target = $proforma_invoice->unit_target?->target ?? 0;
+    @endphp
     <h6 class="mb-2" style="display: inline-block;">
         <table style="width:100%">
             <tr>
@@ -109,8 +114,8 @@
                 </td>
 
                 <td class="p-1">
-                    {{ $unit_target->unit->description }}
-                    (<b>{{ $unit_target->unit->vehicle_no }}</b>)
+                    {{ $unit_target->unit?->description ?? '-' }}
+                    (<b>{{ $unit_target->unit?->vehicle_no ?? '-' }}</b>)
                 </td>
 
                 <td class="p-1" width="10px"></td>
@@ -350,19 +355,19 @@
                         Trip
                     </td>
                     <td class="text-end">
-                        {{ Number::format($contractrate->rate, precision: 0) }}
+                        {{ Number::format($contractrate?->rate ?? 0, precision: 0) }}
                     </td>
                     <td class="text-end">
                         {{ Number::format($trip, precision: 2) }}
                     </td>
                     <td class="text-end">
-                        {{ Number::format($contractrate->rate * $trip, precision: 0) }}
+                        {{ Number::format($contractrate?->rate ?? 0 * $trip, precision: 0) }}
                     </td>
                     <td class="text-end">
                         {{ Number::format($qty_ptd + $trip, precision: 2) }}
                     </td>
                     <td class="text-end">
-                        {{ Number::format($amount_ptd + $contractrate->rate * $trip, precision: 0) }}
+                        {{ Number::format($amount_ptd + $contractrate?->rate ?? 0 * $trip, precision: 0) }}
                     </td>
                 </tr>
 
@@ -516,7 +521,7 @@
                         {{ $contractrate->unit }}
                     </td>
                     <td class="text-end">
-                        {{ Number::format($contractrate->rate, precision: 0) }}
+                        {{ Number::format($contractrate?->rate ?? 0, precision: 0) }}
                     </td>
                     <td class="text-end">
                         {{ Number::format($qty, precision: 2) }}
@@ -623,10 +628,10 @@
                         {{ $loop->iteration }}
                     </td>
                     <td>
-                        {{ $d->service_item }}
+                        {{ $d?->service_item ?? '-' }}
                     </td>
                     <td>
-                        {{ $unit->vehicle_no }}
+                        {{ $unit?->vehicle_no ?? '-' }}
                     </td>
                     <td class="text-end">
                         {{ Number::format($d->rate ?? 0, precision: 0) }}

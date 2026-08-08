@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('generate_no', 30)->nullable();
             $table->string('invoice_no', 30)->nullable();
             $table->date('date')->nullable();
+            $table->date('due_date')->nullable();
             $table->string('periode')->nullable();
             $table->date('periode_start')->nullable();
             $table->date('periode_finish')->nullable();
@@ -40,6 +41,7 @@ return new class extends Migration
             $table->decimal('ppn', 16, 2)->nullable();
             $table->decimal('dpp', 16, 2)->nullable();
             $table->decimal('total', 16, 2)->nullable();
+            $table->decimal('discount', 16, 2)->nullable();
             $table->decimal('grand_total', 16, 2)->nullable();
             $table->decimal('km_awal', 16, 2)->nullable();
             $table->decimal('km_akhir', 16, 2)->nullable();
@@ -67,7 +69,9 @@ return new class extends Migration
             $table->text('invoice_path')->nullable();
             $table->text('real_name')->nullable();
             $table->string('cic_number')->nullable(); //Buat cic numbernya, diambil dari proforma invoice
-            $table->text('status')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
+            $table->text('notes')->nullable(); //Buat cic numbernya, diambil dari proforma invoice
+            $table->string('status', 30)->nullable();
+            $table->string('payment_status', 20)->nullable(); //Waiting Invoice, Unpaid, Partially Paid, Paid
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();
             $table->timestamp('sync_at')->nullable();

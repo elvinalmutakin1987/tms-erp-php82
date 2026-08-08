@@ -22,9 +22,9 @@
             </div>
             <div class="modal-footer">
                 <div class="d-md-flex d-grid align-items-center gap-1">
-                    <button type="button" class="btn btn-primary saveCreateButton" id="saveCreateBubtton1"
+                    <button type="button" class="btn btn-primary saveCreateButton" id="saveCreateButton1"
                         name="status" value="Save">Draft</button>
-                    <button type="button" class="btn btn-success saveCreateButton" id="saveCreateBubtton2"
+                    <button type="button" class="btn btn-success saveCreateButton" id="saveCreateButton2"
                         name="status" value="Open">Save</button>
                     <button type="button" class="btn btn-light" id="cancelCreateButton">Cancel</button>
                 </div>

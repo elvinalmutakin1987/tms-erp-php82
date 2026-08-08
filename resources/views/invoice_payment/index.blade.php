@@ -1,0 +1,976 @@
+@extends('partials.main')
+
+@section('css')
+    <link href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap5.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+@endsection
+
+@section('content')
+    <!--start page wrapper -->
+    <div class="page-wrapper">
+        <div class="page-content container-xxl">
+
+            @include('partials.breadcrum')
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <a href="javascript:;" id="openModalButton" class="btn btn-primary mb-3 mb-lg-0"
+                                        data-bs-toggle="modal" data-bs-target="#formModal" data-title="Add Payment"><i
+                                            class='bx bxs-plus-square'></i>New</a>
+                                </div>
+                                <div class="col-4">
+                                    <select class="form-select w-100" id="client" name="client">
+                                        <option value="All">All Client</option>
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <select class="form-select select-top" id="_status" name="_status">
+                                        <option value="All">All Status</option>
+                                        <option value="Draft">Draft</option>
+                                        <option value="Cancel">Cancel</option>
+                                        <option value="Done">Done</option>
+                                    </select>
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" class="form-control datepicker" id="date_start" name="date_start"
+                                        placeholder="Start Date">
+                                </div>
+                                <div class="col-2">
+                                    <input type="text" class="form-control datepicker" id="date_end" name="date_end"
+                                        placeholder="End Date">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <table id="table-data" class="table table-striped table-bordered" style="width:100%">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th width="10">No</th>
+                                        <th>Invoice Number</th>
+                                        <th>Client</th>
+                                        <th>Date</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th width="20">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <!--end page wrapper -->
+
+    @include('invoice_payment.modal')
+
+    @include('invoice_payment.modal-detail')
+@endsection
+
+@section('js')
+    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap5.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('assets/plugins/select2/js/select2-custom.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+
+    <script>
+        const saveButton1 = document.getElementById('saveButton1');
+        const saveButton2 = document.getElementById('saveButton2');
+
+        var invoiceId = '';
+        var orderId = '';
+        var vendorId = '';
+        $(document).ready(function() {
+            var ajax = '{{ url()->current() }}';
+            var table = $('#table-data').DataTable({
+                scrollCollapse: true,
+                responsive: true,
+                "lengthMenu": [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
+                "paging": true,
+                "lengthChange": true,
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "autoWidth": false,
+                "processing": true,
+                "serverSide": true,
+                "ajax": {
+                    url: ajax,
+                    data: function(d) {
+                        d.status = $('#_status').val();
+                        d.date_start = $('#date_start').val();
+                        d.date_end = $('#date_end').val();
+                        d.client = $('#client').val();
+                    }
+                },
+                "columns": [{
+                        data: 'DT_RowIndex',
+                        name: 'DT_RowIndex',
+                        orderable: false,
+                        searchable: false,
+                        width: '10px',
+                        className: 'dt-center',
+                        targets: '_all'
+                    },
+                    {
+                        data: 'invoice_no',
+                        name: 'invoice_no',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
+                        data: 'client',
+                        name: 'client',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
+                        data: 'date',
+                        name: 'date',
+                        orderable: true,
+                        searchable: true,
+                    },
+                    {
+                        data: 'total',
+                        name: 'total',
+                        orderable: true,
+                        searchable: true,
+                        className: 'text-end',
+                        render: function(data, type, row) {
+                            return numbro(data ?? 0).format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            });
+                        }
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        orderable: true,
+                        searchable: true,
+                        render: function(data, type, row) {
+                            if (data == "Done") {
+                                return '<span class="badge bg-success" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Approved' || data == 'Received') {
+                                return '<span class="badge bg-warning" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Open') {
+                                return '<span class="badge bg-primary" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Approval') {
+                                return '<span class="badge bg-info" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else if (data == 'Cancel') {
+                                return '<span class="badge bg-danger" style="font-size: 13px">' +
+                                    data + '</span>';
+                            } else {
+                                return '<span class="badge bg-secondary" style="font-size: 13px">' +
+                                    data + '</span>';
+                            }
+                        }
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false,
+                        width: '100px',
+                        className: 'text-center',
+                        targets: '_all'
+                    }
+                ],
+            });
+
+            $(document).on('click', '.editButton', function() {
+                paymentId = $(this).data('id');
+                $('#modal-header').text('Edit Payment');
+                $('#id').val(paymentId);
+                let url = '{{ route('invoicepayment.show', ':_id') }}';
+                url = url.replace(':_id', paymentId);
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $("#divSignPath").css('display', 'block');
+                        $('#modal-header').text('Edit Payment');
+                        /*
+                         * Select invoice
+                         */
+                        const poId = response.data.purchase_order_id;
+                        const poText = response.purchase_order ? response
+                            .purchase_order.order_no :
+                            null;
+
+                        const $purchase_order = $("#purchase_order_id");
+
+                        initPurchaseRequisitionSelect2();
+
+                        if (poId) {
+                            const optionExists = $purchase_order.find('option').filter(
+                                function() {
+                                    return String(this.value) === String($purchase_order);
+                                }).length > 0;
+
+                            if (!optionExists) {
+                                const newOption = new Option(poText, poId, true, true);
+                                $purchase_order.append(newOption);
+                            }
+
+                            $purchase_order.val(poId).trigger('change.select2');
+                        }
+                        /* End */
+
+                        var inv_date = response.purchase_order.invoice_date ?
+                            dayjs(response.purchase_order.invoice_date) :
+                            dayjs();
+
+                        var due_date = response.purchase_order.due_date ?
+                            dayjs(response.purchase_order.due_date) :
+                            dayjs();
+
+                        var date = response.data.date ?
+                            dayjs(response.data.date) :
+                            dayjs();
+
+                        var topDays = response.client_vendor.top ?
+                            parseInt(response.client_vendor.top) :
+                            0;
+
+                        if (isNaN(topDays)) {
+                            topDays = 0;
+                        }
+
+                        var due_date = inv_date.add(topDays, 'day');
+
+                        $('#vendor_name').val(response.client_vendor.name);
+                        $('#bank').val(response.data.bank).trigger('change');
+                        $('#bank_account').val(response.data.bank_account);
+                        $('#bank_sender').val(response.data.bank_sender + ' - ' + response.data
+                            .bank_account_sender).trigger('change');
+                        $('#ref_no').val(response.data.ref_no);
+                        $('#client_vendor_id').val(response.data.client_vendor_id);
+                        $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
+                        $('#due_date').val(due_date.format('YYYY-MM-DD'));
+                        $('#date').val(date.format('YYYY-MM-DD'));
+                        $('#grand_total').val(numbro(response.purchase_order.grand_total)
+                            .format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            }));
+                        $('#grand_total_').val(response.purchase_order.grand_total);
+                        $('#balance').val(numbro(response.purchase_order.balance).format({
+                            thousandSeparated: true,
+                            mantissa: 0
+                        }));
+                        $('#balance_').val(response.purchase_order.balance);
+                        $('#total_').val(numbro(response.data.total)
+                            .format({
+                                thousandSeparated: true,
+                                mantissa: 0
+                            }));
+                        $('#total').val(response.data.total);
+                        $('#notes').val(response.data.notes);
+                        $("#div-file").html(response.html);
+                        $("#request_token").val(response.data.request_token);
+                    },
+                    error: function() {
+                        alert('Error fetching data');
+                    }
+                });
+            });
+
+            $(document).on('click', '.detailButton', function() {
+                $('#modal-detail-header').text('Detail Payment');
+                let url = '{{ route('purchaseorderpayment.get_detail', ':_id') }}';
+                url = url.replace(':_id', $(this).data('id'));
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#modal-detail-body').html(response);
+                    },
+                    error: function() {
+                        alert('Error fetching data');
+                    }
+                });
+            });
+
+            $(".datepicker").flatpickr({
+                allowInput: true
+            });
+
+            $(".select-top").select2({
+                theme: "bootstrap-5",
+                width: $(this).data('width') ? $(this).data('width') : $(this).hasClass(
+                    'w-100') ? '100%' : 'style',
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            $("#date_start").on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            $("#date_end").on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            // $('#vendor').select2({
+            //     theme: "bootstrap-5",
+            //     width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
+            //         'w-100') ? '100%' : 'style'),
+            //     placeholder: 'All Vendor',
+            //     allowClear: true,
+            //     selectOnClose: false,
+            //     minimumResultsForSearch: 0,
+            //     ajax: {
+            //         url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
+            //         dataType: 'json',
+            //         delay: 250,
+            //         data: function(params) {
+            //             return {
+            //                 term: params.term || '',
+            //                 page: params.page || 1
+            //             };
+            //         },
+            //         processResults: function(data) {
+            //             return {
+            //                 results: data.results || data
+            //             };
+            //         },
+            //         cache: true
+            //     }
+            // }).on('change', function() {
+            //     $('#table-data').DataTable().draw();
+            // });
+
+            $('#vendor').select2({
+                theme: 'bootstrap-5',
+                width: '100%',
+                placeholder: 'All Vendor',
+                allowClear: true,
+                selectOnClose: false,
+                minimumResultsForSearch: 0,
+
+                ajax: {
+                    url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
+                    dataType: 'json',
+                    delay: 250,
+                    cache: true,
+
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+
+                    processResults: function(data, params) {
+                        params.page = params.page || 1;
+
+                        /*
+                         * Mendukung beberapa bentuk response:
+                         *
+                         * 1. Select2:
+                         *    {
+                         *      results: [],
+                         *      pagination: { more: true }
+                         *    }
+                         *
+                         * 2. Laravel paginator:
+                         *    {
+                         *      data: [],
+                         *      current_page: 1,
+                         *      last_page: 5
+                         *    }
+                         */
+
+                        const results = data.results || data.data || [];
+
+                        let hasMore = false;
+
+                        if (data.pagination && typeof data.pagination.more !== 'undefined') {
+                            hasMore = data.pagination.more;
+                        } else if (
+                            typeof data.current_page !== 'undefined' &&
+                            typeof data.last_page !== 'undefined'
+                        ) {
+                            hasMore = Number(data.current_page) < Number(data.last_page);
+                        } else if (typeof data.has_more !== 'undefined') {
+                            hasMore = Boolean(data.has_more);
+                        }
+
+                        return {
+                            results: results,
+                            pagination: {
+                                more: hasMore
+                            }
+                        };
+                    },
+
+                    error: function(xhr, status, error) {
+                        console.error('Gagal mengambil data vendor:', {
+                            status: status,
+                            error: error,
+                            response: xhr.responseText
+                        });
+                    }
+                }
+            }).on('change', function() {
+                $('#table-data').DataTable().draw();
+            });
+
+            gen_select2();
+        });
+
+        function delete_(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, Delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('purchaseorderpayment.destroy', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#table-data').DataTable().ajax.reload(null, false);
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        $('.saveButton').on('click', function() {
+            disableButton();
+            const status = $(this).val();
+            const form = $('#formModal').find('form')[0];
+            const formData = new FormData(form);
+
+            formData.append('status', status);
+
+            let url = '{{ route('purchaseorderpayment.store') }}';
+            let type = 'POST';
+
+            if (paymentId) {
+                url = '{{ route('purchaseorderpayment.update', ':_id') }}'.replace(':_id', paymentId);
+                formData.append('_method', 'PUT');
+            }
+
+            const submitForm = () => {
+                $.ajax({
+                    url,
+                    type,
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+                            willClose: () => {
+                                $('#table-data').DataTable().ajax.reload(null, false);
+                                form.reset();
+                                paymentId = '';
+                                $('#formModal').modal('hide');
+                            }
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        const errorMessage = xhr.responseJSON?.message || error;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage,
+                        });
+                        enableButton();
+                    }
+                });
+            };
+
+            if (status === 'Open') {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#5156be',
+                    cancelButtonColor: '#fd625e',
+                    confirmButtonText: 'Yes, Save it!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    result.isConfirmed ? submitForm() : enableButton();
+                });
+            } else {
+                submitForm();
+            }
+        });
+
+        $('#formModal').on('show.bs.modal', function() {
+            var button = $('#openModalButton');
+            var title = button.data('title');
+            $('#formModal form')[0].reset();
+            $('#modal-header').text(title);
+
+            setTimeout(function() {
+                const isEdit = paymentId != '';
+                if (!isEdit) {
+                    $.ajax({
+                        url: '{{ route('purchaseorderpayment.get_prev_no') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            const titleText = 'Add Payment';
+                            $('#modal-header').html(titleText + ' -&nbsp;<b>' +
+                                response.payment_prev_no +
+                                '</b>');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error:', error);
+                        }
+                    });
+
+                    $.ajax({
+                        url: '{{ route('gen_request_token') }}',
+                        type: 'GET',
+                        success: function(response) {
+                            $('#request_token').val(response.data);
+                        },
+                        error: function(xhr, status, error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: error,
+                            });
+                        }
+                    });
+                }
+            }, 500);
+        });
+
+        $('#formModal').on('hidden.bs.modal', function() {
+            paymentId = '';
+            orderId = '';
+            vendorId = '';
+            $("#request_token").val("");
+            $('#vendor_name').val("");
+            $('#client_vendor_id').val("");
+            $('#invoice_date').val("");
+            $('#ref_no').val("");
+            $('#due_date').val("");
+            $('#date').val("");
+            $('#grand_total').val("");
+            $('#grand_total_').val("");
+            $('#balance').val("");
+            $('#balance_').val("");
+            $('#total').val("");
+            $('#total_').val("");
+            $('#notes').val("");
+            $("#bank")
+                .val(null)
+                .trigger('change');
+            $('#bank_account').val("");
+            $("#bank_sender")
+                .val(null)
+                .trigger('change');
+            $("#purchase_order_id")
+                .val(null)
+                .empty()
+                .trigger('change');
+            $("#div-file").html("");
+            enableButton();
+        });
+
+        $('#cancelButton').on('click', function() {
+            $('#formModal').modal('hide');
+            paymentId = '';
+            orderId = '';
+        });
+
+        $('#cancelDetailButton').on('click', function() {
+            $('#formDetail').modal('hide');
+            $('#modal-detail-body').html("");
+        });
+
+        function gen_select2() {
+            $('.select-select')
+                .not('#purchase_order_id')
+                .each(function() {
+                    const $el = $(this);
+
+                    if ($el.hasClass('select2-hidden-accessible')) {
+                        $el.select2('destroy');
+                    }
+
+                    $el.select2({
+                        theme: "bootstrap-5",
+                        dropdownParent: $('#formModal'),
+                        width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                            'style'),
+                        selectOnClose: false,
+                        minimumResultsForSearch: 0,
+                    }).on('select2:close', function() {
+                        $(this).blur();
+                        if (document.activeElement) {
+                            document.activeElement.blur();
+                        }
+                    });
+                });
+        }
+
+        function disableButton() {
+            saveButton1.disabled = true;
+            saveButton2.disabled = true;
+        }
+
+        function enableButton() {
+            saveButton1.disabled = false;
+            saveButton2.disabled = false;
+        }
+
+        function delete_file(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, Delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let url = '{{ route('purchaseorderpayment.destroy_file', ':_id') }}';
+                    url = url.replace(':_id', id);
+                    $.ajax({
+                        url: url,
+                        type: 'DELETE',
+                        data: {
+                            id: id,
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                title: "Deleted!",
+                                text: response.message,
+                                icon: "success",
+                                timer: 5000,
+                                didOpen: () => {},
+                                willClose: () => {
+                                    $('#div-file').html("");
+                                }
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            var errorMessage = xhr.responseJSON ? xhr.responseJSON.message : error;
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: errorMessage,
+                            });
+                        }
+                    });
+                }
+            });
+        }
+
+        const $total = $('#total_');
+
+        let isFmt = false;
+        let userDecSep = null;
+
+        function sanitize(s) {
+            return (s ?? '').toString().replace(/[^0-9.,]/g, '');
+        }
+
+        function groupThousands(digits, sep) {
+            digits = digits.replace(/^0+(?=\d)/, '');
+            if (digits === '') digits = '0';
+            return digits.replace(/\B(?=(\d{3})+(?!\d))/g, sep);
+        }
+
+        function countDigitsLeft(str, pos) {
+            return (str.slice(0, pos).match(/\d/g) || []).length;
+        }
+
+        function caretByDigits(str, digitCount) {
+            let c = 0;
+            for (let i = 0; i < str.length; i++) {
+                if (/\d/.test(str[i])) c++;
+                if (c >= digitCount) return i + 1;
+            }
+            return str.length;
+        }
+
+        function textKeyDown(e) {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            const okNav = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Home', 'End', 'Tab', 'Enter'];
+            if (okNav.includes(e.key)) return;
+
+            if (/^[0-9.,]$/.test(e.key)) return;
+
+            e.preventDefault();
+        }
+
+        function textInput(key, e) {
+            if (isFmt) return;
+            isFmt = true;
+
+            const el = e.target;
+            const raw = el.value || '';
+            const caretRaw = (typeof el.selectionStart === 'number') ? el.selectionStart : raw.length;
+
+            const oe = e.originalEvent || e;
+            const inserted = (oe && typeof oe.data === 'string') ? oe.data : '';
+
+            const prevDecSep = userDecSep;
+            const justTypedSep = (inserted === '.' || inserted === ',');
+
+            const san = sanitize(raw);
+            const leftSan = sanitize(raw.slice(0, caretRaw));
+            const caretSan = leftSan.length;
+
+            if (userDecSep && !san.includes(userDecSep)) userDecSep = null;
+
+            const justSetDecSep = (!prevDecSep && justTypedSep);
+            if (justSetDecSep) userDecSep = inserted;
+
+            const digitsLeft = countDigitsLeft(san, caretSan);
+
+            let intDigits = '';
+            let fracDigits = '';
+            let keepDec = false;
+
+            if (userDecSep && san.includes(userDecSep)) {
+                const pos = san.indexOf(userDecSep);
+                keepDec = true;
+                intDigits = san.slice(0, pos).replace(/[.,]/g, '');
+                fracDigits = san.slice(pos + 1).replace(/[.,]/g, '');
+                if (intDigits === '') intDigits = '0';
+            } else {
+                intDigits = san.replace(/[.,]/g, '');
+            }
+
+            const thousandsSep = userDecSep ? (userDecSep === ',' ? '.' : ',') : ',';
+
+            const formattedInt = groupThousands(intDigits, thousandsSep);
+            const formatted = keepDec ? (formattedInt + userDecSep + fracDigits) : formattedInt;
+
+            el.value = formatted;
+
+            if (typeof el.setSelectionRange === 'function') {
+                if (justSetDecSep && keepDec) {
+                    const decPosNew = formatted.indexOf(userDecSep);
+                    const newCaret = decPosNew + 1;
+                    el.setSelectionRange(newCaret, newCaret);
+                } else {
+                    const newCaret = caretByDigits(formatted, digitsLeft);
+                    el.setSelectionRange(newCaret, newCaret);
+                }
+            }
+
+            isFmt = false;
+
+            $("#" + key).val(numbro.unformat(el.value));
+        }
+
+        $total.on('keydown', function(e) {
+            textKeyDown(e);
+        });
+
+        $total.on('input', function(e) {
+            textInput("total", e);
+            checkTotalNotExceedBalance(e);
+        });
+
+        function cleanNumber(value) {
+            if (value === null || value === undefined || value === '') {
+                return 0;
+            }
+
+            return parseFloat(
+                value.toString()
+                .replace(/[^0-9.-]/g, '')
+            ) || 0;
+        }
+
+        function checkTotalNotExceedBalance(e) {
+            const el = e.target;
+
+            const totalValue = Number(numbro.unformat($('#total').val())) || 0;
+            const balanceValue = Number(numbro.unformat($('#balance').val())) || 0;
+
+            if (totalValue > balanceValue) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Payment Exceeds Balance',
+                    text: 'Please enter an amount less than or equal to the balance.',
+                    confirmButtonText: 'OK'
+                });
+
+                // kembalikan tampilan input total_ ke sejumlah balance
+                el.value = numbro(balanceValue).format({
+                    thousandSeparated: true
+                });
+
+                // kembalikan value asli total ke balance juga
+                $('#total').val(balanceValue);
+            }
+        }
+
+        function initPurchaseRequisitionSelect2() {
+            const $purchase_order = $('#purchase_order_id');
+
+            if (!$purchase_order.length) {
+                return;
+            }
+
+            const selectedValue = $purchase_order.val();
+
+            if ($purchase_order.hasClass('select2-hidden-accessible')) {
+                $purchase_order.select2('destroy');
+            }
+
+            $purchase_order.off('.purchaseOrder');
+
+            $purchase_order.select2({
+                theme: "bootstrap-5",
+                width: $('#purchase_order_id').data('width') ? $('#purchase_order_id').data('width') : (
+                    $('#purchase_order_id').hasClass('w-100') ? '100%' : 'style'),
+                placeholder: '',
+                allowClear: true,
+                selectOnClose: false,
+                ajax: {
+                    url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
+                    dataType: 'json',
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            page: params.page || 1
+                        };
+                    },
+                    processResults: function(data) {
+                        return {
+                            results: data.results || data
+                        };
+                    },
+                    cache: true
+                }
+            }).on('select2:open', function() {
+                setTimeout(function() {
+                    $('.select2-container--open .select2-search__field').trigger('focus');
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            }).on('select2:select', function(e) {
+                const selectedData = e.params.data;
+                $('#vendor_name').val(selectedData.vendor);
+                $('#bank').val(selectedData.bank).trigger('change');
+                $('#bank_account').val(selectedData.bank_account);
+                $('#client_vendor_id').val(selectedData.client_vendor_id);
+                var inv_date = selectedData.invoice_date ?
+                    dayjs(selectedData.invoice_date) :
+                    dayjs();
+
+                var topDays = selectedData.top ?
+                    parseInt(selectedData.top) :
+                    0;
+
+                if (isNaN(topDays)) {
+                    topDays = 0;
+                }
+
+                var due_date = inv_date.add(topDays, 'day');
+
+                $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
+                $('#due_date').val(due_date.format('YYYY-MM-DD'));
+                $('#grand_total').val(numbro(selectedData.grand_total).format({
+                    thousandSeparated: true,
+                    mantissa: 0
+                }));
+                $('#balance').val(numbro(selectedData.balance).format({
+                    thousandSeparated: true,
+                    mantissa: 0
+                }));
+            });
+
+            if (selectedValue) {
+                $purchase_order.val(selectedValue).trigger('change.select2');
+            }
+
+            $purchase_order.on('select2:open.purchaseOrder', function() {
+                setTimeout(function() {
+                    const search = document.querySelector(
+                        '.select2-container--open .select2-search__field'
+                    );
+
+                    if (search) {
+                        search.focus({
+                            preventScroll: true
+                        });
+                    }
+
+                    $('.select2-container--open').css('z-index', 1056);
+                }, 0);
+            });
+
+            $purchase_order.on('change.purchaseOrder', function() {
+                orderId = $(this).val();
+            });
+        }
+
+        initPurchaseRequisitionSelect2();
+    </script>
+    <!--app JS-->
+@endsection

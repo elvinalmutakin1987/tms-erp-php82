@@ -427,12 +427,13 @@
                     <td class="p-1 align-middle">
                         <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]" readonly value="${maintenance_item_id}">
                        <input type="text" class="form-control" id="maintenance_item" name="maintenance_item[]" readonly value="${maintenance_item}">
+                    </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="mro_item_id" name="mro_item_id[]" readonly value="${mro_item_id}">
                        <input type="text" class="form-control" id="mro_item" name="mro_item[]" readonly value="${mro_item}">
                     </td>
-                     <td class="p-1 align-middle">
-                      <input type="text" class="form-control" id="desc_vendor" name="desc_vendor[]" readonly value="${desc_vendor}">
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" id="desc_vendor" name="desc_vendor[]" readonly value="${desc_vendor}">
                     </td>
                     <td class="p-1 align-middle">
                         <input type="text" class="form-control" id="uom" name="uom[]" readonly value="${uom}">
@@ -449,8 +450,8 @@
                        <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly value="${_discount_item}">
                        <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly value="${_discount_item_}" style="text-align: right;">
                     </td>
-                     <td class="p-1 align-middle">
-                       <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
                         <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}" style="text-align: right;">
                     </td>
                     <td class="text-center p-1 align-middle">
@@ -599,7 +600,5 @@
         };
 
         window.initPurchaseOrderItemTable();
-
-
     })();
 </script>

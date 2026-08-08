@@ -5,14 +5,11 @@
     <thead class="table-dark">
         <tr>
             <th scope="col" style="width:3%">#</th>
-            <th scope="col">Maintenance Item</th>
-            <th scope="col">MRO Item</th>
-            <th scope="col">Alter Name</th>
-            <th scope="col" style="width:9%">Uom</th>
-            <th scope="col" style="width:8%">Qty</th>
-            <th scope="col" style="width:10%">Price</th>
-            <th scope="col" style="width:10%">Discount</th>
-            <th scope="col" style="width:10%">Amount</th>
+            <th scope="col">Item</th>
+            <th scope="col" style="width:10%">Qty</th>
+            <th scope="col" style="width:13%">Price</th>
+            <th scope="col" style="width:13%">Discount</th>
+            <th scope="col" style="width:13%">Amount</th>
             <th scope="col" style="width:2%">Action</th>
         </tr>
     </thead>
@@ -22,24 +19,7 @@
 
             </td>
             <td class="p-1 align-middle">
-                <select class="form-select select-select" id="maintenance_item_" name="maintenance_item_">
-
-                </select>
-            </td>
-            <td class="p-1 align-middle">
-                <select class="form-select select-select" id="mro_item_" name="mro_item_">
-
-                </select>
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="_desc_vendor" name="_desc_vendor">
-            </td>
-            <td class="p-1 align-middle">
-                <select class="form-select select-select" id="_uom" name="_uom">
-                    @foreach ($uom as $d => $value)
-                        <option value="{{ $value }}">{{ $value }}</option>
-                    @endforeach
-                </select>
+                <input type="text" class="form-control" id="service_" name="service_">
             </td>
             <td class="p-1 align-middle">
                 <input type="hidden" class="form-control" id="_qty" name="_qty">
@@ -68,124 +48,101 @@
                 </div>
             </td>
         </tr>
-        @if ($purchase_order)
-            @foreach ($purchase_order->purchase_order_detail as $d)
-                <tr>
-                    <td class="p-1 align-middle row-number">
-                        {{ $loop->iteration }}
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]"
-                            readonly value="{{ $d->maintenance_item_id }}">
-                        <input type="text" class="form-control" id="maintenance_item" name="maintenance_item[]"
-                            readonly value="{{ $d->maintenance_item->name }}">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="mro_item_id" name="mro_item_id[]" readonly
-                            value="{{ $d->mro_item_id }}">
-                        <input type="text" class="form-control" id="mro_item" name="mro_item[]" readonly
-                            value="{{ $d->mro_item->name }}">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="text" class="form-control" id="desc_vendor" name="desc_vendor[]"
-                            value="{{ $d->desc_vendor }}">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="text" class="form-control" id="uom" name="uom[]" readonly
-                            value="{{ $d->uom }}">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
-                            value="{{ $d?->qty ?? 0 }}">
-                        <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '' }}"
-                            style="text-align: right;">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="price" name="price[]" readonly
-                            value="{{ $d?->price ?? 0 }}">
-                        <input type="text" class="form-control" id="__price" name="__price[]" readonly
-                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '' }}"
-                            style="text-align: right;">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="discount_item" name="discount_item[]"
-                            readonly value="{{ $d?->discount_item ?? 0 }}">
-                        <input type="text" class="form-control" id="__discount_item" name="__discount_item[]"
-                            readonly
-                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '' }}"
-                            style="text-align: right;">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="amount" name="amount[]" readonly
-                            value="{{ $d?->amount ?? 0 }}">
-                        <input type="text" class="form-control" id="__amount" name="__amount[]" readonly
-                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '' }}"
-                            style="text-align: right;">
-                    </td>
-                    <td class="text-center p-1 align-middle">
-                        <div class="row row-cols-auto g-3">
-                            <div class="col">
-                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-                                    id="removeItemButton"></button>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
-        @endif
-    </tbody>
 
+        @foreach ($invoice->invoice_detail as $d)
+            <tr>
+                <td class="p-1 align-middle row-number">
+                    {{ $loop->iteration }}
+                </td>
+                <td class="p-1 align-middle">
+                    <input type="text" class="form-control" id="service" name="service[]" readonly
+                        value="{{ $d->service_item }}">
+                </td>
+                <td class="p-1 align-middle">
+                    <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
+                        value="{{ $d?->qty ?? 0 }}">
+                    <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
+                        value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '0' }}" style="text-align: right;">
+                </td>
+                <td class="p-1 align-middle">
+                    <input type="hidden" class="form-control" id="price" name="price[]" readonly
+                        value="{{ $d?->price ?? 0 }}">
+                    <input type="text" class="form-control" id="__price" name="__price[]" readonly
+                        value="{{ $d->price ? Number::format($d->price, precision: 0) : '0' }}"
+                        style="text-align: right;">
+                </td>
+                <td class="p-1 align-middle">
+                    <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly
+                        value="{{ $d?->discount_item ?? 0 }}">
+                    <input type="text" class="form-control" id="__discount_item" name="__discount_item[]"
+                        readonly
+                        value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '0' }}"
+                        style="text-align: right;">
+                </td>
+                <td class="p-1 align-middle">
+                    <input type="hidden" class="form-control amount" name="amount[]" readonly
+                        value="{{ $d?->amount ?? 0 }}">
+                    <input type="text" class="form-control" name="__amount[]" readonly
+                        value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '0' }}"
+                        style="text-align: right;">
+                </td>
+                <td class="text-center p-1 align-middle">
+                    <div class="row row-cols-auto g-3">
+                        <div class="col">
+                            <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+                                id="removeItemButton"></button>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        @endforeach
+    </tbody>
     <tfoot>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Total</b>
+            <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Total</b>
             </td>
             <td scope="col" class="p-1 align-middle">
-                <input type="hidden" id="total" name="total" readonly
-                    value="{{ $purchase_order?->total ?? 0 }}">
+                <input type="hidden" id="total" name="total" readonly value="{{ $invoice?->total ?? 0 }}">
                 <input type="text" class="form-control" id="total_" name="total_" readonly
-                    value="{{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : 0 }}"
+                    value="{{ $invoice->total ? Number::format($invoice->total, precision: 0) : '' }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Discount</b>
+            <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Discount</b>
             </td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="discount" name="discount" readonly
-                    value="{{ $purchase_order?->discount ?? 0 }}">
+                    value="{{ $invoice?->discount ?? 0 }}">
                 <input type="text" class="form-control" id="discount_" name="discount_"
-                    value="{{ $purchase_order->discount ? Number::format($purchase_order->discount, precision: 0) : 0 }}"
+                    value="{{ $invoice->discount ? Number::format($invoice->discount, precision: 0) : '' }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle">
-                <input class="form-check-input" type="checkbox" value="" id="check_tax" name="check_tax"
-                    {{ (int) $purchase_order->tax !== 0 ? 'checked' : '' }}> &nbsp;
+            <td scope="col" colspan="5" class="text-end p-1 align-middle">
+                <input class="form-check-input" type="checkbox" value="" id="check_tax" name="check_tax">
+                &nbsp;
                 <b>Tax</b>
-                {{-- <b id='text-tax'>Tax
-                    ({{ $purchase_order->client_vendor->taxable }})</b> --}}
             </td>
             <td scope="col" class="p-1 align-middle">
-                <input type="hidden" id="tax" name="tax" readonly
-                    value="{{ (int) $purchase_order?->tax !== 0 ? $purchase_order->tax : 0 }}">
+                <input type="hidden" id="tax" name="tax" readonly value="{{ $invoice?->tax ?? 0 }}">
                 <input type="text" class="form-control" id="tax_" name="tax_" readonly
-                    value="{{ (int) $purchase_order?->tax !== 0 ? Number::format($purchase_order->tax, precision: 0) : 0 }}"
+                    value="{{ $invoice->tax ? Number::format($invoice->tax, precision: 0) : '' }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
         </tr>
         <tr>
-            <td scope="col" colspan="8" class="text-end p-1 align-middle"><b>Grand
+            <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Grand
                     Total</b></td>
             <td scope="col" class="p-1 align-middle">
                 <input type="hidden" id="grand_total" name="grand_total" readonly
-                    value="{{ $purchase_order?->grand_total ?? 0 }}">
+                    value="{{ $invoice?->grand_total ?? 0 }}">
                 <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
-                    value="{{ $purchase_order->grand_total ? Number::format($purchase_order->grand_total) : 0 }}"
+                    value="{{ $invoice->grand_total ? Number::format($invoice->grand_total, precision: 0) : '' }}"
                     style="text-align: right;">
             </td>
             <td scope="col" class="p-1 align-middle"></td>
@@ -195,78 +152,9 @@
 
 <script>
     (() => {
-        // window.poState.taxable = '{{ $purchase_order->client_vendor->taxable }}';
-
         const tax_ = {{ $system_setting['tax'] }};
         const modalEl = document.querySelector('#formModal');
         const modalBody = document.querySelector('#formModal .modal-body');
-
-        $('#tableItem .select-select')
-            .not('#client_vendor_id, #purchase_requisition_id, #urgency, #job')
-            .each(function() {
-                const $el = $(this);
-
-                let config = {
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0
-                };
-
-                if ($el.attr('id') === 'maintenance_item_') {
-                    config.ajax = {
-                        url: '{{ route('purchaseorder.get_maintenance_item') }}',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function(params) {
-                            return {
-                                term: params.term || '',
-                                page: params.page || 1
-                            };
-                        },
-                        processResults: function(data) {
-                            return {
-                                results: data.results || data
-                            };
-                        },
-                        cache: true
-                    };
-                }
-
-                if ($el.attr('id') === 'mro_item_') {
-                    config.ajax = {
-                        url: '{{ route('purchaseorder.get_mro_item') }}',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function(params) {
-                            return {
-                                term: params.term || '',
-                                page: params.page || 1
-                            };
-                        },
-                        processResults: function(data) {
-                            return {
-                                results: data.results || data
-                            };
-                        },
-                        cache: true
-                    };
-                }
-
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.select2('destroy');
-                }
-
-                $el.select2(config).on('select2:open', function() {
-                    setTimeout(function() {
-                        const $search = $('.select2-container--open .select2-search__field');
-                        $search.trigger('focus');
-                        $('.select2-container--open').css('z-index', 1056);
-                    }, 0);
-                });
-            });
 
         const $qty = $('#_qty_');
         const $price = $('#_price_');
@@ -410,53 +298,37 @@
 
         $('#addItemButton').on('click', function() {
             var tbody = $("#tableItem > tbody");
-            var maintenance_item_id = $("#maintenance_item_").val();
-            var maintenance_item = $("#maintenance_item_ option:selected").text();
-            var mro_item_id = $("#mro_item_").val();
-            var mro_item = $("#mro_item_ option:selected").text();
-            var desc_vendor = $("#_desc_vendor").val();
-            var uom = $("#_uom").val();
+            var service = $("#service_").val();
             var _qty = $("#_qty").val();
             var _qty_ = $("#_qty_").val();
             var _price = $("#_price").val();
             var _price_ = $("#_price_").val();
-            var _discount_item = $("#_discount_item").val();
-            var _discount_item_ = $("#_discount_item_").val();
             var _amount = $("#_amount").val();
             var _amount_ = $("#_amount_").val();
+            var _discount_item = $("#_discount_item").val();
+            var _discount_item_ = $("#_discount_item_").val();
             var newRow = `
                 <tr>
                     <td class="p-1 align-middle row-number">
                         #
                     </td>
                     <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control" id="maintenance_item_id" name="maintenance_item_id[]" readonly value="${maintenance_item_id}">
-                        <input type="text" class="form-control" id="maintenance_item" name="maintenance_item[]" readonly value="${maintenance_item}">
-                    </td>
-                    <td class="p-1 align-middle">
-                       <input type="hidden" class="form-control" id="mro_item_id" name="mro_item_id[]" readonly value="${mro_item_id}">
-                       <input type="text" class="form-control" id="mro_item" name="mro_item[]" readonly value="${mro_item}">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="text" class="form-control" id="desc_vendor" name="desc_vendor[]" readonly value="${desc_vendor}">
-                    </td>
-                    <td class="p-1 align-middle">
-                        <input type="text" class="form-control" id="uom" name="uom[]" readonly value="${uom}">
+                        <input type="text" class="form-control" id="service" name="service[]" readonly value="${service}">
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly value="${_qty}">
-                       <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}"  style="text-align: right;">
+                       <input type="text" class="form-control" id="__qty" name="__qty[]" readonly value="${_qty_}" style="text-align: right;">
                     </td>
                     <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="price" name="price[]" readonly value="${_price}">
                        <input type="text" class="form-control" id="__price" name="__price[]" readonly value="${_price_}" style="text-align: right;">
                     </td>
-                     <td class="p-1 align-middle">
+                    <td class="p-1 align-middle">
                        <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly value="${_discount_item}">
                        <input type="text" class="form-control" id="__discount_item" name="__discount_item[]" readonly value="${_discount_item_}" style="text-align: right;">
                     </td>
-                    <td class="p-1 align-middle">
-                        <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
+                     <td class="p-1 align-middle">
+                       <input type="hidden" class="form-control amount" name="amount[]" readonly value="${_amount}">
                         <input type="text" class="form-control" name="__amount[]" readonly value="${_amount_}" style="text-align: right;">
                     </td>
                     <td class="text-center p-1 align-middle">
@@ -469,25 +341,23 @@
                     </td>
                 </tr>
             `;
+            $("#service_").val('');
             $("#_qty").val('');
             $("#_qty_").val('');
             $("#_price").val('');
             $("#_price_").val('');
-            $("#_discount_item").val('');
-            $("#_discount_item_").val('');
             $("#_amount").val('');
             $("#_amount_").val('');
-            $("#_desc_vendor").val('');
-            $("#maintenance_item_").val('').trigger('change');
-            $("#mro_item_").val('').trigger('change');
-            $("#_uom").val('').trigger('change');
+            $("#_discount_item").val('');
+            $("#_discount_item_").val('');
+            // $("#service_").val('').trigger('change');
             tbody.append(newRow);
-            window.initPurchaseOrderItemTable = function() {
+            window.initInvoiceItemTable = function() {
                 renumberRows();
                 calculateTotal();
             };
 
-            window.initPurchaseOrderItemTable();
+            window.initInvoiceItemTable();
         });
 
         function renumberRows() {
@@ -512,12 +382,12 @@
             }
 
             $(this).remove();
-            window.initPurchaseOrderItemTable = function() {
+            window.initInvoiceItemTable = function() {
                 renumberRows();
                 calculateTotal();
             };
 
-            window.initPurchaseOrderItemTable();
+            window.initInvoiceItemTable();
         });
 
         function calculateAmount() {
@@ -543,15 +413,11 @@
         function calculateTotal() {
             let total = 0;
             let total_disc = 0;
-            // let discount = 0;
 
             $('input[name="amount[]"]').each(function() {
                 total += parseFloat($(this).val()) || 0;
             });
 
-            // $('input[name="discount_item[]"]').each(function() {
-            //     discount += parseFloat($(this).val()) || 0;
-            // });
             let discount = parseFloat($('#discount').val()) || 0;
 
             let tax = 0;
@@ -559,10 +425,12 @@
 
             if (total > 0) {
                 total_disc = total - discount;
-                if (window.poState.taxable == 'PKP') {
+                if (window.invoiceState.taxable == 'PKP') {
                     tax = tax_ / 100 * total_disc;
                 }
                 grandTotal = total_disc + tax;
+            } else {
+                discount = 0;
             }
 
             $("#total").val(total || 0);
@@ -591,18 +459,17 @@
         }
 
         $(document)
-            .off('po:taxableChanged.tableItem')
-            .on('po:taxableChanged.tableItem', function() {
+            .off('invoice:taxableChanged.tableItem')
+            .on('invoice:taxableChanged.tableItem', function() {
                 calculateTotal();
             });
 
-        window.initPurchaseOrderItemTable = function() {
+
+        window.initInvoiceItemTable = function() {
             renumberRows();
             calculateTotal();
-
         };
 
-        window.initPurchaseOrderItemTable();
-
+        window.initInvoiceItemTable();
     })();
 </script>

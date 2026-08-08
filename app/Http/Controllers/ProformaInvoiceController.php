@@ -325,7 +325,7 @@ class ProformaInvoiceController extends Controller
                     'proforma_invoice_id' => $proforma_invoice->id,
                     'contract_fmf_id' => $gen_proforma['contract_fmf']->id,
                     'item_no' => '',
-                    'service_item' => '',
+                    'service_item' => 'Fix Monthly Fee',
                     'value' => $gen_proforma['contract_fmf']->value,
                     'qty' => 1,
                     'amount' => $amount,
@@ -361,6 +361,7 @@ class ProformaInvoiceController extends Controller
                         'request_token' => $contract->request_token,
                         'contract_id' => $contract->id,
                         'contract_rate_id' => $contractRate->id,
+                        'service_item' => $contractRate->service_item,
                         'rate' => $rate,
                         'qty' => $tripQty,
                         'amount' => $amount,
@@ -728,6 +729,7 @@ class ProformaInvoiceController extends Controller
                     'proforma_invoice_id' => $lockProforma_invoice->id,
                     'contract_fmf_id' => $gen_proforma['contract_fmf']->id,
                     'value' => $gen_proforma['contract_fmf']->value,
+                    'service_item' => 'Fix Monthly Fee',
                     'qty' => 1,
                     'amount' => $amount,
                     'ptd_qty' => $qty_ptd,
@@ -758,6 +760,7 @@ class ProformaInvoiceController extends Controller
                         'proforma_invoice_id' => $proforma_invoice->id,
                         'contract_rate_id' => $contractrate->id,
                         'rate' => $contractrate->rate,
+                        'service_item' => $contractrate->service_item,
                         'qty' => $trip,
                         'amount' => $amount,
                         'ptd_qty' => $qty_ptd,
@@ -827,6 +830,7 @@ class ProformaInvoiceController extends Controller
                         'request_token' => $contract->request_token,
                         'contract_id' => $contract->id,
                         'contract_rate_id' => $contractrate->id,
+                        'service_item' => $contractrate->service_item,
                         'rate' => $rate,
                         'qty' => $qty,
                         'amount' => $amount,
@@ -1159,9 +1163,12 @@ class ProformaInvoiceController extends Controller
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
         $contract = Contract::find($proforma_invoice->contract_id);
-        $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
-        $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
-        $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
+        // $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+        // $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
+        // $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
+        $contract_rate = Contract_rate::where('contract_id', $proforma_invoice->contract_id)->get();
+        $contract_fmf = Contract_fmf::where('contract_id', $proforma_invoice->contract_id)->get();
+        $unit_target = Unit_target::where('contract_id', $proforma_invoice->contract_id)->get();
         $periode = $proforma_invoice->periode;
         $exp_periode = explode("-", $periode);
         $year = $exp_periode[0];
@@ -1247,7 +1254,7 @@ class ProformaInvoiceController extends Controller
                 [0.6, 0.6, 0.6]
             );
         }
-        $safeFilename = Str::of($proforma_invoice->order_no)
+        $safeFilename = Str::of($proforma_invoice->proforma_no)
             ->replace(['/', '\\'], '-')
             ->toString();
 
@@ -1265,9 +1272,12 @@ class ProformaInvoiceController extends Controller
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
         $contract = Contract::find($proforma_invoice->contract_id);
-        $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
-        $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
-        $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
+        // $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
+        // $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
+        // $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
+        $contract_rate = Contract_rate::where('contract_id', $proforma_invoice->contract_id)->get();
+        $contract_fmf = Contract_fmf::where('contract_id', $proforma_invoice->contract_id)->get();
+        $unit_target = Unit_target::where('contract_id', $proforma_invoice->contract_id)->get();
         $periode = $proforma_invoice->periode;
         $exp_periode = explode("-", $periode);
         $year = $exp_periode[0];

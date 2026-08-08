@@ -223,38 +223,41 @@
         }
     }
 </style>
-@if ($proforma_invoice->contract->service->type == 'Unit Rental')
-    <table class="table-p2h">
-        <thead>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <table class="doc-header-table">
-                        <tr>
-                            <td class="logo-cell">
-                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                    style="max-width:120px;height:auto;margin:0 auto;">
-                            </td>
+<table class="table-p2h">
+    <thead>
+        <tr>
+            <th class="doc-header-wrapper">
+                <table class="doc-header-table">
+                    <tr>
+                        <td class="logo-cell">
+                            <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
+                                style="max-width:120px;height:auto;margin:0 auto;">
+                        </td>
 
-                            <td class="title-cell">
-                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
-                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
-                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
-                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
-                            </td>
-                        </tr>
-                    </table>
-                </th>
-            </tr>
+                        <td class="title-cell">
+                            <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
+                            <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
+                            <div class="doc-subtitle">Sangatta - Kutai Timur</div>
+                            <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
+                        </td>
+                    </tr>
+                </table>
+            </th>
+        </tr>
 
-            <tr>
-                <th class="doc-header-wrapper">
-                    <div class="doc-title" style="padding-top: 15px">
-                        PROFORMA INVOICE
-                    </div>
-                </th>
-            </tr>
-        </thead>
-    </table>
+        <tr>
+            <th class="doc-header-wrapper">
+                <div class="doc-title" style="padding-top: 15px">
+                    PROFORMA INVOICE
+                </div>
+            </th>
+        </tr>
+    </thead>
+</table>
+
+@if (
+    $proforma_invoice->contract->service->type == 'Unit Rental' ||
+        $proforma_invoice->contract->service->type == 'Fuel Truck Rental')
     <table class="table-p2h"
         style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
         <tbody>
@@ -380,8 +383,8 @@
                                 </td>
 
                                 <td class="p-1">
-                                    {{ $unit_target->unit->description }}
-                                    (<b>{{ $unit_target->unit->vehicle_no }}</b>)
+                                    {{ $proforma_invoice->unit_target->unit->description }}
+                                    (<b>{{ $proforma_invoice->unit_target->unit->vehicle_no }}</b>)
                                 </td>
 
                                 <td class="p-1" width="10px"></td>
@@ -489,36 +492,6 @@
         </tbody>
     </table>
 @elseif($proforma_invoice->contract->service->type == 'LCT')
-    <table class="table-p2h">
-        <thead>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <table class="doc-header-table">
-                        <tr>
-                            <td class="logo-cell">
-                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                    style="max-width:120px;height:auto;margin:0 auto;">
-                            </td>
-
-                            <td class="title-cell">
-                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
-                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
-                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
-                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
-                            </td>
-                        </tr>
-                    </table>
-                </th>
-            </tr>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <div class="doc-title" style="padding-top: 15px">
-                        PROFORMA INVOICE
-                    </div>
-                </th>
-            </tr>
-        </thead>
-    </table>
     <table class="table-p2h"
         style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
         <tbody>
@@ -706,36 +679,6 @@
         </tbody>
     </table>
 @elseif($proforma_invoice->contract->service->type == 'Explosive Material Transport')
-    <table class="table-p2h">
-        <thead>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <table class="doc-header-table">
-                        <tr>
-                            <td class="logo-cell">
-                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                    style="max-width:120px;height:auto;margin:0 auto;">
-                            </td>
-
-                            <td class="title-cell">
-                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
-                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
-                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
-                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
-                            </td>
-                        </tr>
-                    </table>
-                </th>
-            </tr>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <div class="doc-title" style="padding-top: 15px">
-                        PROFORMA INVOICE
-                    </div>
-                </th>
-            </tr>
-        </thead>
-    </table>
     <table class="table-p2h"
         style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
         <tbody>
@@ -931,36 +874,6 @@
         </tbody>
     </table>
 @elseif($proforma_invoice->contract->service->type == 'Pallet')
-    <table class="table-p2h">
-        <thead>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <table class="doc-header-table">
-                        <tr>
-                            <td class="logo-cell">
-                                <img src="{{ public_path('assets/images/tms_logo.png') }}" alt="Logo"
-                                    style="max-width:120px;height:auto;margin:0 auto;">
-                            </td>
-
-                            <td class="title-cell">
-                                <div class="doc-title">PT. TUNAS MITRA SEJATI</div>
-                                <div class="doc-subtitle">Perum GPL Munthe Hatari A4-05</div>
-                                <div class="doc-subtitle">Sangatta - Kutai Timur</div>
-                                <div class="doc-subtitle">Telp. (0549)-2129100 Cp. 082370205584</div>
-                            </td>
-                        </tr>
-                    </table>
-                </th>
-            </tr>
-            <tr>
-                <th class="doc-header-wrapper">
-                    <div class="doc-title" style="padding-top: 15px">
-                        PROFORMA INVOICE
-                    </div>
-                </th>
-            </tr>
-        </thead>
-    </table>
     <table class="table-p2h"
         style="border: 1px double #000; border-collapse: separate; border-spacing: 1px; width: 100%;">
         <tbody>

@@ -57,7 +57,7 @@
                  'safety' => ['unit_expired'],
                  'purchase_requisition_general' => ['purchase_requisition_general'],
                  'procurement' => ['request_quotation', 'purchase_order'],
-                 'finance' => ['cic', 'invoice', 'invoice_payment'],
+                 'finance' => ['purchase_order_payment', 'invoice_receipt', 'cic', 'invoice', 'invoice_payment'],
                  'approval' => ['approval'],
                  'master_data' => [
                      'service',

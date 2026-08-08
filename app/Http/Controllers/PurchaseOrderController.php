@@ -592,7 +592,7 @@ class PurchaseOrderController extends Controller
     /**
      * Ngambil tabel list requisition nya
      */
-    public function get_table_add(Request $request, Purchase_order $purchase_order)
+    public function get_table_add(Request $request)
     {
         try {
             $type = 'General';
