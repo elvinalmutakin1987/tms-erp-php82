@@ -471,49 +471,65 @@
                 formData.append('_method', 'PUT');
             }
 
-            $.ajax({
-                url: url,
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
+            Swal.fire({
+                title: 'Are you sure?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#5156be',
+                cancelButtonColor: '#fd625e',
+                confirmButtonText: 'Yes, process it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
 
-                success: function(response) {
-                    Swal.fire({
-                        title: response.title,
-                        text: response.message,
-                        icon: 'success',
-                        timer: 5000,
-
-                        willClose: function() {
-                            $('#table-data')
-                                .DataTable()
-                                .ajax
-                                .reload(null, false);
-
-                            $('#formUpdate form')[0].reset();
-
-                            proformaInvoiceId = '';
-                            contractId = '';
-                            unitId = '';
-
-                            $('#formUpdate').modal('hide');
-                        }
-                    });
-                },
-
-                error: function(xhr, status, error) {
+                if (!result.isConfirmed) {
                     enableButton();
-
-                    const errorMessage =
-                        xhr.responseJSON?.message ?? error;
-
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Oops...',
-                        text: errorMessage
-                    });
+                    return;
                 }
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+
+                    success: function(response) {
+                        Swal.fire({
+                            title: response.title,
+                            text: response.message,
+                            icon: 'success',
+                            timer: 5000,
+
+                            willClose: function() {
+                                $('#table-data')
+                                    .DataTable()
+                                    .ajax
+                                    .reload(null, false);
+
+                                $('#formUpdate form')[0].reset();
+
+                                proformaInvoiceId = '';
+                                contractId = '';
+                                unitId = '';
+
+                                $('#formUpdate').modal('hide');
+                            }
+                        });
+                    },
+
+                    error: function(xhr, status, error) {
+                        enableButton();
+
+                        const errorMessage =
+                            xhr.responseJSON?.message ?? error;
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: errorMessage
+                        });
+                    }
+                });
             });
         });
 

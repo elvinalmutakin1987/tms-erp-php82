@@ -1,0 +1,118 @@
+<style>
+    #formModal .modal-body {
+        overflow-y: auto !important;
+        max-height: calc(100vh - 160px);
+        scroll-behavior: auto;
+    }
+</style>
+
+<!-- search modal -->
+<div class="modal" id="formModal" aria-labelledby="formModalLabel" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable modal-fullscreen-md-down">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-header">
+            </div>
+            <div class="modal-body">
+                <form enctype="multipart/form-data" onsubmit="disableButton()">
+                    @csrf
+                    <input type="hidden" name="request_token" id="request_token">
+                    <div class="row">
+                        <div class="col">
+                            <div class="col-md-12 mb-2">
+                                <label for="invoice_id" class="form-label">Invoice</label>
+                                <select class="form-select select-select" id="invoice_id" name="invoice_id">
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="client_name" class="form-label">Client</label>
+                                <input type="hidden" id="client_vendor_id" name="client_vendor_id">
+                                <input type="text" class="form-control" id="client_name" name="client_name" readonly>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="invoice_date" class="form-label">Date</label>
+                                <input type="text" class="form-control" id="invoice_date" name="invoice_date"
+                                    readonly>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="due_date" class="form-label">Due Date</label>
+                                <input type="text" class="form-control" id="due_date" name="due_date" readonly>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="grand_total" class="form-label">Grand Total</label>
+                                <input type="text" class="form-control" id="grand_total" name="grand_total" readonly>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="balance" class="form-label">Balance</label>
+                                <input type="text" class="form-control" id="balance" name="balance" readonly>
+                            </div>
+                        </div>
+                        <div class="col">
+
+                            <div class="col-md-12 mb-2">
+                                <label for="date" class="form-label">Date</label>
+                                <input type="text" class="form-control datepicker" id="date" name="date"
+                                    value="{{ date('Y-m-d') }}">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="total" class="form-label">Total</label>
+                                <input type="hidden" class="form-control" id="total" name="total">
+                                <input type="text" class="form-control" id="total_" name="total_">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="bank" class="form-label">Bank</label>
+                                <select class="form-select select-select" id="bank" name="bank">
+                                    <option value="" selected disabled></option>
+                                    @foreach ($bank as $d => $value)
+                                        <option value="{{ $value }}">{{ $value }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="bank_account" class="form-label">Account</label>
+                                <input type="text" class="form-control" id="bank_account" name="bank_account">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="bank_receipt" class="form-label">Receipt With</label>
+                                <select class="form-select select-select" id="bank_receipt" name="bank_receipt">
+                                    <option value="" selected disabled></option>
+                                    @foreach ($bank_tms as $d => $value)
+                                        <option value="{{ $value['bank'] }} - {{ $value['account'] }}">
+                                            {{ $value['bank'] }} - {{ $value['account'] }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="ref_no" class="form-label">Ref No.</label>
+                                <input type="text" class="form-control" id="ref_no" name="ref_no">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="notes" class="form-label">Notes</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <label for="payment_path" class="form-label">Attachment</label>
+                                <input class="form-control" type="file" id="payment_path" name="payment_path">
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <div class="col" id="div-file">
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <div class="d-md-flex d-grid align-items-center gap-1">
+                    <button type="button" class="btn btn-secondary saveButton" id="saveButton1" name="status"
+                        value="Draft">Draft</button>
+                    <button type="button" class="btn btn-success saveButton" id="saveButton2" name="status"
+                        value="Open">Save</button>
+                    <button type="button" class="btn btn-light" id="cancelButton">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- end search modal -->

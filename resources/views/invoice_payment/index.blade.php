@@ -99,6 +99,7 @@
         const saveButton2 = document.getElementById('saveButton2');
 
         var invoiceId = '';
+        var paymentId = '';
         var orderId = '';
         var vendorId = '';
         $(document).ready(function() {
@@ -217,43 +218,37 @@
                     type: 'GET',
                     success: function(response) {
                         $("#divSignPath").css('display', 'block');
-                        $('#modal-header').text('Edit Payment');
+                        $('#modal-header').html('Edit Payment - &nbsp; <b>' + response.data
+                            .payment_no + '</b>');
                         /*
                          * Select invoice
                          */
-                        const poId = response.data.purchase_order_id;
-                        const poText = response.purchase_order ? response
-                            .purchase_order.order_no :
+                        const invId = response.data.invoice_id;
+                        const invText = response.invoice ? response
+                            .invoice.invoice_no :
                             null;
 
-                        const $purchase_order = $("#purchase_order_id");
+                        const $invoice = $("#invoice_id");
 
                         initPurchaseRequisitionSelect2();
 
-                        if (poId) {
-                            const optionExists = $purchase_order.find('option').filter(
+                        if (invId) {
+                            const optionExists = $invoice.find('option').filter(
                                 function() {
-                                    return String(this.value) === String($purchase_order);
+                                    return String(this.value) === String($invoice);
                                 }).length > 0;
 
                             if (!optionExists) {
-                                const newOption = new Option(poText, poId, true, true);
-                                $purchase_order.append(newOption);
+                                const newOption = new Option(invText, invId, true, true);
+                                $invoice.append(newOption);
                             }
 
-                            $purchase_order.val(poId).trigger('change.select2');
+                            $invoice.val(invId).trigger('change.select2');
                         }
                         /* End */
 
-                        var inv_date = response.purchase_order.invoice_date ?
-                            dayjs(response.purchase_order.invoice_date) :
-                            dayjs();
 
-                        var due_date = response.purchase_order.due_date ?
-                            dayjs(response.purchase_order.due_date) :
-                            dayjs();
-
-                        var date = response.data.date ?
+                        var inv_date = response.data.date ?
                             dayjs(response.data.date) :
                             dayjs();
 
@@ -267,27 +262,27 @@
 
                         var due_date = inv_date.add(topDays, 'day');
 
-                        $('#vendor_name').val(response.client_vendor.name);
+                        $('#client_name').val(response.client_vendor.name);
                         $('#bank').val(response.data.bank).trigger('change');
                         $('#bank_account').val(response.data.bank_account);
-                        $('#bank_sender').val(response.data.bank_sender + ' - ' + response.data
-                            .bank_account_sender).trigger('change');
+                        $('#bank_receipt').val(response.data.bank_receipt + ' - ' + response
+                            .data
+                            .bank_account_receipt).trigger('change');
                         $('#ref_no').val(response.data.ref_no);
                         $('#client_vendor_id').val(response.data.client_vendor_id);
-                        $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
                         $('#due_date').val(due_date.format('YYYY-MM-DD'));
-                        $('#date').val(date.format('YYYY-MM-DD'));
-                        $('#grand_total').val(numbro(response.purchase_order.grand_total)
+                        $('#invoice_date').val(inv_date.format('YYYY-MM-DD'));
+                        $('#grand_total').val(numbro(response.invoice.grand_total)
                             .format({
                                 thousandSeparated: true,
                                 mantissa: 0
                             }));
-                        $('#grand_total_').val(response.purchase_order.grand_total);
-                        $('#balance').val(numbro(response.purchase_order.balance).format({
+                        $('#grand_total_').val(response.invoice.grand_total);
+                        $('#balance').val(numbro(response.invoice.balance).format({
                             thousandSeparated: true,
                             mantissa: 0
                         }));
-                        $('#balance_').val(response.purchase_order.balance);
+                        $('#balance_').val(response.invoice.balance);
                         $('#total_').val(numbro(response.data.total)
                             .format({
                                 thousandSeparated: true,
@@ -306,7 +301,7 @@
 
             $(document).on('click', '.detailButton', function() {
                 $('#modal-detail-header').text('Detail Payment');
-                let url = '{{ route('purchaseorderpayment.get_detail', ':_id') }}';
+                let url = '{{ route('invoicepayment.get_detail', ':_id') }}';
                 url = url.replace(':_id', $(this).data('id'));
                 $.ajax({
                     url: url,
@@ -340,45 +335,15 @@
                 $('#table-data').DataTable().draw();
             });
 
-            // $('#vendor').select2({
-            //     theme: "bootstrap-5",
-            //     width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
-            //         'w-100') ? '100%' : 'style'),
-            //     placeholder: 'All Vendor',
-            //     allowClear: true,
-            //     selectOnClose: false,
-            //     minimumResultsForSearch: 0,
-            //     ajax: {
-            //         url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
-            //         dataType: 'json',
-            //         delay: 250,
-            //         data: function(params) {
-            //             return {
-            //                 term: params.term || '',
-            //                 page: params.page || 1
-            //             };
-            //         },
-            //         processResults: function(data) {
-            //             return {
-            //                 results: data.results || data
-            //             };
-            //         },
-            //         cache: true
-            //     }
-            // }).on('change', function() {
-            //     $('#table-data').DataTable().draw();
-            // });
-
-            $('#vendor').select2({
+            $('#client').select2({
                 theme: 'bootstrap-5',
                 width: '100%',
-                placeholder: 'All Vendor',
+                placeholder: 'All Client',
                 allowClear: true,
                 selectOnClose: false,
                 minimumResultsForSearch: 0,
-
                 ajax: {
-                    url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
+                    url: '{{ route('invoicepayment.get_client_vendor') }}',
                     dataType: 'json',
                     delay: 250,
                     cache: true,
@@ -434,7 +399,7 @@
                     },
 
                     error: function(xhr, status, error) {
-                        console.error('Gagal mengambil data vendor:', {
+                        console.error('Gagal mengambil data client:', {
                             status: status,
                             error: error,
                             response: xhr.responseText
@@ -459,7 +424,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('purchaseorderpayment.destroy', ':_id') }}';
+                    let url = '{{ route('invoicepayment.destroy', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -501,11 +466,11 @@
 
             formData.append('status', status);
 
-            let url = '{{ route('purchaseorderpayment.store') }}';
+            let url = '{{ route('invoicepayment.store') }}';
             let type = 'POST';
 
             if (paymentId) {
-                url = '{{ route('purchaseorderpayment.update', ':_id') }}'.replace(':_id', paymentId);
+                url = '{{ route('invoicepayment.update', ':_id') }}'.replace(':_id', paymentId);
                 formData.append('_method', 'PUT');
             }
 
@@ -569,7 +534,7 @@
                 const isEdit = paymentId != '';
                 if (!isEdit) {
                     $.ajax({
-                        url: '{{ route('purchaseorderpayment.get_prev_no') }}',
+                        url: '{{ route('invoicepayment.get_prev_no') }}',
                         type: 'GET',
                         success: function(response) {
                             const titleText = 'Add Payment';
@@ -607,7 +572,6 @@
             $("#request_token").val("");
             $('#vendor_name').val("");
             $('#client_vendor_id').val("");
-            $('#invoice_date').val("");
             $('#ref_no').val("");
             $('#due_date').val("");
             $('#date').val("");
@@ -625,7 +589,7 @@
             $("#bank_sender")
                 .val(null)
                 .trigger('change');
-            $("#purchase_order_id")
+            $("#invoice_id")
                 .val(null)
                 .empty()
                 .trigger('change');
@@ -646,7 +610,7 @@
 
         function gen_select2() {
             $('.select-select')
-                .not('#purchase_order_id')
+                .not('#invoice_id')
                 .each(function() {
                     const $el = $(this);
 
@@ -691,7 +655,7 @@
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let url = '{{ route('purchaseorderpayment.destroy_file', ':_id') }}';
+                    let url = '{{ route('invoicepayment.destroy_file', ':_id') }}';
                     url = url.replace(':_id', id);
                     $.ajax({
                         url: url,
@@ -871,29 +835,29 @@
         }
 
         function initPurchaseRequisitionSelect2() {
-            const $purchase_order = $('#purchase_order_id');
+            const $invoice = $('#invoice_id');
 
-            if (!$purchase_order.length) {
+            if (!$invoice.length) {
                 return;
             }
 
-            const selectedValue = $purchase_order.val();
+            const selectedValue = $invoice.val();
 
-            if ($purchase_order.hasClass('select2-hidden-accessible')) {
-                $purchase_order.select2('destroy');
+            if ($invoice.hasClass('select2-hidden-accessible')) {
+                $invoice.select2('destroy');
             }
 
-            $purchase_order.off('.purchaseOrder');
+            $invoice.off('.invoice');
 
-            $purchase_order.select2({
+            $invoice.select2({
                 theme: "bootstrap-5",
-                width: $('#purchase_order_id').data('width') ? $('#purchase_order_id').data('width') : (
-                    $('#purchase_order_id').hasClass('w-100') ? '100%' : 'style'),
+                width: $('#invoice_id').data('width') ? $('#invoice_id').data('width') : (
+                    $('#invoice_id').hasClass('w-100') ? '100%' : 'style'),
                 placeholder: '',
                 allowClear: true,
                 selectOnClose: false,
                 ajax: {
-                    url: '{{ route('purchaseorderpayment.get_purchase_order') }}',
+                    url: '{{ route('invoicepayment.get_invoice') }}',
                     dataType: 'json',
                     data: function(params) {
                         return {
@@ -915,12 +879,12 @@
                 }, 0);
             }).on('select2:select', function(e) {
                 const selectedData = e.params.data;
-                $('#vendor_name').val(selectedData.vendor);
+                $('#client_name').val(selectedData.client);
                 $('#bank').val(selectedData.bank).trigger('change');
                 $('#bank_account').val(selectedData.bank_account);
                 $('#client_vendor_id').val(selectedData.client_vendor_id);
-                var inv_date = selectedData.invoice_date ?
-                    dayjs(selectedData.invoice_date) :
+                var inv_date = selectedData.date ?
+                    dayjs(selectedData.date) :
                     dayjs();
 
                 var topDays = selectedData.top ?
@@ -946,10 +910,10 @@
             });
 
             if (selectedValue) {
-                $purchase_order.val(selectedValue).trigger('change.select2');
+                $invoice.val(selectedValue).trigger('change.select2');
             }
 
-            $purchase_order.on('select2:open.purchaseOrder', function() {
+            $invoice.on('select2:open.invoice', function() {
                 setTimeout(function() {
                     const search = document.querySelector(
                         '.select2-container--open .select2-search__field'
@@ -965,7 +929,7 @@
                 }, 0);
             });
 
-            $purchase_order.on('change.purchaseOrder', function() {
+            $invoice.on('change.invoice', function() {
                 orderId = $(this).val();
             });
         }

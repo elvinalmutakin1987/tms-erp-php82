@@ -236,6 +236,12 @@ class PurchaseOrderPaymentController extends Controller
                 if ($request->status == 'Open') {
                     $purchase_order_payment->status = 'Done';
                     $purchase_order_payment->save();
+
+                    /**
+                     * Buat check status bayarnya
+                     */
+                    $purchase_order = Purchase_order::find($request->purchase_order_id);
+                    $this->check_payment($purchase_order);
                 }
             }
 
@@ -415,7 +421,28 @@ class PurchaseOrderPaymentController extends Controller
      */
     public function destroy(Purchase_order_payment $purchase_order_payment)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $filePath = $purchase_order_payment->payment_path;
+            if ($filePath && Storage::disk('public')->exists($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+            $purchase_order = Purchase_order::find($purchase_order_payment->purchase_order_id);
+            $purchase_order_payment->delete();
+            $this->check_payment($purchase_order);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Deleted!',
+                'message' => 'Data Deleted'
+            ], 200);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
     }
 
     /**

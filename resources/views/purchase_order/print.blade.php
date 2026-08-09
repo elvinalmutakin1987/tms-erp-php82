@@ -58,7 +58,7 @@
         font-family: "Times New Roman", Times, serif;
         margin: 0;
         padding: 0;
-        font-size: 12pt;
+        font-size: 11pt;
         color: #000;
     }
 
@@ -68,6 +68,7 @@
         border-spacing: 0;
         margin: 0;
         padding: 0;
+        font-size: 11pt;
         table-layout: fixed;
     }
 
@@ -323,43 +324,43 @@
 
                     <table class="table-p2h">
                         <colgroup>
-                            <col style="width: 5%;">
-                            <col style="width: 10%;">
-                            <col style="width: 10%;">
-                            <col style="width: 30%;">
-                            <col style="width: 15%;">
-                            <col style="width: 15%;">
-                            <col style="width: 15%;">
+                            <col style="width: 7%;">
+                            <col style="width: 7%;">
+                            <col style="width: 8%;">
+                            <col style="width: 45%;">
+                            <col style="width: 12%;">
+                            <col style="width: 12%;">
+                            <col style="width: 12%;">
                         </colgroup>
 
                         <thead>
                             <tr>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 7%;">
                                     Item
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 7%">
                                     Qty
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 10%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
                                     Unit
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 30%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 45%">
                                     Description
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 12%">
                                     Price IDR
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 12%">
                                     Discount
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 12%">
                                     Total IDR
                                 </th>
                             </tr>
@@ -413,7 +414,7 @@
                                             {!! nl2br(e($purchase_order->notes)) !!}
                                         </td>
 
-                                        <td style="text-align: left; border: 1px solid #000;">
+                                        <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                             <b>Sub Total</b>
                                         </td>
 
@@ -423,7 +424,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td style="text-align: left; border: 1px solid #000;">
+                                        <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                             <b>Discount</b>
                                         </td>
 
@@ -433,7 +434,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td style="text-align: left; border: 1px solid #000;">
+                                        <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                             <b>VAT ({{ $system_setting['tax'] ?? 10 }}%)</b>
                                         </td>
 
@@ -443,7 +444,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td style="text-align: left; border: 1px solid #000;">
+                                        <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                             <b>Grand Total</b>
                                         </td>
 
@@ -458,7 +459,7 @@
                                             {!! nl2br(e($purchase_order->notes)) !!}
                                         </td>
 
-                                        <td style="text-align: left; border: 1px solid #000;">
+                                        <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                             <b>Grand Total</b>
                                         </td>
 
@@ -601,43 +602,43 @@
 
                     <table class="table-p2h">
                         <colgroup>
-                            <col style="width: 5%;">
-                            <col style="width: 10%;">
-                            <col style="width: 10%;">
-                            <col style="width: 30%;">
-                            <col style="width: 15%;">
-                            <col style="width: 15%;">
-                            <col style="width: 15%;">
+                            <col style="width: 7%;">
+                            <col style="width: 7%;">
+                            <col style="width: 8%;">
+                            <col style="width: 45%;">
+                            <col style="width: 12%;">
+                            <col style="width: 12%;">
+                            <col style="width: 12%;">
                         </colgroup>
 
                         <thead>
                             <tr>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 7%">
                                     Item
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 7%">
                                     Qty
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 10%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 8%">
                                     Unit
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 30%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 45%">
                                     Description
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 12%">
                                     Price IDR
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 12%">
                                     Discount
                                 </th>
                                 <th
-                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 15%">
+                                    style="text-align: center; border: 1px solid #000; background-color: #d9ecff; width: 12%">
                                     Total IDR
                                 </th>
                             </tr>
@@ -654,17 +655,17 @@
                                         {!! nl2br(e($purchase_order->notes)) !!}
                                     </td>
 
-                                    <td style="text-align: left; border: 1px solid #000;">
+                                    <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                         <b>Sub Total</b>
                                     </td>
 
-                                    <td style="text-align: right; border: 1px solid #000;">
+                                    <td style="text-align: right; border: 1px solid #000; ">
                                         {{ $purchase_order->total ? Number::format($purchase_order->total, precision: 0) : '' }}
                                     </td>
                                 </tr>
 
                                 <tr>
-                                    <td style="text-align: left; border: 1px solid #000;">
+                                    <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                         <b>Discount</b>
                                     </td>
 
@@ -674,7 +675,7 @@
                                 </tr>
 
                                 <tr>
-                                    <td style="text-align: left; border: 1px solid #000;">
+                                    <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                         <b>VAT ({{ $system_setting['tax'] ?? 10 }}%)</b>
                                     </td>
 
@@ -684,7 +685,7 @@
                                 </tr>
 
                                 <tr>
-                                    <td style="text-align: left; border: 1px solid #000;">
+                                    <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                         <b>Grand Total</b>
                                     </td>
 
@@ -699,7 +700,7 @@
                                         {!! nl2br(e($purchase_order->notes)) !!}
                                     </td>
 
-                                    <td style="text-align: left; border: 1px solid #000;">
+                                    <td style="text-align: left; border: 1px solid #000; font-size:10pt !important">
                                         <b>Grand Total</b>
                                     </td>
 
@@ -717,7 +718,8 @@
 @endif
 
 @if (!in_array($purchase_order->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']))
-    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;" class="avoid-break">
+    <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12pt !important"
+        class="avoid-break">
         <tr>
             <td style="border: none;" colspan="{{ $approvalStepCount + 2 }}">
                 <div>
@@ -733,7 +735,7 @@
                     Approved By,
                 </div>
 
-                <div style="height: 95px;"></div>
+                <div style="height: 80px;"></div>
 
                 <div style="min-height: 35px;">
                     {{ $purchase_order->client_vendor->name ?? '' }}
@@ -745,7 +747,7 @@
                     Prepared By,
                 </div>
 
-                <div style="height: 95px; text-align: center;">
+                <div style="height: 80px; text-align: center;">
                     @if ($purchase_order->user->sign_path)
                         <img src="{{ public_path('storage/' . $purchase_order->user->sign_path) }}" alt="Signature"
                             style="
@@ -779,7 +781,7 @@
                                 ->first();
                         @endphp
 
-                        <div style="height: 95px; text-align: center;">
+                        <div style="height: 80px; text-align: center;">
                             @if ($d->user->sign_path)
                                 <img src="{{ public_path('storage/' . $d->user->sign_path) }}" alt="Signature"
                                     style="

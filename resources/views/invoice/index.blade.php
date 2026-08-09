@@ -81,6 +81,7 @@
                                         <th width="10">No</th>
                                         <th>Invoice No.</th>
                                         <th>Client</th>
+                                        <th>Contract No.</th>
                                         <th>Periode</th>
                                         <th>Grand Total</th>
                                         <th>Status</th>
@@ -168,6 +169,12 @@
                     {
                         data: 'client',
                         name: 'client',
+                        orderable: true,
+                        searchable: true
+                    },
+                    {
+                        data: 'contract_no',
+                        name: 'contract_no',
                         orderable: true,
                         searchable: true
                     },
@@ -764,29 +771,30 @@
         });
 
         $(document).off('click.updateButton').on('click.updateButton', '.updateButton', function() {
-            proformaInvoiceId = $(this).data('id');
+            invoiceId = $(this).data('id');
 
             $('#modal-update-header').text('Update Progress');
-            $('#id').val(proformaInvoiceId);
+            $('#id').val(invoiceId);
 
-            let url = '{{ route('proformainvoice.show', ':_id') }}';
-            url = url.replace(':_id', proformaInvoiceId);
+            let url = '{{ route('invoice.show', ':_id') }}';
+            url = url.replace(':_id', invoiceId);
 
             $.ajax({
                 url: url,
                 type: 'GET',
                 success: function(response) {
                     $('#modal-update-header').html(
-                        'Update Progress -&nbsp;<b>' + response.proforma_no + '</b>'
+                        'Update Progress -&nbsp;<b>' + response.data.invoice_no + '</b>'
                     );
                     $("#update_contract_no").val(response.contract_no);
-                    $("#update_unit").val(response.unit);
-                    $("#cut_off_date").val(response.proforma_invoice.cut_off_date);
-                    $("#consolidation_date").val(response.proforma_invoice.consolidation_date);
-                    $("#progress_claim_date").val(response.proforma_invoice.progress_claim_date);
-                    $("#ops_received_date").val(response.proforma_invoice.ops_received_date);
-                    $("#prof_inv_app_date").val(response.proforma_invoice.prof_inv_app_date);
-                    $("#cic_request_date").val(response.proforma_invoice.cic_request_date);
+                    $("#cic_created_date").val(response.data.cic_created_date);
+                    $("#cic_received_date").val(response.data.cic_received_date);
+                    $("#inv_date").val(response.data.inv_date);
+                    $("#inv_create_date").val(response.data.inv_create_date);
+                    $("#cic_send_date").val(response.data.cic_send_date);
+                    $("#cic_ready_to_pick_date").val(response.data.cic_ready_to_pick_date);
+                    $("#cic_pick_up_date").val(response.data.cic_pick_up_date);
+                    $("#inv_send_date").val(response.data.inv_send_date);
                 },
                 error: function() {
                     alert('Error fetching data');
@@ -794,7 +802,7 @@
             });
         });
 
-        $('.saveButton').off('click.saveProforma').on('click.saveProforma', function() {
+        $('.saveButton').off('click.saveInvoice').on('click.saveInvoice', function() {
             const statusValue = $(this).val();
             const formElement = $('#formModal').find('form')[0];
             const formData = new FormData(formElement);
@@ -875,23 +883,23 @@
             }
         });
 
-        $('.saveUpdateButton').off('click.updateProforma').on('click.updateProforma', function() {
+        $('.saveUpdateButton').off('click.updateInvoice').on('click.updateInvoice', function() {
             const statusValue = $(this).val();
             const formElement = $('#formUpdate').find('form')[0];
             const formData = new FormData(formElement);
 
-            let url = '{{ route('proformainvoice.store') }}';
+            let url = '{{ route('invoice.store') }}';
 
             formData.append('status', statusValue);
 
-            if (proformaInvoiceId !== '') {
-                url = '{{ route('proformainvoice.update_progress', ':_id') }}'
-                    .replace(':_id', proformaInvoiceId);
+            if (invoiceId !== '') {
+                url = '{{ route('invoice.update_progress', ':_id') }}'
+                    .replace(':_id', invoiceId);
 
                 formData.append('_method', 'PUT');
             }
 
-            function submitProformaProgress() {
+            function submitInvoiceProgress() {
                 $.ajax({
                     url: url,
                     type: 'POST',
@@ -914,7 +922,7 @@
 
                                 $('#formUpdate form')[0].reset();
 
-                                proformaInvoiceId = '';
+                                invoiceId = '';
                                 contractId = '';
                                 unitId = '';
 
@@ -938,7 +946,7 @@
                 });
             }
 
-            if (statusValue === 'Done' || statusValue === 'CIC Approval') {
+            if (statusValue === 'Done') {
                 Swal.fire({
                     title: 'Are you sure?',
                     icon: 'warning',
@@ -949,13 +957,13 @@
                     cancelButtonText: 'Cancel'
                 }).then(function(result) {
                     if (result.isConfirmed) {
-                        submitProformaProgress();
+                        submitInvoiceProgress();
                     } else {
                         enableButton();
                     }
                 });
             } else {
-                submitProformaProgress();
+                submitInvoiceProgress();
             }
         });
 

@@ -347,35 +347,6 @@
                 $('#table-data').DataTable().draw();
             });
 
-            // $('#vendor').select2({
-            //     theme: "bootstrap-5",
-            //     width: $('#vendor').data('width') ? $('#vendor').data('width') : ($('#vendor').hasClass(
-            //         'w-100') ? '100%' : 'style'),
-            //     placeholder: 'All Vendor',
-            //     allowClear: true,
-            //     selectOnClose: false,
-            //     minimumResultsForSearch: 0,
-            //     ajax: {
-            //         url: '{{ route('purchaseorderpayment.get_client_vendor') }}',
-            //         dataType: 'json',
-            //         delay: 250,
-            //         data: function(params) {
-            //             return {
-            //                 term: params.term || '',
-            //                 page: params.page || 1
-            //             };
-            //         },
-            //         processResults: function(data) {
-            //             return {
-            //                 results: data.results || data
-            //             };
-            //         },
-            //         cache: true
-            //     }
-            // }).on('change', function() {
-            //     $('#table-data').DataTable().draw();
-            // });
-
             $('#vendor').select2({
                 theme: 'bootstrap-5',
                 width: '100%',

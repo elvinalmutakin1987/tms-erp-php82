@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreignId('checked_by')->nullable()->constrained('users')->nullOnDelete();
             $table->string('bank')->nullable();
             $table->string('bank_account', 50)->nullable();
-            $table->string('bank_sender')->nullable();
-            $table->string('bank_account_sender', 50)->nullable();
+            $table->string('bank_receipt')->nullable();
+            $table->string('bank_account_receipt', 50)->nullable();
             $table->string('payment_no', 30)->nullable();
             $table->string('type', 30)->nullable(); //Down Payment, Balance Payment
             $table->string('ref_no', 30)->nullable();

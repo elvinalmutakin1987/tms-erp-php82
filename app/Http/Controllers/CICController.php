@@ -308,6 +308,7 @@ class CICController extends Controller
                 $lockProforma_invoice->cic_path = $directory . '/' . $filename;
                 $lockProforma_invoice->real_name = $realname;
             }
+            $lockProforma_invoice->status = $request->status;
             $invoice = Invoice::where('id', $lockProforma_invoice->invoice_id)->lockForUpdate()->first();
             if ($invoice) {
                 if ($request->cut_off_date) $invoice->cut_off_date = $request->cut_off_date;
@@ -378,7 +379,6 @@ class CICController extends Controller
             $json_data = [
                 'proforma_no' => $proforma_invoice->proforma_no,
             ];
-
             return response()->view($view, compact(
                 'proforma_invoice',
                 'contract',

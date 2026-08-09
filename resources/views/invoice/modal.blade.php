@@ -26,10 +26,6 @@
                             <label for="date" class="form-label">Date</label>
                             <input type="text" class="form-control datepicker" id="date" name="date">
                         </div>
-                        {{-- <div class="col">
-                            <label for="due_date" class="form-label">Due Date</label>
-                            <input type="text" class="form-control datepicker" id="due_date" name="due_date">
-                        </div> --}}
                     </div>
                     <div class="row mb-3">
                         <div class="col">

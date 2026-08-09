@@ -318,7 +318,7 @@
 
     @media print {
         @page {
-            size: A4 !important;
+            size: A5 landscape !important;
             /* leave a bit more bottom space for footer page number */
             margin: 14px 14px 20px 14px !important;
         }
@@ -508,7 +508,7 @@
                                     @php
                                         $approval_status = $approval_status
                                             ->where('approval_flow_id', $approval_flow->id)
-                                            ->where('approvable_id', $purchase_requisition->id)
+                                            ->where('approvable_id', $purchase_order_payment->id)
                                             ->where('step', $d->order)
                                             ->first();
                                     @endphp

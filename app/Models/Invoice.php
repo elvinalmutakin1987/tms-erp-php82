@@ -111,4 +111,9 @@ class Invoice extends Model implements Auditable
     {
         return $this->hasMany(Invoice_detail::class);
     }
+
+    public function invoice_payment(): HasMany
+    {
+        return $this->hasMany(Invoice_payment::class);
+    }
 }

@@ -129,7 +129,7 @@ class InvoiceController extends Controller
                      * - hanya muncul jika status Approved
                      * - hanya untuk superadmin atau user dengan permission proforma_invoice.update_progress
                      */
-                    if (($item->status === 'Approved' && $canAccess('invoice.update_progress')) || Auth::user()->hasRole('superadmin')) {
+                    if (($item->contract_id !== null && $item->status === 'Approved' && $canAccess('invoice.update_progress')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
                             <li>
                                 <a class="dropdown-item updateButton" href="#" data-bs-toggle="modal" data-bs-target="#formUpdate" data-id="' . $item->id . '">
@@ -143,15 +143,21 @@ class InvoiceController extends Controller
                      * - hanya muncul jika status bukan Done
                      * - hanya untuk superadmin atau user dengan permission proforma_invoice.delete
                      */
-                    if (($item->status !== 'Done' && $canAccess('invoice.delete')) || Auth::user()->hasRole('superadmin')) {
+                    $cannotDeleteStatuses = [
+                        'Done',
+                        'Approval',
+                        'Approved',
+                    ];
+                    if ((!in_array($item->status, $cannotDeleteStatuses, true) && $canAccess('invoice.delete')) || Auth::user()->hasRole('superadmin')) {
                         $button .= '
-                            <li>
-                                <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
-                                    Delete
-                                </a>
-                            </li>
-                        ';
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">
+                                Delete
+                            </a>
+                        </li>
+                    ';
                     }
+
                     $button .= '
                                 </ul>
                             </div>
@@ -160,7 +166,7 @@ class InvoiceController extends Controller
                     return $button;
                 })
                 ->addColumn('contract_no', function ($item) {
-                    return $item->contract->contract_no ?? '';
+                    return $item->contract->contract_no ?? 'Direct Invoice';
                 })
                 ->addColumn('client', function ($item) {
                     return $item->client_vendor->name ?? '';
@@ -284,7 +290,11 @@ class InvoiceController extends Controller
                 }
             } else {
                 if ($request->status == 'Open') {
-                    $invoice->status = 'Approved';
+                    if ($invoice->contract_id === null) {
+                        $invoice->status = 'Done';
+                    } else {
+                        $invoice->status = 'Approved';
+                    }
                     $invoice->save();
                 }
             }
@@ -311,10 +321,13 @@ class InvoiceController extends Controller
     {
         $invoice_detail = $invoice->invoice_detail;
         $client = Client_vendor::find($invoice->client_vendor_id);
+        $contract_no = $invoice?->contract_id !== null ? $invoice->contract->contract_no : null;
         return response()->json([
             'success' => true,
             'message' => 'Data showed',
             'data' => $invoice,
+            'invoice' => $invoice,
+            'contract_no' => $contract_no,
             'invoice_detail' => $invoice_detail,
             'client' => $client
         ], 200);
@@ -416,7 +429,11 @@ class InvoiceController extends Controller
                 }
             } else {
                 if ($request->status == 'Open') {
-                    $lockInvoice->status = 'Approved';
+                    if ($lockInvoice->contract_id === null) {
+                        $lockInvoice->status = 'Done';
+                    } else {
+                        $lockInvoice->status = 'Approved';
+                    }
                     $lockInvoice->save();
                 }
             }
@@ -869,6 +886,52 @@ class InvoiceController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => $client_vendor,
+            ], 200);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => $th->getMessage()
+            ], 400);
+        }
+    }
+
+    /**
+     * Untuk update progress invoice
+     * Langsung update ke proforma invoice nya
+     */
+
+    public function update_progress(Request $request, Invoice $invoice)
+    {
+        DB::beginTransaction();
+        try {
+            if ($request->cic_created_date) $invoice->cic_created_date = $request->cic_created_date;
+            if ($request->cic_received_date) $invoice->cic_received_date = $request->cic_received_date;
+            if ($request->inv_date) $invoice->inv_date = $request->inv_date;
+            if ($request->inv_create_date) $invoice->inv_create_date = $request->inv_create_date;
+            if ($request->cic_send_date) $invoice->cic_send_date = $request->cic_send_date;
+            if ($request->cic_ready_to_pick_date) $invoice->cic_ready_to_pick_date = $request->cic_ready_to_pick_date;
+            if ($request->cic_pick_up_date) $invoice->cic_pick_up_date = $request->cic_pick_up_date;
+            if ($request->inv_send_date) $invoice->inv_send_date = $request->inv_send_date;
+            $invoice->status = $request->status;
+            $invoice->save();
+            $invoice_proforma_invoice = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->get();
+            foreach ($invoice_proforma_invoice as $ipi) {
+                $proforma_invoice = Proforma_invoice::find($ipi->proforma_invoice_id);
+                if ($request->cic_created_date) $proforma_invoice->cic_created_date = $request->cic_created_date;
+                if ($request->cic_received_date) $proforma_invoice->cic_received_date = $request->cic_received_date;
+                if ($request->inv_date) $proforma_invoice->inv_date = $request->inv_date;
+                if ($request->inv_create_date) $proforma_invoice->inv_create_date = $request->inv_create_date;
+                if ($request->cic_send_date) $proforma_invoice->cic_send_date = $request->cic_send_date;
+                if ($request->cic_ready_to_pick_date) $proforma_invoice->cic_ready_to_pick_date = $request->cic_ready_to_pick_date;
+                if ($request->cic_pick_up_date) $proforma_invoice->cic_pick_up_date = $request->cic_pick_up_date;
+                if ($request->inv_send_date) $proforma_invoice->inv_send_date = $request->inv_send_date;
+                $proforma_invoice->save();
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'title' => 'Saved!',
+                'message' => 'Data saved!'
             ], 200);
         } catch (\Throwable $th) {
             return response()->json([

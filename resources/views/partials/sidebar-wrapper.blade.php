@@ -363,7 +363,7 @@
 
                                  @if ($can('invoice_payment'))
                                      <li>
-                                         <a href="auth-basic-signin.html">
+                                         <a href="{{ route('invoicepayment.index') }}">
                                              <i class='bx bx-radio-circle'></i>Invoice Payment
                                          </a>
                                      </li>

@@ -318,3 +318,134 @@
         @endforeach
     </table>
 @endempty
+
+@isset($invoice->contract_id)
+    <table style="border-collapse:separate; border-spacing:0;">
+        <tr>
+            <td style="vertical-align: top" colspan="3">
+                <b>
+                    <h6 style="border-bottom: 1px solid #000; display: inline-block;">
+                        Document Progress
+                    </h6>
+                </b>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Cut Off Date
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->cut_off_date ? Carbon::parse($invoice->cut_off_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Konsolidasi Data TMS & CMD
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->consolidation_date ? Carbon::parse($invoice->consolidation_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Kirim Progress Claim Approval
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->progress_claim_date ? Carbon::parse($invoice->progress_claim_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Data Terima Dari OPS
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->ops_received_date ? Carbon::parse($invoice->ops_received_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Proforma Invoice Approved
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->prof_inv_app_date ? Carbon::parse($invoice->prof_inv_app_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Minta CIC
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->cic_request_date ? Carbon::parse($invoice->cic_request_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Pembuatan CIC
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->cic_created_date ? Carbon::parse($invoice->cic_created_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Tanggal Invoice
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->inv_date ? Carbon::parse($invoice->inv_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Pembuatan Invoice
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->inv_create_date ? Carbon::parse($invoice->inv_create_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Kirim CIC Ke KPC
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->cic_send_date ? Carbon::parse($invoice->cic_send_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Informasi CIC Bisa Diambil
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->cic_ready_to_pick_date ? Carbon::parse($invoice->cic_ready_to_pick_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                CIC Diambil TMS
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->cic_pick_up_date ? Carbon::parse($invoice->cic_pick_up_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                Invoice Terima KPC
+            </td>
+            <td> &nbsp;:&nbsp;</td>
+            <td>
+                {{ $invoice->inv_send_date ? Carbon::parse($invoice->inv_send_date)->translatedFormat('d F Y') : '-' }}
+            </td>
+        </tr>
+    </table>
+@endisset
