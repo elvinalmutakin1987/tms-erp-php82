@@ -30,7 +30,19 @@
                         </div>
                         <div class="col">
                             <label for="date" class="form-label">Date</label>
-                            <input type="text" class="form-control datepicker" id="date" name="date">
+                            <input type="text" class="form-control datepicker" id="date" name="date"
+                                value="{{ date('Y-m-d') }}">
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col">
+                            <label for="department" class="form-label">Department</label>
+                            <select class="form-select select-select" id="department" name="department">
+                                @foreach ($department as $key => $value)
+                                    <option value="{{ $value }}"
+                                        {{ $value === 'Procurement' ? 'selected' : '' }}>{{ $value }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col">
                             <label for="urgency" class="form-label">Abbreviation</label>

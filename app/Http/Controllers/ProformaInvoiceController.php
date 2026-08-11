@@ -62,7 +62,12 @@ class ProformaInvoiceController extends Controller
                     $proforma_invoice = $proforma_invoice->where('periode', 'like', '%-' . request()->month);
                 }
             }
-            $proforma_invoice = $proforma_invoice->orderBy('id', 'desc')->get();
+            $proforma_invoice = $proforma_invoice
+                ->whereHas('contract.service', function ($query) {
+                    $query->where('type', '!=', 'Survey');
+                })
+                ->orderBy('id', 'desc')
+                ->get();
             $user = Auth::user();
             $permissionNames = [
                 'proforma_invoice.edit',
@@ -183,7 +188,11 @@ class ProformaInvoiceController extends Controller
                 ->rawColumns(['action'])
                 ->make();
         }
-        $contract = Contract::where('status', 'Active')->get();
+        $contract = Contract::where('status', 'Active')
+            ->whereHas('service', function ($query) {
+                $query->where('type', '!=', 'Survey');
+            })
+            ->get();
         $breadcrum = [
             'module' => 'Equipment',
             'route-module' => null,
@@ -324,6 +333,7 @@ class ProformaInvoiceController extends Controller
                 $proforma_invoice->proforma_invoice_detail()->create([
                     'proforma_invoice_id' => $proforma_invoice->id,
                     'contract_fmf_id' => $gen_proforma['contract_fmf']->id,
+                    'contract_id' => $contract->id,
                     'item_no' => '',
                     'service_item' => 'Fix Monthly Fee',
                     'value' => $gen_proforma['contract_fmf']->value,
@@ -1158,14 +1168,12 @@ class ProformaInvoiceController extends Controller
      */
     public function print(Request $request, Proforma_invoice $proforma_invoice)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+            ->where('department', 'Equipment')->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
         $contract = Contract::find($proforma_invoice->contract_id);
-        // $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
-        // $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
-        // $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
         $contract_rate = Contract_rate::where('contract_id', $proforma_invoice->contract_id)->get();
         $contract_fmf = Contract_fmf::where('contract_id', $proforma_invoice->contract_id)->get();
         $unit_target = Unit_target::where('contract_id', $proforma_invoice->contract_id)->get();
@@ -1267,14 +1275,12 @@ class ProformaInvoiceController extends Controller
 
     public function export_pdf(Request $request, Proforma_invoice $proforma_invoice)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+            ->where('department', 'Equipment')->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
         $contract = Contract::find($proforma_invoice->contract_id);
-        // $contract_rate = Contract_rate::find($proforma_invoice->contract_rate_id);
-        // $contract_fmf = Contract_fmf::find($proforma_invoice->contract_fmf_id);
-        // $unit_target = Unit_target::find($proforma_invoice->unit_target_id);
         $contract_rate = Contract_rate::where('contract_id', $proforma_invoice->contract_id)->get();
         $contract_fmf = Contract_fmf::where('contract_id', $proforma_invoice->contract_id)->get();
         $unit_target = Unit_target::where('contract_id', $proforma_invoice->contract_id)->get();

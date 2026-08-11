@@ -1,154 +1,381 @@
 @php
     use Illuminate\Support\Number;
+    use Carbon\Carbon;
+    use App\Models\Approval_flow;
+    use App\Models\Approval_status;
+    use App\Models\Approval_process;
+    use App\Models\Approval_step;
+    use App\Models\Proforma_invoice;
+    use App\Models\Invoice_proforma_invoice;
+    use App\Models\Invoice;
+    use App\Models\Proforma_invoice_detail;
+    use App\Models\Contract;
+    use App\Models\Contract_rate;
+    use App\Models\Contract_fmf;
+    use App\Models\Unit_target;
+    use App\Models\Unit;
+    use App\Models\Maintenance;
+    use App\Models\Daily_report;
+    use App\Models\Daily_report_detail;
 @endphp
-<table class="table mb-0" id="tableItem">
-    <thead class="table-dark">
-        <tr>
-            <th scope="col" style="width:3%">#</th>
-            <th scope="col">Item</th>
-            <th scope="col" style="width:10%">Qty</th>
-            <th scope="col" style="width:13%">Price</th>
-            <th scope="col" style="width:13%">Discount</th>
-            <th scope="col" style="width:13%">Amount</th>
-            <th scope="col" style="width:2%">Action</th>
-        </tr>
-    </thead>
-    <tbody id="tbody">
-        <tr class="fixed-row">
-            <td class="p-1 align-middle">
 
-            </td>
-            <td class="p-1 align-middle">
-                <input type="text" class="form-control" id="service_" name="service_">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="hidden" class="form-control" id="_qty" name="_qty">
-                <input type="text" class="form-control" id="_qty_" name="_qty_" style="text-align: right;">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="hidden" class="form-control" id="_price" name="_price">
-                <input type="text" class="form-control" id="_price_" name="_price_" style="text-align: right;">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="hidden" class="form-control" id="_discount_item" name="_discount_item">
-                <input type="text" class="form-control" id="_discount_item_" name="_discount_item_"
-                    style="text-align: right;">
-            </td>
-            <td class="p-1 align-middle">
-                <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
-                <input type="text" class="form-control" id="_amount_" name="_amount_" readonly
-                    style="text-align: right;">
-            </td>
-            <td class="p-1 align-middle" style="width:2%">
-                <div class="row row-cols-auto g-3">
-                    <div class="col">
-                        <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"
-                            id="addItemButton"></button>
-                    </div>
-                </div>
-            </td>
-        </tr>
-
-        @foreach ($invoice->invoice_detail as $d)
+@if (!$invoice->contract_id)
+    <table class="table mb-0" id="tableItem">
+        <thead class="table-dark">
             <tr>
-                <td class="p-1 align-middle row-number">
-                    {{ $loop->iteration }}
+                <th scope="col" style="width:3%">#</th>
+                <th scope="col">Item</th>
+                <th scope="col" style="width:10%">Qty</th>
+                <th scope="col" style="width:13%">Price</th>
+                <th scope="col" style="width:13%">Discount</th>
+                <th scope="col" style="width:13%">Amount</th>
+                <th scope="col" style="width:2%">Action</th>
+            </tr>
+        </thead>
+        <tbody id="tbody">
+            <tr class="fixed-row">
+                <td class="p-1 align-middle">
+
                 </td>
                 <td class="p-1 align-middle">
-                    <input type="text" class="form-control" id="service" name="service[]" readonly
-                        value="{{ $d->service_item }}">
+                    <input type="text" class="form-control" id="service_" name="service_">
                 </td>
                 <td class="p-1 align-middle">
-                    <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
-                        value="{{ $d?->qty ?? 0 }}">
-                    <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                        value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '0' }}" style="text-align: right;">
+                    <input type="hidden" class="form-control" id="_qty" name="_qty">
+                    <input type="text" class="form-control" id="_qty_" name="_qty_" style="text-align: right;">
                 </td>
                 <td class="p-1 align-middle">
-                    <input type="hidden" class="form-control" id="price" name="price[]" readonly
-                        value="{{ $d?->price ?? 0 }}">
-                    <input type="text" class="form-control" id="__price" name="__price[]" readonly
-                        value="{{ $d->price ? Number::format($d->price, precision: 0) : '0' }}"
+                    <input type="hidden" class="form-control" id="_price" name="_price">
+                    <input type="text" class="form-control" id="_price_" name="_price_" style="text-align: right;">
+                </td>
+                <td class="p-1 align-middle">
+                    <input type="hidden" class="form-control" id="_discount_item" name="_discount_item">
+                    <input type="text" class="form-control" id="_discount_item_" name="_discount_item_"
                         style="text-align: right;">
                 </td>
                 <td class="p-1 align-middle">
-                    <input type="hidden" class="form-control" id="discount_item" name="discount_item[]" readonly
-                        value="{{ $d?->discount_item ?? 0 }}">
-                    <input type="text" class="form-control" id="__discount_item" name="__discount_item[]"
-                        readonly
-                        value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '0' }}"
+                    <input type="hidden" class="form-control" id="_amount" name="_amount" readonly>
+                    <input type="text" class="form-control" id="_amount_" name="_amount_" readonly
                         style="text-align: right;">
                 </td>
-                <td class="p-1 align-middle">
-                    <input type="hidden" class="form-control amount" name="amount[]" readonly
-                        value="{{ $d?->amount ?? 0 }}">
-                    <input type="text" class="form-control" name="__amount[]" readonly
-                        value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '0' }}"
-                        style="text-align: right;">
-                </td>
-                <td class="text-center p-1 align-middle">
+                <td class="p-1 align-middle" style="width:2%">
                     <div class="row row-cols-auto g-3">
                         <div class="col">
-                            <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
-                                id="removeItemButton"></button>
+                            <button type="button" class="btn btn-lg btn-primary bx bx-plus mr-1"
+                                id="addItemButton"></button>
                         </div>
                     </div>
                 </td>
             </tr>
-        @endforeach
-    </tbody>
-    <tfoot>
-        <tr>
-            <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Total</b>
-            </td>
-            <td scope="col" class="p-1 align-middle">
-                <input type="hidden" id="total" name="total" readonly value="{{ $invoice?->total ?? 0 }}">
-                <input type="text" class="form-control" id="total_" name="total_" readonly
-                    value="{{ $invoice->total ? Number::format($invoice->total, precision: 0) : '' }}"
-                    style="text-align: right;">
-            </td>
-            <td scope="col" class="p-1 align-middle"></td>
-        </tr>
-        <tr>
-            <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Discount</b>
-            </td>
-            <td scope="col" class="p-1 align-middle">
-                <input type="hidden" id="discount" name="discount" readonly
-                    value="{{ $invoice?->discount ?? 0 }}">
-                <input type="text" class="form-control" id="discount_" name="discount_"
-                    value="{{ $invoice->discount ? Number::format($invoice->discount, precision: 0) : '' }}"
-                    style="text-align: right;">
-            </td>
-            <td scope="col" class="p-1 align-middle"></td>
-        </tr>
-        <tr>
-            <td scope="col" colspan="5" class="text-end p-1 align-middle">
-                <input class="form-check-input" type="checkbox" value="" id="check_tax" name="check_tax">
-                &nbsp;
-                <b>Tax</b>
-            </td>
-            <td scope="col" class="p-1 align-middle">
-                <input type="hidden" id="tax" name="tax" readonly value="{{ $invoice?->tax ?? 0 }}">
-                <input type="text" class="form-control" id="tax_" name="tax_" readonly
-                    value="{{ $invoice->tax ? Number::format($invoice->tax, precision: 0) : '' }}"
-                    style="text-align: right;">
-            </td>
-            <td scope="col" class="p-1 align-middle"></td>
-        </tr>
-        <tr>
-            <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Grand
-                    Total</b></td>
-            <td scope="col" class="p-1 align-middle">
-                <input type="hidden" id="grand_total" name="grand_total" readonly
-                    value="{{ $invoice?->grand_total ?? 0 }}">
-                <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
-                    value="{{ $invoice->grand_total ? Number::format($invoice->grand_total, precision: 0) : '' }}"
-                    style="text-align: right;">
-            </td>
-            <td scope="col" class="p-1 align-middle"></td>
-        </tr>
-    </tfoot>
-</table>
+
+            @foreach ($invoice->invoice_detail as $d)
+                <tr>
+                    <td class="p-1 align-middle row-number">
+                        {{ $loop->iteration }}
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="text" class="form-control" id="service" name="service[]" readonly
+                            value="{{ $d->service_item }}">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
+                            value="{{ $d?->qty ?? 0 }}">
+                        <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
+                            value="{{ $d->qty ? Number::format($d->qty, precision: 0) : '0' }}"
+                            style="text-align: right;">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="price" name="price[]" readonly
+                            value="{{ $d?->price ?? 0 }}">
+                        <input type="text" class="form-control" id="__price" name="__price[]" readonly
+                            value="{{ $d->price ? Number::format($d->price, precision: 0) : '0' }}"
+                            style="text-align: right;">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control" id="discount_item" name="discount_item[]"
+                            readonly value="{{ $d?->discount_item ?? 0 }}">
+                        <input type="text" class="form-control" id="__discount_item" name="__discount_item[]"
+                            readonly
+                            value="{{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : '0' }}"
+                            style="text-align: right;">
+                    </td>
+                    <td class="p-1 align-middle">
+                        <input type="hidden" class="form-control amount" name="amount[]" readonly
+                            value="{{ $d?->amount ?? 0 }}">
+                        <input type="text" class="form-control" name="__amount[]" readonly
+                            value="{{ $d->amount ? Number::format($d->amount, precision: 0) : '0' }}"
+                            style="text-align: right;">
+                    </td>
+                    <td class="text-center p-1 align-middle">
+                        <div class="row row-cols-auto g-3">
+                            <div class="col">
+                                <button type="button" class="btn btn-lg btn-danger bx bx-trash mr-1 delete-row  "
+                                    id="removeItemButton"></button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+        </tbody>
+        <tfoot>
+            <tr>
+                <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Total</b>
+                </td>
+                <td scope="col" class="p-1 align-middle">
+                    <input type="hidden" id="total" name="total" readonly
+                        value="{{ $invoice?->total ?? 0 }}">
+                    <input type="text" class="form-control" id="total_" name="total_" readonly
+                        value="{{ $invoice->total ? Number::format($invoice->total, precision: 0) : '' }}"
+                        style="text-align: right;">
+                </td>
+                <td scope="col" class="p-1 align-middle"></td>
+            </tr>
+            <tr>
+                <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Discount</b>
+                </td>
+                <td scope="col" class="p-1 align-middle">
+                    <input type="hidden" id="discount" name="discount" readonly
+                        value="{{ $invoice?->discount ?? 0 }}">
+                    <input type="text" class="form-control" id="discount_" name="discount_"
+                        value="{{ $invoice->discount ? Number::format($invoice->discount, precision: 0) : '' }}"
+                        style="text-align: right;">
+                </td>
+                <td scope="col" class="p-1 align-middle"></td>
+            </tr>
+            <tr>
+                <td scope="col" colspan="5" class="text-end p-1 align-middle">
+                    <input class="form-check-input" type="checkbox" value="" id="check_tax" name="check_tax">
+                    &nbsp;
+                    <b>Tax</b>
+                </td>
+                <td scope="col" class="p-1 align-middle">
+                    <input type="hidden" id="tax" name="tax" readonly value="{{ $invoice?->tax ?? 0 }}">
+                    <input type="text" class="form-control" id="tax_" name="tax_" readonly
+                        value="{{ $invoice->tax ? Number::format($invoice->tax, precision: 0) : '' }}"
+                        style="text-align: right;">
+                </td>
+                <td scope="col" class="p-1 align-middle"></td>
+            </tr>
+            <tr>
+                <td scope="col" colspan="5" class="text-end p-1 align-middle"><b>Grand
+                        Total</b></td>
+                <td scope="col" class="p-1 align-middle">
+                    <input type="hidden" id="grand_total" name="grand_total" readonly
+                        value="{{ $invoice?->grand_total ?? 0 }}">
+                    <input type="text" class="form-control" id="grand_total_" name="grand_total_" readonly
+                        value="{{ $invoice->grand_total ? Number::format($invoice->grand_total, precision: 0) : '' }}"
+                        style="text-align: right;">
+                </td>
+                <td scope="col" class="p-1 align-middle"></td>
+            </tr>
+        </tfoot>
+    </table>
+@else
+    <table class="table mb-0">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" style="width: 5%">#</th>
+                <th scope="col">Item</th>
+                <th scope="col" style="width: 10%; text-align: right">Qty</th>
+                <th scope="col" style="width: 13%; text-align: right">Price</th>
+                <th scope="col" style="width: 13%; text-align: right">Discount</th>
+                <th scope="col" style="width: 13%; text-align: right">Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            @isset($invoice->contract_id)
+                @if ($contract->service->type === 'Unit Rental' || $contract->service->type === 'Fuel Truck Rental')
+                    @foreach ($proforma_invoice as $pi)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>FIX MONTHLY FEE
+                                ({{ $pi->unit->vehicle_no ?? '-' }})
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format(1, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ $pi->price ? Number::format($pi->price, precision: 0) : 0 }}
+                            </td>
+                            <td style="text-align: right">
+                                0
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pi->total ?? 0, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                @elseif($contract->service->type === 'LCT')
+                    @foreach ($contract_rate as $rate)
+                        @php
+                            $proforma_invoice_id = $proforma_invoice->pluck('id');
+                            $qty = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('qty');
+                            $rate = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('rate');
+                            $amount = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_rate_id', $rate->id)
+                                ->sum('amount');
+                        @endphp
+                        <tr>
+                            <td>
+                                {{ $loop->iteration }}</td>
+                            <td>FIX MONTHLY FEE
+                                ({{ $pi->unit->vehicle_no ?? '-' }})
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($qty, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($rate ?? 0, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                0
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($amount ?? 0, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                @elseif($contract->service->type === 'Explosive Material Transport')
+                    @foreach ($contract_rate as $contractrate)
+                        @php
+                            $qty = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_rate_id', $contractrate->id)
+                                ->sum('qty');
+                            $rate = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_rate_id', $contractrate->id)
+                                ->sum('rate');
+                            $amount = 0;
+                            $amount = Proforma_invoice_detail::whereIn('proforma_invoice_id', $proforma_invoice_id)
+                                ->where('contract_rate_id', $contractrate->id)
+                                ->sum('amount');
+                        @endphp
+                        <tr>
+                            <td>
+                                {{ $loop->iteration }}</td>
+                            <td>FIX MONTHLY FEE
+                                {{ $contractrate->service_item ?? '-' }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($qty, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($rate ?? 0, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                0
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($amount ?? 0, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                @elseif($contract->service->type === 'Pallet')
+                    @php
+                        $proforma_invoice_detail = Proforma_invoice_detail::whereIn(
+                            'proforma_invoice_id',
+                            $proforma_invoice_id,
+                        )->get();
+                    @endphp
+                    @foreach ($proforma_invoice_detail as $pid)
+                        <tr>
+                            <td>
+                                {{ $loop->iteration }}</td>
+                            <td> {{ $pid?->service_item ?? '-' }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pid?->qty ?? 0, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pid->rate ?? 0, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                0
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pid?->amount ?? 0, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                @elseif($contract->service->type === 'Survey')
+                    @php
+                        $proforma_invoice_detail = Proforma_invoice_detail::whereIn(
+                            'proforma_invoice_id',
+                            $proforma_invoice_id,
+                        )->get();
+                    @endphp
+                    @foreach ($proforma_invoice_detail as $pid)
+                        <tr>
+                            <td>
+                                {{ $loop->iteration }}</td>
+                            <td> {{ $pid?->service_item ?? '-' }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pid?->qty ?? 0, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pid->rate ?? 0, 2) }}
+                            </td>
+                            <td style="text-align: right">
+                                0
+                            </td>
+                            <td style="text-align: right">
+                                {{ Number::format($pid?->amount ?? 0, 2) }}
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
+            @else
+                @foreach ($invoice->invoice_detail as $d)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>{{ $d->service_item }}</td>
+                        <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}
+                        </td>
+                        <td style="text-align: right">
+                            {{ $d->price ? Number::format($d->price, precision: 0) : 0 }}
+                        </td>
+                        <td style="text-align: right">
+                            {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : 0 }}</td>
+                        <td style="text-align: right">
+                            {{ $d->amount ? Number::format($d->amount, precision: 0) : 0 }}
+                        </td>
+                    </tr>
+                @endforeach
+            @endisset
+        </tbody>
+        <tfoot>
+            <tr>
+                <td style="text-align:right" colspan="5"><b>Total</b></td>
+                <td style="text-align:right">
+                    {{ $invoice->total ? Number::format($invoice->total, precision: 0) : 0 }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right" colspan="5"><b>Discount</b></td>
+                <td style="text-align:right">
+                    {{ $invoice->discount ? Number::format($invoice->discount, precision: 0) : 0 }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right" colspan="5"><b>Tax
+                        ({{ (int) $invoice?->tax === 0 ? 'Non PKP' : 'PKP' }})</b></td>
+                <td style="text-align:right">
+                    {{ $invoice->tax ? Number::format($invoice->tax, precision: 0) : 0 }}
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align:right" colspan="5"><b>Grand Total</b></td>
+                <td style="text-align:right">
+                    {{ $invoice->grand_total ? Number::format($invoice->grand_total, precision: 0) : 0 }}
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+@endif
 
 <script>
     (() => {

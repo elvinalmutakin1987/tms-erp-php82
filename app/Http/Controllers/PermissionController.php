@@ -7,6 +7,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
 class PermissionController extends Controller
 {
@@ -141,11 +142,15 @@ class PermissionController extends Controller
     {
         DB::beginTransaction();
         try {
-            $permission->load('roles');
-            foreach ($permission->roles as $role) {
-                $role->revokePermissionTo($permission);
-            }
+            // $permission->load('roles');
+            // foreach ($permission->roles as $role) {
+            //     $role->revokePermissionTo($permission);
+            // }
             $permission->delete();
+            $permission->roles()->detach();
+            $permission->users()->detach();
+            $permission->delete();
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
             return response()->json([
                 'success' => true,
                 'title' => 'Deleted!',

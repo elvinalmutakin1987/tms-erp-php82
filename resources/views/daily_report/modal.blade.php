@@ -17,7 +17,8 @@
                         </div>
                         <div class="col">
                             <label for="date" class="form-label">Date</label>
-                            <input type="text" class="form-control datepicker" id="date" name="date">
+                            <input type="text" class="form-control datepicker" id="date" name="date"
+                                value="{{ date('Y-m-d') }}">
                         </div>
                         <div class="col">
                             <label for="shift" class="form-label">Shift</label>

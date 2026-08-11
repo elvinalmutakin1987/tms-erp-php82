@@ -679,6 +679,7 @@
             </tr>
         </tbody>
     </table>
+
 @endif
 
 @empty(!$approval_process)

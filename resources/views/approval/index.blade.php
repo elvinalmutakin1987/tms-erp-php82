@@ -314,11 +314,15 @@
                             $('#table-data').DataTable().ajax.reload(null, false);
                             $('#formDetail').modal('hide');
                             $('#modal-detail-body').html("");
-                            $("#badge-approval-process").html(`
-                            <span class="badge bg-success" style="font-size: 13px">
-                                ${ response.approval_total }
-                            </span>
-                            `);
+                            if (response.approval_total > 0) {
+                                $("#badge-approval-process").html(`
+                                    <span class="badge bg-success" style="font-size: 13px">
+                                        ${ response.approval_total }
+                                    </span>
+                                `);
+                            } else {
+                                $("#badge-approval-process").html("");
+                            }
                         },
                         error: function(xhr, status, error) {
                             var errorMessage = xhr.responseJSON ? xhr.responseJSON

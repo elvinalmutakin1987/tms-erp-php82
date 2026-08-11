@@ -554,7 +554,8 @@ class PurchaseOrderPaymentController extends Controller
      */
     public function print(Request $request, Purchase_order_payment $purchase_order_payment)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order_payment')->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order_payment')
+            ->where('department', $purchase_order_payment->purchase_requisition->department)->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
@@ -616,7 +617,8 @@ class PurchaseOrderPaymentController extends Controller
 
     public function export_pdf(Request $request, Purchase_order_payment $purchase_order_payment)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order_payment')->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order_payment')
+            ->where('department', $purchase_order_payment->purchase_requisition->department)->first();
         $approval_step = $approval_flow  ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow  ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow  ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;

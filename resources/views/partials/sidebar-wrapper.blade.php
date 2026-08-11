@@ -229,7 +229,7 @@
                  <ul>
                      @if ($can('progress_claim'))
                          <li>
-                             <a href="app-emailbox.html">
+                             <a href="{{ route('progressclaim.index') }}">
                                  <i class='bx bx-radio-circle'></i>Progress Claim
                              </a>
                          </li>
@@ -374,6 +374,32 @@
                  </ul>
              </li>
          @endif
+
+         <li>
+             <a href="javascript:;" class="has-arrow">
+                 <div class="parent-icon">
+                     <i class="bx bx-chart"></i>
+                 </div>
+                 <div class="menu-title">Report</div>
+             </a>
+             <ul>
+                 <li>
+                     <a href="{{ route('report', ['t' => 'breakdown-summary']) }}">
+                         <i class='bx bx-radio-circle'></i>Unit Breakdown Summary
+                     </a>
+                 </li>
+                 <li>
+                     <a href="{{ route('report', ['t' => 'monitoring-invoice']) }}">
+                         <i class='bx bx-radio-circle'></i>Monitoring Invoice
+                     </a>
+                 </li>
+                 <li>
+                     <a href="{{ route('report', ['t' => 'monitoring-po']) }}">
+                         <i class='bx bx-radio-circle'></i>Monitoring PO
+                     </a>
+                 </li>
+             </ul>
+         </li>
 
 
          @if ($can('approval'))

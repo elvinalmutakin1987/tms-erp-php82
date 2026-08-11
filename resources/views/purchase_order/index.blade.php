@@ -324,6 +324,10 @@
                             .val(response.data.urgency)
                             .trigger('change');
 
+                        $("#department")
+                            .val(response.data.department)
+                            .trigger('change');
+
                         $("#request_token").val(response.data.request_token);
 
                         $("#div-file").html(response.html);
@@ -667,6 +671,10 @@
                 .trigger('change');
 
             $("#client_vendor_id")
+                .val(null)
+                .empty()
+                .trigger('change');
+            $("#department")
                 .val(null)
                 .empty()
                 .trigger('change');

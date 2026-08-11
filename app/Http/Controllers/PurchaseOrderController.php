@@ -170,13 +170,14 @@ class PurchaseOrderController extends Controller
         $uom = config('uom');
         $system_setting = config('system_setting');
         $job = config('job');
+        $department = config('department');
         $breadcrum = [
             'module' => 'Procurement',
             'route-module' => null,
             'sub-module' => 'Purchase Order',
             'route-sub-module' => 'purchaseorder.index',
         ];
-        return view('purchase_order.index', compact('breadcrum', 'uom', 'system_setting', 'job'));
+        return view('purchase_order.index', compact('breadcrum', 'uom', 'system_setting', 'department', 'job'));
     }
 
     /**
@@ -201,8 +202,8 @@ class PurchaseOrderController extends Controller
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             $type = $purchase_requisition?->type ?? 'General';
-            // $department = $purchase_requisition?->department ?? 'Procurement';
-            $department = 'Procurement';
+            $department = $purchase_requisition?->department ?? $request?->department ?? 'Procurement';
+            // $department = 'Procurement';
             $system_setting = config('system_setting');
             $data = array_merge(
                 $request->only([
@@ -407,8 +408,8 @@ class PurchaseOrderController extends Controller
             ]);
             $purchase_requisition = Purchase_requisition::find($request->purchase_requisition_id);
             $type = $purchase_requisition?->type ?? 'General';
-            // $department = $purchase_requisition?->department ?? 'Procurement';
-            $department = 'Procurement';
+            $department = $purchase_requisition?->department ?? $request?->department ?? 'Procurement';
+            //$department = 'Procurement';
             $system_setting = config('system_setting');
             $data = array_merge(
                 $request->only([
@@ -807,7 +808,8 @@ class PurchaseOrderController extends Controller
      */
     public function print(Request $request, Purchase_order $purchase_order)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')
+            ->where('department', $purchase_order->department)->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;
@@ -902,7 +904,8 @@ class PurchaseOrderController extends Controller
 
     public function export_pdf(Request $request, Purchase_order $purchase_order)
     {
-        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')->first();
+        $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Purchase_order')
+            ->where('department', $purchase_order->department)->first();
         $approval_step = $approval_flow ? Approval_step::where('approval_flow_id', $approval_flow->id)->orderBy('order', 'asc')->get() : null;
         $approval_process = $approval_flow ? Approval_process::where('approval_flow_id', $approval_flow->id)->get() : null;
         $approval_status = $approval_flow ? Approval_status::where('approval_flow_id', $approval_flow->id)->get() : null;

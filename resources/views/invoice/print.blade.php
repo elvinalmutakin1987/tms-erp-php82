@@ -1376,9 +1376,6 @@
     </tbody>
 </table>
 
-@if (!in_array($invoice->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']))
-@endif
-
 <script type="text/php">
     if (isset($pdf)) {
         $font = $fontMetrics->getFont("Helvetica", "normal");

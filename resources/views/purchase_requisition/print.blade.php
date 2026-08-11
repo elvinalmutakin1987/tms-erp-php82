@@ -400,7 +400,7 @@
         </tbody>
 
         @if ($loop->last)
-            <tfoot>
+            {{-- <tfoot>
                 <tr>
                     <td class="p-1 align-middle" style="text-align: right;" colspan="6">
                         <b>Total</b>
@@ -448,7 +448,44 @@
                         <br>
                     </td>
                 </tr>
-            </tfoot>
+            </tfoot> --}}
+
+            <tr>
+                <td class="p-1 align-middle" colspan="5" rowspan="{{ $purchase_requisition->tax != 0 ? 3 : 2 }}">
+                    Notes : <br>
+                    {!! $purchase_requisition->notes !!}
+                </td>
+
+                <td class="p-1 align-middle" style="text-align: right;  font-size:11px !important">
+                    <b>Discount</b>
+                </td>
+
+                <td class="p-1 align-middle" style="text-align: right;">
+                    {{ $purchase_requisition->discount ? Number::format($purchase_requisition->discount, precision: 0) : '' }}
+                </td>
+            </tr>
+
+            @if ($purchase_requisition->tax != 0)
+                <tr>
+                    <td class="p-1 align-middle" style="text-align: right;  font-size:11px !important">
+                        <b>Tax</b>
+                    </td>
+
+                    <td class="p-1 align-middle" style="text-align: right; ">
+                        {{ $purchase_requisition->tax ? Number::format($purchase_requisition->tax, precision: 0) : '' }}
+                    </td>
+                </tr>
+            @endif
+
+            <tr>
+                <td class="p-1 align-middle" style="text-align: right;  font-size:11px !important">
+                    <b>Grand Total</b>
+                </td>
+
+                <td class="p-1 align-middle" style="text-align: right;">
+                    {{ $purchase_requisition->grand_total ? Number::format($purchase_requisition->grand_total, precision: 0) : '' }}
+                </td>
+            </tr>
         @endif
     </table>
 
@@ -477,7 +514,7 @@
 
                         <tr>
                             <td style="border: none; text-align: center; vertical-align: top; padding: 10px;">
-                                <div style="height: 95px; text-align: center;">
+                                <div style="height: 50px; text-align: center;">
                                     @if ($purchase_requisition->user->sign_path)
                                         <img src="{{ public_path('storage/' . $purchase_requisition->user->sign_path) }}"
                                             alt="Signature"
@@ -510,7 +547,7 @@
                                                 ->where('step', $d->order)
                                                 ->first();
                                         @endphp
-                                        <div style="height: 95px; text-align: center;">
+                                        <div style="height: 50px; text-align: center;">
                                             {{-- @if ($approval_status)
                                                 @if ($approval_status->status == 'Open')
                                                     <div style="height: 95px; line-height: 95px;">

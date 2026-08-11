@@ -570,7 +570,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" style="width: 5px; vertical-align:middle">No.</th>
-                                <th scope="col">Item</th>
+                                <th scope="col" style="vertical-align:middle">Item</th>
                                 <th scope="col" style="width: 10%; vertical-align:middle">Unit</th>
                                 <th scope="col" style="width: 13%; vertical-align:middle">Rate (IDR)</th>
                                 <th scope="col" style="width: 8%; vertical-align:middle">Qty</th>
@@ -757,7 +757,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" style="width: 5px; vertical-align:middle">No.</th>
-                                <th scope="col">Item</th>
+                                <th scope="col" style="vertical-align:middle">Item</th>
                                 <th scope="col" style="width: 10%; vertical-align:middle">Unit</th>
                                 <th scope="col" style="width: 13%; vertical-align:middle">Rate (IDR)</th>
                                 <th scope="col" style="width: 8%; vertical-align:middle">Qty</th>
@@ -952,7 +952,7 @@
                         <thead>
                             <tr>
                                 <th scope="col" style="width: 5px; vertical-align:middle">No.</th>
-                                <th scope="col">Item</th>
+                                <th scope="col" style="vertical-align:middle">Item</th>
                                 <th scope="col" style="width: 10%; vertical-align:middle">Unit</th>
                                 <th scope="col" style="width: 15%; vertical-align:right">Rate</th>
                                 <th scope="col" style="width: 10%; vertical-align:right">Qty</th>

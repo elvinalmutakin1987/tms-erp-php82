@@ -42,6 +42,7 @@ return [
         'pi', //Untuk penomoran proforma invoice,
         'po-payment', //Untuk penomoran purchase order payment
         'inv-payment', //Untuk penomoran invoice payment,
+        'pro-invoice', //
         'pro-inv' //
     ],
 
@@ -121,6 +122,7 @@ return [
             'insp' => ResetPeriod::YEARLY->value,
             'po-payment' => ResetPeriod::YEARLY->value,
             'inv-payment' => ResetPeriod::YEARLY->value,
+            'pro-inv' => ResetPeriod::YEARLY->value,
             'pro-invoice' => ResetPeriod::YEARLY->value,
         ],
     ],

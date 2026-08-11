@@ -57,35 +57,6 @@ class P2hController extends Controller
             return DataTables::of($p2h)
                 ->addIndexColumn()
                 ->addColumn('action', function ($item) use ($canAccess) {
-                    // $button = '
-                    // <div class="col">
-                    //     <div class="dropdown">
-                    //         <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                    //             aria-expanded="false">Action</button>
-                    //         <ul class="dropdown-menu">
-                    //             <li>
-                    //                 <a class="dropdown-item exportPdfButton" href="' . route('p2h.export_pdf', $item->id) . '">Export PDF</a>
-                    //             </li>
-                    //             <li>
-                    //                 <a class="dropdown-item printButton" href="' . route('p2h.print', $item->id) . '" target="_blank">Print</a>
-                    //             </li>
-                    //             <li>
-                    //                 <a class="dropdown-item detailButton" href="#" data-bs-toggle="modal" data-bs-target="#formDetail"
-                    //                 data-id="' . $item->id . '">Detail</a>
-                    //             </li>
-                    //             <li>
-                    //                 <a class="dropdown-item editButton" href="#" data-bs-toggle="modal" data-bs-target="#formModal"
-                    //                 data-id="' . $item->id . '">Edit</a>
-                    //             </li>
-                    //             <li>
-                    //                 <a class="dropdown-item" href="#" onclick="delete_(\'' . $item->id . '\')">Delete</a>
-                    //             </li>
-                    //         </ul>
-                    //     </div>
-                    // </div>
-                    // ';
-                    // return $button;
-
                     $button = '
                         <div class="col">
                             <div class="dropdown">

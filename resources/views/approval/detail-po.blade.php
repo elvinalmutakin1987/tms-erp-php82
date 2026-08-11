@@ -29,7 +29,7 @@
                             {{ $purchase_order->purchase_requisition->department }} -
                             {{ $purchase_order->user->username }}
                         @else
-                            Direct PO
+                            Direct PO - {{ $purchase_order->department }} - {{ $purchase_order->user->username }}
                         @endif
                     </b>
                 </td>

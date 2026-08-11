@@ -36,6 +36,8 @@ use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoicePaymentController;
+use App\Http\Controllers\ProgressClaimController;
+use App\Http\Controllers\ReportController;
 use App\Models\Invoice;
 use Illuminate\Support\Facades\Storage;
 
@@ -813,6 +815,10 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('role_or_permission:superadmin|invoice')
         ->name('invoice.update_progress');
 
+    Route::get('invoice-export-file/{proforma_invoice}', [InvoiceController::class, 'export_file'])
+        ->middleware('role_or_permission:superadmin|invoice')
+        ->name('invoice.export_file');
+
     /**
      * Routenya CIC
      */
@@ -883,4 +889,51 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('invoicepayment-destroy-file/{invoice_payment}', [InvoicePaymentController::class, 'destroy_file'])
         ->middleware('role_or_permission:superadmin|invoice_payment')
         ->name('invoicepayment.destroy_file');
+
+    /**
+     * Routenya Progress Claim
+     */
+    Route::resource('progressclaim', ProgressClaimController::class)
+        ->parameters(['progressclaim' => 'proforma_invoice'])
+        ->middleware('role_or_permission:superadmin|progress_claim')
+        ->names('progressclaim');
+
+    Route::get('progressclaim-get-client-all', [ProgressClaimController::class, 'get_client_all'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.get_client_all');
+
+    Route::get('progressclaim-load-table-add', [ProgressClaimController::class, 'get_table_add'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.get_table_add');
+
+    Route::get('progressclaim-load-table-edit/{proforma_invoice}', [ProgressClaimController::class, 'get_table_edit'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.get_table_edit');
+
+    Route::get('progressclaim-print/{proforma_invoice}', [ProgressClaimController::class, 'print'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.print');
+
+    Route::get('progressclaim-export-pdf/{proforma_invoice}', [ProgressClaimController::class, 'export_pdf'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.export_pdf');
+
+    Route::get('progressclaim-check-available', [ProgressClaimController::class, 'check_proforma_invoice'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.check_proforma_invoice');
+
+    Route::get('progressclaim-get-detail/{proforma_invoice}', [ProgressClaimController::class, 'get_detail'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.get_detail');
+
+    Route::put('progressclaim-update-progress/{proforma_invoice}', [ProgressClaimController::class, 'update_progress'])
+        ->middleware('role_or_permission:superadmin|proforma_invoice')
+        ->name('progressclaim.update_progress');
+
+    /**
+     * Routenya Report
+     */
+    Route::get('report', [ReportController::class, 'index'])
+        ->middleware('role_or_permission:superadmin|report')
+        ->name('report');
 });

@@ -5,7 +5,6 @@
     use App\Models\Approval_status;
     use App\Models\Approval_process;
     use App\Models\Approval_step;
-    use App\Models\Invoice_proforma_invoice;
     use App\Models\Proforma_invoice;
     use App\Models\Proforma_invoice_detail;
     use App\Models\Contract;
@@ -16,6 +15,9 @@
     use App\Models\Maintenance;
     use App\Models\Daily_report;
     use App\Models\Daily_report_detail;
+
+    // $proforma_invoice_id = $invoice->proforma_invoice_id ?? null;
+
 @endphp
 <div class="row mb-2">
     <div class="col">
@@ -75,7 +77,7 @@
         {!! nl2br(e($invoice->notes)) !!}
     </div>
 </div>
-<div class="row mb-4">
+<div class="row mb-2">
     <div class="col">
         <table class="table mb-0">
             <thead class="table-dark">
@@ -242,12 +244,12 @@
                             <td style="text-align: right">{{ $d->qty ? Number::format($d->qty, precision: 0) : 0 }}
                             </td>
                             <td style="text-align: right">
-                                {{ $d->price ? Number::format($d->price, precision: 0) : 0 }}
+                                {{ $d->price ? Number::format($d->price, precision: 0) : 2 }}
                             </td>
                             <td style="text-align: right">
-                                {{ $d->discount_item ? Number::format($d->discount_item, precision: 0) : 0 }}</td>
+                                {{ $d->discount_item ? Number::format($d->discount_item, precision: 2) : 0 }}</td>
                             <td style="text-align: right">
-                                {{ $d->amount ? Number::format($d->amount, precision: 0) : 0 }}
+                                {{ $d->amount ? Number::format($d->amount, precision: 0) : 2 }}
                             </td>
                         </tr>
                     @endforeach
@@ -257,26 +259,26 @@
                 <tr>
                     <td style="text-align:right" colspan="5"><b>Total</b></td>
                     <td style="text-align:right">
-                        {{ $invoice->total ? Number::format($invoice->total, precision: 0) : 0 }}
+                        {{ $invoice->total ? Number::format($invoice->total, precision: 2) : 0 }}
                     </td>
                 </tr>
                 <tr>
                     <td style="text-align:right" colspan="5"><b>Discount</b></td>
                     <td style="text-align:right">
-                        {{ $invoice->discount ? Number::format($invoice->discount, precision: 0) : 0 }}
+                        {{ $invoice->discount ? Number::format($invoice->discount, precision: 2) : 0 }}
                     </td>
                 </tr>
                 <tr>
                     <td style="text-align:right" colspan="5"><b>Tax
                             ({{ (int) $invoice?->tax === 0 ? 'Non PKP' : 'PKP' }})</b></td>
                     <td style="text-align:right">
-                        {{ $invoice->tax ? Number::format($invoice->tax, precision: 0) : 0 }}
+                        {{ $invoice->tax ? Number::format($invoice->tax, precision: 2) : 0 }}
                     </td>
                 </tr>
                 <tr>
                     <td style="text-align:right" colspan="5"><b>Grand Total</b></td>
                     <td style="text-align:right">
-                        {{ $invoice->grand_total ? Number::format($invoice->grand_total, precision: 0) : 0 }}
+                        {{ $invoice->grand_total ? Number::format($invoice->grand_total, precision: 2) : 0 }}
                     </td>
                 </tr>
             </tfoot>
@@ -307,47 +309,6 @@
         @endphp
     </div>
 </div>
-
-@php
-    $invoice_proforma_invoice = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->get();
-@endphp
-
-@if ($invoice_proforma_invoice->count() > 0)
-    <table style="border-collapse:separate; border-spacing:0;" class="mb-4" width="25%">
-        <tr>
-            <td style="vertical-align: top" colspan="2">
-                <b>
-                    <h6 style="border-bottom: 1px solid #000; display: inline-block;">
-                        CIC
-                    </h6>
-                </b>
-            </td>
-        </tr>
-        <tr>
-            <td style="border-bottom: 1px solid #000;">Proforma Invoice</td>
-            <td style="border-bottom: 1px solid #000;">CIC</td>
-
-        </tr>
-        @foreach ($invoice_proforma_invoice as $ipi)
-            @php
-                $pro_invoice = Proforma_invoice::find($ipi->proforma_invoice_id);
-            @endphp
-            <tr>
-                <td>
-                    {{ $pro_invoice->proforma_no }}
-                </td>
-                <td>
-                    @if (!in_array($invoice->status, ['Draft', 'Open', 'Approval', 'Cancel', 'Received']) && $pro_invoice->cic_path != null)
-                        <a href="{{ route('invoice.export_file', $ipi->proforma_invoice_id) }}"
-                            target="_blank">{{ $pro_invoice->cic_number }}</a>
-                    @else
-                        {{ $pro_invoice->cic_number }}
-                    @endif
-                </td>
-            </tr>
-        @endforeach
-    </table>
-@endif
 
 @empty(!$approval_process)
     <table style="border-collapse:separate; border-spacing:0;" class="mb-4">

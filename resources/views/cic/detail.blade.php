@@ -660,6 +660,163 @@
             </tr>
         </tbody>
     </table>
+@elseif($contract->service->type == 'Survey')
+    @php
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+    @endphp
+    <h6 class="mb-2" style="display: inline-block;">
+        <table style="width:100%">
+            <tr>
+                <td>Client</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->client_vendor)->name }}
+                </td>
+            </tr>
+            <tr>
+                <td>Contract Type</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                </td>
+            </tr>
+            <tr>
+                <td>Progress Claim</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($startDate)->format('F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Starting Date</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($startDate)->format('d F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Closing Date</td>
+                <td style="width:5px">:</td>
+                <td>
+                    &nbsp;&nbsp;&nbsp;{{ Carbon::parse($endDate)->format('d F Y') }}
+                </td>
+            </tr>
+            <tr>
+                <td>Status</td>
+                <td style="width:5px"> &nbsp;&nbsp;&nbsp;:</td>
+                <td>
+                    &nbsp;&nbsp;
+                    @if ($proforma_invoice->status == 'Done')
+                        <span class="badge bg-success" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
+                    @elseif($proforma_invoice->status == 'Approval')
+                        <span class="badge bg-info" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
+                    @elseif($proforma_invoice->status == 'Open')
+                        <span class="badge bg-primary" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
+                    @elseif($proforma_invoice->status == 'Approved' || $proforma_invoice->status == 'Received')
+                        <span class="badge bg-warning" style="font-size: 13px">{{ $proforma_invoice->status }}</span>
+                    @else
+                        <span class="badge bg-secondary"
+                            style="font-size: 13px">{{ $proforma_invoice->status }}</span>
+                    @endif
+                </td>
+            </tr>
+        </table>
+    </h6>
+
+    <table class="table tableItem">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col" style="width: 5px">No.</th>
+                <th scope="col">Item</th>
+                <th scope="col" style="width: 30px">Unit</th>
+                <th scope="col" class="text-end">Rate</th>
+                <th scope="col" class="text-end">Estimation Contract Value</th>
+                <th scope="col" class="text-end">Total Previous Program Claims</th>
+                <th scope="col" class="text-end">Amount</th>
+                <th scope="col" class="text-end">PTD Amount</th>
+                <th scope="col" class="text-end">Remaining Contract</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{-- Ini untuk Fix Monthly Fee --}}
+            @php
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+                $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->where('year', $year)->first();
+                $fix_monthly_fee = $contract_fmf->value;
+                $fmf_qty = 1;
+                $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $contract_fmf->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->count();
+                $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $contract_fmf->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->sum('value');
+                $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                    ->where('contract_fmf_id', $contract_fmf->id)
+                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                    ->sum('value');
+                $total_amount = 0;
+                $total_amount_ptd = 0;
+
+            @endphp
+            {{-- end --}}
+            {{-- Ini untuk hitung biaya trip nya, dari contract rate --}}
+            <tr>
+                <td>
+                    1
+                </td>
+                <td>
+                    Fix Monthly Fee
+                </td>
+                <td>
+                    Month
+                </td>
+                <td class="text-end">
+                    {{ Number::format($fix_monthly_fee) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($contract?->value) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($fmf_amount_ptd) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($fix_monthly_fee) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($fmf_amount_ptd + $fix_monthly_fee) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format($contract?->value - ($fmf_amount_ptd + $fix_monthly_fee)) }}
+                </td>
+            </tr>
+
+            @php
+                $total_amount += $fix_monthly_fee * $fmf_qty;
+                $total_amount_ptd += $fmf_amount_ptd + $fix_monthly_fee * $fmf_qty;
+            @endphp
+
+            {{-- end --}}
+            <tr>
+                <td colspan="6" class="text-end">
+                    <b>TOTAL</b>
+                </td>
+                <td class="text-end">
+                    <b> {{ Number::format($fix_monthly_fee) }}</b>
+                </td>
+                <td class="text-end">
+                    <b>{{ Number::format($fmf_amount_ptd + $fix_monthly_fee) }}</b>
+                </td>
+                <td class="text-end">
+                    <b>{{ Number::format($contract?->value - ($fmf_amount_ptd + $fix_monthly_fee)) }}</b>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 @endif
 
 @empty(!$approval_process)

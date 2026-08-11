@@ -15,6 +15,9 @@ use App\Models\Approval_step;
 use App\Models\Contract;
 use App\Models\Contract_fmf;
 use App\Models\Contract_rate;
+use App\Models\Invoice;
+use App\Models\Invoice_payment;
+use App\Models\Invoice_proforma_invoice;
 use App\Models\Proforma_invoice;
 use App\Models\Purchase_order;
 use App\Models\Purchase_order_payment;
@@ -114,13 +117,11 @@ class ApprovalController extends Controller
                         $proforma_invoice = Proforma_invoice::find($item->approvable_id);
                         return $proforma_invoice->proforma_no ?? '';
                     } else if ($item->approval_flow->approvable_model == 'App\Models\Invoice') {
-                        // $invoice = Invoice::find($item->approvable_id);
-                        // return $invoice->invoice_no ?? '';
-                        return true;
+                        $invoice = Invoice::find($item->approvable_id);
+                        return $invoice->invoice_no ?? '';
                     } else {
-                        // $invoice_payment = Invoice_payment::find($item->approvable_id);
-                        // return $invoice_payment->payment_no ?? '';
-                        return true;
+                        $invoice_payment = Invoice_payment::find($item->approvable_id);
+                        return $invoice_payment->payment_no ?? '';
                     }
                 })
                 ->addColumn('type', function ($item) {
@@ -241,9 +242,16 @@ class ApprovalController extends Controller
                 $contract_rate = Contract_rate::where('contract_id', $contract->id)->first();
                 $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->first();
                 $unit_target = Unit_target::where('contract_id', $contract->id)->where('unit_id', $proforma_invoice->unit_id)->first();
-                $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
-                    ->where('department', 'Equipment')
-                    ->first();
+                if ($contract->service->type === 'Survey') {
+                    $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+                        ->where('department', 'Survey')
+                        ->first();
+                } else {
+                    $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Proforma_invoice')
+                        ->where('department', 'Equipment')
+                        ->first();
+                }
+
                 $approval_process = $approval_flow
                     ? Approval_process::where('approval_flow_id', $approval_flow->id)
                     ->where('approvable_id', $proforma_invoice->id)
@@ -256,6 +264,42 @@ class ApprovalController extends Controller
                 $view = 'approval.detail-pi';
                 $compact = compact(
                     'proforma_invoice',
+                    'contract',
+                    'contract_rate',
+                    'contract_fmf',
+                    'unit_target',
+                    'approval_process',
+                    'year',
+                    'month'
+                );
+            } else if ($approvable_model == 'Invoice') {
+                $invoice = Invoice::find($id);
+                $invoice = Invoice::find($invoice->id);
+                $invoice_proforma_invoice = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->get();
+                $proforma_invoice_id = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->pluck('proforma_invoice_id');
+                $proforma_invoice = Proforma_invoice::whereIn('id', $proforma_invoice_id)->get() ?? collect([]);
+                $contract = Contract::find($invoice->contract_id) ?? collect([]);
+                $contract_rate = Contract_rate::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+                $contract_fmf = Contract_fmf::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+                $unit_target = Unit_target::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+                $approval_flow = Approval_flow::where('approvable_model', 'App\Models\Invoice')
+                    ->where('department', 'Finance')
+                    ->first();
+                $approval_process = $approval_flow
+                    ? Approval_process::where('approval_flow_id', $approval_flow->id)
+                    ->where('approvable_id', $invoice->id)
+                    ->get()
+                    : null;
+                $periode = $invoice->periode;
+                $exp_periode = explode("-", $periode);
+                $year = $exp_periode[0];
+                $month = $exp_periode[1];
+                $view = 'approval.detail-inv';
+                $compact = compact(
+                    'invoice',
+                    'proforma_invoice',
+                    'proforma_invoice_id',
+                    'invoice_proforma_invoice',
                     'contract',
                     'contract_rate',
                     'contract_fmf',

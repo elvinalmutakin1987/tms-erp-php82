@@ -20,6 +20,7 @@ use App\Models\Invoice;
 use App\Models\Invoice_proforma_invoice;
 use App\Models\Service;
 use App\Models\Service_item;
+use App\Models\Sys_setting;
 use Illuminate\Http\Request;
 use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
@@ -35,6 +36,8 @@ use CleaniqueCoders\RunningNumber\Contracts\Presenter;
 use Spatie\Permission\Models\Permission;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Services\ApprovalService;
+use setasign\Fpdi\Fpdi;
+use Symfony\Component\Process\Process;
 
 class InvoiceController extends Controller
 {
@@ -357,8 +360,6 @@ class InvoiceController extends Controller
             $system_setting = config('system_setting');
             $data = array_merge(
                 $request->only([
-                    'client_vendor_id',
-                    'date',
                     'notes',
                     'total',
                     'tax',
@@ -376,7 +377,7 @@ class InvoiceController extends Controller
             $lockInvoice = Invoice::where('id', $invoice->id)->lockForUpdate()->first();
             $lockInvoice->update($data);
             $lockInvoice->invoice_detail()->delete();
-            $lockInvoice->periode = Carbon::parse($lockInvoice->date)->format('Y-m');
+            // $lockInvoice->periode = Carbon::parse($lockInvoice->date)->format('Y-m');
             if ($request->filled('service')) {
                 $details = [];
                 foreach ($request->input('service', []) as $i => $service_item) {
@@ -860,10 +861,29 @@ class InvoiceController extends Controller
     public function get_table_edit(Request $request, Invoice $invoice)
     {
         try {
+            $invoice = Invoice::find($invoice->id);
+            $invoice_proforma_invoice = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->get();
+            $proforma_invoice_id = Invoice_proforma_invoice::where('invoice_id', $invoice->id)->pluck('proforma_invoice_id');
+            $proforma_invoice = Proforma_invoice::whereIn('id', $proforma_invoice_id)->get() ?? collect([]);
+            $contract = Contract::find($invoice->contract_id) ?? collect([]);
+            $contract_rate = Contract_rate::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+            $contract_fmf = Contract_fmf::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
+            $unit_target = Unit_target::where('contract_id', $invoice->contract_id)->get() ?? collect([]);
             $view = 'invoice.table-edit';
             $system_setting = config('system_setting');
             $invoice_detail = $invoice->invoice_detail;
-            $html = view($view, compact('invoice', 'invoice_detail', 'system_setting'))->render();
+            $html = view($view, compact(
+                'invoice',
+                'proforma_invoice',
+                'proforma_invoice_id',
+                'invoice_proforma_invoice',
+                'contract',
+                'contract_rate',
+                'contract_fmf',
+                'unit_target',
+                'invoice_detail',
+                'system_setting'
+            ))->render();
             return response()->json([
                 'success' => true,
                 'html' => $html,
@@ -938,6 +958,225 @@ class InvoiceController extends Controller
                 'success' => false,
                 'message' => $th->getMessage()
             ], 400);
+        }
+    }
+
+    /**
+     * export file
+     */
+    public function export_file(Request $request, Proforma_invoice $proforma_invoice)
+    {
+        try {
+            $sys_setting = Sys_setting::where('description', 'loc_ttd_siboro')->first();
+            $path = public_path(
+                'storage/' . $proforma_invoice->cic_path
+            );
+
+            if (!file_exists($path)) {
+                abort(404, 'File not found.');
+            }
+
+            $mimeType = mime_content_type($path);
+            $extension = strtolower(
+                pathinfo($path, PATHINFO_EXTENSION)
+            );
+
+            $fileName = $proforma_invoice->proforma_no . "__CIC" . $proforma_invoice->cic_number . ".pdf";
+            if ($mimeType === 'application/pdf' || $extension === 'pdf') {
+                $tempDirectory = storage_path('app/temp/pdf');
+                if (!is_dir($tempDirectory)) {
+                    mkdir(
+                        $tempDirectory,
+                        0755,
+                        true
+                    );
+                }
+                $normalizedPath =
+                    $tempDirectory
+                    . DIRECTORY_SEPARATOR
+                    . 'normalized_'
+                    . uniqid()
+                    . '.pdf';
+
+                $process = new Process([
+                    'qpdf',
+                    '--object-streams=disable',
+                    $path,
+                    $normalizedPath,
+                ]);
+
+                $process->setTimeout(60);
+
+                $process->run();
+
+                if (!$process->isSuccessful()) {
+
+                    if (file_exists($normalizedPath)) {
+                        unlink($normalizedPath);
+                    }
+
+                    throw new \RuntimeException(
+                        'Failed to normalize PDF: '
+                            . $process->getErrorOutput()
+                    );
+                }
+
+                $signaturePath = public_path(
+                    'assets/images/ttd_siboro.png'
+                );
+
+                if (!file_exists($signaturePath)) {
+
+                    if (file_exists($normalizedPath)) {
+                        unlink($normalizedPath);
+                    }
+
+                    abort(404, 'Signature not found.');
+                }
+
+                $pdf = new Fpdi();
+
+                $pageCount = $pdf->setSourceFile(
+                    $normalizedPath
+                );
+
+                $signatureWidth = (int) $sys_setting->val_1; //35; // mm
+                $bottomMargin = (int) $sys_setting->val_2; //10;   // mm
+
+                [$imageWidth, $imageHeight] =
+                    getimagesize($signaturePath);
+
+                if (!$imageWidth || !$imageHeight) {
+                    throw new \RuntimeException(
+                        'Invalid signature image.'
+                    );
+                }
+
+                $signatureHeight =
+                    $signatureWidth
+                    * ($imageHeight / $imageWidth);
+
+                for (
+                    $pageNo = 1;
+                    $pageNo <= $pageCount;
+                    $pageNo++
+                ) {
+
+
+                    $templateId = $pdf->importPage(
+                        $pageNo
+                    );
+
+
+                    $size = $pdf->getTemplateSize(
+                        $templateId
+                    );
+
+
+                    $pdf->AddPage(
+                        $size['orientation'],
+                        [
+                            $size['width'],
+                            $size['height'],
+                        ]
+                    );
+
+
+                    $pdf->useTemplate(
+                        $templateId
+                    );
+
+
+                    $x =
+                        ($size['width'] - $signatureWidth - (int) $sys_setting->val_3)
+                        / 2;
+
+
+                    //Val 3
+                    $y =
+                        $size['height']
+                        - $signatureHeight
+                        - $bottomMargin;
+
+                    $pdf->Image(
+                        $signaturePath,
+                        $x,
+                        $y,
+                        $signatureWidth
+                    );
+                }
+
+
+                $outputPath =
+                    $tempDirectory
+                    . DIRECTORY_SEPARATOR
+                    . 'signed_'
+                    . uniqid()
+                    . '.pdf';
+
+                $pdf->Output(
+                    'F',
+                    $outputPath
+                );
+
+                if (file_exists($normalizedPath)) {
+                    unlink($normalizedPath);
+                }
+
+                return response()
+                    ->file(
+                        $outputPath,
+                        [
+                            'Content-Type' =>
+                            'application/pdf',
+
+                            'Content-Disposition' =>
+                            'inline; filename="'
+                                . $fileName
+                                . '"',
+                        ]
+                    )
+                    ->deleteFileAfterSend(true);
+            }
+
+            /*
+    |--------------------------------------------------------------------------
+    | Non-PDF
+    |--------------------------------------------------------------------------
+    */
+
+            return response()->download(
+                $path,
+                $proforma_invoice->real_name,
+                [
+                    'Content-Type' =>
+                    $mimeType
+                        ?: 'application/octet-stream',
+                ]
+            );
+        } catch (HttpException $e) {
+
+            throw $e;
+        } catch (\Throwable $th) {
+
+            /*
+     * Log error sebenarnya.
+     * Jangan hanya menelan exception.
+     */
+            \Log::error(
+                'Failed to open/sign CIC PDF',
+                [
+                    'message' => $th->getMessage(),
+                    'file' => $th->getFile(),
+                    'line' => $th->getLine(),
+                ]
+            );
+            return redirect()
+                ->route('invoice.index')
+                ->with(
+                    'error',
+                    'Failed to open file.'
+                );
         }
     }
 }

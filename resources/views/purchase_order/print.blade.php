@@ -735,7 +735,7 @@
                     Approved By,
                 </div>
 
-                <div style="height: 80px;"></div>
+                <div style="height: 50px;"></div>
 
                 <div style="min-height: 35px;">
                     {{ $purchase_order->client_vendor->name ?? '' }}
@@ -747,7 +747,7 @@
                     Prepared By,
                 </div>
 
-                <div style="height: 80px; text-align: center;">
+                <div style="height: 50px; text-align: center;">
                     @if ($purchase_order->user->sign_path)
                         <img src="{{ public_path('storage/' . $purchase_order->user->sign_path) }}" alt="Signature"
                             style="
@@ -781,7 +781,7 @@
                                 ->first();
                         @endphp
 
-                        <div style="height: 80px; text-align: center;">
+                        <div style="height: 50px; text-align: center;">
                             @if ($d->user->sign_path)
                                 <img src="{{ public_path('storage/' . $d->user->sign_path) }}" alt="Signature"
                                     style="
