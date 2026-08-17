@@ -935,5 +935,25 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::get('report', [ReportController::class, 'index'])
         ->middleware('role_or_permission:superadmin|report')
-        ->name('report');
+        ->name('report.index');
+
+    Route::get('report-get-result', [ReportController::class, 'get_result'])
+        ->middleware('role_or_permission:superadmin|report')
+        ->name('report.get_result');
+
+    Route::get('report-print', [ReportController::class, 'print'])
+        ->middleware('role_or_permission:superadmin|report')
+        ->name('report.print');
+
+    Route::get('report-export-pdf', [ReportController::class, 'export_pdf'])
+        ->middleware('role_or_permission:superadmin|report')
+        ->name('report.export_pdf');
+
+    Route::get('report-export', [ReportController::class, 'export'])
+        ->middleware('role_or_permission:superadmin|report')
+        ->name('report.export');
+
+    Route::get('report-export-image', [ReportController::class, 'export_image'])
+        ->middleware('role_or_permission:superadmin|report')
+        ->name('report.export_image');
 });

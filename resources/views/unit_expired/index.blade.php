@@ -22,9 +22,7 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <a href="{{ route('unitexpired.export') }}" class="btn btn-success mb-3 mb-lg-0"
-                                        data-title="Export Unit" target="_blank" i="btnExport"><i
-                                            class='bx bxs-share'></i>Export to
-                                        Excel</a>
+                                        data-title="Export Unit" target="_blank" i="btnExport">Export to Excel</a>
                                 </div>
                                 <div class="col-2">
                                     <select class="form-select" id="typeUnit" name="typeUnit">

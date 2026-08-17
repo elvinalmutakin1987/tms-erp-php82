@@ -532,42 +532,6 @@ class InvoiceController extends Controller
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        // if (in_array($invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
-        //     $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
-        //         'Nomor Invoice : ' . $invoice->proforma_no . "\n" .
-        //         'Tanggal : ' . Carbon::parse($invoice->date)->format('d-m-Y') . "\n" .
-        //         'Client : ' . optional($invoice->client_vendor)->name . "\n" .
-        //         'Total : ' . Number::format($invoice?->total ?? 0, 0) . "\n" .
-        //         'Telah disetujui secara digital.';
-
-        //     $qrImage = QrCode::format('png')
-        //         ->size(150)
-        //         ->margin(1)
-        //         ->generate($qrText);
-
-        //     $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
-
-        //     // Posisi QR Code di atas page number
-        //     $qrSize = 55;
-        //     $qrX = $width - 120;
-        //     $qrY = $height - 100;
-
-        //     $canvas->image(
-        //         $qrBase64,
-        //         $qrX,
-        //         $qrY,
-        //         $qrSize,
-        //         $qrSize
-        //     );
-        // }
-        // $canvas->page_text(
-        //     $width - 120,
-        //     $height - 35,
-        //     "Page {PAGE_NUM} of {PAGE_COUNT}",
-        //     $fontNormal,
-        //     10,
-        //     [0, 0, 0]
-        // );
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($invoice->status, $status, true)) {
             $size = 48;
@@ -642,42 +606,6 @@ class InvoiceController extends Controller
         $width  = $canvas->get_width();
         $height = $canvas->get_height();
 
-        // if (in_array($invoice->status, ['Approved', 'Approval', 'Received', 'Done'], true)) {
-        //     $qrText = 'PT. Tunas Mitra Sejati' . "\n" . "\n" .
-        //         'Nomor Invoice : ' . $invoice->proforma_no . "\n" .
-        //         'Tanggal : ' . Carbon::parse($invoice->date)->format('d-m-Y') . "\n" .
-        //         'Client : ' . optional($invoice->client_vendor)->name . "\n" .
-        //         'Total : ' . Number::format($invoice?->total ?? 0, 0) . "\n" .
-        //         'Telah disetujui secara digital.';
-
-        //     $qrImage = QrCode::format('png')
-        //         ->size(150)
-        //         ->margin(1)
-        //         ->generate($qrText);
-
-        //     $qrBase64 = 'data:image/png;base64,' . base64_encode($qrImage);
-
-        //     // Posisi QR Code di atas page number
-        //     $qrSize = 55;
-        //     $qrX = $width - 120;
-        //     $qrY = $height - 100;
-
-        //     $canvas->image(
-        //         $qrBase64,
-        //         $qrX,
-        //         $qrY,
-        //         $qrSize,
-        //         $qrSize
-        //     );
-        // }
-        // $canvas->page_text(
-        //     $width - 120,
-        //     $height - 35,
-        //     "Page {PAGE_NUM} of {PAGE_COUNT}",
-        //     $fontNormal,
-        //     10,
-        //     [0, 0, 0]
-        // );
         $status = ['Draft', 'Open', 'Approval', 'Cancel', 'Received'];
         if (in_array($invoice->status, $status, true)) {
             $size = 48;

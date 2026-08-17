@@ -51,7 +51,12 @@
                     </td>
                     <td width="30%">
                         Work Duration<br>
-                        <b>{{ \Carbon\Carbon::parse($maintenance->work_duration)->format('H:i') }}</b>
+                        <b>
+                            @php
+                                [$hours, $minutes, $seconds] = explode(':', $maintenance->work_duration);
+                            @endphp
+                            {{ sprintf('%02d:%02d', $hours, $minutes) }}
+                        </b>
                     </td>
                 </tr>
                 <tr>

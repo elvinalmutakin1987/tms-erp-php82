@@ -344,19 +344,6 @@ class MaintenanceController extends Controller
      */
     public function get_unit_all(Request $request)
     {
-        // try {
-        //     $unit = Unit::all();
-        //     return response()->json([
-        //         'success' => true,
-        //         'data' => $unit
-        //     ], 200);
-        // } catch (\Throwable $th) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => $th->getMessage()
-        //     ], 400);
-        // }
-
         if ($request->ajax()) {
             $term = trim($request->term);
             $unit = Unit::selectRaw("id, vehicle_no as text")
@@ -675,7 +662,7 @@ class MaintenanceController extends Controller
         $safeFilename = Str::of($maintenance->maintenance_no)
             ->replace(['/', '\\'], '-')   // ganti 
             ->toString();
-        return $pdf->stream("report-{$safeFilename}.pdf");
+        return $pdf->stream("{$safeFilename}.pdf");
     }
 
     /**

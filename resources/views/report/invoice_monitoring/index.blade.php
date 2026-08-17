@@ -22,12 +22,6 @@
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col">
-                                    <select class="form-select select-top" id="unit_id" name="unit_id">
-                                        <option value=""></option>
-                                    </select>
-                                </div>
-
-                                <div class="col">
                                     <select class="form-select select-top" id="month" name="month">
                                         <option value="01" {{ date('m') == '01' ? 'selected' : '' }}>January</option>
                                         <option value="02" {{ date('m') == '02' ? 'selected' : '' }}>February</option>
@@ -78,7 +72,7 @@
     </div>
     <!--end page wrapper -->
 
-    @include('report.breakdown_summary.modal-detail')
+    @include('report.invoice_monitoring.modal-detail')
 @endsection
 
 @section('js')
@@ -96,123 +90,10 @@
         var unitId = '';
 
         $(document).ready(function() {
-            initUnitTopSelect2();
-            initTopStatusSelect2();
             gen_select2();
         });
 
-        function initUnitTopSelect2() {
-            const $unit = $('#unit_id');
-
-            if (!$unit.length) {
-                return;
-            }
-
-            if ($unit.hasClass('select2-hidden-accessible')) {
-                $unit.select2('destroy');
-            }
-
-            $unit.off('.unitTop');
-
-            $unit.select2({
-                theme: "bootstrap-5",
-                width: $unit.data('width') ? $unit.data('width') : ($unit.hasClass('w-100') ? '100%' : 'style'),
-                placeholder: 'Choose Unit',
-                allowClear: true,
-                selectOnClose: false,
-                minimumInputLength: 0,
-                ajax: {
-                    url: '{{ route('proformainvoice.get_unit_all') }}',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function(params) {
-                        return {
-                            term: params.term || '',
-                            page: params.page || 1
-                        };
-                    },
-                    processResults: function(data, params) {
-                        params.page = params.page || 1;
-
-                        return {
-                            results: data.results,
-                            pagination: {
-                                more: data.pagination ? data.pagination.more : false
-                            }
-                        };
-                    },
-                    cache: true
-                }
-            });
-
-            $unit.val(null).trigger('change.select2');
-
-            $unit.on('select2:open.unitTop', function() {
-                setTimeout(function() {
-                    $('.select2-container--open .select2-search__field').trigger('focus');
-                }, 0);
-            });
-
-            $unit.on('change.unitTop', function() {
-                $('#table-data').DataTable().draw();
-            });
-        }
-
-        function gen_select2() {
-            $('.select-select').each(function() {
-                const $el = $(this);
-
-                if ($el.attr('id') === 'unit_id') {
-                    return;
-                }
-
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.select2('destroy');
-                }
-
-                $el.select2({
-                    theme: "bootstrap-5",
-                    dropdownParent: $('#formModal'),
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style'),
-                    selectOnClose: false,
-                    minimumResultsForSearch: 0,
-                }).on('select2:close', function() {
-                    $(this).blur();
-
-                    if (document.activeElement) {
-                        document.activeElement.blur();
-                    }
-                });
-
-                if ($el.attr('id') === 'unit_id') {
-                    $el.val(null).trigger('change.select2');
-                }
-            });
-        }
-
-        function initTopStatusSelect2() {
-            $('.select-top').not('#unit_id').each(function() {
-                const $el = $(this);
-
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.select2('destroy');
-                }
-
-                $el.select2({
-                    theme: "bootstrap-5",
-                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
-                        'style')
-                });
-
-                $el.off('change.topFilter').on('change.topFilter', function() {
-                    $('#table-data').DataTable().draw();
-                });
-            });
-        }
-
         function get_result() {
-            var unit_id = $("#unit_id").val();
             var month = $("#month").val();
             var year = $("#year").val();
             const params = new URLSearchParams(window.location.search);
@@ -231,7 +112,6 @@
                 url: url,
                 type: 'GET',
                 data: {
-                    unit_id: unit_id,
                     year: year,
                     month: month,
                     t: t
@@ -248,6 +128,26 @@
                         </div>
                     `);
                 }
+            });
+        }
+
+        function gen_select2() {
+            $('.select-top').each(function() {
+                const $el = $(this);
+
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.select2('destroy');
+                }
+
+                $el.select2({
+                    theme: "bootstrap-5",
+                    width: $el.data('width') ? $el.data('width') : ($el.hasClass('w-100') ? '100%' :
+                        'style')
+                });
+
+                $el.off('change.topFilter').on('change.topFilter', function() {
+                    $('#table-data').DataTable().draw();
+                });
             });
         }
 

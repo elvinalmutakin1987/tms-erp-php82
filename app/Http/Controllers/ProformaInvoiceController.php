@@ -1389,9 +1389,9 @@ class ProformaInvoiceController extends Controller
             if ($request->ops_received_date) $lockProforma_invoice->ops_received_date = $request->ops_received_date;
             if ($request->prof_inv_app_date) $lockProforma_invoice->prof_inv_app_date = $request->prof_inv_app_date;
             if ($request->cic_request_date) $lockProforma_invoice->cic_request_date = $request->cic_request_date;
-            $lockProforma_invoice->status = $request->status;
             $lockProforma_invoice->save();
             if ($request->status == 'Done') {
+                $lockProforma_invoice->status = $request->status;
                 $proforma_invoice_service->genInvoiceFromProforma($lockProforma_invoice);
             }
             DB::commit();

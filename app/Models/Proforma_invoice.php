@@ -100,10 +100,15 @@ class Proforma_invoice extends Model implements Auditable
         return $this->hasMany(Proforma_invoice_detail::class);
     }
 
-    public function invoice(): HasMany
-    {
-        return $this->hasMany(Invoice::class);
-    }
+    // public function invoice(): HasMany
+    // {
+    //     return $this->hasMany(Invoice::class);
+    // }
+
+    // public function invoice(): BelongsTo
+    // {
+    //     return $this->belongsTo(Unit_target::class);
+    // }
 
     public function invoice_proforma_invoice(): HasMany
     {

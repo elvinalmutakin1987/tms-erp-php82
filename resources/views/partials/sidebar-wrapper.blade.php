@@ -384,18 +384,18 @@
              </a>
              <ul>
                  <li>
-                     <a href="{{ route('report', ['t' => 'breakdown-summary']) }}">
+                     <a href="{{ route('report.index', ['t' => 'breakdown-summary']) }}">
                          <i class='bx bx-radio-circle'></i>Unit Breakdown Summary
                      </a>
                  </li>
                  <li>
-                     <a href="{{ route('report', ['t' => 'monitoring-invoice']) }}">
-                         <i class='bx bx-radio-circle'></i>Monitoring Invoice
+                     <a href="{{ route('report.index', ['t' => 'invoice-monitoring']) }}">
+                         <i class='bx bx-radio-circle'></i>Invoice Monitoring
                      </a>
                  </li>
                  <li>
-                     <a href="{{ route('report', ['t' => 'monitoring-po']) }}">
-                         <i class='bx bx-radio-circle'></i>Monitoring PO
+                     <a href="{{ route('report.index', ['t' => 'po-monitoring']) }}">
+                         <i class='bx bx-radio-circle'></i>PO Monitoring
                      </a>
                  </li>
              </ul>

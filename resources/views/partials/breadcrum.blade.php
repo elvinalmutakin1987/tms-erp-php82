@@ -18,7 +18,12 @@
                 @if ($breadcrum['sub-module'])
                     <li class="breadcrumb-item" aria-current="page">
                         @if ($breadcrum['route-sub-module'])
-                            <a href="{{ route($breadcrum['route-sub-module']) }}">{{ $breadcrum['sub-module'] }}</a>
+                            @isset($t)
+                                <a
+                                    href="{{ route($breadcrum['route-sub-module'], ['t' => $t]) }}">{{ $breadcrum['sub-module'] }}</a>
+                            @else
+                                <a href="{{ route($breadcrum['route-sub-module']) }}">{{ $breadcrum['sub-module'] }}</a>
+                            @endisset
                         @else
                             {{ $breadcrum['sub-module'] }}
                         @endif
