@@ -4,8 +4,8 @@
 @endsection
 
 @section('content')
-    @if (Request::get('t') == 'equipment')
-        @include('dashboard.equipment')
+    @if (Request::get('t') == 'operational')
+        @include('dashboard.operational')
     @elseif(Request::get('t') == 'procurement')
         @include('dashboard.procurement')
     @elseif(Request::get('t') == 'survey')
