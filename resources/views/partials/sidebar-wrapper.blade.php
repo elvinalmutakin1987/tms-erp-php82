@@ -22,13 +22,16 @@
  <!--sidebar wrapper -->
  <div class="sidebar-wrapper" data-simplebar="true">
      <div class="sidebar-header">
-         <div>
-             <img src="assets/images/tms_logo.png" class="logo-icon" alt="logo icon">
-         </div>
-         <div>
-             <h4 class="logo-text">PT. TMS</h4>
-         </div>
-         <div class="mobile-toggle-icon ms-auto"><i class='bx bx-x'></i>
+         <a href="{{ route('dashboard') }}" class="d-flex align-items-center text-decoration-none">
+             <div>
+                 <img src="assets/images/tms_logo.png" class="logo-icon" alt="logo icon">
+             </div>
+             <div>
+                 <h4 class="logo-text">PT. TMS</h4>
+             </div>
+         </a>
+         <div class="mobile-toggle-icon ms-auto">
+             <i class='bx bx-x'></i>
          </div>
      </div>
      <!--navigation-->
@@ -70,6 +73,10 @@
                      'maintenance_item',
                      'mro_item',
                      'client_vendor',
+                     'plan_operational',
+                     'plan_maintenance',
+                     'plan_it',
+                     'plan_hr',
                  ],
              ];
              $allPermissions = collect($menuPermissions)->flatten()->unique()->values()->toArray();
@@ -510,6 +517,14 @@
                          <li>
                              <a href="{{ route('clientvendor.index') }}">
                                  <i class='bx bx-radio-circle'></i>Client & Vendor
+                             </a>
+                         </li>
+                     @endif
+
+                     @if ($can('plan_operational'))
+                         <li>
+                             <a href="{{ route('plan.operational.index') }}">
+                                 <i class='bx bx-radio-circle'></i>Plan - Operational
                              </a>
                          </li>
                      @endif

@@ -36,6 +36,7 @@ use App\Http\Controllers\UnitExpiredController;
 use App\Http\Controllers\UnitRateController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoicePaymentController;
+use App\Http\Controllers\PlanOperationalController;
 use App\Http\Controllers\ProgressClaimController;
 use App\Http\Controllers\ReportController;
 use App\Models\Invoice;
@@ -48,6 +49,8 @@ Route::middleware('guest')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/unit-operation', [DashboardController::class, 'get_unit_operation'])->name('dashboard.unit.operation');
 
     Route::get('logout', [AuthController::class, 'logout'])->name('logout');
 
@@ -956,4 +959,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('report-export-image', [ReportController::class, 'export_image'])
         ->middleware('role_or_permission:superadmin|report')
         ->name('report.export_image');
+
+    /**
+     * Plan - Operational
+     */
+    Route::resource('plan-operational', PlanOperationalController::class)
+        ->middleware('role_or_permission:superadmin')
+        ->names('plan.operational')
+        ->parameters(['plan-operational' => 'plan']);
+
+    /**
+     * Plan - Maintenance
+     */
+    Route::resource('plan-maintenance', PlanOperationalController::class)
+        ->middleware('role_or_permission:superadmin')
+        ->names('plan.maintenance');
 });

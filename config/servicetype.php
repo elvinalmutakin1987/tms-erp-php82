@@ -9,4 +9,5 @@ return [
     'LCT',
     'Pallet',
     'Survey',
+    'Waste Transfer'
 ];

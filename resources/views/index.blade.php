@@ -10,7 +10,7 @@
         @include('dashboard.procurement')
     @elseif(Request::get('t') == 'survey')
         @include('dashboard.survey')
-    @elseif(Request::get('t') == 'finance')
+    @elseif(Request::get('t') == 'fina-ce')
         @include('dashboard.finance')
     @endif
 @endsection
@@ -20,7 +20,10 @@
 @endsection
 
 @section('js')
-    <script src="assets/js/index.js"></script>
+    {{-- <script src="assets/js/index.js"></script>
+    <script src="assets/js/index3.js"></script> --}}
+
+    @stack('script-chart')
 
     <script src="assets/plugins/peity/jquery.peity.min.js"></script>
     <script>

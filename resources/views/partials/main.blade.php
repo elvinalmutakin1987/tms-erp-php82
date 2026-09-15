@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-bs-theme="light">
+<html lang="en" data-bs-theme="semi-dark">
 
 @include('partials.head')
 

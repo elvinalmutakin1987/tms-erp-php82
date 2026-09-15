@@ -302,6 +302,7 @@
                     <option value="Pupuk">Pupuk</option>
                     <option value="Access.">Access.</option>
                     <option value="Used Fuel">Used Fuel</option>
+                    <option value="Pallet">Pallet</option>
                 </select>
             </td>
             <td class="p-1 align-middle">
