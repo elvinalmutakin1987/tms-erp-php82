@@ -108,37 +108,37 @@ Route::middleware(['auth'])->group(function () {
      * Routenya service
      */
     Route::resource('service', ServiceController::class)
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|service')
         ->names('service');
 
     Route::get('service-get-service-item-list', [ServiceController::class, 'get_service_item_list'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|service')
         ->name('service.get_service_item_list');
 
     /**
      * Routenya location
      */
     Route::resource('location', LocationController::class)
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|location')
         ->names('location');
 
     /**
      * Routenya unit
      */
     Route::resource('unit', UnitController::class)
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit')
         ->names('unit');
 
     Route::get('unit-get-location-all', [UnitController::class, 'get_location_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit')
         ->name('unit.get_location_all');
 
     Route::get('unit-get-brand-all', [UnitController::class, 'get_brand_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit')
         ->name('unit.get_brand_all');
 
     Route::get('unit-get-model-all', [UnitController::class, 'get_model_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit')
         ->name('unit.get_model_all');
 
 
@@ -147,7 +147,7 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('unitbrand', UnitBrandController::class)
         ->parameters(['unitbrand' => 'unit_brand'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|brand')
         ->names('unitbrand');
 
     /**
@@ -155,11 +155,11 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('unitmodel', UnitModelController::class)
         ->parameters(['unitmodel' => 'unit_model'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unitmodel')
         ->names('unitmodel');
 
     Route::get('unitmodel-get-brand-all', [UnitModelController::class, 'get_brand_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unitmodel')
         ->name('unitmodel.get_brand_all');
 
     /**
@@ -167,64 +167,62 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('clientvendor', ClientVendorController::class)
         ->parameters(['clientvendor' => 'client_vendor'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|client_vendor')
         ->names('clientvendor');
 
     Route::get('clientvendor-get-location-all', [ClientVendorController::class, 'get_location_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|client_vendor')
         ->name('clientvendor.get_location_all');
 
     /**
      * Routenya Contract
      */
     Route::resource('contract', ContractController::class)
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->names('contract');
 
     Route::get('contract-get-client-all', [ContractController::class, 'get_client_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->name('contract.get_client_all');
 
     Route::get('contract-get-service-all', [ContractController::class, 'get_service_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->name('contract.get_service_all');
 
     Route::put('contract-update-status/{contract}', [ContractController::class, 'update_status'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->name('contract.update_status');
 
     Route::get('contract-get-service-item', [ContractController::class, 'get_service_item'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->name('contract.get_service_item');
 
     Route::get('contract-get-unit-all', [ContractController::class, 'get_unit_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->name('contract.get_unit_all');
 
     Route::get('contract-get-detail/{contract}', [ContractController::class, 'get_detail'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|contract')
         ->name('contract.get_detail');
-
-
 
     /**
      * Routenya Unit rate buat perhitungan proforma invoice
      */
     Route::resource('unitrate', UnitRateController::class)
         ->parameters(['unitrate' => 'unit_rate'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit_rate')
         ->names('unitrate');
 
     Route::get('unitrate-get-client-all', [UnitRateController::class, 'get_client_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit_rate')
         ->name('unitrate.get_client_all');
 
     Route::get('unitrate-get-unit-all', [UnitRateController::class, 'get_unit_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit_rate')
         ->name('unitrate.get_unit_all');
 
     Route::get('unitrate-get-contract', [UnitRateController::class, 'get_contract'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|unit_rate')
         ->name('unitrate.get_contract');
 
 
@@ -233,11 +231,11 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('mroitem', MroItemController::class)
         ->parameters(['mroitem' => 'mro_item'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|mro_item')
         ->names('mroitem');
 
     Route::get('mroitem-get-unit-all', [MroItemController::class, 'get_unit_all'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|mro_item')
         ->name('mroitem.get_unit_all');
 
 
@@ -255,15 +253,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('p2h-get-p2h-item', [P2hController::class, 'get_p2h_item'])
         ->middleware('role_or_permission:superadmin|p2h')
         ->name('p2h.get_p2h_item');
-
-    /**
-     * buat load table inputan p2h waktu mau tambah data
-     */
-    // Route::get('p2h-load-table-add', function () {
-    //     return view('p2h.table-add');
-    // })
-    //     ->middleware('role_or_permission:superadmin|p2h')
-    //     ->name('p2h.load_table_add');
 
     Route::get('p2h-load-table-add', [P2hController::class, 'get_table_add'])
         ->middleware('role_or_permission:superadmin|p2h')
@@ -331,7 +320,7 @@ Route::middleware(['auth'])->group(function () {
      */
     Route::resource('maintenanceitem', MaintenanceItemController::class)
         ->parameters(['maintenanceitem' => 'maintenance_item'])
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|maintenance_item')
         ->names('maintenanceitem');
 
     /**
@@ -560,7 +549,7 @@ Route::middleware(['auth'])->group(function () {
         ->names('unitexpired');
 
     Route::get('unitexpired-export', [UnitExpiredController::class, 'export'])
-        ->middleware('role_or_permission:superadmin|unit')
+        ->middleware('role_or_permission:superadmin|unit_expired')
         ->name('unitexpired.export');
 
     /**
@@ -803,7 +792,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('invoice.get_service');
 
     Route::get('invoice-load-table-add', [InvoiceController::class, 'get_table_add'])
-        ->middleware('role_or_permission:superadmin|maintenance')
+        ->middleware('role_or_permission:superadmin|invoice')
         ->name('invoice.get_table_add');
 
     Route::get('invoice-load-table-edit/{invoice}', [InvoiceController::class, 'get_table_edit'])
@@ -811,7 +800,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('invoice.get_table_edit');
 
     Route::get('invoice-get-client-vendor-by-id/{client_vendor}', [InvoiceController::class, 'get_client_vendor_by_id'])
-        ->middleware('role_or_permission:superadmin|purchase_order')
+        ->middleware('role_or_permission:superadmin|invoice')
         ->name('invoice.get_client_vendor_by_id');
 
     Route::put('invoice-update-progress/{invoice}', [InvoiceController::class, 'update_progress'])
@@ -964,7 +953,7 @@ Route::middleware(['auth'])->group(function () {
      * Plan - Operational
      */
     Route::resource('plan-operational', PlanOperationalController::class)
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|plan_operational')
         ->names('plan.operational')
         ->parameters(['plan-operational' => 'plan']);
 
@@ -972,6 +961,6 @@ Route::middleware(['auth'])->group(function () {
      * Plan - Maintenance
      */
     Route::resource('plan-maintenance', PlanOperationalController::class)
-        ->middleware('role_or_permission:superadmin')
+        ->middleware('role_or_permission:superadmin|plan_maintenance')
         ->names('plan.maintenance');
 });

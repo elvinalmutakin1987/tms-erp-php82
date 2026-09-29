@@ -953,7 +953,7 @@
                                             <tr>
                                                 <td width="100%" style="font-size: 12pt">
                                                     Terbilang : IDR <br>
-                                                    {{ ucfirst(\Riskihajar\Terbilang\Facades\Terbilang::make((int) round($invoice->grand_total), ' rupiah')) }}
+                                                    ({{ ucwords(\Riskihajar\Terbilang\Facades\Terbilang::make((int) round($invoice?->grand_total ?? 0), ' rupiah')) }})
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1201,7 +1201,7 @@
                                             <tr>
                                                 <td width="100%" style="font-size: 12pt">
                                                     Terbilang : IDR <br>
-                                                    {{ ucfirst(\Riskihajar\Terbilang\Facades\Terbilang::make((int) round($invoice?->grand_total ?? 0), ' rupiah')) }}
+                                                    ({{ ucwords(\Riskihajar\Terbilang\Facades\Terbilang::make((int) round($invoice?->grand_total ?? 0), ' rupiah')) }})
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -1286,10 +1286,11 @@
                 <table class="doc-header-table">
                     <tr>
                         <td style="font-size: 10pt; font-weight: normal">
-                            Pembayaran dengan cek/giro dianggap sah setelah duangkan atau setelah clearing oleh bank
+                            Pembayaran dengan cek/giro dianggap sah setelah diuangkan atau setelah clearing oleh bank
                             <br>
-                            Payment by cheque/draft etc. is not considered valid before it is cashed or cleared by our
-                            bank
+                            <i>Payment by cheque/draft etc. is not considered valid before it is cashed or cleared by
+                                our
+                                bank</i>
                         </td>
                     </tr>
                     <tr>
@@ -1366,7 +1367,9 @@
                         <tr>
                             <td>
                                 Dokumen ini dihasilkan secara elektronik. Tidak diperlukan lagi tanda-tangan basah <br>
-                                This document is computer generated. No wet signature needed.
+                                <i>
+                                    This document is computer generated. No wet signature needed.
+                                </i>
                             </td>
                         </tr>
                     </tbody>

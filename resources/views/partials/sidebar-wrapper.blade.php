@@ -62,6 +62,7 @@
                  'procurement' => ['request_quotation', 'purchase_order'],
                  'finance' => ['purchase_order_payment', 'invoice_receipt', 'cic', 'invoice', 'invoice_payment'],
                  'approval' => ['approval'],
+                 'report' => ['report.unit-breakdown-summary', 'report.invoice-monitoring', 'report.po-monitoring'],
                  'master_data' => [
                      'service',
                      'contract',
@@ -267,7 +268,6 @@
              </li>
          @endif
 
-
          @if ($can('purchase_requisition_general'))
              <li>
                  <a href="{{ route('purchaserequisitiongeneral.index') }}">
@@ -278,7 +278,6 @@
                  </a>
              </li>
          @endif
-
 
          @if ($canAny($menuPermissions['procurement']))
              <li>
@@ -308,7 +307,6 @@
                  </ul>
              </li>
          @endif
-
 
          @if ($canAny($menuPermissions['finance']))
              <li>
@@ -345,6 +343,7 @@
                              </ul>
                          </li>
                      @endif
+
                      @if ($can('cic') || $can('invoice') || $can('invoice_payment'))
                          <li>
                              <a class="has-arrow" href="javascript:;">
@@ -382,32 +381,39 @@
              </li>
          @endif
 
-         <li>
-             <a href="javascript:;" class="has-arrow">
-                 <div class="parent-icon">
-                     <i class="bx bx-chart"></i>
-                 </div>
-                 <div class="menu-title">Report</div>
-             </a>
-             <ul>
-                 <li>
-                     <a href="{{ route('report.index', ['t' => 'breakdown-summary']) }}">
-                         <i class='bx bx-radio-circle'></i>Unit Breakdown Summary
-                     </a>
-                 </li>
-                 <li>
-                     <a href="{{ route('report.index', ['t' => 'invoice-monitoring']) }}">
-                         <i class='bx bx-radio-circle'></i>Invoice Monitoring
-                     </a>
-                 </li>
-                 <li>
-                     <a href="{{ route('report.index', ['t' => 'po-monitoring']) }}">
-                         <i class='bx bx-radio-circle'></i>PO Monitoring
-                     </a>
-                 </li>
-             </ul>
-         </li>
-
+         @if ($canAny($menuPermissions['report']))
+             <li>
+                 <a href="javascript:;" class="has-arrow">
+                     <div class="parent-icon">
+                         <i class="bx bx-chart"></i>
+                     </div>
+                     <div class="menu-title">Report</div>
+                 </a>
+                 <ul>
+                     @if ($can('report.unit-breakdown-summary'))
+                         <li>
+                             <a href="{{ route('report.index', ['t' => 'breakdown-summary']) }}">
+                                 <i class='bx bx-radio-circle'></i>Unit Breakdown Summary
+                             </a>
+                         </li>
+                     @endif
+                     @if ($can('report.invoice-monitoring'))
+                         <li>
+                             <a href="{{ route('report.index', ['t' => 'invoice-monitoring']) }}">
+                                 <i class='bx bx-radio-circle'></i>Invoice Monitoring
+                             </a>
+                         </li>
+                     @endif
+                     @if ($can('report.po-monitoring'))
+                         <li>
+                             <a href="{{ route('report.index', ['t' => 'po-monitoring']) }}">
+                                 <i class='bx bx-radio-circle'></i>PO Monitoring
+                             </a>
+                         </li>
+                     @endif
+                 </ul>
+             </li>
+         @endif
 
          @if ($can('approval'))
              <li>
@@ -429,7 +435,6 @@
                  </a>
              </li>
          @endif
-
 
          @if ($canAny($menuPermissions['master_data']))
              <li>
