@@ -68,7 +68,7 @@ return new class extends Migration
             //------------------------------------------------------------
             $table->text('invoice_path')->nullable();
             $table->text('real_name')->nullable();
-            $table->string('cic_number')->nullable(); //Buat cic numbernya, diambil dari proforma invoice
+            $table->json('cic_number')->nullable(); //Buat cic numbernya, diambil dari proforma invoice
             $table->text('notes')->nullable(); //Buat cic numbernya, diambil dari proforma invoice
             $table->string('status', 30)->nullable();
             $table->string('payment_status', 20)->nullable(); //Waiting Invoice, Unpaid, Partially Paid, Paid

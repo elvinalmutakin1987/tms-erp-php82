@@ -62,7 +62,7 @@ return new class extends Migration
             //------------------------------------------------------------
             $table->text('cic_path')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->text('real_name')->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
-            $table->string('cic_number', 30)->nullable(); //CIC Numbernya
+            $table->json('cic_number')->nullable(); //CIC Numbernya
             $table->string('status', 30)->nullable(); //Status nya > Draft, Approval, Open, User Approval, Custodian Approval, Revision, Done, Cancel
             $table->timestamp('checked_at')->nullable();
             $table->string('sync_status', 2)->nullable();

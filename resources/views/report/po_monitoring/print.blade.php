@@ -334,7 +334,7 @@
                 @empty
                     <tr>
                         <td colspan="11" style="text-align:center;padding:10px;">
-                            Tidak ada data Purchase Order.
+                            There is no order data for this period.
                         </td>
                     </tr>
                 @endforelse

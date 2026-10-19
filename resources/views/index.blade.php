@@ -10,7 +10,7 @@
         @include('dashboard.procurement')
     @elseif(Request::get('t') == 'survey')
         @include('dashboard.survey')
-    @elseif(Request::get('t') == 'fina-ce')
+    @elseif(Request::get('t') == 'finance')
         @include('dashboard.finance')
     @endif
 @endsection

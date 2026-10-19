@@ -922,6 +922,19 @@
     </tr>
     <tr>
         <td style="vertical-align: top">
+            CIC Number
+        </td>
+        <td> &nbsp;:&nbsp;</td>
+        <td>
+            @php
+                $cicList = json_decode($proforma_invoice->cic_number, true) ?? [];
+                $cicNumbers = collect($cicList)->pluck('cic_number')->filter()->implode(', ');
+            @endphp
+            {{ $cicNumbers ?: '-' }}
+        </td>
+    </tr>
+    <tr>
+        <td style="vertical-align: top">
             Pembuatan CIC
         </td>
         <td> &nbsp;:&nbsp;</td>

@@ -221,7 +221,7 @@ class ReportController extends Controller
             );
         }
 
-        $safeFilename = "report_" . $t;
+        $safeFilename = $t;
         return $pdf->stream("{$safeFilename}.pdf");
     }
 
@@ -300,7 +300,7 @@ class ReportController extends Controller
             $qrSize,
             $qrSize
         );
-        $safeFilename = "report_" . $t;
+        $safeFilename = $t;
         return $pdf->download("{$safeFilename}.pdf");
     }
 
@@ -313,7 +313,7 @@ class ReportController extends Controller
         $month = $request->month;
         $t = $request->t;
         $unit_id = $request->unit_id ?? null;
-        return Excel::download(new ReportExport($year, $month, $t, $unit_id), 'report_' . $t . '_' . date('YmdHis') . '.xlsx');
+        return Excel::download(new ReportExport($year, $month, $t, $unit_id), $t . '_' . date('YmdHis') . '.xlsx');
     }
 
     public function export_image(Request $request)

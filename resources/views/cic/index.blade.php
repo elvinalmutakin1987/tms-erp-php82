@@ -166,10 +166,29 @@
                         searchable: true
                     },
                     {
-                        data: 'cic_number',
-                        name: 'cic_number',
+                        data: 'cic_number_list',
+                        name: 'cic_number_list',
                         orderable: true,
-                        searchable: true
+                        searchable: true,
+                        rowCallback: function(row, data, index) {
+                            const cell = row.cells[4]; // sesuaikan index kolom CIC Number
+                            if (!cell) return;
+                            const raw = data.cic_number_list;
+                            if (!raw || raw === '-' || raw === '') {
+                                cell.innerHTML = '-';
+                                return;
+                            }
+                            const list = String(raw)
+                                .split('\n')
+                                .map(v => v.trim())
+                                .filter(v => v !== '');
+
+                            if (list.length === 0) {
+                                cell.innerHTML = '-';
+                                return;
+                            }
+                            cell.innerHTML = list.join('<br>');
+                        }
                     },
                     {
                         data: 'type',
@@ -362,6 +381,9 @@
             contractId = '';
             unitId = '';
             enableButton();
+            if (window.CicTable) {
+                window.CicTable.reset();
+            }
         });
 
         $('#cancelButton').on('click', function() {
@@ -446,7 +468,10 @@
                     $("#cic_ready_to_pick_date").val(response.proforma_invoice.cic_ready_to_pick_date);
                     $("#cic_pick_up_date").val(response.proforma_invoice.cic_pick_up_date);
                     $("#inv_send_date").val(response.proforma_invoice.inv_send_date);
-                    $("#cic_number").val(response.proforma_invoice.cic_number);
+                    // $("#cic_number").val(response.proforma_invoice.cic_number);
+                    if (window.CicTable) {
+                        window.CicTable.fill(response.proforma_invoice.cic_number);
+                    }
                     $("#div-file").html(response.html);
                 },
                 error: function() {

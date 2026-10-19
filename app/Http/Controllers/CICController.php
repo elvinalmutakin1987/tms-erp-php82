@@ -149,6 +149,15 @@ class CICController extends Controller
                     $invoice = Invoice::find($item->invoice_id);
                     return $invoice?->invoice_no ?? '-';
                 })
+                ->addColumn('cic_number_list', function ($row) {
+                    $data = $row->cic_number;
+                    if (is_string($data)) {
+                        $data = json_decode($data, true);
+                        if (is_string($data)) $data = json_decode($data, true);
+                    }
+                    if (!is_array($data)) return '';
+                    return collect($data)->pluck('cic_number')->filter()->implode("\n");
+                })
                 ->rawColumns(['action'])
                 ->make();
         }
@@ -289,7 +298,35 @@ class CICController extends Controller
             if ($request->cic_ready_to_pick_date) $lockProforma_invoice->cic_ready_to_pick_date = $request->cic_ready_to_pick_date;
             if ($request->cic_pick_up_date) $lockProforma_invoice->cic_pick_up_date = $request->cic_pick_up_date;
             if ($request->inv_send_date) $lockProforma_invoice->inv_send_date = $request->inv_send_date;
-            if ($request->cic_number) $lockProforma_invoice->cic_number = $request->cic_number;
+            // if ($request->cic_number) $lockProforma_invoice->cic_number = $request->cic_number;
+            if ($request->has('cic_number')) {
+                $numbers = $request->input('cic_number', []);
+                $totals  = $request->input('cic_total', []);
+
+                // Pastikan array (kalau cuma 1 baris, form bisa kirim string)
+                $numbers = is_array($numbers) ? $numbers : [$numbers];
+                $totals  = is_array($totals)  ? $totals  : [$totals];
+
+                $data = [];
+                foreach ($numbers as $i => $num) {
+                    $num = trim((string) $num);
+                    if ($num === '') continue;
+
+                    $rawTotal = $totals[$i] ?? null;
+                    $total = ($rawTotal !== null && $rawTotal !== '')
+                        ? (float) str_replace(',', '', $rawTotal)   // buang koma ribuan dari numbro
+                        : null;
+
+                    $data[] = [
+                        'cic_number' => $num,
+                        'cic_total'  => $total,
+                    ];
+                }
+
+                $lockProforma_invoice->cic_number = !empty($data)
+                    ? json_encode($data)
+                    : null;   // atau json_encode([]) kalau mau tetap '[]'
+            }
             if ($request->hasFile('cic_path')) {
                 // Hapus file lama jika masih tersedia
                 if (
@@ -357,7 +394,7 @@ class CICController extends Controller
     /**
      * ngambil detail purchase requisition
      */
-    public function get_detail(Request $request, $proforma_invoice_id)
+    public function get_detail(Request $request, string $proforma_invoice_id)
     {
         try {
             $proforma_invoice = Proforma_invoice::find($proforma_invoice_id);
@@ -423,7 +460,7 @@ class CICController extends Controller
      * generate invoice per proforma invoice
      * 1 proforma invoice : 1 invoice
      */
-    public function create_invoice(Request $request, $proforma_invoice_id, ApprovalService $approval_service)
+    public function create_invoice(Request $request, string $proforma_invoice_id, ApprovalService $approval_service)
     {
         DB::beginTransaction();
         try {

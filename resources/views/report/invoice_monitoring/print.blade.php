@@ -355,7 +355,7 @@
                 @empty
                     <tr>
                         <td colspan="19" style="text-align:center;padding:10px;">
-                            Tidak ada data invoice pada periode ini.
+                            There is no invoice data for this period.
                         </td>
                     </tr>
                 @endforelse
