@@ -3,82 +3,132 @@
     use Illuminate\Support\Number;
     use Carbon\Carbon;
 
-    $startDate = Carbon::create($year, $month, 1)->startOfMonth();
-    $endDate = $startDate->copy()->endOfMonth();
-    $currentMonth = Carbon::create($year, $month, 1)->startOfMonth();
-    $calendarStart = $currentMonth->copy()->startOfMonth()->startOfWeek(Carbon::SUNDAY);
-    $calendarEnd = $currentMonth->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY);
-    $totalDays = (int) $calendarStart->diffInDays($calendarEnd) + 1;
+    /* ============================================================
+       DEBUG HELPER — deteksi baris error
+       Set $__debug = false di production
+       ============================================================ */
+    $__debug = true;
 
+    $__report = function ($e, $line = null, $label = '') use ($__debug) {
+        if (!$__debug) {
+            return;
+        }
+        $lineInfo = $line ? "Blade line ~{$line}" : "Compiled line {$e->getLine()}";
+        echo '<div style="background:#fee;color:#900;padding:8px;border:1px solid #900;' .
+            'margin:4px 0;font-family:monospace;font-size:12px;text-align:left">' .
+            '<b>ERROR</b>' .
+            ($label ? " [{$label}]" : '') .
+            ': ' .
+            e($e->getMessage()) .
+            '<br><b>Location:</b> ' .
+            $lineInfo .
+            '<br><b>Compiled line:</b> ' .
+            $e->getLine() .
+            '</div>';
+    };
+
+    // Nilai default agar UI tidak error jika terjadi kegagalan di blok try
+    $weeks = collect();
     $hoursByDate = [];
     $main = collect();
+    $totalBreakdown = 0;
+    $startDate = null;
+    $endDate = null;
+    $currentMonth = null;
+    $calendarStart = null;
+    $calendarEnd = null;
+    $totalDays = 0;
+@endphp
 
-    if (isset($unit_id)) {
-        $monthStart = $currentMonth->copy()->startOfDay();
-        $monthEnd = $currentMonth->copy()->addMonth()->startOfDay();
+@php
+    $__block_init_line = __LINE__ + 1;
+    try {
+        $startDate = Carbon::create($year, $month, 1)->startOfMonth();
+        $endDate = $startDate->copy()->endOfMonth();
+        $currentMonth = Carbon::create($year, $month, 1)->startOfMonth();
+        $calendarStart = $currentMonth->copy()->startOfMonth()->startOfWeek(Carbon::SUNDAY);
+        $calendarEnd = $currentMonth->copy()->endOfMonth()->endOfWeek(Carbon::SATURDAY);
+        $totalDays = (int) $calendarStart->diffInDays($calendarEnd) + 1;
+    } catch (\Throwable $e) {
+        $__report($e, $__block_init_line, 'Init - Date Generation');
+    }
+@endphp
 
-        $maintenances = Maintenance::where('unit_id', $unit_id)
-            ->whereNotNull('start')
-            ->whereNotNull('finish')
-            ->where('start', '<', $monthEnd)
-            ->where('finish', '>', $monthStart)
-            ->get();
+@php
+    $__block_maintenance_line = __LINE__ + 1;
+    try {
+        if (isset($unit_id) && $currentMonth) {
+            $monthStart = $currentMonth->copy()->startOfDay();
+            $monthEnd = $currentMonth->copy()->addMonth()->startOfDay();
 
-        foreach ($maintenances as $maintenance) {
-            $maintenanceStart = Carbon::parse($maintenance->start);
-            $maintenanceFinish = Carbon::parse($maintenance->finish);
+            $maintenances = Maintenance::where('unit_id', $unit_id)
+                ->whereNotNull('start')
+                ->whereNotNull('finish')
+                ->where('start', '<', $monthEnd)
+                ->where('finish', '>', $monthStart)
+                ->get();
 
-            if ($maintenanceFinish->lte($maintenanceStart)) {
-                continue;
-            }
+            foreach ($maintenances as $maintenance) {
+                $maintenanceStart = Carbon::parse($maintenance->start);
+                $maintenanceFinish = Carbon::parse($maintenance->finish);
 
-            $rangeStart = $maintenanceStart->gt($monthStart) ? $maintenanceStart->copy() : $monthStart->copy();
-
-            $rangeFinish = $maintenanceFinish->lt($monthEnd) ? $maintenanceFinish->copy() : $monthEnd->copy();
-
-            $cursor = $rangeStart->copy()->startOfDay();
-
-            while ($cursor->lt($rangeFinish)) {
-                $dayStart = $cursor->copy();
-                $dayEnd = $dayStart->copy()->addDay();
-
-                $partStart = $rangeStart->gt($dayStart) ? $rangeStart->copy() : $dayStart->copy();
-
-                $partFinish = $rangeFinish->lt($dayEnd) ? $rangeFinish->copy() : $dayEnd->copy();
-
-                if ($partStart->lt($partFinish)) {
-                    $seconds = $partFinish->getTimestamp() - $partStart->getTimestamp();
-                    $hours = $seconds / 3600;
-                    $dateKey = $dayStart->format('Y-m-d');
-
-                    $hoursByDate[$dateKey] = ($hoursByDate[$dateKey] ?? 0) + $hours;
+                if ($maintenanceFinish->lte($maintenanceStart)) {
+                    continue;
                 }
 
-                $cursor = $dayEnd;
+                $rangeStart = $maintenanceStart->gt($monthStart) ? $maintenanceStart->copy() : $monthStart->copy();
+                $rangeFinish = $maintenanceFinish->lt($monthEnd) ? $maintenanceFinish->copy() : $monthEnd->copy();
+
+                $cursor = $rangeStart->copy()->startOfDay();
+
+                while ($cursor->lt($rangeFinish)) {
+                    $dayStart = $cursor->copy();
+                    $dayEnd = $dayStart->copy()->addDay();
+
+                    $partStart = $rangeStart->gt($dayStart) ? $rangeStart->copy() : $dayStart->copy();
+                    $partFinish = $rangeFinish->lt($dayEnd) ? $rangeFinish->copy() : $dayEnd->copy();
+
+                    if ($partStart->lt($partFinish)) {
+                        $seconds = $partFinish->getTimestamp() - $partStart->getTimestamp();
+                        $hours = $seconds / 3600;
+                        $dateKey = $dayStart->format('Y-m-d');
+
+                        $hoursByDate[$dateKey] = ($hoursByDate[$dateKey] ?? 0) + $hours;
+                    }
+
+                    $cursor = $dayEnd;
+                }
+            }
+
+            $main = Maintenance::where('unit_id', $unit_id)
+                ->whereNotNull('start')
+                ->whereNotNull('finish')
+                ->whereYear('start', $year)
+                ->whereMonth('start', $month)
+                ->get();
+
+            $totalMaintenanceHours = array_sum($hoursByDate);
+            $totalBreakdown = (int) round($totalMaintenanceHours, 0, PHP_ROUND_HALF_UP);
+        }
+    } catch (\Throwable $e) {
+        $__report($e, $__block_maintenance_line, 'Maintenance - Query & Calculation');
+    }
+@endphp
+
+@php
+    $__block_calendar_line = __LINE__ + 1;
+    try {
+        if ($calendarStart && $totalDays > 0) {
+            for ($i = 0; $i < $totalDays; $i += 7) {
+                $week = [];
+                for ($j = 0; $j < 7; $j++) {
+                    $week[] = $calendarStart->copy()->addDays($i + $j);
+                }
+                $weeks->push($week);
             }
         }
-
-        $main = Maintenance::where('unit_id', $unit_id)
-            ->whereNotNull('start')
-            ->whereNotNull('finish')
-            ->whereYear('start', $year)
-            ->whereMonth('start', $month)
-            ->get();
-    }
-
-    $totalMaintenanceHours = array_sum($hoursByDate);
-    $totalBreakdown = (int) round($totalMaintenanceHours, 0, PHP_ROUND_HALF_UP);
-
-    $weeks = collect();
-
-    for ($i = 0; $i < $totalDays; $i += 7) {
-        $week = [];
-
-        for ($j = 0; $j < 7; $j++) {
-            $week[] = $calendarStart->copy()->addDays($i + $j);
-        }
-
-        $weeks->push($week);
+    } catch (\Throwable $e) {
+        $__report($e, $__block_calendar_line, 'Calendar - Grid Generation');
     }
 @endphp
 
@@ -181,7 +231,9 @@
         <tr>
             <td class="label">Periode</td>
             <td class="separator">:</td>
-            <td>{{ $startDate->format('d F') }} - {{ $endDate->format('d F Y') }}</td>
+            <td>
+                {{ $startDate ? $startDate->format('d F') : '-' }} - {{ $endDate ? $endDate->format('d F Y') : '-' }}
+            </td>
         </tr>
         <tr>
             <td class="label">Total Breakdown</td>
@@ -194,7 +246,7 @@
 @isset($unit_id)
     <div class="calendar-container mb-4">
         <div class="text-center mb-3">
-            <h4>{{ $currentMonth->format('F Y') }}</h4>
+            <h4>{{ $currentMonth ? $currentMonth->format('F Y') : '' }}</h4>
         </div>
 
         <div class="table-responsive">
@@ -214,7 +266,9 @@
                     @foreach ($weeks as $week)
                         @php
                             $hasCurrentMonth = collect($week)->contains(function ($date) use ($currentMonth) {
-                                return $date->year === $currentMonth->year && $date->month === $currentMonth->month;
+                                return $currentMonth &&
+                                    $date->year === $currentMonth->year &&
+                                    $date->month === $currentMonth->month;
                             });
                         @endphp
 
@@ -222,21 +276,30 @@
                             <tr>
                                 @foreach ($week as $date)
                                     @php
-                                        $isCurrentMonth =
-                                            $date->year === $currentMonth->year &&
-                                            $date->month === $currentMonth->month;
-
-                                        $dateKey = $date->format('Y-m-d');
-                                        $totalHours = $hoursByDate[$dateKey] ?? 0;
+                                        $__block_calendar_cell = __LINE__ + 1;
+                                        $isCurrentMonth = false;
+                                        $dateKey = '';
+                                        $totalHours = 0;
                                         $cellClass = '';
 
-                                        if ($isCurrentMonth) {
-                                            $cellClass =
-                                                $totalHours > 0 ? 'calendar-day-danger' : 'calendar-day-success';
-                                        }
+                                        try {
+                                            $isCurrentMonth =
+                                                $currentMonth &&
+                                                $date->year === $currentMonth->year &&
+                                                $date->month === $currentMonth->month;
+                                            $dateKey = $date->format('Y-m-d');
+                                            $totalHours = $hoursByDate[$dateKey] ?? 0;
 
-                                        if ($isCurrentMonth && $date->isToday()) {
-                                            $cellClass .= ' today';
+                                            if ($isCurrentMonth) {
+                                                $cellClass =
+                                                    $totalHours > 0 ? 'calendar-day-danger' : 'calendar-day-success';
+                                            }
+
+                                            if ($isCurrentMonth && $date->isToday()) {
+                                                $cellClass .= ' today';
+                                            }
+                                        } catch (\Throwable $e) {
+                                            $__report($e, $__block_calendar_cell, 'Calendar - Cell Render');
                                         }
                                     @endphp
 
@@ -268,12 +331,23 @@
 
         <table class="notes-table mb-4">
             @forelse ($main as $d)
+                @php
+                    $__block_notes_line = __LINE__ + 1;
+                    $formattedDate = '-';
+                    try {
+                        if ($d->start) {
+                            $formattedDate = Carbon::parse($d->start)->format('d F Y');
+                        }
+                    } catch (\Throwable $e) {
+                        $__report($e, $__block_notes_line, "Notes - Date parse id={$d->id}");
+                    }
+                @endphp
                 <tr>
                     <td class="notes-number">
                         {{ $loop->iteration }}.
                     </td>
                     <td class="notes-date">
-                        {{ Carbon::parse($d->start)->format('d F Y') }},
+                        {{ $formattedDate }},
                     </td>
                     <td>
                         {!! $d->remarks !!}

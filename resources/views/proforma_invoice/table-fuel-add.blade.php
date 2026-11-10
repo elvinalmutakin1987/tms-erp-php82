@@ -12,6 +12,32 @@
 
     $startDate = Carbon::create($year, $month, 1)->startOfMonth();
     $endDate = $startDate->copy()->endOfMonth();
+
+    /* ============================================================
+       DEBUG HELPER — deteksi baris error
+       Set $__debug = false di production
+       ============================================================ */
+    $__debug = true;
+
+    $__report = function ($e, $line = null, $label = '') use ($__debug) {
+        if (!$__debug) {
+            return;
+        }
+        $lineInfo = $line ? "Blade line ~{$line}" : "Compiled line {$e->getLine()}";
+        echo '<div style="background:#fee;color:#900;padding:8px;border:1px solid #900;' .
+            'margin:4px 0;font-family:monospace;font-size:12px">' .
+            '<b>ERROR</b>' .
+            ($label ? " [{$label}]" : '') .
+            ': ' .
+            e($e->getMessage()) .
+            '<br><b>Location:</b> ' .
+            $lineInfo .
+            '<br><b>File:</b> ' .
+            e($e->getFile()) .
+            '<br><b>Compiled line:</b> ' .
+            $e->getLine() .
+            '</div>';
+    };
 @endphp
 
 <h6 class="mb-2" style="display: inline-block;">
@@ -69,82 +95,134 @@
     </thead>
 
     <tbody>
-        {{-- Ini untuk Fix Monthly Fee --}}
+        {{-- ============================================================
+             BLOK 1: Fix Monthly Fee — inisialisasi & query
+             ============================================================ --}}
         @php
-            $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
-            $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
-            $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->where('year', $year)->first();
-            $fix_monthly_fee = $contract_fmf->value;
-            $fmf_qty = 1;
-            $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                ->where('contract_fmf_id', $contract_fmf->id)
-                ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                ->count();
-            $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                ->where('contract_fmf_id', $contract_fmf->id)
-                ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                ->sum('value');
+            $__block1_line = __LINE__ + 1;
 
+            // Default aman (supaya view tidak fatal jika error di bawah)
+            $contract_rate = collect();
+            $proforma_invoice_old = collect();
+            $contract_fmf = null;
+            $fix_monthly_fee = 0;
+            $fmf_qty = 1;
+            $fmf_qty_ptd = 0;
+            $fmf_amount_ptd = 0;
             $total_amount = 0;
             $total_amount_ptd = 0;
 
-        @endphp
-        {{-- end --}}
-        {{-- Ini untuk hitung biaya trip nya, dari contract rate --}}
-        <tr>
-            <td>
-                1
-            </td>
-            <td>
-                Fix Monthly Fee
-            </td>
-            <td>
-                Month
-            </td>
-            <td class="text-end">
-                {{ Number::format($fix_monthly_fee) }}
-            </td>
-            <td class="text-end">
-                {{ Number::format($fmf_qty, precision: 2) }}
-            </td>
-            <td class="text-end">
-                {{ Number::format($fix_monthly_fee * $fmf_qty) }}
-            </td>
-            <td class="text-end">
-                {{ Number::format($fmf_qty_ptd + $fmf_qty, precision: 2) }}
-            </td>
-            <td class="text-end">
-                {{ Number::format($fmf_amount_ptd + $fix_monthly_fee * $fmf_qty, precision: 0) }}
-            </td>
-        </tr>
+            // Flag untuk mengecek apakah FMF perlu ditampilkan
+            $has_fmf = false;
 
+            // Variabel penomoran baris dinamis
+            $row_number = 1;
+
+            try {
+                $contract_rate = Contract_rate::where('contract_id', $contract->id)->get();
+                $proforma_invoice_old = Proforma_invoice::where('contract_id', $contract->id)->pluck('id');
+
+                $contract_fmf = Contract_fmf::where('contract_id', $contract->id)->where('year', $year)->first();
+
+                // Cek jika FMF ada
+                if ($contract_fmf) {
+                    $has_fmf = true;
+                    $fix_monthly_fee = $contract_fmf->value;
+                    $fmf_qty = 1;
+
+                    $fmf_qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_fmf_id', $contract_fmf->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->count();
+
+                    $fmf_amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_fmf_id', $contract_fmf->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('value');
+
+                    // Tambahkan ke total HANYA jika FMF ada
+                    $total_amount += $fix_monthly_fee * $fmf_qty;
+                    $total_amount_ptd += $fmf_amount_ptd + $fix_monthly_fee * $fmf_qty;
+                }
+            } catch (\Throwable $e) {
+                $__report($e, $__block1_line, 'BLOK 1 - FMF');
+            }
+        @endphp
+
+        {{-- Tampilkan Baris FMF HANYA JIKA datanya ada --}}
+        @if ($has_fmf)
+            <tr>
+                <td>{{ $row_number++ }}</td>
+                <td>Fix Monthly Fee</td>
+                <td>Month</td>
+                <td class="text-end">
+                    {{ Number::format((float) $fix_monthly_fee) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format((float) $fmf_qty, precision: 2) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format((float) $fix_monthly_fee * (float) $fmf_qty) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format((float) $fmf_qty_ptd + (float) $fmf_qty, precision: 2) }}
+                </td>
+                <td class="text-end">
+                    {{ Number::format((float) $fmf_amount_ptd + (float) $fix_monthly_fee * (float) $fmf_qty, precision: 0) }}
+                </td>
+            </tr>
+        @endif
+
+        {{-- ============================================================
+             BLOK 2: Hitung trip dari Daily_report
+             ============================================================ --}}
         @php
-            $total_amount += $fix_monthly_fee * $fmf_qty;
-            $total_amount_ptd += $fmf_amount_ptd + $fix_monthly_fee * $fmf_qty;
-            $unit_lct_id = Unit::where('type', 'LCT')->pluck('id');
-            $daily_report = Daily_report::whereBetween('date', [
-                Carbon::parse($startDate)->format('Y-m-d'),
-                Carbon::parse($endDate)->format('Y-m-d'),
-            ])
-                ->whereIn('unit_id', $unit_lct_id)
-                ->get();
-            $trip = $daily_report->count();
+            $__block2_line = __LINE__ + 1;
+            $trip = 0;
+
+            try {
+                $unit_lct_id = Unit::where('type', 'LCT')->pluck('id');
+
+                $daily_report = Daily_report::whereBetween('date', [
+                    Carbon::parse($startDate)->format('Y-m-d'),
+                    Carbon::parse($endDate)->format('Y-m-d'),
+                ])
+                    ->whereIn('unit_id', $unit_lct_id)
+                    ->get();
+
+                $trip = $daily_report->count();
+            } catch (\Throwable $e) {
+                $__report($e, $__block2_line, 'BLOK 2 - Trip / Daily_report');
+            }
         @endphp
 
+        {{-- ============================================================
+             BLOK 3: Loop Contract_rate
+             ============================================================ --}}
         @foreach ($contract_rate as $contractrate)
             @php
-                $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                    ->where('contract_rate_id', $contractrate->id)
-                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                    ->sum('qty');
-                $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
-                    ->where('contract_rate_id', $contractrate->id)
-                    ->whereIn('proforma_invoice_id', $proforma_invoice_old)
-                    ->sum('amount');
+                $__block3_line = __LINE__ + 1;
+                $qty_ptd = 0;
+                $amount_ptd = 0;
+
+                try {
+                    $qty_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('qty');
+
+                    $amount_ptd = Proforma_invoice_detail::where('contract_id', $contract->id)
+                        ->where('contract_rate_id', $contractrate->id)
+                        ->whereIn('proforma_invoice_id', $proforma_invoice_old)
+                        ->sum('amount');
+                } catch (\Throwable $e) {
+                    $__report($e, $__block3_line, "BLOK 3 - Contract_rate id={$contractrate->id}");
+                }
             @endphp
+
             <tr>
                 <td>
-                    {{ $loop->iteration + 1 }}
+                    {{ $row_number++ }}
                 </td>
                 <td>
                     {{ $contractrate->service_item }}
@@ -153,38 +231,46 @@
                     Trip
                 </td>
                 <td class="text-end">
-                    {{ Number::format($contractrate->rate, precision: 0) }}
+                    {{ Number::format((float) $contractrate->rate, precision: 0) }}
                 </td>
                 <td class="text-end">
-                    {{ Number::format($trip, precision: 2) }}
+                    {{ Number::format((float) $trip, precision: 2) }}
                 </td>
                 <td class="text-end">
-                    {{ Number::format($contractrate->rate * $trip, precision: 0) }}
+                    {{ Number::format((float) $contractrate->rate * (float) $trip, precision: 0) }}
                 </td>
                 <td class="text-end">
-                    {{ Number::format($qty_ptd + $trip, precision: 2) }}
+                    {{ Number::format((float) $qty_ptd + (float) $trip, precision: 2) }}
                 </td>
                 <td class="text-end">
-                    {{ Number::format($amount_ptd + $contractrate->rate * $trip, precision: 0) }}
+                    {{ Number::format((float) $amount_ptd + (float) $contractrate->rate * (float) $trip, precision: 0) }}
                 </td>
             </tr>
 
             @php
-                $total_amount += $contractrate->rate * $trip;
-                $total_amount_ptd += $amount_ptd + $contractrate->rate * $trip;
+                $__block3b_line = __LINE__ + 1;
+                try {
+                    $total_amount += $contractrate->rate * $trip;
+                    $total_amount_ptd += $amount_ptd + $contractrate->rate * $trip;
+                } catch (\Throwable $e) {
+                    $__report($e, $__block3b_line, "BLOK 3b - Akumulasi total rate id={$contractrate->id}");
+                }
             @endphp
         @endforeach
-        {{-- end --}}
+
+        {{-- ============================================================
+             BARIS TOTAL
+             ============================================================ --}}
         <tr>
             <td colspan="5" class="text-end">
                 <b>TOTAL</b>
             </td>
             <td class="text-end">
-                <b>{{ Number::format($total_amount, precision: 0) }}</b>
+                <b>{{ Number::format((float) $total_amount, precision: 0) }}</b>
             </td>
             <td></td>
             <td class="text-end">
-                <b>{{ Number::format($total_amount_ptd, precision: 0) }}</b>
+                <b>{{ Number::format((float) $total_amount_ptd, precision: 0) }}</b>
             </td>
         </tr>
     </tbody>

@@ -44,7 +44,7 @@
                 <td>Contract Type</td>
                 <td style="width:5px"> &nbsp;&nbsp;&nbsp;:</td>
                 <td>
-                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->name }}
                 </td>
             </tr>
             <tr>
@@ -237,7 +237,7 @@
                 <td>Contract Type</td>
                 <td style="width:5px">&nbsp;&nbsp;&nbsp;:</td>
                 <td>
-                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->name }}
                 </td>
             </tr>
             <tr>
@@ -412,7 +412,7 @@
                 <td>Contract Type</td>
                 <td style="width:5px">:</td>
                 <td>
-                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->name }}
                 </td>
             </tr>
             <tr>
@@ -577,7 +577,7 @@
                 <td>Contract Type</td>
                 <td style="width:5px">:</td>
                 <td>
-                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->name }}
                 </td>
             </tr>
             <tr>
@@ -679,7 +679,7 @@
                 <td>Contract Type</td>
                 <td style="width:5px">:</td>
                 <td>
-                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->type }}
+                    &nbsp;&nbsp;&nbsp;{{ optional($contract->service)->name }}
                 </td>
             </tr>
             <tr>

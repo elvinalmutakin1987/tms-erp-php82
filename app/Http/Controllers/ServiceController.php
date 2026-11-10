@@ -7,6 +7,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Illuminate\Support\Facades\DB;
 use App\Models\Service;
 use App\Models\Service_item;
+use Illuminate\Validation\Rule;
 
 class ServiceController extends Controller
 {
@@ -68,7 +69,11 @@ class ServiceController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|unique:services,name',
+                'name' => [
+                    'required',
+                    Rule::unique('services', 'name')
+                        ->whereNull('deleted_at'),
+                ],
                 'type' => 'required'
             ]);
             $data = array_merge(
@@ -150,7 +155,12 @@ class ServiceController extends Controller
         DB::beginTransaction();
         try {
             $request->validate([
-                'name' => 'required|unique:services,name,' . $service->id . ',id',
+                'name' => [
+                    'required',
+                    Rule::unique('services', 'name')
+                        ->ignore($service->id)
+                        ->whereNull('deleted_at'),
+                ],
                 'type' => 'required'
             ]);
             $data = array_merge($request->except(

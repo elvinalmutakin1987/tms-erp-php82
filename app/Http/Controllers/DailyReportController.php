@@ -181,14 +181,14 @@ class DailyReportController extends Controller
                 $depart_trip_1 = $request->trip_1_departed_at;
 
                 $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
-                    ? $time_count_service->countTime($depart_trip_1, $berthing_trip_1)
+                    ? $time_count_service->countDateTime($depart_trip_1, $berthing_trip_1)
                     : null;
 
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
 
                 $duration_trip_2 = $request->filled('trip_2_berthing_at') && $request->filled('trip_2_departed_at')
-                    ? $time_count_service->countTime($depart_trip_2, $berthing_trip_2)
+                    ? $time_count_service->countDateTime($depart_trip_2, $berthing_trip_2)
                     : null;
             } else {
                 $request->validate([
@@ -320,14 +320,14 @@ class DailyReportController extends Controller
                 $depart_trip_1 = $request->trip_1_departed_at;
 
                 $duration_trip_1 = $request->filled('trip_1_berthing_at') && $request->filled('trip_1_departed_at')
-                    ? $time_count_service->countTime($depart_trip_1, $berthing_trip_1)
+                    ? $time_count_service->countDateTime($depart_trip_1, $berthing_trip_1)
                     : null;
 
                 $berthing_trip_2 = $request->trip_2_berthing_at;
                 $depart_trip_2 = $request->trip_2_departed_at;
 
                 $duration_trip_2 = $request->filled('trip_2_berthing_at') && $request->filled('trip_2_departed_at')
-                    ? $time_count_service->countTime($depart_trip_2, $berthing_trip_2)
+                    ? $time_count_service->countDateTime($depart_trip_2, $berthing_trip_2)
                     : null;
             } else {
                 $request->validate([

@@ -85,7 +85,10 @@
             <td class="p-1 align-middle">
                 <select class="form-select select-pallet text-end" id="_contract_rate" name="_contract_rate">
                     @foreach ($contract_rate as $d)
-                        <option value="{{ $d->rate }}">{{ Number::format($d->rate, precision: 0) }}</option>
+                        @if ($d->rate != 0)
+                            <option value="{{ $d->rate }}">{{ Number::format((float) $d->rate, precision: 0) }}
+                            </option>
+                        @endif
                     @endforeach
                 </select>
             </td>

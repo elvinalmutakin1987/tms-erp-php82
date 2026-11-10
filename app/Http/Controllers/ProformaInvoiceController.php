@@ -1018,7 +1018,6 @@ class ProformaInvoiceController extends Controller
                     'month'
                 ))->render();
             }
-
             /**
              * Check contract id sudah dibuatkan proforma invoice di bulan ini atau belum
              */
@@ -1101,7 +1100,7 @@ class ProformaInvoiceController extends Controller
     /**
      * ngambil detail purchase requisition
      */
-    public function get_detail(Request $request, $proforma_invoice_id)
+    public function get_detail(Request $request, String $proforma_invoice_id)
     {
         try {
             $proforma_invoice = Proforma_invoice::find($proforma_invoice_id);

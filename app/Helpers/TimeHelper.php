@@ -1,5 +1,7 @@
 <?php
 
+use Carbon\Carbon;
+
 if (! function_exists('addTime')) {
     function addTime(string $time1, string $time2): string
     {
@@ -33,5 +35,21 @@ if (! function_exists('countTime')) {
         $minute = $totalMinute % 60;
 
         return sprintf('%02d:%02d', $hour, $minute);
+    }
+}
+
+if (! function_exists('countDateTime')) {
+    function countDateTime(string $time1, string $time2): string
+    {
+        $start = Carbon::parse($time1);
+        $end = Carbon::parse($time2);
+
+        $totalSeconds = (int) abs($start->diffInSeconds($end));
+
+        $hours = intdiv($totalSeconds, 3600);
+        $minutes = intdiv($totalSeconds % 3600, 60);
+        $seconds = $totalSeconds % 60;
+
+        return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
     }
 }

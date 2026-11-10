@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+
 class TimeCountService
 {
     /**
@@ -42,5 +44,30 @@ class TimeCountService
         $minute = $totalMinute % 60;
 
         return sprintf('%02d:%02d', $hour, $minute);
+    }
+
+    function countDateTime(string $time1, string $time2): string
+    {
+        // Normalisasi format waktu (16.30 menjadi 16:30)
+        $time1 = str_replace('.', ':', $time1);
+        $time2 = str_replace('.', ':', $time2);
+
+        // Parse waktu
+        $start = Carbon::createFromFormat('!H:i', $time1);
+        $end = Carbon::createFromFormat('!H:i', $time2);
+
+        // Jika waktu akhir lebih kecil, berarti melewati tengah malam
+        if ($end->lessThan($start)) {
+            $end->addDay();
+        }
+
+        // Hitung selisih detik
+        $totalSeconds = $end->timestamp - $start->timestamp;
+
+        $hours = intdiv($totalSeconds, 3600);
+        $minutes = intdiv($totalSeconds % 3600, 60);
+        $seconds = $totalSeconds % 60;
+
+        return sprintf('%02d:%02d:%02d', $hours, $minutes, $seconds);
     }
 }

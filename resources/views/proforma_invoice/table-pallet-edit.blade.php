@@ -85,7 +85,10 @@
             <td class="p-1 align-middle">
                 <select class="form-select select-pallet text-end" id="_contract_rate" name="_contract_rate">
                     @foreach ($contract_rate as $d)
-                        <option value="{{ $d->rate }}">{{ Number::format($d->rate, precision: 0) }}</option>
+                        @if ($d->rate != 0)
+                            <option value="{{ $d->rate }}">{{ Number::format((float) $d->rate, precision: 0) }}
+                            </option>
+                        @endif
                     @endforeach
                 </select>
             </td>
@@ -129,19 +132,19 @@
                     <input type="hidden" class="form-control" id="rate" name="rate[]" readonly
                         value="{{ $d->rate }}">
                     <input type="text" class="form-control" id="__rate" name="__rate[]" readonly
-                        value="{{ Number::format($d->rate, precision: 0) }}" style="text-align: right;">
+                        value="{{ Number::format((float) $d->rate, precision: 0) }}" style="text-align: right;">
                 </td>
                 <td class="p-1 align-middle">
                     <input type="hidden" class="form-control" id="qty" name="qty[]" readonly
                         value="{{ $d->qty }}">
                     <input type="text" class="form-control" id="__qty" name="__qty[]" readonly
-                        value="{{ Number::format($d->qty, precision: 2) }}" style="text-align: right;">
+                        value="{{ Number::format((float) $d->qty, precision: 2) }}" style="text-align: right;">
                 </td>
                 <td class="p-1 align-middle">
                     <input type="hidden" class="form-control amount" name="amount[]" readonly
                         value="{{ $d->amount }}">
                     <input type="text" class="form-control" name="__amount[]" readonly
-                        value="{{ Number::format($d->amount, precision: 0) }}" style="text-align: right;">
+                        value="{{ Number::format((float) $d->amount, precision: 0) }}" style="text-align: right;">
                 </td>
                 <td class="text-center p-1 align-middle">
                     <div class="row row-cols-auto g-3">

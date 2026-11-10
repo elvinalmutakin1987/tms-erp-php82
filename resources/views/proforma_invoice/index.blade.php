@@ -493,7 +493,7 @@
                 const isEdit = proformaInvoiceId != '';
 
                 const url = isEdit ?
-                    '{{ route('proformainvoice.get_table_edit', ':_id') }}'.replace(':_id',
+                    '{{ route('proformainvoice.get_table_add', ':_id') }}'.replace(':_id',
                         proformaInvoiceId) :
                     '{{ route('proformainvoice.get_table_add') }}';
 

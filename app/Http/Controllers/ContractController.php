@@ -104,8 +104,8 @@ class ContractController extends Controller
                 'contract_no' =>  'required',
                 'client_vendor_id' => 'required',
                 'service_id' => 'required',
-                'start_date' => 'required',
-                'end_date' => 'required',
+                // 'start_date' => 'required',
+                // 'end_date' => 'required',
             ]);
             $data = array_merge(
                 $request->only(
@@ -233,8 +233,8 @@ class ContractController extends Controller
                 'contract_no' =>  'required',
                 'client_vendor_id' => 'required',
                 'service_id' => 'required',
-                'start_date' => 'required',
-                'end_date' => 'required',
+                // 'start_date' => 'required',
+                // 'end_date' => 'required',
             ]);
             $data = array_merge(
                 $request->only(

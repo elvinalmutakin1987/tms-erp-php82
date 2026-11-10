@@ -91,6 +91,8 @@
                                                 <option value="Pupuk">Pupuk</option>
                                                 <option value="Access.">Access.</option>
                                                 <option value="Used Fuel">Used Fuel</option>
+                                                <option value="Waste">Waste</option>
+                                                <option value="Other">Other</option>
                                             </select>
                                         </td>
                                         <td class="p-1 align-middle">
